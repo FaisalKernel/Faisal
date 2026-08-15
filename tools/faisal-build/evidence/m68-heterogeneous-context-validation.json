@@ -1,0 +1,73 @@
+{
+  "milestone": "M68",
+  "feature": "vendor-neutral heterogeneous compute-context negotiation",
+  "date": "2026-08-15",
+  "upstream": {
+    "tag": "v7.2-rc7",
+    "local_base_tag": "upstream-v7.2-rc7"
+  },
+  "abi_version": 35,
+  "ioctl": "AGI_LC_COMPUTE_CONTEXT",
+  "ioctl_number": "0x5d",
+  "build": {
+    "configuration": "x86_64_defconfig + CONFIG_AGI_LIFECYCLE=y",
+    "kernel_and_modules_build_rc": 0,
+    "selftest_build_rc": 0,
+    "selftest": "tools/testing/selftests/agi_heterogeneous_context_test.c"
+  },
+  "negotiation": {
+    "requested_device_mask": "CPU|GPU|NPU|IO",
+    "active_device_mask": "CPU",
+    "unsupported_device_mask": "GPU|NPU|IO",
+    "requested_fabric": "CPU|DMA_BUF|DMA_ENGINE|IOMMU_SVA|HMM|UACCE",
+    "active_fabric_mask": "0xf",
+    "active_fabric_names": ["CPU", "DMA_BUF", "DMA_ENGINE", "IOMMU_SVA"],
+    "unsupported_fabric_names": ["HMM", "UACCE"],
+    "provider_for_cpu_context": "CPU",
+    "provider_for_gpu_only_context": "NONE",
+    "address_space_for_cpu_context": "PROCESS",
+    "address_space_for_gpu_only_context": "NONE"
+  },
+  "qemu": {
+    "machine": "x86_64 pc",
+    "vcpus": 2,
+    "memory_mb": 512,
+    "boot_rc": 0,
+    "markers": {
+      "FAISAL_M68_BOOT_OK": true,
+      "M68_MEMORY_REGION_OK": true,
+      "M68_CONTEXT_NEGOTIATION_OK": true,
+      "M68_CONTEXT_QUERY_OK": true,
+      "M68_STALE_CONTEXT_CAPABILITY_REJECT_OK": true,
+      "M68_CONTEXT_BIND_OK": true,
+      "M68_CONTEXT_UNBIND_OK": true,
+      "M68_GPU_PROVIDER_BOUNDARY_OK": true,
+      "M68_CONTEXT_CLOSE_OK": true,
+      "M68_SELFTEST_EXIT=0": true,
+      "FAISAL_M68_TEST_RC=0": true
+    },
+    "raw_serial_log": "tools/faisal-build/evidence/m68-qemu.log"
+  },
+  "enforced_properties": {
+    "session_lineage_required": true,
+    "agent_identity_required": true,
+    "opaque_context_capability_required": true,
+    "memory_region_capability_required": true,
+    "bound_bytes_accounted": true,
+    "dma_addresses_exposed": false,
+    "physical_addresses_exposed": false,
+    "pasid_exposed": false,
+    "vendor_commands_submitted": false,
+    "model_output_authorizes_device": false
+  },
+  "not_claimed": [
+    "GPU or NPU execution in QEMU",
+    "unified CPU/GPU/NPU scheduling",
+    "HMM migration implementation",
+    "SVA activation for an accelerator",
+    "zero-copy transfer guarantee",
+    "accelerator throughput improvement",
+    "latency improvement",
+    "device reset/recovery support"
+  ]
+}

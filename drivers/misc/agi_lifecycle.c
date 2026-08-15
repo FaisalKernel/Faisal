@@ -3691,6 +3691,30 @@ if (s->contexts[i].valid && s->contexts[i].context.context_id == id && s->contex
 return &s->contexts[i];
 return NULL;
 }
+static void agi_lc_compute_context_fabric_caps(struct agi_lc_compute_context *context)
+{
+	u64 active = AGI_LC_CONTEXT_FABRIC_CPU;
+
+	if (IS_ENABLED(CONFIG_DMA_SHARED_BUFFER))
+		active |= AGI_LC_CONTEXT_FABRIC_DMA_BUF;
+	if (IS_ENABLED(CONFIG_DMA_ENGINE))
+		active |= AGI_LC_CONTEXT_FABRIC_DMA_ENGINE;
+	if (IS_ENABLED(CONFIG_IOMMU_SVA))
+		active |= AGI_LC_CONTEXT_FABRIC_IOMMU_SVA;
+	if (IS_ENABLED(CONFIG_HMM_MIRROR))
+		active |= AGI_LC_CONTEXT_FABRIC_HMM;
+	if (IS_ENABLED(CONFIG_UACCE))
+		active |= AGI_LC_CONTEXT_FABRIC_UACCE;
+	context->active_fabric = active;
+	context->unsupported_fabric = context->requested_fabric & ~active;
+	context->active_device_mask = context->device_mask & AGI_LC_CONTEXT_DEVICE_CPU;
+	context->unsupported_device_mask = context->device_mask & ~context->active_device_mask;
+	context->provider_kind = context->active_device_mask ?
+		AGI_LC_CONTEXT_PROVIDER_CPU : AGI_LC_CONTEXT_PROVIDER_NONE;
+	context->address_space_mode = context->active_device_mask ?
+		AGI_LC_CONTEXT_ADDRESS_SPACE_PROCESS :
+		AGI_LC_CONTEXT_ADDRESS_SPACE_NONE;
+}
 static int agi_lc_compute_context_control(struct agi_lc_session *s, unsigned long arg)
 {
 struct agi_lc_compute_context p, out;
@@ -3705,10 +3729,10 @@ if (!s->session_id || READ_ONCE(s->revoked)) return -ESHUTDOWN;
 if (faisal_task_get_lineage(current) != s->session_id) return -EPERM;
 mutex_lock(&s->context_lock);
 if (p.operation == AGI_LC_CONTEXT_CREATE) {
-if (p.context_id || p.context_capability || (p.agent_id && p.agent_id != faisal_task_get_agent(current)) || (p.device_mask & ~AGI_LC_CONTEXT_DEVICE_ALL) || p.attached_tasks || p.bound_regions || p.generation || p.task_id || p.region_id || p.region_capability || p.region_access || p.status || p.bytes_referenced) { ret = -EINVAL; goto out; }
+if (p.context_id || p.context_capability || (p.agent_id && p.agent_id != faisal_task_get_agent(current)) || (p.device_mask & ~AGI_LC_CONTEXT_DEVICE_ALL) || (p.requested_fabric & ~AGI_LC_CONTEXT_FABRIC_ALL) || p.attached_tasks || p.bound_regions || p.active_device_mask || p.unsupported_device_mask || p.generation || p.task_id || p.region_id || p.region_capability || p.region_access || p.status || p.bytes_referenced || p.active_fabric || p.unsupported_fabric || p.address_space_mode || p.provider_kind || p.bytes_accounted || p.transfer_bytes || p.compute_ns || p.state_sequence) { ret = -EINVAL; goto out; }
 for (i = 0; i < AGI_LC_CONTEXT_RECORDS; i++) if (!s->contexts[i].valid) { slot = &s->contexts[i]; break; }
 if (!slot) { ret = -ENOSPC; goto out; }
-memset(slot, 0, sizeof(*slot)); slot->valid = true; slot->context = p; slot->context.state = AGI_LC_CONTEXT_STATE_ACTIVE; slot->context.context_id = ++s->next_context_id; if (!slot->context.context_id) slot->context.context_id = ++s->next_context_id; slot->context.context_capability = agi_lc_memory_new_capability(); slot->context.agent_id = faisal_task_get_agent(current); slot->context.generation = 1; out = slot->context;
+memset(slot, 0, sizeof(*slot)); slot->valid = true; slot->context = p; slot->context.state = AGI_LC_CONTEXT_STATE_ACTIVE; slot->context.context_id = ++s->next_context_id; if (!slot->context.context_id) slot->context.context_id = ++s->next_context_id; slot->context.context_capability = agi_lc_memory_new_capability(); slot->context.agent_id = faisal_task_get_agent(current); slot->context.generation = 1; agi_lc_compute_context_fabric_caps(&slot->context); out = slot->context;
 } else {
 if (!p.context_id || !p.context_capability) { ret = -EINVAL; goto out; }
 r = agi_lc_context_find_locked(s, p.context_id, p.context_capability);
@@ -3719,23 +3743,23 @@ switch (p.operation) {
 case AGI_LC_CONTEXT_ATTACH_TASK:
 for (i = 0; i < AGI_LC_CONTEXT_MAX_TASKS; i++) if (r->tasks[i] == tid) break;
 if (i == AGI_LC_CONTEXT_MAX_TASKS) { for (i = 0; i < AGI_LC_CONTEXT_MAX_TASKS; i++) if (!r->tasks[i]) { r->tasks[i] = tid; r->context.attached_tasks++; break; } if (i == AGI_LC_CONTEXT_MAX_TASKS) { ret = -ENOSPC; goto out; } }
-r->context.task_id = tid; break;
+r->context.task_id = tid; r->context.state_sequence++; break;
 case AGI_LC_CONTEXT_DETACH_TASK:
 for (i = 0; i < AGI_LC_CONTEXT_MAX_TASKS; i++) if (r->tasks[i] == tid) { r->tasks[i] = 0; r->context.attached_tasks--; break; }
-if (i == AGI_LC_CONTEXT_MAX_TASKS) { ret = -ENOENT; goto out; } r->context.task_id = tid; break;
+if (i == AGI_LC_CONTEXT_MAX_TASKS) { ret = -ENOENT; goto out; } r->context.task_id = tid; r->context.state_sequence++; break;
 case AGI_LC_CONTEXT_BIND_REGION:
 if (!p.region_id || !p.region_capability || !agi_lc_memory_access_valid(p.region_access)) { ret = -EINVAL; goto out; }
 mutex_lock(&agi_lc_memory_lock); m = agi_lc_memory_find_locked(s, p.region_id); if (!m || !agi_lc_memory_authorized_locked(s, m, p.region_capability, p.region_access)) { mutex_unlock(&agi_lc_memory_lock); ret = -EACCES; goto out; }
 for (i = 0; i < AGI_LC_CONTEXT_MAX_REGIONS; i++) if (r->regions[i] == p.region_id) break;
 if (i == AGI_LC_CONTEXT_MAX_REGIONS) { for (i = 0; i < AGI_LC_CONTEXT_MAX_REGIONS; i++) if (!r->regions[i]) { r->regions[i] = p.region_id; r->region_capabilities[i] = p.region_capability; r->region_access[i] = p.region_access; r->context.bound_regions++; r->context.bytes_referenced += m->size_bytes; break; } if (i == AGI_LC_CONTEXT_MAX_REGIONS) { mutex_unlock(&agi_lc_memory_lock); ret = -ENOSPC; goto out; } }
-mutex_unlock(&agi_lc_memory_lock); r->context.region_id = p.region_id; r->context.region_capability = p.region_capability; r->context.region_access = p.region_access; break;
+mutex_unlock(&agi_lc_memory_lock); r->context.region_id = p.region_id; r->context.region_capability = p.region_capability; r->context.region_access = p.region_access; r->context.bytes_accounted = r->context.bytes_referenced; r->context.state_sequence++; break;
 case AGI_LC_CONTEXT_UNBIND_REGION:
 if (!p.region_id) { ret = -EINVAL; goto out; }
 for (i = 0; i < AGI_LC_CONTEXT_MAX_REGIONS; i++) if (r->regions[i] == p.region_id) break;
 if (i == AGI_LC_CONTEXT_MAX_REGIONS) { ret = -ENOENT; goto out; }
 mutex_lock(&agi_lc_memory_lock); m = agi_lc_memory_find_locked(s, p.region_id); if (m && r->context.bytes_referenced >= m->size_bytes) r->context.bytes_referenced -= m->size_bytes; mutex_unlock(&agi_lc_memory_lock);
-r->regions[i] = 0; r->region_capabilities[i] = 0; r->region_access[i] = 0; r->context.bound_regions--; break;
-case AGI_LC_CONTEXT_CLOSE: r->context.state = AGI_LC_CONTEXT_STATE_CLOSED; break;
+r->regions[i] = 0; r->region_capabilities[i] = 0; r->region_access[i] = 0; r->context.bound_regions--; r->context.bytes_accounted = r->context.bytes_referenced; r->context.state_sequence++; break;
+case AGI_LC_CONTEXT_CLOSE: r->context.state = AGI_LC_CONTEXT_STATE_CLOSED; r->context.state_sequence++; break;
 default: ret = -EINVAL; goto out;
 }
 r->context.generation++; out = r->context;

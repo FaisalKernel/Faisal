@@ -5,7 +5,7 @@
 #include <linux/ioctl.h>
 #include <linux/types.h>
 
-#define AGI_LC_ABI_VERSION 34
+#define AGI_LC_ABI_VERSION 35
 #define AGI_LC_DEVICE_NAME "agi_lifecycle"
 
 #define AGI_LC_EVENT_BEGIN 1
@@ -85,6 +85,18 @@
 #define AGI_LC_CONTEXT_DEVICE_NPU (1U << 2)
 #define AGI_LC_CONTEXT_DEVICE_IO (1U << 3)
 #define AGI_LC_CONTEXT_DEVICE_ALL ((1U << 4) - 1)
+#define AGI_LC_CONTEXT_FABRIC_CPU (1ULL << 0)
+#define AGI_LC_CONTEXT_FABRIC_DMA_BUF (1ULL << 1)
+#define AGI_LC_CONTEXT_FABRIC_DMA_ENGINE (1ULL << 2)
+#define AGI_LC_CONTEXT_FABRIC_IOMMU_SVA (1ULL << 3)
+#define AGI_LC_CONTEXT_FABRIC_HMM (1ULL << 4)
+#define AGI_LC_CONTEXT_FABRIC_UACCE (1ULL << 5)
+#define AGI_LC_CONTEXT_FABRIC_ALL ((1ULL << 6) - 1)
+#define AGI_LC_CONTEXT_ADDRESS_SPACE_NONE 0U
+#define AGI_LC_CONTEXT_ADDRESS_SPACE_PROCESS 1U
+#define AGI_LC_CONTEXT_PROVIDER_NONE 0U
+#define AGI_LC_CONTEXT_PROVIDER_CPU 1U
+#define AGI_LC_CONTEXT_PROVIDER_DRIVER 2U
 #define AGI_LC_CONTEXT_MAX_TASKS 8U
 #define AGI_LC_CONTEXT_MAX_REGIONS 8U
 #define AGI_LC_CAP_SCOPE_NONE 0U
@@ -1453,6 +1465,8 @@ __u64 agent_id;
 __u32 device_mask;
 __u32 attached_tasks;
 __u32 bound_regions;
+__u32 active_device_mask;
+__u32 unsupported_device_mask;
 __u32 generation;
 __u64 task_id;
 __u64 region_id;
@@ -1464,6 +1478,15 @@ __u64 provenance_binding_id;
 __u64 provenance_id;
 __u64 provenance_sequence;
 __u64 provenance_generation;
+__u64 requested_fabric;
+__u64 active_fabric;
+__u64 unsupported_fabric;
+__u32 address_space_mode;
+__u32 provider_kind;
+__u64 bytes_accounted;
+__u64 transfer_bytes;
+__u64 compute_ns;
+__u64 state_sequence;
 __u64 correlation;
 __u64 reserved[2];
 };
