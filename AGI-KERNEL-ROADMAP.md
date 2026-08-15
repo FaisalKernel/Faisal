@@ -11,10 +11,10 @@ This roadmap is an active dependency graph. The 14 strategic phases are not a se
 | Item | State |
 |---|---|
 | Linux foundation | Verified Linux `v7.2-rc7`, local tag `upstream-v7.2-rc7` |
-| Latest tagged FAISAL milestone | `FAISAL-M71`, persistent memory service |
+| Latest tagged FAISAL milestone | `FAISAL-M72`, verified experience learning service |
 | Kernel ABI | 37 |
-| Validated kernel and service primitives | Lifecycle, agent/task identity, scoped capabilities, provenance binding, tensor/graph/context control plane, tensor transport metadata, deterministic domains, heterogeneous-context negotiation, graph telemetry, CPU PM QoS policy intent, durable userspace memory journal, checkpoint/recovery integration |
-| Next selected dependency | M72 verified experience learning and skill operationalization |
+| Validated kernel and service primitives | Lifecycle, agent/task identity, scoped capabilities, provenance binding, tensor/graph/context control plane, tensor transport metadata, deterministic domains, heterogeneous-context negotiation, graph telemetry, CPU PM QoS policy intent, durable userspace memory journal, checkpoint/recovery integration, verified experience retention, skill-artifact gating, correction/re-evaluation |
+| Next selected dependency | M73 world-state service with temporal and freshness-aware synchronization |
 | Complete-system status | Not operational; userspace services and end-to-end autonomous integration remain unfinished |
 
 ## Strategic domains and implementation gates
@@ -90,8 +90,8 @@ A work item is blocked when an acceptance gate cannot be executed or when a crit
 
 1. **M64 security completion:** validated and committed as `FAISAL-M64-SECURITY-COMPLETION`; retain regression coverage while downstream work proceeds.
 2. **M71 persistent memory service contract:** validated and committed as `FAISAL-M71`; retain restart, corruption, checkpoint, and capability regression coverage.
-3. **M72 verified experience pipeline:** record, evaluate, retrieve, correct, and operationalize experiences without claiming foundation-model retraining.
-4. **M73 world-state service:** build event-driven system/world self-state representation with temporal ordering and freshness.
+3. **M72 verified experience pipeline:** validated and committed as `FAISAL-M72`; retain the no-retraining and stale-artifact regression gates.
+4. **M73 world-state service:** build event-driven system/world self-state representation with temporal ordering, freshness, conflict state, and recovery.
 5. **M74 trusted model/tool/browser orchestration:** integrate userspace model and browser services behind the supervisor and capability APIs.
 
 The queue is provisional and must be recomputed after every failure, security finding, benchmark regression, or new provider dependency.

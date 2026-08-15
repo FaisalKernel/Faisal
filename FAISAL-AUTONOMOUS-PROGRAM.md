@@ -123,7 +123,7 @@ P1 Linux foundation and verified baseline
  └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-The actual next dependency is selected from the live graph. M64 agent-oriented security and M71 persistent memory have been completed and validated on ABI 37. The next selected dependency is M72 verified experience learning: the system must record, evaluate, retrieve, correct, and operationalize experience or skills while explicitly refusing to call storage alone model retraining. World-model, browser, orchestration, and multi-agent services remain downstream dependencies.
+The actual next dependency is selected from the live graph. M64 agent-oriented security, M71 persistent memory, and M72 verified experience learning have been completed and validated on ABI 37. M72 demonstrates experience retention, evaluation-gated skill artifacts, retrieval, reuse recording, and correction/re-evaluation without claiming foundation-model retraining. The next selected dependency is M73 temporal world-state synchronization; browser, orchestration, and multi-agent services remain downstream dependencies.
 
 ## Governance
 

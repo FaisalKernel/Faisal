@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "2d3b703bcd43c1868acdcc3b5652852dc02d5023",
-  "current_tag": "FAISAL-M71",
+  "current_head": "52610ae341c666bffcc2a95614a85282ee794e5d",
+  "current_tag": "FAISAL-M72",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -77,18 +77,18 @@
       "id": "M72-experience-learning",
       "phase": 12,
       "name": "Experience record, evaluation, retrieval, and skill operationalization service",
-      "status": "next",
+      "status": "validated",
       "priority": 100,
       "depends_on": ["M71-persistent-memory-service", "M69-graph-telemetry"],
       "unlocks": ["M74-model-orchestration"],
       "evidence_required": ["one_query_retention", "second_query_retrieval", "skill_reuse", "correction", "provenance", "explicit_no_retraining_claim"]
     },
     {
-      "id": "M73-world-model",
+"id": "M73-world-model",
       "phase": 11,
-      "name": "Event-driven world and self-state service with temporal ordering",
-      "status": "queued",
-      "priority": 75,
+      "name": "Persistent world-state service with temporal/causal synchronization",
+      "status": "next",
+      "priority": 100,
       "depends_on": ["M71-persistent-memory-service", "M69-graph-telemetry"],
       "unlocks": ["M74-model-orchestration", "M75-multi-agent-coordination"],
       "evidence_required": ["event_ordering", "freshness", "conflict_state", "self_resource_query", "recovery"]
@@ -124,7 +124,7 @@
       "evidence_required": ["long_horizon_task", "multi_agent_coordination", "failure_recovery", "fuzzing", "security_audit", "baseline_comparison", "canary", "rollback"]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",
