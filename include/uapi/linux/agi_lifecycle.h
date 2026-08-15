@@ -5,7 +5,7 @@
 #include <linux/ioctl.h>
 #include <linux/types.h>
 
-#define AGI_LC_ABI_VERSION 33
+#define AGI_LC_ABI_VERSION 34
 #define AGI_LC_DEVICE_NAME "agi_lifecycle"
 
 #define AGI_LC_EVENT_BEGIN 1
@@ -118,6 +118,25 @@
 #define AGI_LC_TRANSPORT_REQUIRE_INTEGRITY (1U << 1)
 #define AGI_LC_TRANSPORT_STATE_ACTIVE 1U
 #define AGI_LC_TRANSPORT_STATE_REVOKED 2U
+#define AGI_LC_EXEC_DOMAIN_CREATE 1U
+#define AGI_LC_EXEC_DOMAIN_QUERY 2U
+#define AGI_LC_EXEC_DOMAIN_RELEASE 3U
+#define AGI_LC_EXEC_DOMAIN_REQUEST_NOHZ_FULL (1U << 0)
+#define AGI_LC_EXEC_DOMAIN_REQUEST_IRQ_ISOLATION (1U << 1)
+#define AGI_LC_EXEC_DOMAIN_REQUEST_PREEMPT_RT (1U << 2)
+#define AGI_LC_EXEC_DOMAIN_REQUIRE_NOHZ_FULL (1U << 3)
+#define AGI_LC_EXEC_DOMAIN_REQUIRE_IRQ_ISOLATION (1U << 4)
+#define AGI_LC_EXEC_DOMAIN_REQUIRE_PREEMPT_RT (1U << 5)
+#define AGI_LC_EXEC_DOMAIN_FEATURE_AFFINITY (1U << 0)
+#define AGI_LC_EXEC_DOMAIN_FEATURE_HOUSEKEEPING (1U << 1)
+#define AGI_LC_EXEC_DOMAIN_FEATURE_NOHZ_FULL (1U << 2)
+#define AGI_LC_EXEC_DOMAIN_FEATURE_IRQ_ISOLATION (1U << 3)
+#define AGI_LC_EXEC_DOMAIN_FEATURE_PREEMPT_RT (1U << 4)
+#define AGI_LC_EXEC_DOMAIN_FEATURE_SMI_CONTROL (1U << 5)
+#define AGI_LC_EXEC_DOMAIN_FEATURE_NMI_CONTROL (1U << 6)
+#define AGI_LC_EXEC_DOMAIN_STATE_ACTIVE 1U
+#define AGI_LC_EXEC_DOMAIN_STATE_RELEASED 2U
+#define AGI_LC_EXEC_DOMAIN_CPU_WORDS 4U
 
 #define AGI_LC_VERIFY_UNVERIFIED 0
 #define AGI_LC_VERIFY_MATCHED 1
@@ -1489,6 +1508,29 @@ struct agi_lc_provenance_binding {
 	__u64 reserved[2];
 };
 
+struct agi_lc_execution_domain {
+	__u32 size;
+	__u32 operation;
+	__u32 flags;
+	__u32 state;
+	__s32 status;
+	__u32 reserved32;
+	__u64 domain_id;
+	__u64 capability;
+	__u64 generation;
+	__u64 owner_agent;
+	__u64 owner_tgid;
+	__u64 requested_features;
+	__u64 available_features;
+	__u64 unsupported_features;
+	__u64 requested_cpus[AGI_LC_EXEC_DOMAIN_CPU_WORDS];
+	__u64 applied_cpus[AGI_LC_EXEC_DOMAIN_CPU_WORDS];
+	__u64 housekeeping_cpus[AGI_LC_EXEC_DOMAIN_CPU_WORDS];
+	__u64 jitter_sequence;
+	__u64 correlation;
+	__u64 reserved[2];
+};
+
 struct agi_lc_tensor_transport {
 	__u32 size;
 	__u32 operation;
@@ -1943,6 +1985,7 @@ struct agi_lc_record {
 #define AGI_LC_COMPUTE_CONTEXT _IOWR(AGI_LC_IOC_MAGIC, 0x5d, struct agi_lc_compute_context)
 #define AGI_LC_PROVENANCE_BINDING _IOWR(AGI_LC_IOC_MAGIC, 0x5e, struct agi_lc_provenance_binding)
 #define AGI_LC_TENSOR_TRANSPORT _IOWR(AGI_LC_IOC_MAGIC, 0x5f, struct agi_lc_tensor_transport)
+#define AGI_LC_EXECUTION_DOMAIN _IOWR(AGI_LC_IOC_MAGIC, 0x60, struct agi_lc_execution_domain)
 #define AGI_LC_RECORD_EXPERIENCE _IOWR(AGI_LC_IOC_MAGIC, 0x2b, struct agi_lc_experience_record)
 #define AGI_LC_GET_EXPERIENCE _IOWR(AGI_LC_IOC_MAGIC, 0x2c, struct agi_lc_experience_query)
 #define AGI_LC_PUBLISH_ARTIFACT _IOWR(AGI_LC_IOC_MAGIC, 0x2d, struct agi_lc_learning_artifact)

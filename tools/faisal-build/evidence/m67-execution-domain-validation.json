@@ -1,0 +1,58 @@
+{
+  "milestone": "M67",
+  "feature": "capability-scoped deterministic execution-domain control",
+  "date": "2026-08-15",
+  "upstream": {
+    "tag": "v7.2-rc7",
+    "local_base_tag": "upstream-v7.2-rc7"
+  },
+  "abi_version": 34,
+  "ioctl": "AGI_LC_EXECUTION_DOMAIN",
+  "ioctl_number": "0x60",
+  "build": {
+    "configuration": "x86_64_defconfig + CONFIG_AGI_LIFECYCLE=y",
+    "kernel_image_build_rc": 0,
+    "selftest_build_rc": 0,
+    "selftest": "tools/testing/selftests/agi_execution_domain_test.c"
+  },
+  "qemu": {
+    "machine": "x86_64 pc",
+    "vcpus": 2,
+    "memory_mb": 512,
+    "boot_rc": 0,
+    "markers": {
+      "FAISAL_M67_BOOT_OK": true,
+      "M67_DOMAIN_CREATE_OK": true,
+      "M67_DOMAIN_QUERY_OK": true,
+      "M67_STALE_DOMAIN_CAPABILITY_REJECT_OK": true,
+      "M67_NOHZ_BOUNDARY_OK": true,
+      "M67_DOMAIN_RELEASE_OK": true,
+      "M67_SELFTEST_EXIT=0": true,
+      "FAISAL_M67_TEST_RC=0": true,
+      "FAISAL_M67_SELFTEST_EXIT=0": true
+    },
+    "raw_serial_log": "tools/faisal-build/evidence/m67-qemu.log"
+  },
+  "enforced_properties": {
+    "requested_cpu_mask_must_be_online": true,
+    "housekeeping_complement_must_be_nonempty": true,
+    "calling_task_affinity_applied": true,
+    "opaque_domain_capability_required_for_query_release": true,
+    "stale_capability_rejected": true,
+    "domain_generation_increments_on_release": true,
+    "required_nohz_full_refused_without_provider": true,
+    "smi_control_claimed": false,
+    "nmi_control_claimed": false,
+    "global_irq_affinity_mutated": false,
+    "model_output_authorizes_domain": false
+  },
+  "not_claimed": [
+    "deterministic latency",
+    "zero interrupts",
+    "SMI or NMI suppression",
+    "global IRQ redirection",
+    "PREEMPT_RT activation",
+    "NO_HZ_FULL activation at runtime",
+    "jitter improvement without comparative benchmark"
+  ]
+}

@@ -12,6 +12,8 @@
 #include <linux/capability.h>
 #include <linux/cgroup.h>
 #include <linux/cpu.h>
+#include <linux/cpumask.h>
+#include <linux/sched/isolation.h>
 #include <linux/faisal.h>
 #include <linux/fdtable.h>
 #include <linux/file.h>
@@ -58,6 +60,7 @@
 #define AGI_LC_BROWSER_SESSIONS_LOCAL AGI_LC_BROWSER_MAX_SESSIONS
 #define AGI_LC_PERSISTENT_MEMORY_RECORDS_LOCAL AGI_LC_MEMORY_RECORDS
 #define AGI_LC_TRANSPORT_RECORDS 32
+#define AGI_LC_EXECUTION_DOMAIN_RECORDS 16
 
 struct agi_lc_lease_record {
 	bool active;
@@ -199,6 +202,11 @@ struct agi_lc_transport_record {
 	struct agi_lc_tensor_transport transport;
 };
 
+struct agi_lc_execution_domain_record {
+	bool valid;
+	struct agi_lc_execution_domain domain;
+};
+
 struct agi_lc_memory_share_record {
 	bool active;
 	u64 target_agent;
@@ -289,6 +297,7 @@ struct mutex graph_lock;
 	struct agi_lc_message messages[AGI_LC_MESSAGE_SLOTS];
 	struct agi_lc_experience_slot experiences[AGI_LC_EXPERIENCE_RECORDS];
 	struct agi_lc_transport_record transports[AGI_LC_TRANSPORT_RECORDS];
+	struct agi_lc_execution_domain_record execution_domains[AGI_LC_EXECUTION_DOMAIN_RECORDS];
 
 	u32 head;
 	u32 tail;
@@ -365,6 +374,7 @@ struct agi_lc_graph_node_record graph_nodes[AGI_LC_GRAPH_NODES];
 	u64 capability_next_id;
 	u64 provenance_next_id;
 	u64 transport_next_id;
+	u64 execution_domain_next_id;
 	u64 provenance_binding_next_id;
 	u64 ipc_next_id;
 	u64 ipc_next_message_id;
@@ -7975,6 +7985,160 @@ static int agi_lc_get_domain(struct agi_lc_session *session,
 	return 0;
 }
 
+static void agi_lc_domain_mask_from_uapi(cpumask_t *mask,
+						 const u64 words[AGI_LC_EXEC_DOMAIN_CPU_WORDS])
+{
+	u32 cpu;
+
+	cpumask_clear(mask);
+	for (cpu = 0; cpu < nr_cpu_ids &&
+	     cpu < AGI_LC_EXEC_DOMAIN_CPU_WORDS * 64; cpu++)
+		if (words[cpu / 64] & (1ULL << (cpu % 64)))
+			cpumask_set_cpu(cpu, mask);
+}
+
+static void agi_lc_domain_mask_to_uapi(
+		const cpumask_t *mask,
+		u64 words[AGI_LC_EXEC_DOMAIN_CPU_WORDS])
+{
+	u32 cpu;
+
+	memset(words, 0, sizeof(u64) * AGI_LC_EXEC_DOMAIN_CPU_WORDS);
+	for_each_cpu(cpu, mask)
+		if (cpu < AGI_LC_EXEC_DOMAIN_CPU_WORDS * 64)
+			words[cpu / 64] |= 1ULL << (cpu % 64);
+}
+
+static int agi_lc_execution_domain_control(struct agi_lc_session *session,
+						 unsigned long arg)
+{
+	struct agi_lc_execution_domain domain;
+	struct agi_lc_execution_domain_record *slot = NULL;
+	cpumask_t requested, applied, housekeeping;
+	u64 supported_requests = AGI_LC_EXEC_DOMAIN_REQUEST_NOHZ_FULL |
+		AGI_LC_EXEC_DOMAIN_REQUEST_IRQ_ISOLATION |
+		AGI_LC_EXEC_DOMAIN_REQUEST_PREEMPT_RT |
+		AGI_LC_EXEC_DOMAIN_REQUIRE_NOHZ_FULL |
+		AGI_LC_EXEC_DOMAIN_REQUIRE_IRQ_ISOLATION |
+		AGI_LC_EXEC_DOMAIN_REQUIRE_PREEMPT_RT;
+	u64 available = AGI_LC_EXEC_DOMAIN_FEATURE_AFFINITY |
+		AGI_LC_EXEC_DOMAIN_FEATURE_HOUSEKEEPING;
+	u32 i;
+	int ret = 0;
+
+	if (copy_from_user(&domain, (void __user *)arg, sizeof(domain)))
+		return -EFAULT;
+	if (domain.size != sizeof(domain) || domain.flags ||
+	    domain.reserved32 || domain.reserved[0] || domain.reserved[1] ||
+	    domain.operation < AGI_LC_EXEC_DOMAIN_CREATE ||
+	    domain.operation > AGI_LC_EXEC_DOMAIN_RELEASE ||
+	    domain.requested_features & ~supported_requests ||
+	    !domain.correlation || !session->session_id ||
+	    READ_ONCE(session->revoked))
+		return -EINVAL;
+	if (faisal_task_get_lineage(current) != session->session_id)
+		return -EPERM;
+
+	if (domain.operation == AGI_LC_EXEC_DOMAIN_CREATE) {
+		if (domain.domain_id || domain.capability || domain.generation ||
+		    domain.state || domain.status || domain.owner_agent ||
+		    domain.owner_tgid || domain.available_features ||
+		    domain.unsupported_features || domain.jitter_sequence)
+			return -EINVAL;
+		if (nr_cpu_ids > AGI_LC_EXEC_DOMAIN_CPU_WORDS * 64)
+			return -E2BIG;
+		agi_lc_domain_mask_from_uapi(&requested, domain.requested_cpus);
+		if (cpumask_empty(&requested) ||
+		    !cpumask_subset(&requested, cpu_online_mask))
+			return -EINVAL;
+		cpumask_and(&applied, &requested, cpu_online_mask);
+		cpumask_andnot(&housekeeping, cpu_online_mask, &applied);
+		if (cpumask_empty(&housekeeping))
+			return -EINVAL;
+		domain.unsupported_features = 0;
+		if (domain.requested_features &
+		    (AGI_LC_EXEC_DOMAIN_REQUEST_NOHZ_FULL |
+		     AGI_LC_EXEC_DOMAIN_REQUIRE_NOHZ_FULL))
+			domain.unsupported_features |= AGI_LC_EXEC_DOMAIN_FEATURE_NOHZ_FULL;
+		if (domain.requested_features &
+		    (AGI_LC_EXEC_DOMAIN_REQUEST_IRQ_ISOLATION |
+		     AGI_LC_EXEC_DOMAIN_REQUIRE_IRQ_ISOLATION))
+			domain.unsupported_features |= AGI_LC_EXEC_DOMAIN_FEATURE_IRQ_ISOLATION;
+		if (domain.requested_features &
+		    (AGI_LC_EXEC_DOMAIN_REQUEST_PREEMPT_RT |
+		     AGI_LC_EXEC_DOMAIN_REQUIRE_PREEMPT_RT))
+			domain.unsupported_features |= AGI_LC_EXEC_DOMAIN_FEATURE_PREEMPT_RT;
+		if (domain.requested_features &
+		    (AGI_LC_EXEC_DOMAIN_REQUIRE_NOHZ_FULL |
+		     AGI_LC_EXEC_DOMAIN_REQUIRE_IRQ_ISOLATION |
+		     AGI_LC_EXEC_DOMAIN_REQUIRE_PREEMPT_RT))
+			return -EOPNOTSUPP;
+		ret = set_cpus_allowed_ptr(current, &applied);
+		if (ret)
+			return ret;
+		for (i = 0; i < AGI_LC_EXECUTION_DOMAIN_RECORDS; i++)
+			if (!session->execution_domains[i].valid) {
+				slot = &session->execution_domains[i];
+				break;
+			}
+		if (!slot)
+			return -ENOSPC;
+		if (++session->execution_domain_next_id == U64_MAX)
+			return -EOVERFLOW;
+		memset(slot, 0, sizeof(*slot));
+		slot->valid = true;
+		slot->domain = domain;
+		slot->domain.domain_id = session->execution_domain_next_id;
+		slot->domain.capability = get_random_u64();
+		while (!slot->domain.capability)
+			slot->domain.capability = get_random_u64();
+		slot->domain.generation = 1;
+		slot->domain.state = AGI_LC_EXEC_DOMAIN_STATE_ACTIVE;
+		slot->domain.status = 0;
+		slot->domain.owner_agent = faisal_task_get_agent(current);
+		slot->domain.owner_tgid = task_tgid_nr(current);
+		slot->domain.available_features = available;
+		slot->domain.unsupported_features = domain.unsupported_features;
+		agi_lc_domain_mask_to_uapi(&applied,
+					    slot->domain.applied_cpus);
+		agi_lc_domain_mask_to_uapi(&housekeeping,
+					    slot->domain.housekeeping_cpus);
+		slot->domain.jitter_sequence = ++session->change_generation;
+		domain = slot->domain;
+		ret = agi_lc_push_record(session, AGI_LC_EVENT_SCHED_HINT,
+					 0, domain.correlation, domain.domain_id);
+	} else {
+		if (!domain.domain_id || !domain.capability)
+			return -EINVAL;
+		for (i = 0; i < AGI_LC_EXECUTION_DOMAIN_RECORDS; i++)
+			if (session->execution_domains[i].valid &&
+			    session->execution_domains[i].domain.domain_id ==
+				domain.domain_id &&
+			    session->execution_domains[i].domain.capability ==
+				domain.capability) {
+				slot = &session->execution_domains[i];
+				break;
+			}
+		if (!slot)
+			return -EACCES;
+		if (domain.operation == AGI_LC_EXEC_DOMAIN_RELEASE) {
+			slot->domain.state = AGI_LC_EXEC_DOMAIN_STATE_RELEASED;
+			slot->domain.generation++;
+			domain = slot->domain;
+			slot->valid = false;
+			ret = agi_lc_push_record(session, AGI_LC_EVENT_SCHED_HINT,
+						 -ECANCELED, domain.correlation,
+						 domain.domain_id);
+		} else {
+			domain = slot->domain;
+			domain.operation = AGI_LC_EXEC_DOMAIN_QUERY;
+		}
+	}
+	if (copy_to_user((void __user *)arg, &domain, sizeof(domain)))
+		return -EFAULT;
+	return ret;
+}
+
 static int agi_lc_tensor_transport_control(struct agi_lc_session *session,
 						 unsigned long arg)
 {
@@ -8439,6 +8603,9 @@ case AGI_LC_GRAPH_NODE:
 		break;
 	case AGI_LC_TENSOR_TRANSPORT:
 		ret = agi_lc_tensor_transport_control(session, arg);
+		break;
+	case AGI_LC_EXECUTION_DOMAIN:
+		ret = agi_lc_execution_domain_control(session, arg);
 		break;
 
 	case AGI_LC_GET_INFO: {
