@@ -1,0 +1,95 @@
+{
+  "milestone": "FAISAL-M78",
+  "name": "controlled deployment, canary, monitoring, and rollback supervisor",
+  "status": "validated_bounded_test_environment",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "pre_m78_head": "45ce23a29c8b9f97f63ecd92a9c136a8eada36e5",
+  "implementation": {
+    "design": "M78-DEPLOYMENT-SUPERVISOR-DESIGN.md",
+    "service_header": "tools/faisal-deploy/faisal_deploy_supervisor.h",
+    "service_source": "tools/faisal-deploy/faisal_deploy_supervisor.c",
+    "selftest": "tools/testing/selftests/agi_deployment_supervisor_test.c",
+    "qemu_harness": "tools/faisal-build/run_deployment_supervisor_qemu.sh",
+    "dependency": "M71 checkpoint/recovery and durable memory service"
+  },
+  "build": {
+    "command": "cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -Iinclude/uapi -Itools/faisal-memory -Itools/faisal-deploy tools/faisal-memory/faisal_memory_service.c tools/faisal-deploy/faisal_deploy_supervisor.c tools/testing/selftests/agi_deployment_supervisor_test.c -o /home/ubuntu/agi-kernel/build/recovered/agi_deployment_supervisor_test -lcrypto -ldl -lpthread",
+    "result": "pass",
+    "kernel_source_rebuilt": false,
+    "kernel_image": "/home/ubuntu/agi-kernel/build/recovered/arch/x86/boot/bzImage"
+  },
+  "qemu": {
+    "environment": "x86_64 QEMU, two virtual CPUs, 768 MiB, BusyBox initramfs",
+    "boot": "pass",
+    "harness_rc": 0,
+    "selftest_exit": 0,
+    "markers": [
+      "FAISAL_M78_BOOT_OK",
+      "M78_INDEPENDENT_APPROVAL_DENIAL_OK",
+      "M78_MANIFEST_FUZZ_REJECT_OK iterations=64",
+      "M78_CANDIDATE_INTEGRITY_OK",
+      "M78_CHECKPOINT_VERIFIED_OK",
+      "M78_CANARY_HEALTH_FAILURE_OK",
+      "M78_ROLLBACK_OK recovery=4",
+      "M78_AUDIT_PROVENANCE_OK records=4",
+      "M78_CANARY_ACTIVE_OK",
+      "M78_MODEL_OUTPUT_NO_AUTHORITY_OK",
+      "M78_SELFTEST_EXIT=0",
+      "FAISAL_M78_TEST_RC=0"
+    ],
+    "smoke_runs": [
+      {"run": 1, "elapsed_ns": 4963650650, "markers": 1},
+      {"run": 2, "elapsed_ns": 5010334780, "markers": 1},
+      {"run": 3, "elapsed_ns": 5030189180, "markers": 1},
+      {"run": 4, "elapsed_ns": 5015584504, "markers": 1},
+      {"run": 5, "elapsed_ns": 5051033154, "markers": 1}
+    ]
+  },
+  "functional": {
+    "independent_approval_denial": "pass",
+    "candidate_digest_binding": "pass",
+    "manifest_fuzz_rejection": "pass",
+    "checkpoint_verification": "pass",
+    "resource_snapshot": "pass",
+    "observability_query": "pass",
+    "canary_health_failure": "pass",
+    "explicit_rollback": "pass",
+    "audit_provenance": "pass",
+    "successful_canary_activation": "pass",
+    "model_output_no_authority": "pass"
+  },
+  "security": {
+    "supervisor_and_operator_are_distinct": true,
+    "model_or_service_output_authority": false,
+    "artifact_digest_recomputed": true,
+    "kernel_checkpoint_and_recovery_reused": true,
+    "measured_unavailable_unsupported_masks_preserved": true,
+    "malformed_manifest_cases": 64,
+    "rollback_failure_fails_closed": true
+  },
+  "regression": {
+    "harnesses": ["M64", "M66", "M67", "M68", "M69", "M70", "M71", "M72", "M73", "M74", "M75", "M76", "M77", "M78"],
+    "result": "14/14 pass",
+    "panic_or_oops_scan": "no matches"
+  },
+  "evidence_files": {
+    "milestone": "MILESTONE78.md",
+    "security_review": "M78-SECURITY-REVIEW.md",
+    "benchmarks": "M78-BENCHMARKS.md",
+    "qemu_log": "tools/faisal-build/evidence/m78-qemu.log",
+    "regression_log": "tools/faisal-build/evidence/m78-regression.log",
+    "benchmark_log": "tools/faisal-build/evidence/m78-benchmark.log",
+    "selftest_build_log": "tools/faisal-build/evidence/m78-selftest-build.log"
+  },
+  "non_claims": [
+    "No autonomous production deployment",
+    "No universal health monitoring",
+    "No complete rollback of arbitrary external side effects",
+    "No hardware-independent canary safety",
+    "No model correctness claim",
+    "No consciousness claim",
+    "No model-output deployment authority",
+    "No baseline performance improvement claim"
+  ]
+}
