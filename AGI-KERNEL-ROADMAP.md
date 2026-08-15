@@ -10,12 +10,13 @@ This roadmap is an active dependency graph. The 14 strategic phases are not a se
 
 | Item | State |
 |---|---|
-| M73 evidence | `MILESTONE73.md`, `M73-SECURITY-REVIEW.md`, `M73-BENCHMARKS.md`, and machine-readable validation evidence; M64/M66–M72 regressions pass |
+| M73 evidence | Validated as `FAISAL-M73`; world-state design, security, benchmarks, QEMU, and regression evidence stored |
+| M74 evidence | Validated as `FAISAL-M74`; model admission, policy denial, checkpoint/rollback, output non-authority, fuzz, QEMU, and regression evidence stored |
 | Linux foundation | Verified Linux `v7.2-rc7`, local tag `upstream-v7.2-rc7` |
-| Latest tagged FAISAL milestone | `FAISAL-M73`, temporal world-state service |
+| Latest tagged FAISAL milestone | `FAISAL-M74`, trusted model/runtime orchestration |
 | Kernel ABI | 37 |
-| Validated kernel and service primitives | Lifecycle, agent/task identity, scoped capabilities, provenance binding, tensor/graph/context control plane, tensor transport metadata, deterministic domains, heterogeneous-context negotiation, graph telemetry, CPU PM QoS policy intent, durable userspace memory journal, checkpoint/recovery integration, verified experience retention, skill-artifact gating, correction/re-evaluation, selective world subscriptions, world-sync acknowledgement, freshness/conflict state, temporal checks, honest resource snapshots |
-| Next selected dependency | M74 trusted model/runtime orchestration and policy supervisor |
+| Validated kernel and service primitives | Lifecycle, agent/task identity, scoped capabilities, provenance binding, tensor/graph/context control plane, tensor transport metadata, deterministic domains, heterogeneous-context negotiation, graph telemetry, CPU PM QoS policy intent, durable userspace memory journal, checkpoint/recovery integration, verified experience retention, skill-artifact gating, correction/re-evaluation, selective world subscriptions, world-sync acknowledgement, freshness/conflict state, temporal checks, honest resource snapshots, trusted model admission, explicit approval gates, kernel budget enforcement, checkpoint verification, rollback sequencing, model-output non-authority boundary |
+| Next selected dependency | M75 capability-scoped browser and tool supervision |
 | Complete-system status | Not operational; userspace services and end-to-end autonomous integration remain unfinished |
 
 ## Strategic domains and implementation gates
@@ -93,6 +94,7 @@ A work item is blocked when an acceptance gate cannot be executed or when a crit
 2. **M71 persistent memory service contract:** validated and committed as `FAISAL-M71`; retain restart, corruption, checkpoint, and capability regression coverage.
 3. **M72 verified experience pipeline:** validated and committed as `FAISAL-M72`; retain the no-retraining and stale-artifact regression gates.
 4. **M73 world-state service:** validated as `FAISAL-M73`; retain event-loss, freshness, conflict, temporal-capability, and resource-mask regression coverage.
-5. **M74 trusted model/runtime orchestration:** integrate userspace model services behind an independent policy supervisor, resource admission, checkpoint, and rollback gates; model output remains untrusted.
+5. **M74 trusted model/runtime orchestration:** validated as `FAISAL-M74`; retain independent-approval, resource-admission, checkpoint/rollback, and model-output non-authority regression coverage.
+6. **M75 capability-scoped browser and tool supervision:** build userspace browser/tool broker behind kernel network, browser-session, provenance, and capability boundaries; browser content and model output remain untrusted.
 
 The queue is provisional and must be recomputed after every failure, security finding, benchmark regression, or new provider dependency.
