@@ -64,5 +64,7 @@
     "No physical-hardware validation claim",
     "No performance superiority claim"
   ],
+  "commit": "7ddc7ad97729b37ce32541b72e715855121e69ed",
+  "tag": "FAISAL-M84",
   "status": "validated_experimental_module"
 }
