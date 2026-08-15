@@ -1,0 +1,66 @@
+{
+  "milestone": "M69",
+  "feature": "graph-native operation telemetry",
+  "date": "2026-08-15",
+  "upstream": {
+    "tag": "v7.2-rc7",
+    "local_base_tag": "upstream-v7.2-rc7"
+  },
+  "abi_version": 36,
+  "ioctl": "AGI_LC_GRAPH_TELEMETRY",
+  "ioctl_number": "0x61",
+  "event_type": "AGI_LC_EVENT_GRAPH_OPERATION",
+  "build": {
+    "configuration": "x86_64_defconfig + CONFIG_AGI_LIFECYCLE=y",
+    "kernel_and_modules_build_rc": 0,
+    "selftest_build_rc": 0,
+    "selftest": "tools/testing/selftests/agi_graph_telemetry_test.c"
+  },
+  "qemu": {
+    "machine": "x86_64 pc",
+    "vcpus": 2,
+    "memory_mb": 512,
+    "boot_validation_rc": 0,
+    "markers": {
+      "FAISAL_M69_BOOT_OK": true,
+      "M69_TELEMETRY_BEGIN_OK": true,
+      "M69_TELEMETRY_QUERY_OK": true,
+      "M69_STALE_TELEMETRY_CAPABILITY_REJECT_OK": true,
+      "M69_ANOMALY_SIGNAL_OK": true,
+      "M69_TELEMETRY_END_OK": true,
+      "M69_GRAPH_EVENT_DELIVERY_OK": true,
+      "M69_COMPLETED_QUERY_OK": true,
+      "M69_SELFTEST_EXIT=0": true,
+      "FAISAL_M69_TEST_RC=0": true
+    },
+    "raw_serial_log": "tools/faisal-build/evidence/m69-qemu.log"
+  },
+  "smoke_wall_time_seconds": [4.208, 4.400, 4.182],
+  "validated_properties": {
+    "graph_node_agent_attribution": true,
+    "kernel_begin_timestamp": true,
+    "kernel_end_timestamp": true,
+    "duration_calculation": true,
+    "context_capability_check": true,
+    "tensor_region_capability_check": true,
+    "telemetry_capability_generation": true,
+    "anomaly_signal_preservation": true,
+    "provider_observation_recording": true,
+    "session_event_ring_delivery": true,
+    "bounded_records_per_session": 64,
+    "model_output_authorizes_kernel": false,
+    "tensor_contents_stored": false
+  },
+  "not_claimed": [
+    "tensor-content tracing",
+    "attention-layer semantic identification",
+    "model-drift detection",
+    "automatic anomaly classification",
+    "GPU-kernel introspection",
+    "vendor queue diagnostics",
+    "unified accelerator scheduling",
+    "hardware fence creation",
+    "inference latency improvement",
+    "accelerator throughput improvement"
+  ]
+}

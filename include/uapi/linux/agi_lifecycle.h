@@ -5,7 +5,7 @@
 #include <linux/ioctl.h>
 #include <linux/types.h>
 
-#define AGI_LC_ABI_VERSION 35
+#define AGI_LC_ABI_VERSION 36
 #define AGI_LC_DEVICE_NAME "agi_lifecycle"
 
 #define AGI_LC_EVENT_BEGIN 1
@@ -46,6 +46,7 @@
 #define AGI_LC_EVENT_TEMPORAL 36
 #define AGI_LC_EVENT_REFLECTION 37
 #define AGI_LC_EVENT_OBSERVABILITY 38
+#define AGI_LC_EVENT_GRAPH_OPERATION 39
 
 #define AGI_LC_AGENT_STATE_READY 0
 #define AGI_LC_AGENT_STATE_BLOCKED 1
@@ -296,6 +297,25 @@
                                        AGI_LC_OBSERVABILITY_FLAG_SAMPLE | \
                                        AGI_LC_OBSERVABILITY_FLAG_TRACEFS_CORRELATION)
 #define AGI_LC_OBSERVABILITY_MAX_SAMPLE_PERIOD 1048576U
+#define AGI_LC_GRAPH_TELEMETRY_BEGIN 1U
+#define AGI_LC_GRAPH_TELEMETRY_END 2U
+#define AGI_LC_GRAPH_TELEMETRY_FAIL 3U
+#define AGI_LC_GRAPH_TELEMETRY_CHECKPOINT 4U
+#define AGI_LC_GRAPH_TELEMETRY_ANOMALY 5U
+#define AGI_LC_GRAPH_TELEMETRY_QUERY 6U
+#define AGI_LC_GRAPH_TELEMETRY_STATE_ACTIVE 1U
+#define AGI_LC_GRAPH_TELEMETRY_STATE_COMPLETE 2U
+#define AGI_LC_GRAPH_TELEMETRY_STATE_FAILED 3U
+#define AGI_LC_GRAPH_TELEMETRY_STATE_CHECKPOINTED 4U
+#define AGI_LC_GRAPH_TELEMETRY_FLAG_CONTEXT (1U << 0)
+#define AGI_LC_GRAPH_TELEMETRY_FLAG_TENSOR (1U << 1)
+#define AGI_LC_GRAPH_TELEMETRY_FLAG_TRANSPORT (1U << 2)
+#define AGI_LC_GRAPH_TELEMETRY_FLAG_PROVENANCE (1U << 3)
+#define AGI_LC_GRAPH_TELEMETRY_FLAG_PROVIDER_MEASURED (1U << 4)
+#define AGI_LC_GRAPH_TELEMETRY_FLAG_ANOMALY (1U << 5)
+#define AGI_LC_GRAPH_TELEMETRY_FLAGS_ALL ((1U << 6) - 1)
+#define AGI_LC_GRAPH_TELEMETRY_MAX_OPERATOR_KIND 4096U
+#define AGI_LC_GRAPH_TELEMETRY_MAX_ANOMALY_SCORE 1000000U
 #define AGI_LC_MEMORY_MAX_TTL_NS (365ULL * 24 * 60 * 60 * 1000000000ULL)
 
 #define AGI_LC_RECOVERY_NONE 0
@@ -1971,6 +1991,43 @@ struct agi_lc_observability {
 	__u64 correlation;
 	__u64 reserved[2];
 };
+struct agi_lc_graph_telemetry {
+	__u32 size;
+	__u32 operation;
+	__u32 flags;
+	__u32 state;
+	__s32 status;
+	__u32 device_mask;
+	__u64 telemetry_id;
+	__u64 telemetry_capability;
+	__u64 graph_id;
+	__u64 node_id;
+	__u64 agent_id;
+	__u64 task_id;
+	__u64 context_id;
+	__u64 context_capability;
+	__u64 tensor_region_id;
+	__u64 tensor_capability;
+	__u64 transport_id;
+	__u64 transport_capability;
+	__u64 provenance_id;
+	__u64 provenance_sequence;
+	__u32 operator_kind;
+	__u32 dependency_count;
+	__u64 start_ns;
+	__u64 end_ns;
+	__u64 duration_ns;
+	__u64 queue_delay_ns;
+	__u64 observed_runtime_ns;
+	__u64 bytes_in;
+	__u64 bytes_out;
+	__u64 provider_sequence;
+	__u32 anomaly_score;
+	__u32 anomaly_flags;
+	__u64 generation;
+	__u64 correlation;
+	__u64 reserved[2];
+};
 struct agi_lc_record {
 	__u64 sequence;
 	__u64 timestamp_ns;
@@ -2009,6 +2066,7 @@ struct agi_lc_record {
 #define AGI_LC_PROVENANCE_BINDING _IOWR(AGI_LC_IOC_MAGIC, 0x5e, struct agi_lc_provenance_binding)
 #define AGI_LC_TENSOR_TRANSPORT _IOWR(AGI_LC_IOC_MAGIC, 0x5f, struct agi_lc_tensor_transport)
 #define AGI_LC_EXECUTION_DOMAIN _IOWR(AGI_LC_IOC_MAGIC, 0x60, struct agi_lc_execution_domain)
+#define AGI_LC_GRAPH_TELEMETRY _IOWR(AGI_LC_IOC_MAGIC, 0x61, struct agi_lc_graph_telemetry)
 #define AGI_LC_RECORD_EXPERIENCE _IOWR(AGI_LC_IOC_MAGIC, 0x2b, struct agi_lc_experience_record)
 #define AGI_LC_GET_EXPERIENCE _IOWR(AGI_LC_IOC_MAGIC, 0x2c, struct agi_lc_experience_query)
 #define AGI_LC_PUBLISH_ARTIFACT _IOWR(AGI_LC_IOC_MAGIC, 0x2d, struct agi_lc_learning_artifact)

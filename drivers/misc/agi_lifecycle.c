@@ -61,6 +61,7 @@
 #define AGI_LC_PERSISTENT_MEMORY_RECORDS_LOCAL AGI_LC_MEMORY_RECORDS
 #define AGI_LC_TRANSPORT_RECORDS 32
 #define AGI_LC_EXECUTION_DOMAIN_RECORDS 16
+#define AGI_LC_GRAPH_TELEMETRY_RECORDS 64
 
 struct agi_lc_lease_record {
 	bool active;
@@ -205,6 +206,10 @@ struct agi_lc_transport_record {
 struct agi_lc_execution_domain_record {
 	bool valid;
 	struct agi_lc_execution_domain domain;
+};
+struct agi_lc_graph_telemetry_record {
+	bool valid;
+	struct agi_lc_graph_telemetry telemetry;
 };
 
 struct agi_lc_memory_share_record {
@@ -358,6 +363,7 @@ struct mutex graph_lock;
 struct agi_lc_compute_context_record contexts[AGI_LC_CONTEXT_RECORDS];
 	u64 next_context_id;
 struct agi_lc_graph_node_record graph_nodes[AGI_LC_GRAPH_NODES];
+	struct agi_lc_graph_telemetry_record graph_telemetry[AGI_LC_GRAPH_TELEMETRY_RECORDS];
 	struct agi_lc_capability_record capabilities[AGI_LC_CAPABILITY_RECORDS];
 	struct agi_lc_provenance_record provenance[AGI_LC_PROVENANCE_RECORDS];
 	struct agi_lc_ipc_channel_record *ipc_channels;
@@ -375,6 +381,7 @@ struct agi_lc_graph_node_record graph_nodes[AGI_LC_GRAPH_NODES];
 	u64 provenance_next_id;
 	u64 transport_next_id;
 	u64 execution_domain_next_id;
+	u64 graph_telemetry_next_id;
 	u64 provenance_binding_next_id;
 	u64 ipc_next_id;
 	u64 ipc_next_message_id;
@@ -3768,6 +3775,256 @@ copy_out:
 mutex_unlock(&s->context_lock); if (copy_to_user((void __user *)arg, &out, sizeof(out))) return -EFAULT; return agi_lc_push_record(s, AGI_LC_EVENT_SCHED_HINT, out.status, out.correlation, out.context_id);
 out:
 mutex_unlock(&s->context_lock); return ret;
+}
+static struct agi_lc_graph_telemetry_record *agi_lc_graph_telemetry_find_locked(struct agi_lc_session *s, u64 id, u64 cap)
+{
+	u32 i;
+
+	for (i = 0; i < AGI_LC_GRAPH_TELEMETRY_RECORDS; i++)
+		if (s->graph_telemetry[i].valid &&
+		    s->graph_telemetry[i].telemetry.telemetry_id == id &&
+		    s->graph_telemetry[i].telemetry.telemetry_capability == cap)
+			return &s->graph_telemetry[i];
+	return NULL;
+}
+static int agi_lc_graph_telemetry_control(struct agi_lc_session *s, unsigned long arg)
+{
+	struct agi_lc_graph_telemetry p, out;
+	struct agi_lc_graph_telemetry_record *r = NULL, *slot = NULL;
+	struct agi_lc_graph_node_record *node;
+	struct agi_lc_memory_record *memory;
+	u64 now;
+	u32 i;
+	int ret = 0;
+
+	if (copy_from_user(&p, (void __user *)arg, sizeof(p)))
+		return -EFAULT;
+	if (p.size != sizeof(p) ||
+	    p.operation < AGI_LC_GRAPH_TELEMETRY_BEGIN ||
+	    p.operation > AGI_LC_GRAPH_TELEMETRY_QUERY ||
+	    p.flags & ~AGI_LC_GRAPH_TELEMETRY_FLAGS_ALL ||
+	    p.device_mask & ~AGI_LC_GRAPH_DEVICE_ALL ||
+	    p.operator_kind > AGI_LC_GRAPH_TELEMETRY_MAX_OPERATOR_KIND ||
+	    p.anomaly_score > AGI_LC_GRAPH_TELEMETRY_MAX_ANOMALY_SCORE ||
+	    p.reserved[0] || p.reserved[1] || !p.correlation)
+		return -EINVAL;
+	if (!s->session_id || READ_ONCE(s->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != s->session_id)
+		return -EPERM;
+	if (p.operation == AGI_LC_GRAPH_TELEMETRY_BEGIN) {
+		if (!p.graph_id || !p.node_id || !p.device_mask ||
+		    p.telemetry_id || p.telemetry_capability || p.state || p.status ||
+		    p.start_ns || p.end_ns || p.duration_ns || p.queue_delay_ns ||
+		    p.observed_runtime_ns || p.bytes_in || p.bytes_out ||
+		    p.provider_sequence || p.anomaly_score || p.anomaly_flags ||
+		    p.generation)
+			return -EINVAL;
+	} else {
+		if (!p.telemetry_id || !p.telemetry_capability)
+			return -EINVAL;
+		if (p.operation == AGI_LC_GRAPH_TELEMETRY_QUERY &&
+		    (p.flags || p.status || p.device_mask || p.context_id ||
+		     p.context_capability || p.tensor_region_id || p.tensor_capability ||
+		     p.transport_id || p.transport_capability || p.provenance_id ||
+		     p.provenance_sequence || p.operator_kind || p.dependency_count ||
+		     p.start_ns || p.end_ns || p.duration_ns || p.queue_delay_ns ||
+		     p.observed_runtime_ns || p.bytes_in || p.bytes_out ||
+		     p.provider_sequence || p.anomaly_score || p.anomaly_flags ||
+		     p.generation))
+			return -EINVAL;
+	}
+	mutex_lock(&s->graph_lock);
+	if (p.operation == AGI_LC_GRAPH_TELEMETRY_BEGIN)
+		node = agi_lc_graph_find_locked(s, p.graph_id, p.node_id);
+	else
+		node = NULL;
+	if (node && node->node.agent_id != faisal_task_get_agent(current))
+		node = NULL;
+	if (p.operation == AGI_LC_GRAPH_TELEMETRY_BEGIN &&
+	    (!node || (node->node.state != AGI_LC_GRAPH_STATE_READY &&
+		       node->node.state != AGI_LC_GRAPH_STATE_RUNNING))) {
+		mutex_unlock(&s->graph_lock);
+		return -EINVAL;
+	}
+	if (p.operation != AGI_LC_GRAPH_TELEMETRY_BEGIN) {
+			r = agi_lc_graph_telemetry_find_locked(s, p.telemetry_id,
+								p.telemetry_capability);
+			if (!r) {
+			mutex_unlock(&s->graph_lock);
+			return -EACCES;
+		}
+			if (r->telemetry.agent_id != faisal_task_get_agent(current)) {
+			mutex_unlock(&s->graph_lock);
+			return -EACCES;
+		}
+	}
+	if ((p.context_id || p.context_capability) !=
+	    !!(p.flags & AGI_LC_GRAPH_TELEMETRY_FLAG_CONTEXT) ||
+	    (p.tensor_region_id || p.tensor_capability) !=
+	    !!(p.flags & AGI_LC_GRAPH_TELEMETRY_FLAG_TENSOR) ||
+	    (p.transport_id || p.transport_capability) !=
+	    !!(p.flags & AGI_LC_GRAPH_TELEMETRY_FLAG_TRANSPORT) ||
+	    (p.provenance_id || p.provenance_sequence) !=
+	    !!(p.flags & AGI_LC_GRAPH_TELEMETRY_FLAG_PROVENANCE)) {
+		mutex_unlock(&s->graph_lock);
+		return -EINVAL;
+	}
+	if (p.context_id || p.context_capability) {
+		struct agi_lc_compute_context_record *context;
+		if (!p.context_id || !p.context_capability) {
+			mutex_unlock(&s->graph_lock);
+			return -EINVAL;
+		}
+		mutex_lock(&s->context_lock);
+		context = agi_lc_context_find_locked(s, p.context_id,
+							p.context_capability);
+		if (!context || context->context.agent_id != faisal_task_get_agent(current))
+			ret = -EACCES;
+		mutex_unlock(&s->context_lock);
+		if (ret) {
+			mutex_unlock(&s->graph_lock);
+			return ret;
+		}
+	}
+	if (p.tensor_region_id || p.tensor_capability) {
+		if (!p.tensor_region_id || !p.tensor_capability) {
+			mutex_unlock(&s->graph_lock);
+			return -EINVAL;
+		}
+		mutex_lock(&agi_lc_memory_lock);
+		memory = agi_lc_memory_find_locked(s, p.tensor_region_id);
+		if (!memory || memory->revoked ||
+		    !agi_lc_memory_authorized_locked(s, memory,
+						      p.tensor_capability,
+						      AGI_LC_MEMORY_ACCESS_READ))
+			ret = -EACCES;
+		mutex_unlock(&agi_lc_memory_lock);
+		if (ret) {
+			mutex_unlock(&s->graph_lock);
+			return ret;
+		}
+	}
+	if (p.transport_id || p.transport_capability) {
+		bool transport_ok = false;
+		if (!p.transport_id || !p.transport_capability) {
+			mutex_unlock(&s->graph_lock);
+			return -EINVAL;
+		}
+		for (i = 0; i < AGI_LC_TRANSPORT_RECORDS; i++)
+			if (s->transports[i].valid &&
+			    s->transports[i].transport.state == AGI_LC_TRANSPORT_STATE_ACTIVE &&
+			    s->transports[i].transport.transport_id == p.transport_id &&
+			    s->transports[i].transport.capability == p.transport_capability) {
+				transport_ok = true;
+				break;
+			}
+		if (!transport_ok) {
+			mutex_unlock(&s->graph_lock);
+			return -EACCES;
+		}
+	}
+	if (p.provenance_id || p.provenance_sequence) {
+		bool provenance_ok = false;
+		if (!p.provenance_id || !p.provenance_sequence) {
+			mutex_unlock(&s->graph_lock);
+			return -EINVAL;
+		}
+		for (i = 0; i < AGI_LC_PROVENANCE_RECORDS; i++)
+			if (s->provenance[i].valid &&
+			    s->provenance[i].provenance.provenance_id == p.provenance_id &&
+			    s->provenance[i].provenance.action_sequence == p.provenance_sequence) {
+				provenance_ok = true;
+				break;
+			}
+		if (!provenance_ok) {
+			mutex_unlock(&s->graph_lock);
+			return -EACCES;
+		}
+	}
+	if (p.operation == AGI_LC_GRAPH_TELEMETRY_BEGIN) {
+		for (i = 0; i < AGI_LC_GRAPH_TELEMETRY_RECORDS; i++)
+			if (!s->graph_telemetry[i].valid) {
+				slot = &s->graph_telemetry[i];
+				break;
+			}
+		if (!slot) {
+			mutex_unlock(&s->graph_lock);
+			return -ENOSPC;
+		}
+		if (++s->graph_telemetry_next_id == U64_MAX) {
+			mutex_unlock(&s->graph_lock);
+			return -EOVERFLOW;
+		}
+		memset(slot, 0, sizeof(*slot));
+		slot->valid = true;
+		slot->telemetry = p;
+		slot->telemetry.telemetry_id = s->graph_telemetry_next_id;
+		slot->telemetry.telemetry_capability = get_random_u64();
+		while (!slot->telemetry.telemetry_capability)
+			slot->telemetry.telemetry_capability = get_random_u64();
+		slot->telemetry.state = AGI_LC_GRAPH_TELEMETRY_STATE_ACTIVE;
+		slot->telemetry.status = 0;
+		slot->telemetry.agent_id = faisal_task_get_agent(current);
+		slot->telemetry.task_id = task_pid_nr(current);
+		slot->telemetry.device_mask = node->node.device_mask;
+		slot->telemetry.dependency_count = node->node.dependency_count;
+		slot->telemetry.start_ns = ktime_get_boottime_ns();
+		slot->telemetry.generation = 1;
+		out = slot->telemetry;
+	} else {
+		if (p.graph_id && p.graph_id != r->telemetry.graph_id) {
+			mutex_unlock(&s->graph_lock);
+			return -EINVAL;
+		}
+		if (p.node_id && p.node_id != r->telemetry.node_id) {
+			mutex_unlock(&s->graph_lock);
+			return -EINVAL;
+		}
+		if (p.operation == AGI_LC_GRAPH_TELEMETRY_QUERY) {
+			out = r->telemetry;
+			out.operation = AGI_LC_GRAPH_TELEMETRY_QUERY;
+			mutex_unlock(&s->graph_lock);
+			if (copy_to_user((void __user *)arg, &out, sizeof(out)))
+				return -EFAULT;
+			return 0;
+		}
+		if (r->telemetry.state != AGI_LC_GRAPH_TELEMETRY_STATE_ACTIVE &&
+		    p.operation != AGI_LC_GRAPH_TELEMETRY_ANOMALY) {
+			mutex_unlock(&s->graph_lock);
+			return -ESHUTDOWN;
+		}
+		now = ktime_get_boottime_ns();
+		if (p.operation == AGI_LC_GRAPH_TELEMETRY_END ||
+		    p.operation == AGI_LC_GRAPH_TELEMETRY_FAIL) {
+			r->telemetry.end_ns = now;
+			r->telemetry.duration_ns = now >= r->telemetry.start_ns ?
+				now - r->telemetry.start_ns : 0;
+			r->telemetry.state = p.operation == AGI_LC_GRAPH_TELEMETRY_END ?
+			AGI_LC_GRAPH_TELEMETRY_STATE_COMPLETE :
+			AGI_LC_GRAPH_TELEMETRY_STATE_FAILED;
+		} else if (p.operation == AGI_LC_GRAPH_TELEMETRY_CHECKPOINT) {
+			r->telemetry.state = AGI_LC_GRAPH_TELEMETRY_STATE_CHECKPOINTED;
+		}
+		r->telemetry.flags |= p.flags;
+		r->telemetry.status = p.status;
+		r->telemetry.queue_delay_ns = p.queue_delay_ns;
+		r->telemetry.observed_runtime_ns = p.observed_runtime_ns;
+		r->telemetry.bytes_in = p.bytes_in;
+		r->telemetry.bytes_out = p.bytes_out;
+		r->telemetry.provider_sequence = p.provider_sequence;
+		if (p.flags & AGI_LC_GRAPH_TELEMETRY_FLAG_ANOMALY) {
+			r->telemetry.anomaly_score = p.anomaly_score;
+			r->telemetry.anomaly_flags = p.anomaly_flags;
+		}
+		r->telemetry.generation++;
+		out = r->telemetry;
+	}
+	mutex_unlock(&s->graph_lock);
+	if (copy_to_user((void __user *)arg, &out, sizeof(out)))
+		return -EFAULT;
+	return agi_lc_push_record(s, AGI_LC_EVENT_GRAPH_OPERATION,
+					out.status, out.correlation, out.telemetry_id);
 }
 static int agi_lc_open(struct inode *inode, struct file *file)
 {
@@ -8630,6 +8887,9 @@ case AGI_LC_GRAPH_NODE:
 		break;
 	case AGI_LC_EXECUTION_DOMAIN:
 		ret = agi_lc_execution_domain_control(session, arg);
+		break;
+	case AGI_LC_GRAPH_TELEMETRY:
+		ret = agi_lc_graph_telemetry_control(session, arg);
 		break;
 
 	case AGI_LC_GET_INFO: {
