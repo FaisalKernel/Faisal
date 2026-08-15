@@ -1,0 +1,75 @@
+{
+  "milestone": "M71",
+  "feature": "userspace persistent-memory service with FAISAL kernel integration",
+  "date": "2026-08-15",
+  "kernel_base": "Linux v7.2-rc7",
+  "current_abi": 37,
+  "service": {
+    "implementation": "tools/faisal-memory/faisal_memory_service.c",
+    "header": "tools/faisal-memory/faisal_memory_service.h",
+    "journal_format_version": 1,
+    "digest": "SHA-256",
+    "max_records": 64,
+    "max_content_bytes": 4095,
+    "kernel_ioctls": [
+      "AGI_LC_MEMORY_RECORD",
+      "AGI_LC_CHECKPOINT",
+      "AGI_LC_CHECKPOINT_MANIFEST",
+      "AGI_LC_VERIFY_CHECKPOINT",
+      "AGI_LC_RECOVERY",
+      "AGI_LC_EXPORT_CHECKPOINT",
+      "AGI_LC_IMPORT_CHECKPOINT",
+      "AGI_LC_SET_GATE"
+    ]
+  },
+  "build": {
+    "kernel_and_modules_build_rc": 0,
+    "static_service_selftest_build_rc": 0,
+    "selftest": "tools/testing/selftests/agi_persistent_memory_service_test.c"
+  },
+  "qemu": {
+    "machine": "x86_64 pc",
+    "vcpus": 2,
+    "memory_mb": 512,
+    "stress_runs": 3,
+    "boot_validation_rc": 0,
+    "markers": {
+      "FAISAL_M71_BOOT_OK": true,
+      "M71_PUT_OK": true,
+      "M71_GET_DIGEST_OK": true,
+      "M71_STALE_CAPABILITY_REJECT_OK": true,
+      "M71_CHECKPOINT_OK": true,
+      "M71_CRASH_MARK_OK": true,
+      "M71_RESTART_REPLAY_OK": true,
+      "M71_VERIFIED_RESTORE_OK": true,
+      "M71_INCOMPLETE_TAIL_RECOVERED_OK": true,
+      "M71_CORRUPT_DIGEST_REJECT_OK": true,
+      "M71_SELFTEST_EXIT=0": true,
+      "FAISAL_M71_TEST_RC=0": true
+    },
+    "raw_serial_log": "tools/faisal-build/evidence/m71-qemu.log"
+  },
+  "validated_properties": {
+    "durable_journal_fsync": true,
+    "content_digest_validation": true,
+    "kernel_record_capability_scope": true,
+    "checkpoint_manifest_verification": true,
+    "crash_mark_and_restore": true,
+    "restart_rehydration": true,
+    "incomplete_tail_recovery": true,
+    "complete_corruption_rejection": true,
+    "model_output_authorizes_kernel": false,
+    "semantic_model_retraining": false,
+    "consciousness_claim": false
+  },
+  "not_claimed": [
+    "semantic understanding",
+    "vector or graph retrieval",
+    "foundation-model retraining",
+    "correctness of remembered knowledge",
+    "distributed consensus",
+    "encrypted at-rest storage",
+    "production database throughput",
+    "learning from a query beyond durable experience retention"
+  ]
+}
