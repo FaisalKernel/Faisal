@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "dd3af653cfc50c278872df726723d702686d7b23",
-  "current_tag": "FAISAL-M76",
+  "current_head": "4150bc3165a6646abb136c46218732d6652259bb",
+  "current_tag": "FAISAL-M77",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -47,7 +47,7 @@
     {"id": 9, "name": "AGI system services and model orchestration", "status": "partial_trusted_orchestration_validated"},
     {"id": 10, "name": "Persistent memory and experience learning", "status": "unfinished"},
     {"id": 11, "name": "World model and temporal/causal state", "status": "partial_userspace_service_validated"},
-    {"id": 12, "name": "Verified internet research and source provenance", "status": "unfinished"},
+    {"id": 12, "name": "Verified internet research and source provenance", "status": "validated_bounded_userspace_service"},
     {"id": 13, "name": "Browser and computer-use service", "status": "partial_capability_scoped_broker_validated"},
     {"id": 14, "name": "Multi-agent integration, deployment, rollback, and continuous improvement", "status": "partial_bounded_end_to_end_integration_validated"}
   ],
@@ -135,14 +135,26 @@
       "id": "M77-verified-internet-research",
       "phase": 12,
       "name": "Verified internet research and source provenance service",
-      "status": "next",
+      "status": "validated",
       "priority": 100,
       "depends_on": ["M73-world-model", "M75-browser-tool-supervision", "M76-end_to_end_agent"],
       "unlocks": [],
-      "evidence_required": ["primary_source_preference", "retrieval_timestamp", "cross_check", "conflict_detection", "provenance_audit", "unverified_fact_denial"]
+      "evidence_required": ["primary_source_preference", "retrieval_timestamp", "cross_check", "conflict_detection", "provenance_audit", "unverified_fact_denial"],
+      "evidence": ["M77-RESEARCH-NOTES.md", "M77-VERIFIED-RESEARCH-DESIGN.md", "MILESTONE77.md", "M77-SECURITY-REVIEW.md", "M77-BENCHMARKS.md", "tools/faisal-build/evidence/m77-verified-research-validation.json"],
+      "next_action": "Retain source provenance, primary-source preference, cross-check/conflict, explicit verification, freshness, and unverified-denial coverage."
+    },
+    {
+      "id": "M78-deployment-supervisor",
+      "phase": 14,
+      "name": "Persistent deployment, canary, monitoring, and rollback supervisor",
+      "status": "next",
+      "priority": 100,
+      "depends_on": ["M74-model-orchestration", "M75-browser-tool-supervision", "M76-end_to_end_agent", "M77-verified-internet-research"],
+      "unlocks": [],
+      "evidence_required": ["independent_supervisor", "operator_approval", "canary", "health_monitoring", "rollback", "audit_log", "no_model_authority"]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",
