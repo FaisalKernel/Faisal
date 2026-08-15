@@ -1,0 +1,99 @@
+{
+  "milestone": "FAISAL-M77",
+  "name": "verified internet research and source provenance",
+  "status": "validated",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "pre_m77_head": "9b0a484c4e7bc40873e4dcc1249ec68869a1ffed",
+  "research_sources": [
+    {"id": 1, "url": "https://www.w3.org/TR/prov-dm/", "conclusion": "provenance distinguishes entities, activities, and agents"},
+    {"id": 2, "url": "https://httpwg.org/specs/rfc9110.html", "conclusion": "HTTP representations and metadata are evidence fields, not truth decisions"},
+    {"id": 3, "url": "https://csrc.nist.gov/glossary/term/integrity_verification", "conclusion": "integrity verification concerns unauthorized alteration, not semantic truth"}
+  ],
+  "implementation": {
+    "research_notes": "M77-RESEARCH-NOTES.md",
+    "design": "M77-VERIFIED-RESEARCH-DESIGN.md",
+    "service_header": "tools/faisal-research/faisal_research_service.h",
+    "service_source": "tools/faisal-research/faisal_research_service.c",
+    "selftest": "tools/testing/selftests/agi_verified_research_test.c",
+    "qemu_harness": "tools/faisal-build/run_verified_research_qemu.sh",
+    "dependencies": ["M71 persistent memory", "M73 world state", "M75 browser/tool broker"]
+  },
+  "build": {
+    "command": "cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -Iinclude/uapi -Itools/faisal-memory -Itools/faisal-world -Itools/faisal-browser -Itools/faisal-research tools/faisal-memory/faisal_memory_service.c tools/faisal-world/faisal_world_state_service.c tools/faisal-browser/faisal_browser_tool_service.c tools/faisal-research/faisal_research_service.c tools/testing/selftests/agi_verified_research_test.c -o /home/ubuntu/agi-kernel/build/recovered/agi_verified_research_test -lcrypto -ldl -lpthread",
+    "result": "pass",
+    "kernel_source_rebuilt": false,
+    "kernel_image": "/home/ubuntu/agi-kernel/build/recovered/arch/x86/boot/bzImage"
+  },
+  "qemu": {
+    "environment": "x86_64 QEMU, two virtual CPUs, 768 MiB, BusyBox initramfs",
+    "boot": "pass",
+    "harness_rc": 0,
+    "selftest_exit": 0,
+    "markers": [
+      "FAISAL_M77_BOOT_OK",
+      "FAISAL_M77_BROWSER_WORLD_OPEN_OK",
+      "M77_UNVERIFIED_FACT_DENIAL_OK source=1",
+      "M77_PRIMARY_SOURCE_PREFERENCE_OK source=1",
+      "M77_EQUAL_CROSSCHECK_OK count=1",
+      "M77_VERIFIED_WORLD_PROMOTION_OK knowledge=1 memory=1",
+      "M77_CONFLICT_RETENTION_OK sources=3,4",
+      "M77_METADATA_FUZZ_REJECT_OK iterations=64",
+      "M77_SELFTEST_EXIT=0",
+      "FAISAL_M77_TEST_RC=0"
+    ],
+    "smoke_runs": [
+      {"run": 1, "elapsed_ns": 5184186504, "markers": 1},
+      {"run": 2, "elapsed_ns": 5110059881, "markers": 1},
+      {"run": 3, "elapsed_ns": 5237975044, "markers": 1},
+      {"run": 4, "elapsed_ns": 5014599231, "markers": 1},
+      {"run": 5, "elapsed_ns": 5156461234, "markers": 1}
+    ]
+  },
+  "functional": {
+    "source_collection": "pass",
+    "retrieval_and_browser_provenance": "pass",
+    "primary_source_preference": "pass",
+    "unverified_fact_denial": "pass",
+    "equal_crosscheck": "pass",
+    "explicit_verification": "pass",
+    "verified_world_promotion": "pass",
+    "conflict_retention": "pass",
+    "conflict_verification_denial": "pass",
+    "metadata_fuzz_rejection": "pass"
+  },
+  "security": {
+    "browser_network_scope_reused": true,
+    "source_content_is_untrusted": true,
+    "model_or_page_text_authority": false,
+    "digest_identity_is_not_truth": true,
+    "conflicting_sources_retained": true,
+    "freshness_required_for_promotion": true,
+    "malformed_cases": 64
+  },
+  "regression": {
+    "harnesses": ["M64", "M66", "M67", "M68", "M69", "M70", "M71", "M72", "M73", "M74", "M75", "M76", "M77"],
+    "result": "13/13 pass",
+    "panic_or_oops_scan": "no matches"
+  },
+  "evidence_files": {
+    "milestone": "MILESTONE77.md",
+    "security_review": "M77-SECURITY-REVIEW.md",
+    "benchmarks": "M77-BENCHMARKS.md",
+    "qemu_log": "tools/faisal-build/evidence/m77-qemu.log",
+    "regression_log": "tools/faisal-build/evidence/m77-regression.log",
+    "benchmark_log": "tools/faisal-build/evidence/m77-benchmark.log",
+    "selftest_build_log": "tools/faisal-build/evidence/m77-selftest-build.log"
+  },
+  "non_claims": [
+    "No universal truth oracle",
+    "No complete source authenticity or source-quality ranking",
+    "No semantic correctness claim",
+    "No complete prompt-injection immunity claim",
+    "No automatic conflict resolution",
+    "No consciousness claim",
+    "No model retraining claim",
+    "No production deployment claim",
+    "No baseline performance improvement claim"
+  ]
+}
