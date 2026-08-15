@@ -64,6 +64,7 @@
 #define AGI_LC_EXECUTION_DOMAIN_RECORDS 16
 #define AGI_LC_GRAPH_TELEMETRY_RECORDS 64
 #define AGI_LC_POWER_POLICY_RECORDS 16
+#define AGI_LC_PROVENANCE_BINDING_RECORDS 64
 
 struct agi_lc_lease_record {
 	bool active;
@@ -219,6 +220,11 @@ struct agi_lc_power_policy_record {
 	struct pm_qos_request cpu_latency_qos;
 	struct agi_lc_power_policy policy;
 };
+struct agi_lc_provenance_binding_record {
+	bool valid;
+	u64 owner_agent;
+	struct agi_lc_provenance_binding binding;
+};
 
 struct agi_lc_memory_share_record {
 	bool active;
@@ -373,6 +379,7 @@ struct agi_lc_compute_context_record contexts[AGI_LC_CONTEXT_RECORDS];
 struct agi_lc_graph_node_record graph_nodes[AGI_LC_GRAPH_NODES];
 	struct agi_lc_graph_telemetry_record graph_telemetry[AGI_LC_GRAPH_TELEMETRY_RECORDS];
 	struct agi_lc_power_policy_record power_policies[AGI_LC_POWER_POLICY_RECORDS];
+	struct agi_lc_provenance_binding_record provenance_bindings[AGI_LC_PROVENANCE_BINDING_RECORDS];
 	struct agi_lc_capability_record capabilities[AGI_LC_CAPABILITY_RECORDS];
 	struct agi_lc_provenance_record provenance[AGI_LC_PROVENANCE_RECORDS];
 	struct agi_lc_ipc_channel_record *ipc_channels;
@@ -444,6 +451,8 @@ static struct agi_lc_agent_record *
 	agi_lc_find_agent(struct agi_lc_session *session, u64 agent_id);
 static u64 agi_lc_capability_mask(kernel_cap_t caps);
 static struct agi_lc_accel_record *agi_lc_find_accel_locked(u64 device_id);
+static struct agi_lc_provenance_record *agi_lc_find_provenance(
+		struct agi_lc_session *session, u64 provenance_id, u64 action_sequence);
 
 static int agi_lc_record_experience(struct agi_lc_session *session,
 					    unsigned long arg)
@@ -4225,6 +4234,151 @@ static void agi_lc_power_policy_release_all(struct agi_lc_session *session)
 	for (i = 0; i < AGI_LC_POWER_POLICY_RECORDS; i++)
 		if (session->power_policies[i].valid)
 			agi_lc_power_policy_remove_qos(&session->power_policies[i]);
+}
+static struct agi_lc_provenance_binding_record *agi_lc_provenance_binding_find(struct agi_lc_session *s, u64 id)
+{
+	u32 i;
+
+	for (i = 0; i < AGI_LC_PROVENANCE_BINDING_RECORDS; i++)
+		if (s->provenance_bindings[i].valid &&
+		    s->provenance_bindings[i].binding.binding_id == id)
+			return &s->provenance_bindings[i];
+	return NULL;
+}
+static int agi_lc_provenance_binding_control(struct agi_lc_session *s,
+						unsigned long arg)
+{
+	struct agi_lc_provenance_binding p, out;
+	struct agi_lc_provenance_binding_record *record = NULL;
+	struct agi_lc_provenance_record *provenance;
+	struct agi_lc_memory_record *memory;
+	struct agi_lc_compute_context_record *context;
+	u32 i;
+	int ret = 0;
+
+	if (copy_from_user(&p, (void __user *)arg, sizeof(p)))
+		return -EFAULT;
+	if (p.size != sizeof(p) || p.flags ||
+	    p.scope_kind < AGI_LC_PROVENANCE_BIND_TENSOR ||
+	    p.scope_kind > AGI_LC_PROVENANCE_BIND_CONTEXT ||
+	    p.reserved32 || p.reserved[0] || p.reserved[1] || !p.correlation ||
+	    p.operation < AGI_LC_PROVENANCE_BIND ||
+	    p.operation > AGI_LC_PROVENANCE_BIND_REVOKE)
+		return -EINVAL;
+	if (!s->session_id || READ_ONCE(s->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != s->session_id)
+		return -EPERM;
+	if (p.operation == AGI_LC_PROVENANCE_BIND) {
+		if (p.binding_id || p.status || p.binding_generation ||
+		    !p.resource_id || !p.resource_capability || !p.resource_generation ||
+		    !p.provenance_id || !p.provenance_sequence)
+			return -EINVAL;
+		provenance = agi_lc_find_provenance(s, p.provenance_id,
+							p.provenance_sequence);
+		if (!provenance || !provenance->valid ||
+		    provenance->provenance.agent_id != faisal_task_get_agent(current))
+			return -EACCES;
+		for (i = 0; i < AGI_LC_PROVENANCE_BINDING_RECORDS; i++)
+			if (!s->provenance_bindings[i].valid) {
+				record = &s->provenance_bindings[i];
+				break;
+			}
+		if (!record)
+			return -ENOSPC;
+		if (++s->provenance_binding_next_id == U64_MAX)
+			return -EOVERFLOW;
+		if (p.scope_kind == AGI_LC_PROVENANCE_BIND_TENSOR) {
+			mutex_lock(&agi_lc_memory_lock);
+			memory = agi_lc_memory_find_locked(s, p.resource_id);
+			if (!memory || memory->revoked ||
+			    !agi_lc_memory_authorized_locked(s, memory,
+							p.resource_capability,
+							AGI_LC_MEMORY_ACCESS_READ) ||
+			    !memory->tensor_valid ||
+			    memory->tensor.generation != p.resource_generation) {
+				mutex_unlock(&agi_lc_memory_lock);
+				return -EACCES;
+			}
+			memory->tensor.provenance_binding_id = s->provenance_binding_next_id;
+			memory->tensor.provenance_id = p.provenance_id;
+			memory->tensor.provenance_sequence = p.provenance_sequence;
+			memory->tensor.provenance_generation = p.resource_generation;
+			mutex_unlock(&agi_lc_memory_lock);
+		} else {
+			mutex_lock(&s->context_lock);
+			context = agi_lc_context_find_locked(s, p.resource_id,
+							p.resource_capability);
+			if (!context || context->context.agent_id != faisal_task_get_agent(current) ||
+			    context->context.state != AGI_LC_CONTEXT_STATE_ACTIVE ||
+			    context->context.generation != p.resource_generation) {
+				mutex_unlock(&s->context_lock);
+				return -EACCES;
+			}
+			context->context.provenance_binding_id = s->provenance_binding_next_id;
+			context->context.provenance_id = p.provenance_id;
+			context->context.provenance_sequence = p.provenance_sequence;
+			context->context.provenance_generation = p.resource_generation;
+			mutex_unlock(&s->context_lock);
+		}
+		memset(record, 0, sizeof(*record));
+		record->valid = true;
+		record->owner_agent = faisal_task_get_agent(current);
+		record->binding = p;
+		record->binding.binding_id = s->provenance_binding_next_id;
+		record->binding.binding_generation = 1;
+		record->binding.status = 0;
+		out = record->binding;
+	} else {
+		if (!p.binding_id || p.status || p.binding_generation)
+			return -EINVAL;
+		record = agi_lc_provenance_binding_find(s, p.binding_id);
+		if (!record || record->owner_agent != faisal_task_get_agent(current))
+			return -EACCES;
+		if (p.operation == AGI_LC_PROVENANCE_BIND_GET) {
+			out = record->binding;
+			out.operation = AGI_LC_PROVENANCE_BIND_GET;
+		} else {
+			if (record->binding.status) {
+				ret = -EALREADY;
+				goto out;
+			}
+			if (record->binding.scope_kind == AGI_LC_PROVENANCE_BIND_TENSOR) {
+				mutex_lock(&agi_lc_memory_lock);
+				memory = agi_lc_memory_find_locked(s, record->binding.resource_id);
+				if (memory && memory->tensor.provenance_binding_id == p.binding_id) {
+					memory->tensor.provenance_binding_id = 0;
+					memory->tensor.provenance_id = 0;
+					memory->tensor.provenance_sequence = 0;
+					memory->tensor.provenance_generation = 0;
+				}
+				mutex_unlock(&agi_lc_memory_lock);
+			} else {
+				mutex_lock(&s->context_lock);
+				context = agi_lc_context_find_locked(s,
+						record->binding.resource_id,
+						record->binding.resource_capability);
+				if (context && context->context.provenance_binding_id == p.binding_id) {
+					context->context.provenance_binding_id = 0;
+					context->context.provenance_id = 0;
+					context->context.provenance_sequence = 0;
+					context->context.provenance_generation = 0;
+				}
+				mutex_unlock(&s->context_lock);
+			}
+			record->binding.operation = AGI_LC_PROVENANCE_BIND_REVOKE;
+			record->binding.status = -ECANCELED;
+			record->binding.binding_generation++;
+			out = record->binding;
+		}
+	}
+out:
+	if (ret)
+		return ret;
+	if (copy_to_user((void __user *)arg, &out, sizeof(out)))
+		return -EFAULT;
+	return agi_lc_push_record(s, AGI_LC_EVENT_PROVENANCE, out.status,
+					out.correlation, out.binding_id);
 }
 static int agi_lc_open(struct inode *inode, struct file *file)
 {
@@ -9081,7 +9235,7 @@ case AGI_LC_GRAPH_NODE:
 		ret = agi_lc_compute_context_control(session, arg);
 		break;
 	case AGI_LC_PROVENANCE_BINDING:
-		ret = -EOPNOTSUPP;
+		ret = agi_lc_provenance_binding_control(session, arg);
 		break;
 	case AGI_LC_TENSOR_TRANSPORT:
 		ret = agi_lc_tensor_transport_control(session, arg);

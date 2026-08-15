@@ -1,0 +1,59 @@
+{
+  "milestone": "M64-security-completion",
+  "feature": "agent-oriented scoped capability and provenance binding",
+  "date": "2026-08-15",
+  "current_base": "FAISAL-M70",
+  "abi_version": 37,
+  "ioctl": "AGI_LC_PROVENANCE_BINDING",
+  "ioctl_number": "0x5e",
+  "build": {
+    "kernel_and_modules_build_rc": 0,
+    "static_selftest_build_rc": 0,
+    "selftest": "tools/testing/selftests/agi_agent_security_m64_test.c"
+  },
+  "qemu": {
+    "machine": "x86_64 pc",
+    "vcpus": 2,
+    "memory_mb": 512,
+    "repeated_runs": 3,
+    "boot_validation_rc": 0,
+    "markers": {
+      "FAISAL_M64_BOOT_OK": true,
+      "M64_TENSOR_SCOPE_ALLOW_OK": true,
+      "M64_CROSS_AGENT_REJECT_OK": true,
+      "M64_TENSOR_PROVENANCE_BIND_OK": true,
+      "M64_TENSOR_PROVENANCE_QUERY_OK": true,
+      "M64_CONTEXT_SCOPE_AND_PROVENANCE_OK": true,
+      "M64_SELFTEST_EXIT=0": true,
+      "FAISAL_M64_TEST_RC=0": true
+    },
+    "raw_serial_log": "tools/faisal-build/evidence/m64-qemu.log"
+  },
+  "regressions": {
+    "M66": true,
+    "M67": true,
+    "M68": true,
+    "M69": true,
+    "M70": true
+  },
+  "validated_properties": {
+    "tensor_capability_scope": true,
+    "cross_agent_denial": true,
+    "tensor_provenance_binding": true,
+    "tensor_provenance_query": true,
+    "context_provenance_binding": true,
+    "resource_generation_check": true,
+    "bounded_session_binding_records": 64,
+    "model_output_authorizes_kernel": false,
+    "token_level_provenance": false,
+    "semantic_causality_proof": false
+  },
+  "not_claimed": [
+    "model-weight provenance",
+    "token-level provenance",
+    "semantic causality",
+    "neural-subgraph sandboxing",
+    "hardware execution proof",
+    "model correctness"
+  ]
+}
