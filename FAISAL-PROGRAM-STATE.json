@@ -180,6 +180,18 @@
       "next_action": "Retain M64–M80 regression coverage; next select concurrent lifecycle/IPC stress with sanitizer-enabled kernel validation when the required build infrastructure is available."
     },
     {
+      "id": "M82-memory-ecosystem",
+      "phase": 10,
+      "name": "Unified memory ecosystem, provenance-aware consolidation, bounded hybrid retrieval, and simulation truth boundary",
+      "status": "validated_bounded_userspace_integration",
+      "priority": 100,
+      "depends_on": ["M71-persistent-memory-service", "M72-experience-learning", "M73-world-model", "M76-end_to_end_agent", "M77-verified-internet-research"],
+      "unlocks": ["M83-memory-transactional-concurrency"],
+      "evidence_required": ["repository_inspection", "consolidation", "hybrid_retrieval", "provenance", "freshness", "contradiction", "simulation_boundary", "restart_replay", "security_review", "regression", "benchmark"],
+      "evidence": ["M82-MEMORY-ECOSYSTEM-DESIGN.md", "MILESTONE82.md", "M82-MEMORY-SECURITY-REVIEW.md", "M82-MEMORY-BENCHMARKS.md", "tools/faisal-build/evidence/m82-memory-validation.json"],
+      "next_action": "Retain provenance, truth-class separation, freshness, contradiction, restart, and M71–M76 regression coverage; do not claim transactional cross-journal rollback until M83 validates it."
+    },
+    {
       "id": "M81-concurrent-sanitizer-validation",
       "phase": 14,
       "name": "Concurrent lifecycle and IPC stress with sanitizer-enabled kernel validation",
@@ -190,7 +202,7 @@
       "evidence_required": ["concurrent_stress", "kasan_or_documented_blocker", "kcsan_or_documented_blocker", "lockdep_or_documented_blocker", "randomized_inputs", "security_review", "regression"]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M82"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",

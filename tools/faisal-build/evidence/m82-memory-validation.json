@@ -1,0 +1,107 @@
+{
+  "project": "FAISAL",
+  "milestone": "M82",
+  "title": "Unified memory ecosystem and simulation truth boundary",
+  "date": "2026-08-15",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "implementation": {
+    "header": "tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h",
+    "source": "tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c",
+    "selftest": "tools/testing/selftests/agi_memory_orchestrator_test.c",
+    "qemu_harness": "tools/faisal-build/run_memory_orchestrator_qemu.sh",
+    "kernel_abi_expansion": false,
+    "memory_classes": ["working", "episodic", "semantic", "procedural", "world", "simulation", "self", "experience"],
+    "truth_classes": ["real_world_fact", "simulation_result", "prediction", "hypothesis", "uncertainty"]
+  },
+  "source_repositories": [
+    {
+      "name": "Engram",
+      "repository": "https://github.com/Gentleman-Programming/engram",
+      "commit": "1dafc0f63051b2214100f7bd801357e4aab61c26",
+      "declared_license": "MIT",
+      "adopted_patterns": ["local-first persistence", "scope and topic lifecycle", "progressive disclosure", "soft-delete and review concepts"]
+    },
+    {
+      "name": "MiroFish",
+      "repository": "https://github.com/666ghj/MiroFish",
+      "commit": "b5b53acc57189a4a42e44a23e149dc655c98fe82",
+      "declared_license": "AGPL-3.0",
+      "adopted_patterns": ["separate simulation boundary", "bounded population/world setup", "temporal simulation state labeling"],
+      "not_copied": true
+    },
+    {
+      "name": "Supermemory",
+      "repository": "https://github.com/supermemoryai/supermemory",
+      "commit": "e651045ac50470aa10df5cc8ff7ad2a9b72b00cf",
+      "declared_license": "MIT",
+      "adopted_patterns": ["hybrid retrieval", "static/dynamic context projection", "explicit forgetting and contradiction concepts"]
+    }
+  ],
+  "build": {
+    "command_class": "cc -O2 -Wall -Wextra -Werror -Wno-cpp -static",
+    "status": "passed",
+    "binary": "/home/ubuntu/agi-kernel/build/recovered/agi_memory_orchestrator_test",
+    "build_log": "/home/ubuntu/agi-kernel/build/recovered/m82-build.log"
+  },
+  "qemu": {
+    "status": "passed",
+    "boot_marker": "FAISAL_M82_BOOT_OK",
+    "markers": {
+      "M82_CONSOLIDATION_OK": "records=2",
+      "M82_HYBRID_RETRIEVAL_OK": "results=1",
+      "M82_CONTEXT_BOUND_OK": "count=1 bytes=196",
+      "M82_MEMORY_CLASSES_OK": "classes=8",
+      "M82_SIMULATION_TRUTH_BOUNDARY_OK": "record=11",
+      "M82_CONTRADICTION_SUPERSESSION_OK": "new=13 old=12",
+      "M82_FRESHNESS_EXPIRY_OK": "expired=1",
+      "M82_MALFORMED_INGEST_REJECT_OK": true,
+      "M82_PROVENANCE_STATS_OK": "total=14 complete=13 simulation=1",
+      "M82_RESTART_REPLAY_OK": "total=14",
+      "M82_SELFTEST_EXIT": 0,
+      "FAISAL_M82_TEST_RC": 0
+    },
+    "raw_log": "/home/ubuntu/agi-kernel/build/qemu-faisal-memory-orchestrator/qemu.log"
+  },
+  "regressions": {
+    "M71": "passed",
+    "M72": "passed",
+    "M73": "passed",
+    "M76": "passed",
+    "logs": {
+      "M71": "/home/ubuntu/agi-kernel/build/recovered/m82-regression-m71.log",
+      "M72": "/home/ubuntu/agi-kernel/build/recovered/m82-regression-m72.log",
+      "M73": "/home/ubuntu/agi-kernel/build/recovered/m82-regression-m73.log",
+      "M76": "/home/ubuntu/agi-kernel/build/recovered/m82-regression-m76.log"
+    }
+  },
+  "smoke_runs": {
+    "count": 5,
+    "exit_codes": [0, 0, 0, 0, 0],
+    "elapsed_ms": [5067, 5113, 5003, 5082, 5206],
+    "mean_ms": 5094.2,
+    "median_ms": 5082,
+    "min_ms": 5003,
+    "max_ms": 5206,
+    "range_ms": 203,
+    "summary": "/home/ubuntu/agi-kernel/build/recovered/m82-memory-smoke-summary.txt"
+  },
+  "security": {
+    "dangerous_process_primitives_found": false,
+    "unbounded_copy_primitives_found": false,
+    "bounded_record_storage": true,
+    "simulation_to_fact_promotion": false,
+    "model_output_is_kernel_authority": false,
+    "review": "M82-MEMORY-SECURITY-REVIEW.md",
+    "scan": "/home/ubuntu/agi-kernel/build/recovered/m82-security-scan.txt"
+  },
+  "evidence_limits": [
+    "No KASAN, KCSAN, UBSAN, lockdep, or syzkaller coverage claimed",
+    "No physical accelerator validation claimed",
+    "No production readiness or multi-day reliability claim",
+    "No model retraining or human-like memory claim",
+    "Simulation fixture validates truth separation, not predictive accuracy",
+    "Smoke timings are complete QEMU harness times, not isolated kernel performance"
+  ],
+  "status": "validated_bounded_userspace_integration"
+}

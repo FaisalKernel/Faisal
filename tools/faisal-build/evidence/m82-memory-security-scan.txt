@@ -1,0 +1,114 @@
+M82_SECURITY_SCAN
+--- dangerous process/shell primitives ---
+--- unbounded copy primitives ---
+--- loop inventory ---
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:31:	while (len) {
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:120:	for (i = 0; i < service->record_count; i++)
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:130:	for (i = 0; i < service->record_count; i++)
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:157:	for (;;) {
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:292:	for (i = 0; i < service->record_count; i++) {
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:490:	for (p = text; *p; p++) {
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:494:		for (i = 0; i < len && p[i] &&
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:508:	while (*p) {
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:510:		while (*p && !isalnum((unsigned char)*p))
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:512:		while (p[len] && isalnum((unsigned char)p[len]) &&
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:595:	for (i = 0; i < service->record_count; i++) {
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:616:			while (pos && results[pos - 1].score < results[pos].score) {
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:624:			for (uint32_t pos = FMO_MAX_RESULTS - 1; pos &&
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:650:	for (i = 0; i < count; i++) {
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:672:	for (i = 0; i < service->record_count; i++) {
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:706:	for (i = 0; i < service->record_count; i++) {
+tools/testing/selftests/agi_memory_orchestrator_test.c:21:	for (i = 0; i < sizeof(suffixes) / sizeof(suffixes[0]); i++) {
+tools/testing/selftests/agi_memory_orchestrator_test.c:109:	for (memory_class = FMO_CLASS_WORKING; memory_class <= FMO_CLASS_MAX; memory_class++) {
+--- trust boundary terms ---
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:40:	FMO_CLASS_SIMULATION = 6,
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:47:	FMO_TRUTH_REAL_WORLD_FACT = 1,
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:48:	FMO_TRUTH_SIMULATION_RESULT = 2,
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:49:	FMO_TRUTH_PREDICTION = 3,
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:50:	FMO_TRUTH_HYPOTHESIS = 4,
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:51:	FMO_TRUTH_UNCERTAINTY = 5
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:69:struct fmo_provenance {
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:75:	uint64_t verification_sequence;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:82:	uint64_t memory_capability;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:94:	struct fmo_provenance provenance;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:110:	struct fmo_provenance provenance;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:123:	uint64_t verification_sequence;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:147:	uint32_t require_provenance;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.h:186:	uint32_t provenance_complete_records;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:80:	case FMO_CLASS_SIMULATION:
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:90:	return truth >= FMO_TRUTH_REAL_WORLD_FACT &&
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:91:	       truth <= FMO_TRUTH_UNCERTAINTY;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:111:static int provenance_complete(const struct fmo_provenance *p)
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:114:	       p->task_id && p->event_sequence && p->verification_sequence;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:203:	service->memory.kernel_fd = -1;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:205:	service->experience.memory.kernel_fd = -1;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:207:	service->world.memory.kernel_fd = -1;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:254:				     uint64_t memory_capability, uint64_t sequence)
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:260:	record->memory_capability = memory_capability;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:271:	record->provenance = input->provenance;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:317:			  input->provenance.event_sequence, &memory);
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:327:			memory.authority_capability, memory.sequence);
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:399:	ingest.truth_class = input->verification_sequence ?
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:400:		FMO_TRUTH_REAL_WORLD_FACT : FMO_TRUTH_UNCERTAINTY;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:405:	ingest.provenance.source_id = input->agent_id ^ input->task_id;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:406:	ingest.provenance.experience_sequence = input->event_sequence;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:407:	ingest.provenance.agent_id = input->agent_id;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:408:	ingest.provenance.task_id = input->task_id;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:409:	ingest.provenance.event_sequence = input->event_sequence;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:410:	ingest.provenance.verification_sequence = input->verification_sequence;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:424:	fes.memory.kernel_fd = -1;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:431:				      input->verification_sequence != 0,
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:436:	if (ioctl(service->memory.kernel_fd, AGI_LC_ATTACH_TASK) < 0)
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:440:	ingest.truth_class = FMO_TRUTH_UNCERTAINTY;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:445:	ingest.provenance.source_id = record.id;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:446:	ingest.provenance.experience_sequence = experience_item.experience_sequence;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:447:	ingest.provenance.agent_id = input->agent_id;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:448:	ingest.provenance.task_id = input->task_id;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:449:	ingest.provenance.event_sequence = input->event_sequence;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:450:	ingest.provenance.verification_sequence = input->verification_sequence;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:461:	if (ioctl(service->memory.kernel_fd, AGI_LC_ATTACH_TASK) < 0)
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:466:	fws.memory.kernel_fd = -1;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:479:	if (ioctl(service->memory.kernel_fd, AGI_LC_ATTACH_TASK) < 0)
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:556:	if (query->task_id && query->task_id == record->provenance.task_id)
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:564:	if (provenance_complete(&record->provenance))
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:600:		    (!query->include_simulation && record->truth_class == FMO_TRUTH_SIMULATION_RESULT) ||
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:606:		    (query->task_id && query->task_id != record->provenance.task_id) ||
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:609:		    (query->require_provenance && !provenance_complete(&record->provenance)) ||
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:718:		if (record->truth_class == FMO_TRUTH_SIMULATION_RESULT)
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:720:		if (provenance_complete(&record->provenance))
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:721:			out->provenance_complete_records++;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:735:	input.memory_class = FMO_CLASS_SIMULATION;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:736:	input.truth_class = FMO_TRUTH_SIMULATION_RESULT;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:740:	input.provenance.source_id = 82001;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:741:	input.provenance.experience_sequence = 82002;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:742:	input.provenance.agent_id = 82003;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:743:	input.provenance.task_id = 82004;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:744:	input.provenance.event_sequence = 82005;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:745:	input.provenance.verification_sequence = 0;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:767:	input.truth_class = FMO_TRUTH_REAL_WORLD_FACT;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:772:	input.provenance.source_id = 83001;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:773:	input.provenance.experience_sequence = 83002;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:774:	input.provenance.agent_id = 83003;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:775:	input.provenance.task_id = 83004;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:776:	input.provenance.event_sequence = 83005;
+tools/faisal-memory-orchestrator/faisal_memory_orchestrator_service.c:777:	input.provenance.verification_sequence = 83006;
+tools/testing/selftests/agi_memory_orchestrator_test.c:32:	input->truth_class = FMO_TRUTH_REAL_WORLD_FACT;
+tools/testing/selftests/agi_memory_orchestrator_test.c:37:	input->provenance.source_id = 91000 + memory_class;
+tools/testing/selftests/agi_memory_orchestrator_test.c:38:	input->provenance.experience_sequence = 92000 + memory_class;
+tools/testing/selftests/agi_memory_orchestrator_test.c:39:	input->provenance.agent_id = 93000;
+tools/testing/selftests/agi_memory_orchestrator_test.c:40:	input->provenance.task_id = 94000 + memory_class;
+tools/testing/selftests/agi_memory_orchestrator_test.c:41:	input->provenance.event_sequence = 95000 + memory_class;
+tools/testing/selftests/agi_memory_orchestrator_test.c:42:	input->provenance.verification_sequence = 96000 + memory_class;
+tools/testing/selftests/agi_memory_orchestrator_test.c:75:	experience.verification_sequence = 4001;
+tools/testing/selftests/agi_memory_orchestrator_test.c:88:	strncpy(experience.causal, "source quality -> verification confidence", sizeof(experience.causal) - 1);
+tools/testing/selftests/agi_memory_orchestrator_test.c:99:	query.require_provenance = 1;
+tools/testing/selftests/agi_memory_orchestrator_test.c:130:	    results[0].truth_class != FMO_TRUTH_SIMULATION_RESULT)
+tools/testing/selftests/agi_memory_orchestrator_test.c:132:	printf("M82_SIMULATION_TRUTH_BOUNDARY_OK record=%llu\n",
+tools/testing/selftests/agi_memory_orchestrator_test.c:168:	    stats.provenance_complete_records < classes || !stats.simulation_records)
+tools/testing/selftests/agi_memory_orchestrator_test.c:171:	       stats.total_records, stats.provenance_complete_records,
+--- compiler hardening ---
+cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+  Class:                             ELF64
+  Type:                              EXEC (Executable file)
+  Machine:                           Advanced Micro Devices X86-64
+/home/ubuntu/agi-kernel/build/recovered/agi_memory_orchestrator_test: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, BuildID[sha1]=8bf496df13dd2af6bfd47a52d3ea697c0cab5c07, for GNU/Linux 3.2.0, not stripped
