@@ -1,0 +1,72 @@
+{
+  "milestone": "M70",
+  "feature": "workload-aware power policy",
+  "date": "2026-08-15",
+  "upstream": {
+    "tag": "v7.2-rc7",
+    "local_base_tag": "upstream-v7.2-rc7"
+  },
+  "abi_version": 37,
+  "ioctl": "AGI_LC_POWER_POLICY",
+  "ioctl_number": "0x62",
+  "event_type": "AGI_LC_EVENT_POWER_POLICY",
+  "build": {
+    "configuration": "x86_64_defconfig + CONFIG_AGI_LIFECYCLE=y",
+    "kernel_and_modules_build_rc": 0,
+    "selftest_build_rc": 0,
+    "selftest": "tools/testing/selftests/agi_power_policy_test.c"
+  },
+  "qemu": {
+    "machine": "x86_64 pc",
+    "vcpus": 2,
+    "memory_mb": 512,
+    "boot_validation_rc": 0,
+    "markers": {
+      "FAISAL_M70_BOOT_OK": true,
+      "M70_POWER_POLICY_SET_OK": true,
+      "M70_POWER_POLICY_QUERY_OK": true,
+      "M70_STALE_POLICY_CAPABILITY_REJECT_OK": true,
+      "M70_REQUIRED_FEATURE_REFUSAL_OK": true,
+      "M70_POWER_POLICY_EVENT_OK": true,
+      "M70_POWER_POLICY_RELEASE_OK": true,
+      "M70_SELFTEST_EXIT=0": true,
+      "FAISAL_M70_TEST_RC=0": true
+    },
+    "negotiation": {
+      "cpu_latency_qos_applied": true,
+      "device_wake_latency_unsupported": true,
+      "power_budget_unsupported": true,
+      "applied_features": "0x1",
+      "unsupported_features": "0xa",
+      "partial_status": -95,
+      "required_unsupported_request_errno": 95
+    },
+    "raw_serial_log": "tools/faisal-build/evidence/m70-qemu.log"
+  },
+  "smoke_wall_time_seconds": [4.122, 4.069, 4.151],
+  "validated_properties": {
+    "session_lineage_check": true,
+    "agent_ownership_check": true,
+    "opaque_capability_check": true,
+    "online_cpu_mask_validation": true,
+    "bounded_policy_records": 16,
+    "pm_qos_request_cleanup_on_release": true,
+    "pm_qos_request_cleanup_on_session_close": true,
+    "required_feature_refusal": true,
+    "event_ring_delivery": true,
+    "model_output_authorizes_kernel": false,
+    "gpu_or_npu_register_access": false,
+    "thermal_trip_override": false
+  },
+  "not_claimed": [
+    "GPU/NPU power-gating control",
+    "device wake-latency control",
+    "CPU/GPU thermal arbitration",
+    "cross-device power-budget enforcement",
+    "Energy Model calibration",
+    "DVFS frequency selection",
+    "inference latency improvement",
+    "reduced energy use",
+    "training throughput improvement"
+  ]
+}

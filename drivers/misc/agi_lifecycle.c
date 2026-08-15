@@ -27,6 +27,7 @@
 #include <linux/pid.h>
 #include <linux/mutex.h>
 #include <linux/poll.h>
+#include <linux/pm_qos.h>
 #include <linux/random.h>
 #include <linux/sched.h>
 #include <linux/sched/signal.h>
@@ -62,6 +63,7 @@
 #define AGI_LC_TRANSPORT_RECORDS 32
 #define AGI_LC_EXECUTION_DOMAIN_RECORDS 16
 #define AGI_LC_GRAPH_TELEMETRY_RECORDS 64
+#define AGI_LC_POWER_POLICY_RECORDS 16
 
 struct agi_lc_lease_record {
 	bool active;
@@ -210,6 +212,12 @@ struct agi_lc_execution_domain_record {
 struct agi_lc_graph_telemetry_record {
 	bool valid;
 	struct agi_lc_graph_telemetry telemetry;
+};
+struct agi_lc_power_policy_record {
+	bool valid;
+	bool cpu_qos_active;
+	struct pm_qos_request cpu_latency_qos;
+	struct agi_lc_power_policy policy;
 };
 
 struct agi_lc_memory_share_record {
@@ -364,6 +372,7 @@ struct agi_lc_compute_context_record contexts[AGI_LC_CONTEXT_RECORDS];
 	u64 next_context_id;
 struct agi_lc_graph_node_record graph_nodes[AGI_LC_GRAPH_NODES];
 	struct agi_lc_graph_telemetry_record graph_telemetry[AGI_LC_GRAPH_TELEMETRY_RECORDS];
+	struct agi_lc_power_policy_record power_policies[AGI_LC_POWER_POLICY_RECORDS];
 	struct agi_lc_capability_record capabilities[AGI_LC_CAPABILITY_RECORDS];
 	struct agi_lc_provenance_record provenance[AGI_LC_PROVENANCE_RECORDS];
 	struct agi_lc_ipc_channel_record *ipc_channels;
@@ -382,6 +391,7 @@ struct agi_lc_graph_node_record graph_nodes[AGI_LC_GRAPH_NODES];
 	u64 transport_next_id;
 	u64 execution_domain_next_id;
 	u64 graph_telemetry_next_id;
+	u64 power_policy_next_id;
 	u64 provenance_binding_next_id;
 	u64 ipc_next_id;
 	u64 ipc_next_message_id;
@@ -4026,6 +4036,196 @@ static int agi_lc_graph_telemetry_control(struct agi_lc_session *s, unsigned lon
 	return agi_lc_push_record(s, AGI_LC_EVENT_GRAPH_OPERATION,
 					out.status, out.correlation, out.telemetry_id);
 }
+static void agi_lc_power_policy_mask_from_uapi(cpumask_t *mask,
+						 const u64 words[AGI_LC_EXEC_DOMAIN_CPU_WORDS])
+{
+	u32 cpu;
+
+	cpumask_clear(mask);
+	for (cpu = 0; cpu < nr_cpu_ids &&
+	     cpu < AGI_LC_EXEC_DOMAIN_CPU_WORDS * 64; cpu++)
+		if (words[cpu / 64] & (1ULL << (cpu % 64)))
+			cpumask_set_cpu(cpu, mask);
+}
+static struct agi_lc_power_policy_record *agi_lc_power_policy_find_locked(struct agi_lc_session *s, u64 id, u64 cap)
+{
+	u32 i;
+
+	for (i = 0; i < AGI_LC_POWER_POLICY_RECORDS; i++)
+		if (s->power_policies[i].valid &&
+		    s->power_policies[i].policy.policy_id == id &&
+		    s->power_policies[i].policy.capability == cap)
+			return &s->power_policies[i];
+	return NULL;
+}
+static void agi_lc_power_policy_remove_qos(struct agi_lc_power_policy_record *record)
+{
+	if (record->cpu_qos_active) {
+		cpu_latency_qos_remove_request(&record->cpu_latency_qos);
+		record->cpu_qos_active = false;
+	}
+}
+static u64 agi_lc_power_policy_available_features(u64 device_id)
+{
+	u64 available = 0;
+
+#if IS_ENABLED(CONFIG_CPU_IDLE)
+	available |= AGI_LC_POWER_POLICY_FEATURE_CPU_LATENCY_QOS;
+#endif
+	if (device_id) {
+		struct agi_lc_accel_record *device;
+		mutex_lock(&agi_lc_accel_lock);
+		device = agi_lc_find_accel_locked(device_id);
+		if (device && (device->device.capabilities & AGI_LC_ACCEL_CAP_POWER_CONTROL))
+			available |= AGI_LC_POWER_POLICY_FEATURE_POWER_BUDGET |
+				AGI_LC_POWER_POLICY_FEATURE_ACCELERATOR_PROVIDER;
+		mutex_unlock(&agi_lc_accel_lock);
+	}
+	return available;
+}
+static int agi_lc_power_policy_control(struct agi_lc_session *session,
+					       unsigned long arg)
+{
+	struct agi_lc_power_policy p, out;
+	struct agi_lc_power_policy_record *record = NULL;
+	cpumask_t requested;
+	u64 available, unsupported;
+	u32 i;
+	int ret = 0;
+
+	if (copy_from_user(&p, (void __user *)arg, sizeof(p)))
+		return -EFAULT;
+	if (p.size != sizeof(p) ||
+	    p.operation < AGI_LC_POWER_POLICY_SET ||
+	    p.operation > AGI_LC_POWER_POLICY_RELEASE ||
+	    p.flags & ~AGI_LC_POWER_POLICY_FLAGS_ALL ||
+	    p.requested_features & ~AGI_LC_POWER_POLICY_FEATURES_ALL ||
+	    p.available_features || p.unsupported_features || p.applied_features ||
+	    p.min_cpu_util > AGI_LC_POWER_POLICY_CPU_UTIL_MAX ||
+	    p.max_cpu_util > AGI_LC_POWER_POLICY_CPU_UTIL_MAX ||
+	    p.min_cpu_util > p.max_cpu_util ||
+	    p.cpu_latency_us > AGI_LC_POWER_POLICY_MAX_LATENCY_US ||
+	    p.power_budget_uw > AGI_LC_POWER_POLICY_MAX_BUDGET_UW ||
+	    p.power_window_us > (24ULL * 60 * 60 * 1000000ULL) ||
+	    p.reserved32 || p.reserved[0] || p.reserved[1] || !p.correlation)
+		return -EINVAL;
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != session->session_id)
+		return -EPERM;
+	cpumask_clear(&requested);
+	if (p.operation == AGI_LC_POWER_POLICY_SET) {
+		if (p.profile < AGI_LC_POWER_PROFILE_INFERENCE ||
+		    p.profile > AGI_LC_POWER_PROFILE_MAX)
+			return -EINVAL;
+		if (!p.requested_features || p.policy_id || p.capability || p.state ||
+		    p.status || p.agent_id || p.task_id || p.generation ||
+		    (p.power_budget_uw && !(p.requested_features &
+					AGI_LC_POWER_POLICY_FEATURE_POWER_BUDGET)) ||
+		    (p.power_window_us && !p.power_budget_uw))
+			return -EINVAL;
+		if (nr_cpu_ids > AGI_LC_EXEC_DOMAIN_CPU_WORDS * 64)
+			return -E2BIG;
+		agi_lc_power_policy_mask_from_uapi(&requested, p.requested_cpus);
+		if (!cpumask_empty(&requested) &&
+		    !cpumask_subset(&requested, cpu_online_mask))
+			return -EINVAL;
+	} else {
+		if (!p.policy_id || !p.capability || p.flags || p.profile ||
+		    p.state || p.status || p.agent_id || p.task_id ||
+		    p.requested_features || p.available_features ||
+		    p.unsupported_features || p.applied_features ||
+		    !cpumask_empty(&requested) || p.min_cpu_util || p.max_cpu_util ||
+		    p.cpu_latency_us || p.device_id || p.power_budget_uw ||
+		    p.power_window_us || p.sampled_power_uw || p.sampled_energy_uj ||
+		    p.generation)
+			return -EINVAL;
+	}
+	available = agi_lc_power_policy_available_features(p.device_id);
+	unsupported = p.requested_features & ~available;
+	if ((p.flags & AGI_LC_POWER_POLICY_FLAG_REQUIRE_ALL) && unsupported)
+		return -EOPNOTSUPP;
+	if (p.operation == AGI_LC_POWER_POLICY_SET) {
+		for (i = 0; i < AGI_LC_POWER_POLICY_RECORDS; i++)
+			if (!session->power_policies[i].valid) {
+				record = &session->power_policies[i];
+				break;
+			}
+		if (!record) {
+			ret = -ENOSPC;
+			goto out_unlock;
+		}
+		if (++session->power_policy_next_id == U64_MAX) {
+			ret = -EOVERFLOW;
+			goto out_unlock;
+		}
+		memset(record, 0, sizeof(*record));
+		record->valid = true;
+		record->policy = p;
+		record->policy.policy_id = session->power_policy_next_id;
+		record->policy.capability = get_random_u64();
+		while (!record->policy.capability)
+			record->policy.capability = get_random_u64();
+		record->policy.agent_id = faisal_task_get_agent(current);
+		record->policy.task_id = task_pid_nr(current);
+		record->policy.available_features = available;
+		record->policy.unsupported_features = unsupported;
+		record->policy.applied_features = 0;
+#if IS_ENABLED(CONFIG_CPU_IDLE)
+		if (p.requested_features & AGI_LC_POWER_POLICY_FEATURE_CPU_LATENCY_QOS) {
+			cpu_latency_qos_add_request(&record->cpu_latency_qos,
+						   p.cpu_latency_us);
+			if (cpu_latency_qos_request_active(&record->cpu_latency_qos)) {
+				record->cpu_qos_active = true;
+				record->policy.applied_features |=
+					AGI_LC_POWER_POLICY_FEATURE_CPU_LATENCY_QOS;
+			} else {
+				record->policy.unsupported_features |=
+					AGI_LC_POWER_POLICY_FEATURE_CPU_LATENCY_QOS;
+			}
+		}
+#endif
+		record->policy.state = AGI_LC_POWER_POLICY_STATE_ACTIVE;
+		record->policy.status = record->policy.unsupported_features ?
+			-EOPNOTSUPP : 0;
+		record->policy.generation = 1;
+		out = record->policy;
+	} else {
+		record = agi_lc_power_policy_find_locked(session, p.policy_id,
+							p.capability);
+		if (!record || record->policy.agent_id != faisal_task_get_agent(current)) {
+			ret = -EACCES;
+			goto out_unlock;
+		}
+		if (p.operation == AGI_LC_POWER_POLICY_RELEASE) {
+			if (record->policy.state != AGI_LC_POWER_POLICY_STATE_ACTIVE) {
+				ret = -EALREADY;
+				goto out_unlock;
+			}
+			agi_lc_power_policy_remove_qos(record);
+			record->policy.applied_features = 0;
+			record->policy.state = AGI_LC_POWER_POLICY_STATE_RELEASED;
+			record->policy.generation++;
+		}
+		out = record->policy;
+		out.operation = p.operation;
+	}
+	mutex_unlock(&session->ioctl_lock);
+	if (copy_to_user((void __user *)arg, &out, sizeof(out)))
+		return -EFAULT;
+	return agi_lc_push_record(session, AGI_LC_EVENT_POWER_POLICY,
+					out.status, out.correlation, out.policy_id);
+out_unlock:
+	return ret;
+}
+static void agi_lc_power_policy_release_all(struct agi_lc_session *session)
+{
+	u32 i;
+
+	for (i = 0; i < AGI_LC_POWER_POLICY_RECORDS; i++)
+		if (session->power_policies[i].valid)
+			agi_lc_power_policy_remove_qos(&session->power_policies[i]);
+}
 static int agi_lc_open(struct inode *inode, struct file *file)
 {
 	struct agi_lc_session *session;
@@ -4067,6 +4267,7 @@ static int agi_lc_release(struct inode *inode, struct file *file)
 	if (session->checkpoint_manifest_valid && !session->recovery_invalidated)
 		agi_lc_checkpoint_mark_crashed(session->checkpoint_id);
 	agi_lc_memory_release_session(session, true);
+	agi_lc_power_policy_release_all(session);
 	agi_lc_artifact_release_session(session, true);
 	memset(session->persistent_memory_records, 0, sizeof(session->persistent_memory_records));
 	kfree(session->ipc_channels);
@@ -8890,6 +9091,9 @@ case AGI_LC_GRAPH_NODE:
 		break;
 	case AGI_LC_GRAPH_TELEMETRY:
 		ret = agi_lc_graph_telemetry_control(session, arg);
+		break;
+	case AGI_LC_POWER_POLICY:
+		ret = agi_lc_power_policy_control(session, arg);
 		break;
 
 	case AGI_LC_GET_INFO: {

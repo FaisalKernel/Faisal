@@ -5,7 +5,7 @@
 #include <linux/ioctl.h>
 #include <linux/types.h>
 
-#define AGI_LC_ABI_VERSION 36
+#define AGI_LC_ABI_VERSION 37
 #define AGI_LC_DEVICE_NAME "agi_lifecycle"
 
 #define AGI_LC_EVENT_BEGIN 1
@@ -47,6 +47,7 @@
 #define AGI_LC_EVENT_REFLECTION 37
 #define AGI_LC_EVENT_OBSERVABILITY 38
 #define AGI_LC_EVENT_GRAPH_OPERATION 39
+#define AGI_LC_EVENT_POWER_POLICY 40
 
 #define AGI_LC_AGENT_STATE_READY 0
 #define AGI_LC_AGENT_STATE_BLOCKED 1
@@ -317,6 +318,34 @@
 #define AGI_LC_GRAPH_TELEMETRY_MAX_OPERATOR_KIND 4096U
 #define AGI_LC_GRAPH_TELEMETRY_MAX_ANOMALY_SCORE 1000000U
 #define AGI_LC_MEMORY_MAX_TTL_NS (365ULL * 24 * 60 * 60 * 1000000000ULL)
+#define AGI_LC_POWER_POLICY_SET 1U
+#define AGI_LC_POWER_POLICY_QUERY 2U
+#define AGI_LC_POWER_POLICY_RELEASE 3U
+#define AGI_LC_POWER_PROFILE_INFERENCE 1U
+#define AGI_LC_POWER_PROFILE_TRAINING 2U
+#define AGI_LC_POWER_PROFILE_BACKGROUND 3U
+#define AGI_LC_POWER_PROFILE_RECOVERY 4U
+#define AGI_LC_POWER_PROFILE_MAX AGI_LC_POWER_PROFILE_RECOVERY
+#define AGI_LC_POWER_POLICY_STATE_ACTIVE 1U
+#define AGI_LC_POWER_POLICY_STATE_RELEASED 2U
+#define AGI_LC_POWER_POLICY_FLAG_CPU_LATENCY_QOS (1U << 0)
+#define AGI_LC_POWER_POLICY_FLAG_DEVICE_WAKE_LATENCY (1U << 1)
+#define AGI_LC_POWER_POLICY_FLAG_NO_POWER_OFF (1U << 2)
+#define AGI_LC_POWER_POLICY_FLAG_POWER_BUDGET (1U << 3)
+#define AGI_LC_POWER_POLICY_FLAG_REQUESTED_PROVIDER (1U << 4)
+#define AGI_LC_POWER_POLICY_FLAG_REQUIRE_ALL (1U << 5)
+#define AGI_LC_POWER_POLICY_FLAGS_ALL ((1U << 6) - 1)
+#define AGI_LC_POWER_POLICY_FEATURE_CPU_LATENCY_QOS (1U << 0)
+#define AGI_LC_POWER_POLICY_FEATURE_DEVICE_WAKE_LATENCY (1U << 1)
+#define AGI_LC_POWER_POLICY_FEATURE_NO_POWER_OFF (1U << 2)
+#define AGI_LC_POWER_POLICY_FEATURE_POWER_BUDGET (1U << 3)
+#define AGI_LC_POWER_POLICY_FEATURE_ENERGY_MODEL (1U << 4)
+#define AGI_LC_POWER_POLICY_FEATURE_THERMAL_COORDINATION (1U << 5)
+#define AGI_LC_POWER_POLICY_FEATURE_ACCELERATOR_PROVIDER (1U << 6)
+#define AGI_LC_POWER_POLICY_FEATURES_ALL ((1U << 7) - 1)
+#define AGI_LC_POWER_POLICY_MAX_LATENCY_US (60U * 1000U * 1000U)
+#define AGI_LC_POWER_POLICY_MAX_BUDGET_UW (1ULL << 40)
+#define AGI_LC_POWER_POLICY_CPU_UTIL_MAX 1024U
 
 #define AGI_LC_RECOVERY_NONE 0
 #define AGI_LC_RECOVERY_CRASHED 1
@@ -1991,6 +2020,35 @@ struct agi_lc_observability {
 	__u64 correlation;
 	__u64 reserved[2];
 };
+struct agi_lc_power_policy {
+	__u32 size;
+	__u32 operation;
+	__u32 flags;
+	__u32 profile;
+	__u32 state;
+	__s32 status;
+	__u64 policy_id;
+	__u64 capability;
+	__u64 agent_id;
+	__u64 task_id;
+	__u64 requested_features;
+	__u64 available_features;
+	__u64 unsupported_features;
+	__u64 applied_features;
+	__u64 requested_cpus[AGI_LC_EXEC_DOMAIN_CPU_WORDS];
+	__u32 min_cpu_util;
+	__u32 max_cpu_util;
+	__u32 cpu_latency_us;
+	__u32 reserved32;
+	__u64 device_id;
+	__u64 power_budget_uw;
+	__u64 power_window_us;
+	__u64 sampled_power_uw;
+	__u64 sampled_energy_uj;
+	__u64 generation;
+	__u64 correlation;
+	__u64 reserved[2];
+};
 struct agi_lc_graph_telemetry {
 	__u32 size;
 	__u32 operation;
@@ -2067,6 +2125,7 @@ struct agi_lc_record {
 #define AGI_LC_TENSOR_TRANSPORT _IOWR(AGI_LC_IOC_MAGIC, 0x5f, struct agi_lc_tensor_transport)
 #define AGI_LC_EXECUTION_DOMAIN _IOWR(AGI_LC_IOC_MAGIC, 0x60, struct agi_lc_execution_domain)
 #define AGI_LC_GRAPH_TELEMETRY _IOWR(AGI_LC_IOC_MAGIC, 0x61, struct agi_lc_graph_telemetry)
+#define AGI_LC_POWER_POLICY _IOWR(AGI_LC_IOC_MAGIC, 0x62, struct agi_lc_power_policy)
 #define AGI_LC_RECORD_EXPERIENCE _IOWR(AGI_LC_IOC_MAGIC, 0x2b, struct agi_lc_experience_record)
 #define AGI_LC_GET_EXPERIENCE _IOWR(AGI_LC_IOC_MAGIC, 0x2c, struct agi_lc_experience_query)
 #define AGI_LC_PUBLISH_ARTIFACT _IOWR(AGI_LC_IOC_MAGIC, 0x2d, struct agi_lc_learning_artifact)
