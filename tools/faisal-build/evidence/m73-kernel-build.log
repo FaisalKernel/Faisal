@@ -1,0 +1,68 @@
+make[1]: Entering directory '/home/ubuntu/agi-kernel/build/recovered'
+  DESCEND objtool
+  UPD     include/config/kernel.release
+  UPD     include/generated/utsrelease.h
+  CC      init/version.o
+  AR      init/built-in.a
+  CC      kernel/sys.o
+  CC      kernel/module/main.o
+  AR      kernel/module/built-in.a
+  AR      kernel/built-in.a
+  CC      drivers/base/firmware_loader/main.o
+  AR      drivers/base/firmware_loader/built-in.a
+  AR      drivers/base/built-in.a
+  AR      drivers/built-in.a
+  AR      built-in.a
+  AR      built-in-fixup.a
+  COPY    vmlinux.a
+  LD      vmlinux.o
+  MODPOST Module.symvers
+  CC [M]  .module-common.o
+  UPD     include/generated/utsversion.h
+  CC      init/version-timestamp.o
+  LD [M]  drivers/thermal/intel/x86_pkg_temp_thermal.ko
+  LD [M]  net/netfilter/nf_log_syslog.ko
+  LD [M]  net/netfilter/xt_mark.ko
+  LD [M]  net/netfilter/xt_LOG.ko
+  LD [M]  net/netfilter/xt_MASQUERADE.ko
+  LD [M]  net/netfilter/xt_addrtype.ko
+  LD [M]  net/ipv4/netfilter/nf_reject_ipv4.ko
+  LD [M]  net/ipv4/ip_tunnel.ko
+  KSYMS   .tmp_vmlinux0.kallsyms.S
+  LD [M]  net/ipv4/tunnel4.ko
+  AS      .tmp_vmlinux0.kallsyms.o
+  LD [M]  net/ipv6/netfilter/nf_reject_ipv6.ko
+  LD [M]  net/ipv6/sit.ko
+  LD      .tmp_vmlinux1
+  LD [M]  fs/efivarfs/efivarfs.ko
+  NM      .tmp_vmlinux1.syms
+  KSYMS   .tmp_vmlinux1.kallsyms.S
+  AS      .tmp_vmlinux1.kallsyms.o
+  LD      .tmp_vmlinux2
+  NM      .tmp_vmlinux2.syms
+  KSYMS   .tmp_vmlinux2.kallsyms.S
+  AS      .tmp_vmlinux2.kallsyms.o
+  LD      vmlinux.unstripped
+  NM      System.map
+  SORTTAB vmlinux.unstripped
+  OBJCOPY vmlinux
+  GEN     modules.builtin.modinfo
+  GEN     modules.builtin
+  CC      arch/x86/boot/version.o
+  VOFFSET arch/x86/boot/compressed/../voffset.h
+  OBJCOPY arch/x86/boot/compressed/vmlinux.bin
+  RELOCS  arch/x86/boot/compressed/vmlinux.relocs
+  CC      arch/x86/boot/compressed/kaslr.o
+  CC      arch/x86/boot/compressed/misc.o
+  GZIP    arch/x86/boot/compressed/vmlinux.bin.gz
+  MKPIGGY arch/x86/boot/compressed/piggy.S
+  AS      arch/x86/boot/compressed/piggy.o
+  LD      arch/x86/boot/compressed/vmlinux
+  ZOFFSET arch/x86/boot/zoffset.h
+  OBJCOPY arch/x86/boot/vmlinux.bin
+  AS      arch/x86/boot/header.o
+  LD      arch/x86/boot/setup.elf
+  OBJCOPY arch/x86/boot/setup.bin
+  BUILD   arch/x86/boot/bzImage
+Kernel: arch/x86/boot/bzImage is ready  (#13)
+make[1]: Leaving directory '/home/ubuntu/agi-kernel/build/recovered'

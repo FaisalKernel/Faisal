@@ -1,0 +1,105 @@
+{
+  "milestone": "FAISAL-M73",
+  "name": "temporal world-state service",
+  "status": "validated",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "pre_m73_head": "03d7a0afa3e6cd0d9d16c4be6d7dba05cbe26a47",
+  "validation_environment": {
+    "architecture": "x86_64",
+    "qemu": "QEMU x86_64, two virtual CPUs, 512 MiB",
+    "toolchain": "GCC 13.3.0, static OpenSSL 3.x EVP linkage",
+    "build_output": "/home/ubuntu/agi-kernel/build/recovered"
+  },
+  "implementation": {
+    "service_header": "tools/faisal-world/faisal_world_state_service.h",
+    "service_source": "tools/faisal-world/faisal_world_state_service.c",
+    "selftest": "tools/testing/selftests/agi_world_state_test.c",
+    "qemu_harness": "tools/faisal-build/run_world_state_qemu.sh",
+    "persistent_memory_dependency": "tools/faisal-memory/faisal_memory_service.c",
+    "kernel_session_identity_change": "tools/faisal-memory/faisal_memory_service.h"
+  },
+  "build": {
+    "kernel_command": "make O=/home/ubuntu/agi-kernel/build/recovered -j2 bzImage modules",
+    "kernel_result": "pass",
+    "kernel_elapsed_seconds_observed": 38,
+    "selftest_command": "cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -Iinclude/uapi -Itools/faisal-memory -Itools/faisal-world tools/faisal-memory/faisal_memory_service.c tools/faisal-world/faisal_world_state_service.c tools/testing/selftests/agi_world_state_test.c -o /home/ubuntu/agi-kernel/build/recovered/agi_world_state_test -lcrypto -ldl -lpthread",
+    "selftest_result": "pass",
+    "kernel_image_sha256": "not-recorded-in-this-pass",
+    "selftest_binary_bytes": 5858128,
+    "kernel_image_bytes": 14898176
+  },
+  "qemu": {
+    "boot": "pass",
+    "selftest_exit": 0,
+    "harness_rc": 0,
+    "required_markers": [
+      "FAISAL_M73_BOOT_OK",
+      "M73_SELFTEST_EXIT=0",
+      "FAISAL_M73_TEST_RC=0"
+    ],
+    "functional_markers": [
+      "M73_MALFORMED_UAPI_REJECT_OK iterations=64",
+      "M73_WORLD_QUERY_OK newest=1 generation=2",
+      "M73_WORLD_ACK_OK sequence=1",
+      "M73_SEQUENCE_GUARD_OK",
+      "M73_BOUNDED_INPUT_REJECT_OK",
+      "M73_FRESH_LOOKUP_OK generation=1",
+      "M73_FRESHNESS_EXPIRY_OK",
+      "M73_CONFLICT_DETECTED_OK retained=2",
+      "M73_CONFLICT_RESOLUTION_OK generation=3 retained=3",
+      "M73_TEMPORAL_CHECK_OK record=1 generation=2",
+      "M73_STALE_TEMPORAL_REJECT_OK",
+      "M73_RESOURCE_SNAPSHOT_OK measured=0xa3 unavailable=0x5c unsupported=0x0",
+      "M73_WORLD_STATE_SYNC_OK"
+    ],
+    "smoke_runs": [
+      {"run": 1, "elapsed_ns": 5148116828, "success_markers": 1},
+      {"run": 2, "elapsed_ns": 5098549365, "success_markers": 1},
+      {"run": 3, "elapsed_ns": 5238809128, "success_markers": 1},
+      {"run": 4, "elapsed_ns": 5039908856, "success_markers": 1},
+      {"run": 5, "elapsed_ns": 5086969890, "success_markers": 1}
+    ]
+  },
+  "regression": {
+    "required_harnesses": [
+      {"milestone": "M64", "script": "tools/faisal-build/run_agent_security_m64_qemu.sh", "result": "pass"},
+      {"milestone": "M66", "script": "tools/faisal-build/run_transport_qemu.sh", "result": "pass"},
+      {"milestone": "M67", "script": "tools/faisal-build/run_execution_domain_qemu.sh", "result": "pass"},
+      {"milestone": "M68", "script": "tools/faisal-build/run_heterogeneous_context_qemu.sh", "result": "pass"},
+      {"milestone": "M69", "script": "tools/faisal-build/run_graph_telemetry_qemu.sh", "result": "pass"},
+      {"milestone": "M70", "script": "tools/faisal-build/run_power_policy_qemu.sh", "result": "pass"},
+      {"milestone": "M71", "script": "tools/faisal-build/run_persistent_memory_qemu.sh", "result": "pass"},
+      {"milestone": "M72", "script": "tools/faisal-build/run_experience_learning_qemu.sh", "result": "pass"}
+    ],
+    "result": "8/8 pass"
+  },
+  "security": {
+    "malformed_world_sync_requests": 64,
+    "malformed_temporal_requests": 64,
+    "malformed_resource_snapshot_requests": 64,
+    "malformed_request_result": "all rejected with EINVAL",
+    "stale_world_ack_result": "rejected",
+    "invalid_confidence_result": "rejected",
+    "stale_temporal_capability_result": "rejected with EACCES",
+    "action_authority_grant": false
+  },
+  "evidence_files": {
+    "design": "M73-WORLD-STATE-DESIGN.md",
+    "milestone": "MILESTONE73.md",
+    "security_review": "M73-SECURITY-REVIEW.md",
+    "benchmarks": "M73-BENCHMARKS.md",
+    "qemu_log": "tools/faisal-build/evidence/m73-qemu.log",
+    "regression_log": "tools/faisal-build/evidence/m73-regression.log",
+    "benchmark_log": "tools/faisal-build/evidence/m73-benchmark.log",
+    "kernel_build_log": "tools/faisal-build/evidence/m73-kernel-build.log"
+  },
+  "non_claims": [
+    "No consciousness or human-like awareness claim",
+    "No semantic-truth claim for observed values",
+    "No model retraining claim from persistence",
+    "No automatic conflict winner",
+    "No action authorization from model output, memory, confidence, or temporal state",
+    "No upstream Linux performance comparison in this milestone"
+  ]
+}

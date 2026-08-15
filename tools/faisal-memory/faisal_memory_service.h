@@ -48,6 +48,7 @@ struct fms_checkpoint_state {
 struct fms_service {
 	int kernel_fd;
 	int journal_fd;
+	uint64_t session_id;
 	uint64_t agent_id;
 	uint64_t agent_capability;
 	uint64_t next_sequence;

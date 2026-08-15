@@ -145,6 +145,7 @@ static int kernel_session_open(struct fms_service *service)
 	selected.correlation = 71002;
 	if (ioctl(service->kernel_fd, AGI_LC_SET_AGENT, &selected) < 0)
 		return FMS_ERR_KERNEL;
+	service->session_id = create.session_id;
 	service->agent_id = agent.agent_id;
 	service->agent_capability = agent.capability;
 	return FMS_OK;
