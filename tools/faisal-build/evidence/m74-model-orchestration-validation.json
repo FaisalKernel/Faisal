@@ -1,0 +1,88 @@
+{
+  "milestone": "FAISAL-M74",
+  "name": "trusted model/runtime orchestration",
+  "status": "validated",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "pre_m74_head": "366e8a8e515ef3b0347cf30c44fd5bc90d737373",
+  "validation_environment": {
+    "architecture": "x86_64",
+    "qemu": "QEMU x86_64, two virtual CPUs, 512 MiB",
+    "toolchain": "GCC 13.3.0, static OpenSSL 3.x EVP linkage",
+    "build_output": "/home/ubuntu/agi-kernel/build/recovered"
+  },
+  "implementation": {
+    "design": "M74-MODEL-ORCHESTRATION-DESIGN.md",
+    "service_header": "tools/faisal-orchestrator/faisal_orchestrator_service.h",
+    "service_source": "tools/faisal-orchestrator/faisal_orchestrator_service.c",
+    "selftest": "tools/testing/selftests/agi_model_orchestration_test.c",
+    "qemu_harness": "tools/faisal-build/run_model_orchestration_qemu.sh",
+    "persistent_memory_dependency": "tools/faisal-memory/faisal_memory_service.c"
+  },
+  "build": {
+    "selftest_command": "cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -Iinclude/uapi -Itools/faisal-memory -Itools/faisal-orchestrator tools/faisal-memory/faisal_memory_service.c tools/faisal-orchestrator/faisal_orchestrator_service.c tools/testing/selftests/agi_model_orchestration_test.c -o /home/ubuntu/agi-kernel/build/recovered/agi_model_orchestration_test -lcrypto -ldl -lpthread",
+    "selftest_result": "pass",
+    "kernel_rebuild_dependency": "current FAISAL ABI-37 kernel image reused; no kernel source change in M74"
+  },
+  "qemu": {
+    "boot": "pass",
+    "selftest_exit": 0,
+    "harness_rc": 0,
+    "required_markers": [
+      "FAISAL_M74_BOOT_OK",
+      "M74_SELFTEST_EXIT=0",
+      "FAISAL_M74_TEST_RC=0"
+    ],
+    "functional_markers": [
+      "M74_POLICY_FUZZ_REJECT_OK iterations=128",
+      "M74_POLICY_DENIALS_OK",
+      "M74_RESOURCE_ADMISSION_OK run=1 cpu_ns=100000000 memory_pages=1024",
+      "M74_MODEL_OUTPUT_NOT_AUTHORITY_OK action_mask=0x10",
+      "M74_CHECKPOINT_ROLLBACK_OK checkpoint=74001 recovery=3",
+      "M74_MODEL_IDENTITY_BOUNDARY_OK"
+    ],
+    "smoke_runs": [
+      {"run": 1, "elapsed_ns": 5082647853, "success_markers": 1},
+      {"run": 2, "elapsed_ns": 5052336163, "success_markers": 1},
+      {"run": 3, "elapsed_ns": 5070267551, "success_markers": 1},
+      {"run": 4, "elapsed_ns": 5021357302, "success_markers": 1},
+      {"run": 5, "elapsed_ns": 5149878810, "success_markers": 1}
+    ]
+  },
+  "security": {
+    "independent_approval_required": true,
+    "missing_supervisor_or_operator_denied": true,
+    "duplicate_nonce_denied": true,
+    "unsupported_workload_denied": true,
+    "over_budget_denied": true,
+    "empty_model_identity_denied": true,
+    "reserved_field_mutations": 128,
+    "model_output_capability_grant": false,
+    "model_output_authority": false,
+    "checkpoint_digest_verification": true,
+    "rollback_digest_and_sequence_match": true
+  },
+  "regression": {
+    "harnesses": [
+      "M64", "M66", "M67", "M68", "M69", "M70", "M71", "M72", "M73", "M74"
+    ],
+    "result": "10/10 pass"
+  },
+  "evidence_files": {
+    "milestone": "MILESTONE74.md",
+    "security_review": "M74-SECURITY-REVIEW.md",
+    "benchmarks": "M74-BENCHMARKS.md",
+    "qemu_log": "tools/faisal-build/evidence/m74-qemu.log",
+    "regression_log": "tools/faisal-build/evidence/m74-regression.log",
+    "benchmark_log": "tools/faisal-build/evidence/m74-benchmark.log",
+    "selftest_build_log": "tools/faisal-build/evidence/m74-selftest-build.log"
+  },
+  "non_claims": [
+    "No foundation-model implementation or inference-quality claim",
+    "No consciousness or human-like awareness claim",
+    "No semantic-truth or safety-alignment claim",
+    "No model-output authorization claim",
+    "No arbitrary accelerator/model-state checkpoint claim",
+    "No upstream Linux performance comparison in this milestone"
+  ]
+}
