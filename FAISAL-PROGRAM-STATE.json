@@ -6,7 +6,7 @@
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
   "current_head": "a1248195ceb5cef8f1d10e36796b8eb01b96f14b",
-  "current_tag": "FAISAL-M79",
+  "current_tag": "FAISAL-M80",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -171,14 +171,26 @@
       "id": "M80-stress-fuzz-hardening",
       "phase": 14,
       "name": "Cross-subsystem stress, fuzz, and failure-injection hardening",
-      "status": "next",
+      "status": "validated_bounded_test_environment",
       "priority": 100,
       "depends_on": ["M73-world-model", "M74-model-orchestration", "M75-browser-tool-supervision", "M76-end_to_end_agent", "M77-verified-internet-research", "M78-deployment-supervisor", "M79-accelerator-validation"],
+      "unlocks": ["M81-concurrent-sanitizer-validation"],
+      "evidence_required": ["long_running_composition", "malformed_uapi", "cancellation", "resource_pressure", "audit_retention", "rollback_fault_injection", "security_review", "regression"],
+      "evidence": ["M80-STRESS-FAILURE-DESIGN.md", "MILESTONE80.md", "M80-SECURITY-REVIEW.md", "M80-BENCHMARKS.md", "tools/faisal-build/evidence/m80-stress-validation.json"],
+      "next_action": "Retain M64–M80 regression coverage; next select concurrent lifecycle/IPC stress with sanitizer-enabled kernel validation when the required build infrastructure is available."
+    },
+    {
+      "id": "M81-concurrent-sanitizer-validation",
+      "phase": 14,
+      "name": "Concurrent lifecycle and IPC stress with sanitizer-enabled kernel validation",
+      "status": "next",
+      "priority": 95,
+      "depends_on": ["M80-stress-fuzz-hardening"],
       "unlocks": [],
-      "evidence_required": ["long_running_composition", "malformed_uapi", "cancellation", "resource_pressure", "audit_retention", "rollback_fault_injection", "security_review", "regression"]
+      "evidence_required": ["concurrent_stress", "kasan_or_documented_blocker", "kcsan_or_documented_blocker", "lockdep_or_documented_blocker", "randomized_inputs", "security_review", "regression"]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",

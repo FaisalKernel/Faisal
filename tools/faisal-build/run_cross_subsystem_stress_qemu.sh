@@ -1,0 +1,56 @@
+#!/bin/sh
+set -eu
+
+ROOT=/home/ubuntu/agi-kernel
+BUILD="$ROOT/build/recovered"
+ROOTFS="$ROOT/build/qemu-faisal-cross-subsystem-stress"
+LOG="$ROOTFS/qemu.log"
+
+rm -rf "$ROOTFS"
+mkdir -p "$ROOTFS/bin" "$ROOTFS/dev" "$ROOTFS/proc" "$ROOTFS/sys" "$ROOTFS/tmp"
+cp "$BUILD/agi_cross_subsystem_stress_test" "$ROOTFS/bin/agi_cross_subsystem_stress_test"
+cp "$(command -v busybox)" "$ROOTFS/bin/busybox"
+ln -s busybox "$ROOTFS/bin/sh"
+ln -s busybox "$ROOTFS/bin/mount"
+ln -s busybox "$ROOTFS/bin/echo"
+cat > "$ROOTFS/init" <<'EOF'
+#!/bin/sh
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t tmpfs -o mode=1777 none /tmp
+if [ -r /sys/class/misc/agi_lifecycle/dev ]; then
+  dev=$(cat /sys/class/misc/agi_lifecycle/dev)
+  major=${dev%:*}
+  minor=${dev#*:}
+  mknod /dev/agi_lifecycle c "$major" "$minor" 2>/dev/null || true
+fi
+if [ ! -e /dev/agi_lifecycle ]; then
+  echo FAISAL_M80_DEVICE_NODE_MISSING
+  echo FAISAL_M80_TEST_RC=1
+  poweroff -f
+fi
+echo FAISAL_M80_BOOT_OK
+/bin/agi_cross_subsystem_stress_test
+rc=$?
+echo FAISAL_M80_TEST_RC=$rc
+poweroff -f
+EOF
+chmod +x "$ROOTFS/init"
+( cd "$ROOTFS" && find . -print0 | cpio --null -o -H newc 2>/dev/null | gzip -9 > "$ROOTFS/initramfs.cpio.gz" )
+qemu-system-x86_64 \
+  -M pc \
+  -accel tcg,thread=multi \
+  -cpu qemu64 \
+  -smp 2 \
+  -m 768M \
+  -kernel "$BUILD/arch/x86/boot/bzImage" \
+  -initrd "$ROOTFS/initramfs.cpio.gz" \
+  -append 'console=ttyS0 quiet' \
+  -nographic \
+  -no-reboot \
+  > "$LOG" 2>&1 || true
+
+grep -q 'FAISAL_M80_BOOT_OK' "$LOG"
+grep -q 'M80_SELFTEST_EXIT=0' "$LOG"
+grep -q 'FAISAL_M80_TEST_RC=0' "$LOG"
+printf '%s\n' 'M80_QEMU_VALIDATION_OK'

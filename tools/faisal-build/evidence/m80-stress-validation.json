@@ -1,0 +1,122 @@
+{
+  "project": "FAISAL",
+  "milestone": "M80",
+  "title": "Cross-subsystem stress, fuzz, and failure-injection validation",
+  "date": "2026-08-15",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "kernel_change": false,
+  "qemu": {
+    "arch": "x86_64",
+    "machine": "pc",
+    "cpu": "qemu64",
+    "acceleration": "tcg",
+    "vcpus": 2,
+    "memory_mb": 768,
+    "tmpfs_on_tmp": true,
+    "boot_marker": "FAISAL_M80_BOOT_OK",
+    "result_marker": "FAISAL_M80_TEST_RC=0"
+  },
+  "build": {
+    "userspace_static_rebuild": true,
+    "compiler_flags": [
+      "-O2",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-Wno-cpp",
+      "-static"
+    ],
+    "libraries": ["crypto", "dl", "pthread"],
+    "git_head_before_m80_commit": "7d55eaa5fc2545814c91ec5602d991b439acd015"
+  },
+  "scenarios": {
+    "malformed_uapi": {
+      "cases": 256,
+      "rejected": 256,
+      "accepted": 0,
+      "status": "passed"
+    },
+    "resource_pressure": {
+      "samples": 8,
+      "status": "passed"
+    },
+    "composition": {
+      "runs": 3,
+      "completed": 3,
+      "status": "passed"
+    },
+    "cancellation": {
+      "passes": 8,
+      "completed": 8,
+      "status": "passed"
+    },
+    "rollback_fault_injection": {
+      "passes": 2,
+      "rolled_back": 2,
+      "status": "passed"
+    },
+    "audit_retention": {
+      "records": 5,
+      "status": "passed"
+    },
+    "provider_unsupported_propagation": {
+      "unsupported": 1,
+      "status": "passed"
+    }
+  },
+  "regression": {
+    "pre_m80_harnesses": 15,
+    "passed": 15,
+    "failed": 0,
+    "status": "passed"
+  },
+  "smoke_runs": {
+    "runs": 5,
+    "passed": 5,
+    "failed": 0,
+    "elapsed_ms": [5342, 5259, 5401, 5326, 5405],
+    "min_ms": 5259,
+    "max_ms": 5405,
+    "mean_ms": 5346.6,
+    "population_stddev_ms": 53.83,
+    "status": "passed"
+  },
+  "failure_correction": {
+    "initial_stage": "composition",
+    "initial_m76_return_code": 0,
+    "initial_m76_state": 1,
+    "initial_completed_stages": 5,
+    "cause": "M80 required observability_emitted to be nonzero although the validated M76 completion contract does not require that counter to be nonzero for the fixture",
+    "correction": "Require M76-guaranteed reflection action and reflection authority capability identifiers instead",
+    "post_correction_status": "passed"
+  },
+  "security_review": {
+    "critical_findings": 0,
+    "panic_oops_bug_observed": false,
+    "model_output_is_authority": false,
+    "provider_metadata_is_hardware_proof": false,
+    "production_readiness_claim": false,
+    "sanitizer_or_syzkaller_coverage": false,
+    "status": "bounded_review_passed_with_explicit_limits"
+  },
+  "evidence_limits": [
+    "No KASAN, KCSAN, UBSAN, lockdep, or syzkaller coverage",
+    "No randomized or unbounded fuzzing",
+    "No physical accelerator or provider execution proof",
+    "No multi-day soak test",
+    "No upstream Linux performance baseline comparison",
+    "No claim of production readiness or complete kernel security"
+  ],
+  "artifacts": [
+    "M80-STRESS-FAILURE-DESIGN.md",
+    "MILESTONE80.md",
+    "M80-SECURITY-REVIEW.md",
+    "M80-BENCHMARKS.md",
+    "tools/faisal-stress/faisal_stress_service.h",
+    "tools/faisal-stress/faisal_stress_service.c",
+    "tools/testing/selftests/agi_cross_subsystem_stress_test.c",
+    "tools/faisal-build/run_cross_subsystem_stress_qemu.sh"
+  ],
+  "status": "validated_bounded_test_environment"
+}

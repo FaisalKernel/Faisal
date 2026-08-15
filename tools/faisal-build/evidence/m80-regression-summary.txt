@@ -1,0 +1,59 @@
+run_agent_security_m64_qemu.sh 0
+M64_QEMU_VALIDATION_OK
+run_transport_qemu.sh 0
+M66_ZERO_COPY_BOUNDARY_OK
+M66_TRANSPORT_REVOKE_OK
+M66_SELFTEST_EXIT=0
+FAISAL_M66_TEST_RC=0
+[    3.381373] ACPI: PM: Preparing to enter system sleep state S5
+[    3.382299] reboot: Power down
+QEMU_RC=0
+FAISAL_M66_SELFTEST_EXIT=0
+run_execution_domain_qemu.sh 0
+M67_NOHZ_BOUNDARY_OK
+M67_DOMAIN_RELEASE_OK
+M67_SELFTEST_EXIT=0
+FAISAL_M67_TEST_RC=0
+[    2.450213] ACPI: PM: Preparing to enter system sleep state S5
+[    2.451812] reboot: Power down
+QEMU_RC=0
+FAISAL_M67_SELFTEST_EXIT=0
+run_heterogeneous_context_qemu.sh 0
+M68_GPU_PROVIDER_BOUNDARY_OK
+M68_CONTEXT_CLOSE_OK
+M68_SELFTEST_EXIT=0
+FAISAL_M68_TEST_RC=0
+[    2.263804] ACPI: PM: Preparing to enter system sleep state S5
+[    2.264769] reboot: Power down
+QEMU_RC=0
+FAISAL_M68_SELFTEST_EXIT=0
+run_graph_telemetry_qemu.sh 0
+M69_GRAPH_EVENT_DELIVERY_OK
+M69_COMPLETED_QUERY_OK
+M69_SELFTEST_EXIT=0
+FAISAL_M69_TEST_RC=0
+[    2.251214] ACPI: PM: Preparing to enter system sleep state S5
+[    2.252624] reboot: Power down
+QEMU_RC=0
+FAISAL_M69_SELFTEST_EXIT=0
+run_power_policy_qemu.sh 0
+M70_QEMU_VALIDATION_OK
+run_persistent_memory_qemu.sh 0
+M71_QEMU_VALIDATION_OK
+run_experience_learning_qemu.sh 0
+M72_QEMU_VALIDATION_OK
+run_world_state_qemu.sh 0
+M73_QEMU_VALIDATION_OK
+run_model_orchestration_qemu.sh 0
+M74_QEMU_VALIDATION_OK
+run_browser_tool_qemu.sh 0
+M75_QEMU_VALIDATION_OK
+run_end_to_end_qemu.sh 0
+M76_QEMU_VALIDATION_OK
+run_verified_research_qemu.sh 0
+M77_QEMU_VALIDATION_OK
+run_deployment_supervisor_qemu.sh 0
+M78_QEMU_VALIDATION_OK
+run_accelerator_validation_qemu.sh 0
+M79_QEMU_VALIDATION_OK
+REGRESSION_RC=0
