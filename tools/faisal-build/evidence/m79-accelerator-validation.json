@@ -1,0 +1,98 @@
+{
+  "milestone": "FAISAL-M79",
+  "name": "provider-gated heterogeneous accelerator validation",
+  "status": "validated_provider_neutral_unsupported_hardware",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "pre_m79_head": "61a2a275123a09f21597f636c415c8f32f03e16d",
+  "hardware_inspection": {
+    "cpu": "Intel Xeon virtual CPU, 6 vCPUs",
+    "lspci_accelerator_output": false,
+    "accelerator_device_node": false,
+    "accelerator_sysfs_class": false,
+    "provider_state": "unsupported",
+    "no_hardware_claim": true
+  },
+  "research_sources": [
+    "https://docs.kernel.org/accel/introduction.html",
+    "https://docs.kernel.org/gpu/drm-mm.html",
+    "https://docs.kernel.org/driver-api/dma-buf.html",
+    "https://docs.kernel.org/misc-devices/uacce.html"
+  ],
+  "implementation": {
+    "research_notes": "M79-RESEARCH-NOTES.md",
+    "design": "M79-ACCELERATOR-VALIDATION-DESIGN.md",
+    "service_header": "tools/faisal-accelerator/faisal_accelerator_validation.h",
+    "service_source": "tools/faisal-accelerator/faisal_accelerator_validation.c",
+    "selftest": "tools/testing/selftests/agi_accelerator_validation_test.c",
+    "qemu_harness": "tools/faisal-build/run_accelerator_validation_qemu.sh"
+  },
+  "build": {
+    "command": "cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -Iinclude/uapi -Itools/faisal-accelerator tools/faisal-accelerator/faisal_accelerator_validation.c tools/testing/selftests/agi_accelerator_validation_test.c -o /home/ubuntu/agi-kernel/build/recovered/agi_accelerator_validation_test -lpthread",
+    "result": "pass",
+    "kernel_image": "/home/ubuntu/agi-kernel/build/recovered/arch/x86/boot/bzImage"
+  },
+  "qemu": {
+    "environment": "x86_64 QEMU, two virtual CPUs, 768 MiB, BusyBox initramfs",
+    "harness_rc": 0,
+    "selftest_exit": 0,
+    "markers": [
+      "FAISAL_M79_BOOT_OK",
+      "M79_PROVIDER_UNSUPPORTED_OK",
+      "M79_PROVIDER_METADATA_FUZZ_OK iterations=64",
+      "M79_CONTEXT_FABRIC_OK active_devices=0x1 unsupported_devices=0xe active_fabric=0xf unsupported_fabric=0x30",
+      "M79_TENSOR_TRANSPORT_OK id=1",
+      "M79_GRAPH_TELEMETRY_OK id=1 state=2",
+      "M79_RESOURCE_MASKS_OK measured=0xa3 unavailable=0x5c unsupported=0x0",
+      "M79_POWER_POLICY_INTENT_OK applied=0x1 unsupported=0xa status=-95",
+      "M79_STALE_CAPABILITY_REJECT_OK",
+      "M79_NO_HARDWARE_CLAIM_OK",
+      "M79_SELFTEST_EXIT=0",
+      "FAISAL_M79_TEST_RC=0"
+    ],
+    "smoke_runs": [
+      {"run": 1, "elapsed_ns": 3988505831, "markers": 1},
+      {"run": 2, "elapsed_ns": 4084134426, "markers": 1},
+      {"run": 3, "elapsed_ns": 3951014470, "markers": 1},
+      {"run": 4, "elapsed_ns": 4016144580, "markers": 1},
+      {"run": 5, "elapsed_ns": 3952204594, "markers": 1}
+    ]
+  },
+  "functional": {
+    "provider_discovery_separate_from_metadata": "pass",
+    "explicit_unsupported_state": "pass",
+    "compute_context_negotiation": "pass",
+    "memory_region_capability": "pass",
+    "tensor_transport": "pass",
+    "graph_telemetry": "pass",
+    "resource_masks": "pass",
+    "power_policy_intent": "pass",
+    "stale_context_transport_telemetry_denial": "pass",
+    "provider_metadata_fuzz": "64 cases pass"
+  },
+  "regression": {
+    "harnesses": ["M64", "M66", "M67", "M68", "M69", "M70", "M71", "M72", "M73", "M74", "M75", "M76", "M77", "M78", "M79"],
+    "result": "15/15 pass",
+    "panic_or_oops_scan": "no matches"
+  },
+  "evidence_files": {
+    "milestone": "MILESTONE79.md",
+    "security_review": "M79-SECURITY-REVIEW.md",
+    "benchmarks": "M79-BENCHMARKS.md",
+    "research_notes": "M79-RESEARCH-NOTES.md",
+    "qemu_log": "tools/faisal-build/evidence/m79-qemu.log",
+    "regression_log": "tools/faisal-build/evidence/m79-regression.log",
+    "benchmark_log": "tools/faisal-build/evidence/m79-benchmark.log",
+    "selftest_build_log": "tools/faisal-build/evidence/m79-selftest-build.log"
+  },
+  "non_claims": [
+    "No real accelerator hardware support claim",
+    "No GPU or NPU execution claim",
+    "No HBM or VRAM availability claim",
+    "No DMA or RDMA success claim",
+    "No SVA or UACCE negotiation claim",
+    "No model performance claim",
+    "No physical power coordination claim",
+    "No baseline performance improvement claim"
+  ]
+}

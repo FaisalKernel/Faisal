@@ -1,0 +1,20 @@
+c[?7l[2J[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+2EFCAE00+2EF0AE00 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...
+
+
+Booting from ROM..c[?7l[2JFAISAL_M79_BOOT_OK
+M79_PROVIDER_UNSUPPORTED_OK
+M79_PROVIDER_METADATA_FUZZ_OK iterations=64
+M79_CONTEXT_FABRIC_OK active_devices=0x1 unsupported_devices=0xe active_fabric=0xf unsupported_fabric=0x30
+M79_TENSOR_TRANSPORT_OK id=1
+M79_GRAPH_TELEMETRY_OK id=1 state=2
+M79_RESOURCE_MASKS_OK measured=0xa3 unavailable=0x5c unsupported=0x0
+M79_POWER_POLICY_INTENT_OK applied=0x1 unsupported=0xa status=-95
+M79_STALE_CAPABILITY_REJECT_OK
+M79_NO_HARDWARE_CLAIM_OK
+M79_SELFTEST_EXIT=0
+FAISAL_M79_TEST_RC=0
+[    2.252502] reboot: Power down
