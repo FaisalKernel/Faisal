@@ -103,5 +103,7 @@
     "Simulation fixture validates truth separation, not predictive accuracy",
     "Smoke timings are complete QEMU harness times, not isolated kernel performance"
   ],
+  "commit": "87d1833e8d37693d36285e5672d48096163fad41",
+  "tag": "FAISAL-M82",
   "status": "validated_bounded_userspace_integration"
 }
