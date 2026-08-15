@@ -1,0 +1,65 @@
+{
+  "milestone": "M72",
+  "feature": "verified experience retention and skill operationalization service",
+  "date": "2026-08-15",
+  "kernel_base": "Linux v7.2-rc7",
+  "current_abi": 37,
+  "implementation": {
+    "service": "tools/faisal-experience/faisal_experience_service.c",
+    "header": "tools/faisal-experience/faisal_experience_service.h",
+    "persistent_memory_dependency": "M71",
+    "kernel_interfaces": [
+      "AGI_LC_RECORD_EXPERIENCE",
+      "AGI_LC_GET_EXPERIENCE",
+      "AGI_LC_PUBLISH_ARTIFACT",
+      "AGI_LC_GET_ARTIFACT",
+      "AGI_LC_MEMORY_RECORD"
+    ],
+    "max_index_items": 32
+  },
+  "build": {
+    "static_selftest_build_rc": 0,
+    "selftest": "tools/testing/selftests/agi_experience_learning_test.c"
+  },
+  "qemu": {
+    "machine": "x86_64 pc",
+    "vcpus": 2,
+    "memory_mb": 512,
+    "stress_runs": 3,
+    "validation_rc": 0,
+    "markers": {
+      "FAISAL_M72_BOOT_OK": true,
+      "M72_UNVERIFIED_REJECT_OK": true,
+      "M72_QUERY1_RETAINED_OK": true,
+      "M72_QUERY2_RETRIEVAL_OK": true,
+      "M72_SKILL_REUSE_RECORDED_OK": true,
+      "M72_STALE_ARTIFACT_REJECT_OK": true,
+      "M72_CORRECTION_REEVALUATION_OK": true,
+      "M72_SELFTEST_EXIT=0": true,
+      "FAISAL_M72_TEST_RC=0": true
+    },
+    "raw_serial_log": "tools/faisal-build/evidence/m72-qemu.log"
+  },
+  "validated_properties": {
+    "one_query_retention": true,
+    "second_query_retrieval": true,
+    "skill_reuse_recorded_as_new_experience": true,
+    "correction_requires_new_evaluation": true,
+    "stale_artifact_capability_denied": true,
+    "provenance_sequence_linked": true,
+    "storage_equals_model_retraining": false,
+    "model_output_authorizes_kernel": false,
+    "consciousness_claim": false
+  },
+  "not_claimed": [
+    "foundation-model retraining",
+    "semantic understanding",
+    "general intelligence",
+    "consciousness",
+    "automatic tool execution",
+    "skill transfer across arbitrary contexts",
+    "correctness of remembered knowledge",
+    "model quality or inference improvement",
+    "cross-session M72 index persistence"
+  ]
+}
