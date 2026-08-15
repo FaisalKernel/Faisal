@@ -1,0 +1,98 @@
+{
+  "milestone": "FAISAL-M76",
+  "name": "bounded end-to-end multi-agent integration",
+  "status": "validated",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "pre_m76_head": "bfbe9d0d312b6c0190319e74c61faeed82678740",
+  "implementation": {
+    "design": "M76-END-TO-END-DESIGN.md",
+    "service_header": "tools/faisal-coordinator/faisal_coordinator_service.h",
+    "service_source": "tools/faisal-coordinator/faisal_coordinator_service.c",
+    "selftest": "tools/testing/selftests/agi_end_to_end_test.c",
+    "qemu_harness": "tools/faisal-build/run_end_to_end_qemu.sh",
+    "composed_services": ["M72 experience", "M73 world-state", "M74 model orchestration", "M75 browser/tool broker"]
+  },
+  "build": {
+    "command": "cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -Iinclude/uapi -Itools/faisal-memory -Itools/faisal-experience -Itools/faisal-world -Itools/faisal-orchestrator -Itools/faisal-browser -Itools/faisal-coordinator tools/faisal-memory/faisal_memory_service.c tools/faisal-experience/faisal_experience_service.c tools/faisal-world/faisal_world_state_service.c tools/faisal-orchestrator/faisal_orchestrator_service.c tools/faisal-browser/faisal_browser_tool_service.c tools/faisal-coordinator/faisal_coordinator_service.c tools/testing/selftests/agi_end_to_end_test.c -o /home/ubuntu/agi-kernel/build/recovered/agi_end_to_end_test -lcrypto -ldl -lpthread",
+    "result": "pass",
+    "kernel_source_rebuilt": false,
+    "kernel_image": "/home/ubuntu/agi-kernel/build/recovered/arch/x86/boot/bzImage"
+  },
+  "qemu": {
+    "environment": "x86_64 QEMU, two virtual CPUs, 768 MiB, BusyBox initramfs",
+    "boot": "pass",
+    "selftest_exit": 0,
+    "harness_rc": 0,
+    "markers": [
+      "FAISAL_M76_BOOT_OK",
+      "M76_TASK_INPUT_FUZZ_OK iterations=64",
+      "M76_TASK_INPUT_BOUNDARY_OK",
+      "M76_INDEPENDENT_APPROVAL_DENIAL_OK",
+      "M76_LONG_HORIZON_GRAPH_OK stages=5 experience=2 world=2 browser=1",
+      "M76_MULTI_AGENT_IPC_OK coordinator=1 planner=2 verifier=3 channel=1",
+      "M76_MONITORING_REFLECTION_OK action=1 sequence=2",
+      "M76_DEPLOYMENT_GATE_APPROVED_OK",
+      "M76_FAILURE_RECOVERY_OK stage=4 recovery=6",
+      "M76_SELFTEST_EXIT=0",
+      "FAISAL_M76_TEST_RC=0"
+    ],
+    "smoke_runs": [
+      {"run": 1, "elapsed_ns": 5178647065, "markers": 1},
+      {"run": 2, "elapsed_ns": 5185287396, "markers": 1},
+      {"run": 3, "elapsed_ns": 5056963716, "markers": 1},
+      {"run": 4, "elapsed_ns": 5161541444, "markers": 1},
+      {"run": 5, "elapsed_ns": 5152207396, "markers": 1}
+    ]
+  },
+  "functional": {
+    "experience_stage": "pass",
+    "model_admission_checkpoint_output": "pass",
+    "world_fact_temporal_resource_stage": "pass",
+    "browser_tool_stage": "pass",
+    "light_agent_roles": ["coordinator", "planner", "verifier"],
+    "ipc_channel": "pass",
+    "ipc_priority_receive": "pass",
+    "ipc_queued_message_cancellation": "pass",
+    "light_agent_acknowledgements": "pass",
+    "reflection_action": "pass",
+    "observability": "pass",
+    "failure_injection_stage": "browser",
+    "recovery": "pass",
+    "deployment_gate": "independent supervisor and operator approvals required"
+  },
+  "security": {
+    "approval_denial": true,
+    "malformed_task_mutations": 64,
+    "model_output_authority": false,
+    "page_content_authority": false,
+    "ipc_endpoint_capability_checks": true,
+    "ipc_cancel_sender_ownership": true,
+    "bounded_inline_message": true,
+    "production_deploy_performed": false
+  },
+  "regression": {
+    "harnesses": ["M64", "M66", "M67", "M68", "M69", "M70", "M71", "M72", "M73", "M74", "M75", "M76"],
+    "result": "12/12 pass",
+    "panic_or_oops_scan": "no matches"
+  },
+  "evidence_files": {
+    "milestone": "MILESTONE76.md",
+    "security_review": "M76-SECURITY-REVIEW.md",
+    "benchmarks": "M76-BENCHMARKS.md",
+    "qemu_log": "tools/faisal-build/evidence/m76-qemu.log",
+    "regression_log": "tools/faisal-build/evidence/m76-regression.log",
+    "benchmark_log": "tools/faisal-build/evidence/m76-benchmark.log",
+    "selftest_build_log": "tools/faisal-build/evidence/m76-selftest-build.log"
+  },
+  "non_claims": [
+    "No consciousness or semantic self-awareness claim",
+    "No model retraining claim",
+    "No general intelligence or reasoning-quality claim",
+    "No complete browser safety or prompt-injection immunity claim",
+    "No complete multi-agent scalability claim",
+    "No arbitrary model/browser state restoration claim",
+    "No production kernel or service deployment claim",
+    "No performance improvement claim versus baseline Linux"
+  ]
+}
