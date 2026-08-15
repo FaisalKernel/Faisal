@@ -1,0 +1,99 @@
+{
+  "milestone": "FAISAL-M75",
+  "name": "capability-scoped browser and tool broker",
+  "status": "validated",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "pre_m75_head": "c0e6ea28969789fc8a77059d4da7c7fbaad2dd7b",
+  "validation_environment": {
+    "architecture": "x86_64",
+    "qemu": "QEMU x86_64, two virtual CPUs, 512 MiB",
+    "toolchain": "GCC 13.3.0, static OpenSSL 3.x EVP linkage",
+    "build_output": "/home/ubuntu/agi-kernel/build/recovered"
+  },
+  "implementation": {
+    "design": "M75-BROWSER-TOOL-DESIGN.md",
+    "service_header": "tools/faisal-browser/faisal_browser_tool_service.h",
+    "service_source": "tools/faisal-browser/faisal_browser_tool_service.c",
+    "selftest": "tools/testing/selftests/agi_browser_tool_test.c",
+    "qemu_harness": "tools/faisal-build/run_browser_tool_qemu.sh",
+    "persistent_memory_dependency": "tools/faisal-memory/faisal_memory_service.c"
+  },
+  "build": {
+    "selftest_command": "cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -Iinclude/uapi -Itools/faisal-memory -Itools/faisal-browser tools/faisal-memory/faisal_memory_service.c tools/faisal-browser/faisal_browser_tool_service.c tools/testing/selftests/agi_browser_tool_test.c -o /home/ubuntu/agi-kernel/build/recovered/agi_browser_tool_test -lcrypto -ldl -lpthread",
+    "selftest_result": "pass",
+    "kernel_rebuild_dependency": "current FAISAL ABI-37 kernel image reused; no kernel source change in M75"
+  },
+  "qemu": {
+    "boot": "pass",
+    "selftest_exit": 0,
+    "harness_rc": 0,
+    "required_markers": [
+      "FAISAL_M75_BOOT_OK",
+      "M75_SELFTEST_EXIT=0",
+      "FAISAL_M75_TEST_RC=0"
+    ],
+    "functional_markers": [
+      "M75_SCOPED_NETWORK_AND_GRANT_OK policy=1 grant=1",
+      "M75_BROWSER_OPEN_OK session=1",
+      "M75_SCOPE_DENIALS_OK",
+      "M75_PROMPT_INJECTION_RESISTANCE_OK",
+      "M75_ACTION_FUZZ_REJECT_OK iterations=64",
+      "M75_SEMANTIC_NAVIGATION_OK action=1 sequence=5",
+      "M75_UPLOAD_SCOPE_OK",
+      "M75_DOWNLOAD_SCOPE_OK",
+      "M75_BROWSER_QUERY_OK actions=3 semantic=3",
+      "M75_BROWSER_CANCEL_OK",
+      "M75_POST_CANCEL_DENIAL_OK"
+    ],
+    "smoke_runs": [
+      {"run": 1, "elapsed_ns": 5055003293, "success_markers": 1},
+      {"run": 2, "elapsed_ns": 5029797016, "success_markers": 1},
+      {"run": 3, "elapsed_ns": 4930867533, "success_markers": 1},
+      {"run": 4, "elapsed_ns": 5189085193, "success_markers": 1},
+      {"run": 5, "elapsed_ns": 4985733572, "success_markers": 1}
+    ]
+  },
+  "security": {
+    "browser_capability_rights": ["BROWSER_CONTROL", "NET_CONNECT", "FS_READ", "FS_WRITE"],
+    "sandbox_flags": ["USER_NAMESPACE", "NETWORK_NAMESPACE", "CGROUP", "SECCOMP"],
+    "network_policy_active": true,
+    "network_policy_raw_denied": true,
+    "network_policy_listen_denied": true,
+    "network_policy_socket_ceiling": 8,
+    "out_of_scope_navigation_denied": true,
+    "unconfirmed_upload_denied": true,
+    "hostile_content_denied": true,
+    "malformed_action_mutations": 64,
+    "post_cancel_action_denied": true,
+    "model_or_page_text_authority": false
+  },
+  "provenance": {
+    "successful_action_event_sequence": 5,
+    "successful_action_memory_capability_observed": true,
+    "policy_generation_recorded": true
+  },
+  "regression": {
+    "harnesses": [
+      "M64", "M66", "M67", "M68", "M69", "M70", "M71", "M72", "M73", "M74", "M75"
+    ],
+    "result": "11/11 pass"
+  },
+  "evidence_files": {
+    "milestone": "MILESTONE75.md",
+    "security_review": "M75-SECURITY-REVIEW.md",
+    "benchmarks": "M75-BENCHMARKS.md",
+    "qemu_log": "tools/faisal-build/evidence/m75-qemu.log",
+    "regression_log": "tools/faisal-build/evidence/m75-regression.log",
+    "benchmark_log": "tools/faisal-build/evidence/m75-benchmark.log",
+    "selftest_build_log": "tools/faisal-build/evidence/m75-selftest-build.log"
+  },
+  "non_claims": [
+    "No general browser-agent or semantic-understanding claim",
+    "No complete prompt-injection-immunity claim",
+    "No web-source verification or real-world action-success claim",
+    "No consciousness claim",
+    "No capability authorization from page text or model output",
+    "No upstream Linux or browser-engine performance comparison in this milestone"
+  ]
+}
