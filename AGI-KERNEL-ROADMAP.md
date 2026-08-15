@@ -12,11 +12,12 @@ This roadmap is an active dependency graph. The 14 strategic phases are not a se
 |---|---|
 | M73 evidence | Validated as `FAISAL-M73`; world-state design, security, benchmarks, QEMU, and regression evidence stored |
 | M74 evidence | Validated as `FAISAL-M74`; model admission, policy denial, checkpoint/rollback, output non-authority, fuzz, QEMU, and regression evidence stored |
+| M75 evidence | Validated as `FAISAL-M75`; browser grant, network policy, semantic actions, transfer scopes, hostile-content, cancellation, QEMU, and regression evidence stored |
 | Linux foundation | Verified Linux `v7.2-rc7`, local tag `upstream-v7.2-rc7` |
-| Latest tagged FAISAL milestone | `FAISAL-M74`, trusted model/runtime orchestration |
+| Latest tagged FAISAL milestone | `FAISAL-M75`, capability-scoped browser and tool broker |
 | Kernel ABI | 37 |
-| Validated kernel and service primitives | Lifecycle, agent/task identity, scoped capabilities, provenance binding, tensor/graph/context control plane, tensor transport metadata, deterministic domains, heterogeneous-context negotiation, graph telemetry, CPU PM QoS policy intent, durable userspace memory journal, checkpoint/recovery integration, verified experience retention, skill-artifact gating, correction/re-evaluation, selective world subscriptions, world-sync acknowledgement, freshness/conflict state, temporal checks, honest resource snapshots, trusted model admission, explicit approval gates, kernel budget enforcement, checkpoint verification, rollback sequencing, model-output non-authority boundary |
-| Next selected dependency | M75 capability-scoped browser and tool supervision |
+| Validated kernel and service primitives | Lifecycle, agent/task identity, scoped capabilities, provenance binding, tensor/graph/context control plane, tensor transport metadata, deterministic domains, heterogeneous-context negotiation, graph telemetry, CPU PM QoS policy intent, durable userspace memory journal, checkpoint/recovery integration, verified experience retention, skill-artifact gating, correction/re-evaluation, selective world subscriptions, world-sync acknowledgement, freshness/conflict state, temporal checks, honest resource snapshots, trusted model admission, explicit approval gates, kernel budget enforcement, checkpoint verification, rollback sequencing, model-output non-authority boundary, capability-scoped browser sessions, network policy, semantic action records, transfer scopes, hostile-content denial, cancellation |
+| Next selected dependency | M76 end-to-end multi-agent integration, deployment, monitoring, and rollback |
 | Complete-system status | Not operational; userspace services and end-to-end autonomous integration remain unfinished |
 
 ## Strategic domains and implementation gates
@@ -95,6 +96,7 @@ A work item is blocked when an acceptance gate cannot be executed or when a crit
 3. **M72 verified experience pipeline:** validated and committed as `FAISAL-M72`; retain the no-retraining and stale-artifact regression gates.
 4. **M73 world-state service:** validated as `FAISAL-M73`; retain event-loss, freshness, conflict, temporal-capability, and resource-mask regression coverage.
 5. **M74 trusted model/runtime orchestration:** validated as `FAISAL-M74`; retain independent-approval, resource-admission, checkpoint/rollback, and model-output non-authority regression coverage.
-6. **M75 capability-scoped browser and tool supervision:** build userspace browser/tool broker behind kernel network, browser-session, provenance, and capability boundaries; browser content and model output remain untrusted.
+6. **M75 capability-scoped browser and tool supervision:** validated as `FAISAL-M75`; retain browser-grant, network-scope, transfer-scope, hostile-content, provenance, and cancellation regression coverage.
+7. **M76 end-to-end multi-agent integration:** integrate orchestration, world state, experience, browser/tool supervision, long-horizon tasks, failure recovery, monitoring, deployment gates, and rollback under independent supervisor/operator approval.
 
 The queue is provisional and must be recomputed after every failure, security finding, benchmark regression, or new provider dependency.

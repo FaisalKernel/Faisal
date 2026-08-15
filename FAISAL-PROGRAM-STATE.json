@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "6a12e3a05315e28d6ac8e4a1c51da6664b6835c1",
-  "current_tag": "FAISAL-M74",
+  "current_head": "6b2bb84c670f50d0637657dc47b006ca5644b530",
+  "current_tag": "FAISAL-M75",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -48,7 +48,7 @@
     {"id": 10, "name": "Persistent memory and experience learning", "status": "unfinished"},
     {"id": 11, "name": "World model and temporal/causal state", "status": "partial_userspace_service_validated"},
     {"id": 12, "name": "Verified internet research and source provenance", "status": "unfinished"},
-    {"id": 13, "name": "Browser and computer-use service", "status": "unfinished"},
+    {"id": 13, "name": "Browser and computer-use service", "status": "partial_capability_scoped_broker_validated"},
     {"id": 14, "name": "Multi-agent integration, deployment, rollback, and continuous improvement", "status": "unfinished"}
   ],
   "dependencies": [
@@ -111,24 +111,26 @@
       "id": "M75-browser-tool-supervision",
       "phase": 13,
       "name": "Capability-scoped browser and tool broker",
-      "status": "next",
+      "status": "validated",
       "priority": 100,
       "depends_on": ["M64-security-stabilization", "M74-model-orchestration"],
       "unlocks": ["M76-end_to_end_agent"],
-      "evidence_required": ["semantic_browser_fixture", "network_scope", "upload_download_scope", "prompt_injection_resistance", "audit_provenance"]
+      "evidence_required": ["semantic_browser_fixture", "network_scope", "upload_download_scope", "prompt_injection_resistance", "audit_provenance"],
+      "evidence": ["MILESTONE75.md", "M75-BROWSER-TOOL-DESIGN.md", "M75-SECURITY-REVIEW.md", "M75-BENCHMARKS.md", "tools/faisal-build/evidence/m75-browser-tool-validation.json"],
+      "next_action": "Retain browser grant, network-scope, transfer-scope, hostile-content, provenance, and cancellation regression coverage."
     },
     {
       "id": "M76-end_to_end_agent",
       "phase": 14,
       "name": "Multi-agent autonomous integration, deployment, monitoring, and rollback",
-      "status": "queued",
-      "priority": 60,
+      "status": "next",
+      "priority": 100,
       "depends_on": ["M74-model-orchestration", "M75-browser-tool-supervision", "M73-world-model", "M72-experience-learning"],
       "unlocks": [],
       "evidence_required": ["long_horizon_task", "multi_agent_coordination", "failure_recovery", "fuzzing", "security_audit", "baseline_comparison", "canary", "rollback"]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",
