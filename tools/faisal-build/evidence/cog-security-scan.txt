@@ -1,0 +1,31 @@
+COG_SECURITY_SCAN
+--- forbidden floating point / semantic kernel patterns ---
+tools/cog-kernel/cog_kernel.c:8: * milli-units instead of float.
+--- unsafe copy/process primitives ---
+--- synchronization/lifecycle markers ---
+114:		call_rcu(&atom->rcu, cog_atom_rcu_free);
+124:	hash_for_each_possible_rcu(cog_atom_table, atom, hash_node, uuid) {
+167:	spin_lock_irqsave(&cog_atom_lock, flags);
+206:	spin_lock_irqsave(&cog_atom_lock, flags);
+235:	spin_lock_irqsave(&cog_atom_lock, flags);
+281:	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
+305:	if (copy_to_user((void __user *)arg, &request, sizeof(request))) {
+308:		spin_lock_irqsave(&cog_atom_lock, flags);
+322:	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
+329:	spin_lock_irqsave(&cog_atom_lock, flags);
+336:	if (copy_to_user((void __user *)arg, &request, sizeof(request)))
+347:	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
+354:	spin_lock_irqsave(&cog_atom_lock, flags);
+362:	if (copy_to_user((void __user *)arg, &request, sizeof(request)))
+397:	cog_atom_cache = kmem_cache_create("cog_atom", sizeof(struct cog_atom),
+401:	cog_atom_shrinker = shrinker_alloc(0, "faisal-cog");
+407:	shrinker_register(cog_atom_shrinker);
+419:		shrinker_free(cog_atom_shrinker);
+422:	spin_lock_irqsave(&cog_atom_lock, flags);
+426:	rcu_barrier();
+428:		kmem_cache_destroy(cog_atom_cache);
+460:	cog_scheduler = kthread_run(cog_scheduler_fn, NULL, "cog_scheduler");
+488:		kthread_stop(cog_scheduler);
+--- module artifact ---
+tools/cog-kernel/cog_kernel.ko: ELF 64-bit LSB relocatable, x86-64, version 1 (SYSV), BuildID[sha1]=693079dd8a1d6f5b24dafc5f51ab170b8c059243, not stripped
+tools/cog-kernel/cog_tester:    ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, BuildID[sha1]=18a2b3c718cedce836641c66c463313ccfaa4d6e, for GNU/Linux 3.2.0, not stripped

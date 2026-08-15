@@ -1,0 +1,5 @@
+mode=deterministic run=1 rc=0 elapsed_ms=6304
+mode=deterministic run=2 rc=0 elapsed_ms=6175
+mode=deterministic run=3 rc=0 elapsed_ms=6280
+mode=drift run=1 rc=0 elapsed_ms=6168
+COG_SMOKE_TOTAL=4

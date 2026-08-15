@@ -192,6 +192,18 @@
       "next_action": "Retain provenance, truth-class separation, freshness, contradiction, restart, and M71–M76 regression coverage; do not claim transactional cross-journal rollback until M83 validates it."
     },
     {
+      "id": "M84-cogos-atom-control-plane",
+      "phase": 5,
+      "name": "CogOS bounded atom metadata control-plane module with RCU, shrinker, scheduler stub, and ioctl lifecycle",
+      "status": "validated_experimental_module",
+      "priority": 90,
+      "depends_on": ["M64-security-stabilization", "M71-persistent-memory-service"],
+      "unlocks": [],
+      "evidence_required": ["strict_module_build", "ioctl_selftest", "qemu_insert", "qemu_unload", "attention_thread", "security_review", "benchmark"],
+      "evidence": ["MILESTONE84.md", "tools/cog-kernel/COGOS-FAISAL-DESIGN.md", "tools/cog-kernel/COGOS-FAISAL-SECURITY-REVIEW.md", "tools/faisal-build/evidence/cog-kernel-validation.json"],
+      "next_action": "Keep this as an experimental private module; do not promote it into the stable FAISAL ABI until randomized ioctl fuzzing, sanitizer/lockdep coverage, namespace/capability policy, and scalability benchmarks are available."
+    },
+    {
       "id": "M81-concurrent-sanitizer-validation",
       "phase": 14,
       "name": "Concurrent lifecycle and IPC stress with sanitizer-enabled kernel validation",
@@ -202,7 +214,7 @@
       "evidence_required": ["concurrent_stress", "kasan_or_documented_blocker", "kcsan_or_documented_blocker", "lockdep_or_documented_blocker", "randomized_inputs", "security_review", "regression"]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M82"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M82", "FAISAL-M84"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",

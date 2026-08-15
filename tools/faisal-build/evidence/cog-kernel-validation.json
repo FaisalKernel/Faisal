@@ -1,0 +1,68 @@
+{
+  "project": "FAISAL",
+  "milestone": "M83",
+  "title": "CogOS bounded atom control-plane kernel module",
+  "date": "2026-08-15",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "implementation": {
+    "module": "tools/cog-kernel/cog_kernel.c",
+    "makefile": "tools/cog-kernel/Makefile",
+    "tester": "tools/cog-kernel/cog_tester.c",
+    "host_runner": "tools/cog-kernel/run_cog_test.sh",
+    "qemu_harness": "tools/faisal-build/run_cog_kernel_qemu.sh",
+    "private_experimental_abi": true,
+    "kernel_abi_expansion": false,
+    "attention_representation": "u32 fixed-point milli-units",
+    "shrinker_lifecycle": "shrinker_alloc/shrinker_register/shrinker_free"
+  },
+  "build": {
+    "module": "passed",
+    "tester": "passed",
+    "warnings": "-Wall -Werror -Wno-declaration-after-statement",
+    "module_log": "/home/ubuntu/agi-kernel/build/recovered/cog-module-build-final.log",
+    "tester_log": "/home/ubuntu/agi-kernel/build/recovered/cog-tester-build-final.log"
+  },
+  "qemu": {
+    "deterministic": {
+      "status": "passed",
+      "markers": ["COG_BOOT_OK", "COG_LEARN_OK", "COG_THINK_OK", "COG_FOCUS_OK", "COG_POST_FOCUS_THINK_OK", "COG_MALFORMED_IOCTL_REJECT_OK", "COG_TEST_EXIT=0", "COG_MODULE_UNLOAD_OK", "COG_QEMU_TEST_RC=0"]
+    },
+    "attention_drift_enabled": {
+      "status": "passed",
+      "markers": ["COG_BOOT_OK", "COG_LEARN_OK", "COG_THINK_OK", "COG_FOCUS_OK", "COG_POST_FOCUS_THINK_OK", "COG_MALFORMED_IOCTL_REJECT_OK", "COG_TEST_EXIT=0", "COG_MODULE_UNLOAD_OK", "COG_QEMU_TEST_RC=0"]
+    },
+    "raw_log": "/home/ubuntu/agi-kernel/build/qemu-cog-kernel/qemu.log"
+  },
+  "smoke_runs": {
+    "count": 4,
+    "exit_codes": [0, 0, 0, 0],
+    "modes": ["deterministic", "deterministic", "deterministic", "attention_drift_enabled"],
+    "elapsed_ms": [6304, 6175, 6280, 6168],
+    "mean_ms": 6231.7,
+    "min_ms": 6168,
+    "max_ms": 6304,
+    "range_ms": 136,
+    "summary": "/home/ubuntu/agi-kernel/build/recovered/cog-smoke-summary.txt"
+  },
+  "security": {
+    "user_copy_helpers_only": true,
+    "unsafe_copy_or_process_primitives_found": false,
+    "floating_point_data_types_found": false,
+    "rcu_reference_teardown": true,
+    "shrinker_partial_init_cleanup": true,
+    "module_unload_tested": true,
+    "scan": "/home/ubuntu/agi-kernel/build/recovered/cog-security-scan.txt",
+    "review": "tools/cog-kernel/COGOS-FAISAL-SECURITY-REVIEW.md"
+  },
+  "non_claims": [
+    "No semantic reasoning or model execution in kernel",
+    "No model-output authority",
+    "No production AtomSpace scalability claim",
+    "No KASAN/KCSAN/UBSAN/lockdep/syzkaller coverage",
+    "No randomized ioctl fuzzing claim",
+    "No physical-hardware validation claim",
+    "No performance superiority claim"
+  ],
+  "status": "validated_experimental_module"
+}

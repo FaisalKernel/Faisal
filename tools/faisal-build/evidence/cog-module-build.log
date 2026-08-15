@@ -1,0 +1,10 @@
+make: Entering directory '/home/ubuntu/agi-kernel/linux/tools/cog-kernel'
+make -C /home/ubuntu/agi-kernel/linux O=/home/ubuntu/agi-kernel/build/recovered M=/home/ubuntu/agi-kernel/linux/tools/cog-kernel modules
+make[1]: Entering directory '/home/ubuntu/agi-kernel/linux'
+make[2]: Entering directory '/home/ubuntu/agi-kernel/linux/tools/cog-kernel'
+  CC [M]  cog_kernel.o
+  MODPOST Module.symvers
+  LD [M]  cog_kernel.ko
+make[2]: Leaving directory '/home/ubuntu/agi-kernel/linux/tools/cog-kernel'
+make[1]: Leaving directory '/home/ubuntu/agi-kernel/linux'
+make: Leaving directory '/home/ubuntu/agi-kernel/linux/tools/cog-kernel'
