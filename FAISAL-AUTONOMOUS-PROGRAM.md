@@ -2,7 +2,7 @@
 
 **Project:** FAISAL
 **Current kernel base:** Linux `v7.2-rc7`
-**Current tagged milestone:** `FAISAL-M70`
+**Current tagged milestone:** `FAISAL-M73`
 **Program status:** Active; not complete.
 
 ## End goal
@@ -123,8 +123,8 @@ P1 Linux foundation and verified baseline
  └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-The actual next dependency is selected from the live graph. M64 agent-oriented security, M71 persistent memory, and M72 verified experience learning have been completed and validated on ABI 37. M72 demonstrates experience retention, evaluation-gated skill artifacts, retrieval, reuse recording, and correction/re-evaluation without claiming foundation-model retraining. The next selected dependency is M73 temporal world-state synchronization; browser, orchestration, and multi-agent services remain downstream dependencies.
+The actual next dependency is selected from the live graph. M64 agent-oriented security, M71 persistent memory, M72 verified experience learning, and M73 temporal world-state synchronization have been completed and validated on ABI 37. M73 demonstrates bounded world-state indexing, selective subscription, kernel-sequence acknowledgement, stale-state retention, conflict retention with explicit resolution, temporal checks, honest resource masks, malformed-input rejection, and stale-capability rejection. It does not claim consciousness, semantic truth, model retraining, or action authorization. The next selected dependency is M74 trusted model/runtime orchestration; browser and multi-agent services remain downstream dependencies.
 
 ## Governance
 
-The program maintains small, reviewable commits and milestone tags. Every change records affected subsystems, compatibility impact, security impact, tests, benchmarks, and rollback. Unrelated untracked work is never silently included in a milestone. The active program state is updated after meaningful implementation, validation, failure, or dependency changes.
+The program maintains small, reviewable commits and milestone tags. Every change records affected subsystems, compatibility impact, security impact, tests, benchmarks, and rollback. Unrelated untracked work is never silently included in a milestone. M73 evidence is stored under `tools/faisal-build/evidence/`, including raw QEMU, regression, benchmark, and kernel-build logs. The active program state is updated after meaningful implementation, validation, failure, or dependency changes.
