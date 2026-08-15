@@ -28,7 +28,9 @@
       "-static"
     ],
     "libraries": ["crypto", "dl", "pthread"],
-    "git_head_before_m80_commit": "7d55eaa5fc2545814c91ec5602d991b439acd015"
+    "git_head_before_m80_commit": "7d55eaa5fc2545814c91ec5602d991b439acd015",
+    "git_commit": "43b38f3ee8cd5966c87324e6df1dc25eb6bf22a1",
+    "git_tag": "FAISAL-M80"
   },
   "scenarios": {
     "malformed_uapi": {
