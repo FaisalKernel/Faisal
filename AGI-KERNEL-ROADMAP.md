@@ -13,11 +13,12 @@ This roadmap is an active dependency graph. The 14 strategic phases are not a se
 | M73 evidence | Validated as `FAISAL-M73`; world-state design, security, benchmarks, QEMU, and regression evidence stored |
 | M74 evidence | Validated as `FAISAL-M74`; model admission, policy denial, checkpoint/rollback, output non-authority, fuzz, QEMU, and regression evidence stored |
 | M75 evidence | Validated as `FAISAL-M75`; browser grant, network policy, semantic actions, transfer scopes, hostile-content, cancellation, QEMU, and regression evidence stored |
+| M76 evidence | Validated as `FAISAL-M76`; five-stage end-to-end composition, multi-agent IPC/cancellation, reflection/observability, deployment gates, deterministic recovery, QEMU, fuzz, and regression evidence stored |
 | Linux foundation | Verified Linux `v7.2-rc7`, local tag `upstream-v7.2-rc7` |
-| Latest tagged FAISAL milestone | `FAISAL-M75`, capability-scoped browser and tool broker |
+| Latest tagged FAISAL milestone | `FAISAL-M76`, bounded end-to-end multi-agent integration |
 | Kernel ABI | 37 |
-| Validated kernel and service primitives | Lifecycle, agent/task identity, scoped capabilities, provenance binding, tensor/graph/context control plane, tensor transport metadata, deterministic domains, heterogeneous-context negotiation, graph telemetry, CPU PM QoS policy intent, durable userspace memory journal, checkpoint/recovery integration, verified experience retention, skill-artifact gating, correction/re-evaluation, selective world subscriptions, world-sync acknowledgement, freshness/conflict state, temporal checks, honest resource snapshots, trusted model admission, explicit approval gates, kernel budget enforcement, checkpoint verification, rollback sequencing, model-output non-authority boundary, capability-scoped browser sessions, network policy, semantic action records, transfer scopes, hostile-content denial, cancellation |
-| Next selected dependency | M76 end-to-end multi-agent integration, deployment, monitoring, and rollback |
+| Validated kernel and service primitives | Lifecycle, agent/task identity, scoped capabilities, provenance binding, tensor/graph/context control plane, tensor transport metadata, deterministic domains, heterogeneous-context negotiation, graph telemetry, CPU PM QoS policy intent, durable userspace memory journal, checkpoint/recovery integration, verified experience retention, skill-artifact gating, correction/re-evaluation, selective world subscriptions, world-sync acknowledgement, freshness/conflict state, temporal checks, honest resource snapshots, trusted model admission, explicit approval gates, kernel budget enforcement, checkpoint verification, rollback sequencing, model-output non-authority boundary, capability-scoped browser sessions, network policy, semantic action records, transfer scopes, hostile-content denial, cancellation, bounded multi-agent IPC, queued-message cancellation, reflection, observability, deployment-gate separation, deterministic recovery |
+| Next selected dependency | M77 verified internet research and source provenance service |
 | Complete-system status | Not operational; userspace services and end-to-end autonomous integration remain unfinished |
 
 ## Strategic domains and implementation gates
@@ -97,6 +98,7 @@ A work item is blocked when an acceptance gate cannot be executed or when a crit
 4. **M73 world-state service:** validated as `FAISAL-M73`; retain event-loss, freshness, conflict, temporal-capability, and resource-mask regression coverage.
 5. **M74 trusted model/runtime orchestration:** validated as `FAISAL-M74`; retain independent-approval, resource-admission, checkpoint/rollback, and model-output non-authority regression coverage.
 6. **M75 capability-scoped browser and tool supervision:** validated as `FAISAL-M75`; retain browser-grant, network-scope, transfer-scope, hostile-content, provenance, and cancellation regression coverage.
-7. **M76 end-to-end multi-agent integration:** integrate orchestration, world state, experience, browser/tool supervision, long-horizon tasks, failure recovery, monitoring, deployment gates, and rollback under independent supervisor/operator approval.
+7. **M76 end-to-end multi-agent integration:** validated as `FAISAL-M76`; retain five-stage composition, IPC/cancellation, monitoring, approval-denial, recovery, and M64–M75 regression coverage.
+8. **M77 verified internet research and source provenance:** build the userspace research/source-verification service behind M75 network/browser scopes and M73 world-state freshness/conflict semantics; retain primary-source preference, retrieval timestamps, cross-check, conflict retention, and no-unverified-fact boundary.
 
 The queue is provisional and must be recomputed after every failure, security finding, benchmark regression, or new provider dependency.
