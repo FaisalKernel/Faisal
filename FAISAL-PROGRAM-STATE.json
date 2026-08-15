@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "67ab9bd240af79b53fea821e2d3521c388de2f96",
-  "current_tag": "FAISAL-M64-SECURITY-COMPLETION",
+  "current_head": "2d3b703bcd43c1868acdcc3b5652852dc02d5023",
+  "current_tag": "FAISAL-M71",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -61,13 +61,13 @@
       "depends_on": ["M63-compute-context-foundation"],
       "unlocks": ["M71-persistent-memory-service", "M74-browser-tool-supervision", "M75-multi-agent-coordination"],
       "evidence_required": ["full_build", "static_selftest", "QEMU_boot", "cross_agent_denial", "cross_resource_denial", "stale_generation_denial", "provenance_bind_query", "security_review", "benchmark_or_blocker", "commit_and_tag"],
-      "next_action": "Compile and run the untracked M64 selftest against current ABI-37, diagnose incompatibilities, fix only justified ABI/test defects, then boot-validate and commit if gates pass."
+      "next_action": "Retain M64 regression coverage while downstream services proceed."
     },
     {
       "id": "M71-persistent-memory-service",
       "phase": 10,
       "name": "Userspace persistent memory service integrated with kernel capabilities and checkpoint references",
-      "status": "next",
+      "status": "validated",
       "priority": 100,
       "depends_on": ["M64-security-stabilization", "M61-memory-primitives"],
       "unlocks": ["M72-experience-learning", "M73-world-model"],
@@ -77,8 +77,8 @@
       "id": "M72-experience-learning",
       "phase": 12,
       "name": "Experience record, evaluation, retrieval, and skill operationalization service",
-      "status": "queued",
-      "priority": 80,
+      "status": "next",
+      "priority": 100,
       "depends_on": ["M71-persistent-memory-service", "M69-graph-telemetry"],
       "unlocks": ["M74-model-orchestration"],
       "evidence_required": ["one_query_retention", "second_query_retrieval", "skill_reuse", "correction", "provenance", "explicit_no_retraining_claim"]
@@ -124,7 +124,7 @@
       "evidence_required": ["long_horizon_task", "multi_agent_coordination", "failure_recovery", "fuzzing", "security_audit", "baseline_comparison", "canary", "rollback"]
     }
   ],
-  "completed_milestones": ["FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",

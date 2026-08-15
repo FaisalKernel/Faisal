@@ -123,7 +123,7 @@ P1 Linux foundation and verified baseline
  └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-The actual next dependency is selected from the live graph. M64 agent-oriented security was the highest-priority unfinished foundation and has now been completed and validated on ABI 37. The next selected dependency is the persistent memory service, which must integrate kernel capabilities, provenance, checkpoint references, restart recovery, and explicit non-fabrication of learning claims before experience, world-model, browser, and multi-agent services proceed.
+The actual next dependency is selected from the live graph. M64 agent-oriented security and M71 persistent memory have been completed and validated on ABI 37. The next selected dependency is M72 verified experience learning: the system must record, evaluate, retrieve, correct, and operationalize experience or skills while explicitly refusing to call storage alone model retraining. World-model, browser, orchestration, and multi-agent services remain downstream dependencies.
 
 ## Governance
 

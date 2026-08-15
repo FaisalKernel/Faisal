@@ -11,10 +11,10 @@ This roadmap is an active dependency graph. The 14 strategic phases are not a se
 | Item | State |
 |---|---|
 | Linux foundation | Verified Linux `v7.2-rc7`, local tag `upstream-v7.2-rc7` |
-| Latest integrated FAISAL security completion | `FAISAL-M64-SECURITY-COMPLETION` on top of ABI 37 and M70 |
+| Latest tagged FAISAL milestone | `FAISAL-M71`, persistent memory service |
 | Kernel ABI | 37 |
-| Validated kernel primitives | Lifecycle, agent/task identity, memory/tensor metadata, scoped capabilities, provenance binding, graph/context control plane, tensor transport metadata, deterministic domains, heterogeneous-context negotiation, graph telemetry, CPU PM QoS policy intent |
-| Next selected dependency | M71 persistent memory service integrated with kernel capabilities, provenance, checkpoints, and recovery |
+| Validated kernel and service primitives | Lifecycle, agent/task identity, scoped capabilities, provenance binding, tensor/graph/context control plane, tensor transport metadata, deterministic domains, heterogeneous-context negotiation, graph telemetry, CPU PM QoS policy intent, durable userspace memory journal, checkpoint/recovery integration |
+| Next selected dependency | M72 verified experience learning and skill operationalization |
 | Complete-system status | Not operational; userspace services and end-to-end autonomous integration remain unfinished |
 
 ## Strategic domains and implementation gates
@@ -89,8 +89,8 @@ A work item is blocked when an acceptance gate cannot be executed or when a crit
 ## Immediate dependency queue
 
 1. **M64 security completion:** validated and committed as `FAISAL-M64-SECURITY-COMPLETION`; retain regression coverage while downstream work proceeds.
-2. **M71 persistent memory service contract:** implement the first userspace service plus kernel-backed durable memory/checkpoint integration, with explicit provenance and capability gates.
-3. **M72 verified experience pipeline:** record, evaluate, retrieve, and operationalize experiences without claiming foundation-model retraining.
+2. **M71 persistent memory service contract:** validated and committed as `FAISAL-M71`; retain restart, corruption, checkpoint, and capability regression coverage.
+3. **M72 verified experience pipeline:** record, evaluate, retrieve, correct, and operationalize experiences without claiming foundation-model retraining.
 4. **M73 world-state service:** build event-driven system/world self-state representation with temporal ordering and freshness.
 5. **M74 trusted model/tool/browser orchestration:** integrate userspace model and browser services behind the supervisor and capability APIs.
 
