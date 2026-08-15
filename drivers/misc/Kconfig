@@ -651,4 +651,15 @@ source "drivers/misc/mchp_pci1xxxx/Kconfig"
 source "drivers/misc/keba/Kconfig"
 source "drivers/misc/amd-sbi/Kconfig"
 source "drivers/misc/rp1/Kconfig"
+
+config AGI_LIFECYCLE
+	tristate "FAISAL AGI lifecycle control"
+	depends on MMU
+	select CRYPTO_SHA256
+	help
+	  Enable the FAISAL lifecycle control device. The kernel provides
+	  identity, resource accounting, isolation metadata, cancellation,
+	  provenance, and bounded control-plane objects. Model inference,
+	  reasoning, semantic memory, and browser logic remain in userspace.
+
 endmenu

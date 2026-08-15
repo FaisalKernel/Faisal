@@ -10,7 +10,7 @@ obj-y     = fork.o exec_domain.o exec_state.o panic.o \
 	    extable.o params.o \
 	    kthread.o sys_ni.o nsproxy.o nstree.o nscommon.o \
 	    notifier.o ksysfs.o cred.o reboot.o \
-	    async.o range.o smpboot.o ucount.o regset.o ksyms_common.o
+		    async.o range.o smpboot.o ucount.o regset.o ksyms_common.o faisal.o
 
 obj-$(CONFIG_MULTIUSER) += groups.o
 obj-$(CONFIG_VHOST_TASK) += vhost_task.o
