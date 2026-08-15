@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "64fd4d42e445c6fb8fa9d8a33f2e87077a8d29be",
-  "current_tag": "FAISAL-M78",
+  "current_head": "a1248195ceb5cef8f1d10e36796b8eb01b96f14b",
+  "current_tag": "FAISAL-M79",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -43,7 +43,7 @@
     {"id": 5, "name": "Memory, tensor objects, checkpoint, and recovery primitives", "status": "partial_kernel_primitives"},
     {"id": 6, "name": "Agent IPC and cancellation", "status": "partial_kernel_primitives"},
     {"id": 7, "name": "Capability security and provenance", "status": "validated_and_completed_on_abi37"},
-    {"id": 8, "name": "Heterogeneous accelerator and resource integration", "status": "provider_and_hardware_gated"},
+    {"id": 8, "name": "Heterogeneous accelerator and resource integration", "status": "provider_neutral_control_plane_validated_hardware_gated"},
     {"id": 9, "name": "AGI system services and model orchestration", "status": "partial_trusted_orchestration_validated"},
     {"id": 10, "name": "Persistent memory and experience learning", "status": "unfinished"},
     {"id": 11, "name": "World model and temporal/causal state", "status": "partial_userspace_service_validated"},
@@ -159,14 +159,26 @@
       "id": "M79-accelerator-validation",
       "phase": 8,
       "name": "Provider-gated heterogeneous accelerator validation",
-      "status": "next_provider_gated",
+      "status": "validated_provider_neutral_hardware_gated",
       "priority": 100,
       "depends_on": ["M68-heterogeneous-context", "M69-graph-telemetry", "M70-power-policy", "M78-deployment-supervisor"],
       "unlocks": [],
-      "evidence_required": ["real_hardware_or_identified_provider", "device_discovery", "isolation", "resource_accounting", "tensor_transport", "power_coordination", "provider_limits"]
+      "evidence_required": ["real_hardware_or_identified_provider", "device_discovery", "isolation", "resource_accounting", "tensor_transport", "power_coordination", "provider_limits"],
+      "evidence": ["M79-RESEARCH-NOTES.md", "M79-ACCELERATOR-VALIDATION-DESIGN.md", "MILESTONE79.md", "M79-SECURITY-REVIEW.md", "M79-BENCHMARKS.md", "tools/faisal-build/evidence/m79-accelerator-validation.json"],
+      "next_action": "Do not claim provider execution until real hardware or an explicitly identified provider supplies device, isolation, transport, telemetry, and power evidence."
+    },
+    {
+      "id": "M80-stress-fuzz-hardening",
+      "phase": 14,
+      "name": "Cross-subsystem stress, fuzz, and failure-injection hardening",
+      "status": "next",
+      "priority": 100,
+      "depends_on": ["M73-world-model", "M74-model-orchestration", "M75-browser-tool-supervision", "M76-end_to_end_agent", "M77-verified-internet-research", "M78-deployment-supervisor", "M79-accelerator-validation"],
+      "unlocks": [],
+      "evidence_required": ["long_running_composition", "malformed_uapi", "cancellation", "resource_pressure", "audit_retention", "rollback_fault_injection", "security_review", "regression"]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",
