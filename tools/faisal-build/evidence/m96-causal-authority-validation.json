@@ -60,6 +60,6 @@
     "No unmeasured kernel or workflow speedup claim.",
     "No new kernel ioctl or syscall was added by M96."
   ],
-  "implementation_commit": "recorded by the FAISAL-M96 tag after commit",
+  "implementation_commit": "fd214b1c1fbc8b64c23e15d0f358c95b4511feaa",
   "forbidden_files_excluded": ["M63-COMPUTE-CONTEXT-DESIGN.md", "M63-SECURITY-REVIEW.md"]
 }

@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "f82d7bac8e22c5bc5f47de1469674ce48a9de9e2",
-  "current_tag": "FAISAL-M95",
+  "current_head": "fd214b1c1fbc8b64c23e15d0f358c95b4511feaa",
+  "current_tag": "FAISAL-M96",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -938,7 +938,7 @@
         "M78-deployment-supervisor"
       ],
       "unlocks": [
-        "M96-provider-supervised-recovery"
+        "M96-causal-authority-fabric"
       ],
       "evidence_required": [
         "append_only_journal",
@@ -974,33 +974,82 @@
         "tools/faisal-build/evidence/m95-m91.log",
         "tools/faisal-build/evidence/m95-security-scan.txt"
       ],
-      "next_action": "Retain durable journal, dependency, lease, retry, dead-letter, stop-condition, replay, sanitizer, QEMU, and regression coverage while M96 adds supervisor-mediated provider ownership and explicit crash recovery."
+      "next_action": "Retain durable journal, dependency, lease, retry, dead-letter, stop-condition, replay, sanitizer, QEMU, and regression coverage while M96 causal authority gates remain active."
     },
     {
-      "id": "M96-provider-supervised-recovery",
+      "id": "M96-causal-authority-fabric",
       "phase": 14,
-      "name": "Supervisor-mediated provider ownership, stale-service reclamation, and explicit crash recovery",
-      "status": "next",
-      "priority": 83,
+      "name": "Causal Authority Fabric with branch, evidence, commit, invalidation, and corruption fail-closed gates",
+      "status": "validated_bounded_userspace_service_with_kernel_intent_lease_binding",
+      "priority": 98,
       "depends_on": [
         "M93-provider-multiservice-lifetime",
         "M94-intent-bound-authority-lease",
         "M95-durable-objective-task-execution",
         "M78-deployment-supervisor"
       ],
+      "unlocks": [
+        "M97-tool-registry-risk-cost-contract"
+      ],
+      "evidence_required": [
+        "causal_append_only_journal",
+        "authority_reference",
+        "resource_admission",
+        "evidence_complete_commit",
+        "branch_invalidation",
+        "causal_replay",
+        "corruption_fail_closed",
+        "kernel_qemu",
+        "asan_ubsan",
+        "tsan",
+        "security_review",
+        "benchmark",
+        "full_regression"
+      ],
+      "next_action": "Retain causal authorization, evidence, invalidation, corruption, sanitizer, QEMU, and full-regression coverage while M97 defines a capability-scoped tool registry with risk, cost, provenance, and independent approval contracts.",
+      "evidence": [
+        "MILESTONE96.md",
+        "M96-CAUSAL-DESIGN.md",
+        "M96-SECURITY-REVIEW.md",
+        "M96-BENCHMARKS.md",
+        "M96-FRONTIER-RESEARCH.md",
+        "M96-FRONTIER-DESIGN.md",
+        "tools/faisal-build/evidence/m96-causal-authority-validation.json",
+        "tools/faisal-build/evidence/m96-qemu.log",
+        "tools/faisal-build/evidence/m96-smoke-times.tsv",
+        "tools/faisal-build/evidence/m96-asan-ubsan.log",
+        "tools/faisal-build/evidence/m96-tsan.log",
+        "tools/faisal-build/evidence/m96-full-audit.log",
+        "tools/faisal-build/evidence/m96-m90-regression.log",
+        "tools/faisal-build/evidence/m96-m91-regression.log",
+        "tools/faisal-build/evidence/m96-security-scan.log"
+      ]
+    },
+    {
+      "id": "M97-tool-registry-risk-cost-contract",
+      "phase": 9,
+      "name": "Capability-scoped tool registry with risk, cost, provenance, verification, and independent approval contract",
+      "status": "next",
+      "priority": 97,
+      "depends_on": [
+        "M96-causal-authority-fabric",
+        "M74-model-orchestration",
+        "M75-browser-tool-supervision"
+      ],
       "unlocks": [],
       "evidence_required": [
-        "ownership_protocol",
-        "stale_service_reclamation",
-        "supervisor_restart",
-        "secret_isolation",
-        "fault_injection",
-        "sanitizer",
+        "tool_identity",
+        "capability_scope",
+        "risk_classification",
+        "cost_admission",
+        "provenance",
+        "verification",
+        "revocation",
         "security_review",
         "benchmark",
         "regression"
       ],
-      "next_action": "Design the smallest supervisor-mediated ownership and crash-recovery contract; do not infer recovery from process disappearance and do not add durable private-key storage without an identified provider."
+      "next_action": "Implement the smallest userspace tool-registry contract; bind selection to capability and causal authority, require independent approval for privileged tools, and fail closed on missing provenance or risk metadata."
     }
   ],
   "completed_milestones": [
@@ -1034,7 +1083,8 @@
     "FAISAL-M92",
     "FAISAL-M93",
     "FAISAL-M94",
-    "FAISAL-M95"
+    "FAISAL-M95",
+    "FAISAL-M96"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1044,5 +1094,6 @@
     "M63-COMPUTE-CONTEXT-DESIGN.md",
     "M63-SECURITY-REVIEW.md"
   ],
-  "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions."
+  "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
+  "next_dependency": "M97-tool-registry-risk-cost-contract"
 }
