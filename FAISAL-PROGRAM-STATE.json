@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "023f91aca2f1b0ab32e9171e0da469742081cd82",
-  "current_tag": "FAISAL-M101",
+  "current_head": "4615455f10a8f8c97924760fed3fed122c5cddf7",
+  "current_tag": "FAISAL-M102",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1235,7 +1235,7 @@
         "matched_benchmark",
         "commit_and_tag"
       ],
-      "next_action": "Retain hardware, fairness, power, deadline-miss, and competing-work benchmark gates; then implement M102 only after the network adapter boundary is separately reviewed.",
+      "next_action": "Retain hardware, fairness, power, deadline-miss, and competing-work benchmark gates; M102 network isolation is now validated with explicit fallback limits.",
       "evidence": [
         "MILESTONE101.md",
         "M101-SECURITY-REVIEW.md",
@@ -1244,6 +1244,51 @@
         "tools/faisal-build/evidence/superiority-m101-security-scan.txt",
         "tools/faisal-build/evidence/superiority-scheduler-urgency-trials.csv",
         "tools/faisal-build/evidence/superiority-scheduler-urgency-summary.txt"
+      ]
+    },
+    {
+      "id": "M102-network-isolated-nondeterministic-tool-adapter",
+      "phase": 13,
+      "name": "Open-source-informed network-isolated nondeterministic tool adapter with executable provenance, deny-by-default effects, and durable receipts",
+      "status": "validated_bounded_userspace_network_denied_adapter",
+      "priority": 102,
+      "depends_on": [
+        "M100-verified-tool-adapter-sandbox",
+        "M101-agi-deadline-urgency-scheduler",
+        "M78-deployment-supervisor"
+      ],
+      "unlocks": [
+        "M103-verified-proxy-egress-adapter"
+      ],
+      "evidence_required": [
+        "repository_research",
+        "license_and_provenance_review",
+        "command_content_digest",
+        "network_syscall_denial",
+        "filesystem_write_denial",
+        "idempotency",
+        "revocation",
+        "receipt_replay",
+        "corruption_fail_closed",
+        "host_selftest",
+        "kernel_qemu",
+        "m100_regression",
+        "sanitizer_and_static_analysis",
+        "security_review",
+        "benchmark",
+        "commit_and_tag"
+      ],
+      "next_action": "Retain network-deny, read-only fallback, executable-provenance, ambiguity, replay, M100 regression, and sanitizer-limit coverage; next evaluate a separately authorized proxy-egress adapter.",
+      "evidence": [
+        "FAISAL-OPEN-SOURCE-REPOSITORY-RESEARCH.md",
+        "M102-OPEN-SOURCE-INTEGRATION-DESIGN.md",
+        "MILESTONE102.md",
+        "M102-SECURITY-REVIEW.md",
+        "M102-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m102-open-source-adapter-validation.json",
+        "tools/faisal-build/evidence/m102-qemu.log",
+        "tools/faisal-build/evidence/m102-m100-qemu-regression.log",
+        "tools/faisal-build/evidence/m102-full-audit.log"
       ]
     }
   ],
@@ -1284,7 +1329,8 @@
     "FAISAL-M98",
     "FAISAL-M99",
     "FAISAL-M100",
-    "FAISAL-M101"
+    "FAISAL-M101",
+    "FAISAL-M102"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1297,5 +1343,5 @@
     "M63-SECURITY-REVIEW.md"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "M102-network-isolated-nondeterministic-tool-adapter"
+  "next_dependency": "M103-verified-proxy-egress-adapter"
 }
