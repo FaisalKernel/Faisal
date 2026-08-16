@@ -1,0 +1,79 @@
+{
+  "project": "FAISAL",
+  "milestone": "M98",
+  "name": "Mission Autonomy Control Loop",
+  "status": "validated_pending_commit",
+  "date": "2026-08-16",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 38,
+  "implementation": {
+    "header": "tools/faisal-mission/faisal_mission_service.h",
+    "source": "tools/faisal-mission/faisal_mission_service.c",
+    "selftest": "tools/testing/selftests/agi_mission_autonomy_test.c",
+    "qemu_harness": "tools/faisal-build/run_mission_autonomy_qemu.sh",
+    "design": "M98-MISSION-AUTONOMY-DESIGN.md"
+  },
+  "contract": {
+    "durable_mission_journal": true,
+    "m95_task_binding": true,
+    "m96_authority_and_evidence_binding": true,
+    "m97_continuity_binding": true,
+    "model_output_is_authority": false,
+    "per_invocation_authority": true,
+    "inflight_restart_escalation": true,
+    "deadline_budget_step_risk_stops": true,
+    "corruption_fail_closed": true,
+    "concurrent_query_locking": true,
+    "max_missions": 16,
+    "max_steps": 4096
+  },
+  "markers": [
+    "FAISAL_M98_BOOT_OK",
+    "M98_MISSION_SERVICE_OPEN_OK kernel=1",
+    "M98_AUTHORITY_REFERENCE_OK",
+    "M98_MISSION_CREATE_OK",
+    "M98_OBSERVATION_ADMITTED_OK",
+    "M98_MODEL_PROPOSAL_NOT_AUTHORITY_OK",
+    "M98_PROPOSAL_PREPARED_OK",
+    "M98_EVIDENCE_COMMIT_CONTINUE_OK",
+    "M98_CONTINUATION_OBSERVE_OK",
+    "M98_WORLD_DRIFT_REPLAN_REQUIRED_OK",
+    "M98_MISSION_REPLAY_OK",
+    "M98_CONCURRENT_QUERY_LOCKING_OK workers=4",
+    "M98_INFLIGHT_RECOVERY_ESCALATED_OK",
+    "M98_DEADLINE_STOP_OK",
+    "M98_CORRUPTION_FAIL_CLOSED_OK",
+    "M98_SELFTEST_EXIT=0",
+    "FAISAL_M98_TEST_RC=0",
+    "FAISAL_M98_MISSION_AUTONOMY_QEMU_PASS"
+  ],
+  "validation": {
+    "strict_host_build": {"status": "pass", "evidence": "tools/faisal-build/evidence/m98-build.log"},
+    "static_build": {"status": "pass", "evidence": "tools/faisal-build/evidence/m98-static-build.log"},
+    "host_selftest": {"status": "pass", "exit_code": 0, "evidence": "tools/faisal-build/evidence/m98-host.log"},
+    "asan_ubsan": {"status": "pass", "exit_code": 0, "evidence": "tools/faisal-build/evidence/m98-asan-ubsan.log"},
+    "tsan": {"status": "pass", "exit_code": 0, "evidence": "tools/faisal-build/evidence/m98-tsan.log"},
+    "kernel_qemu": {"status": "pass", "exit_code": 0, "require_kernel": true, "evidence": "tools/faisal-build/evidence/m98-qemu.log"},
+    "qemu_smokes": {"status": "pass", "count": 3, "min_ms": 6210, "max_ms": 6297, "mean_ms": 6267.67, "evidence": "tools/faisal-build/evidence/m98-smokes.log"},
+    "m95_regression": {"status": "pass", "evidence": "tools/faisal-build/evidence/m98-M95_DURABLE_QEMU.log"},
+    "m96_regression": {"status": "pass", "evidence": "tools/faisal-build/evidence/m98-M96_CAUSAL_QEMU.log"},
+    "m90_regression": {"status": "pass", "evidence": "tools/faisal-build/evidence/m98-M90_KEY_PROVIDER_QEMU.log"},
+    "m91_regression": {"status": "pass", "evidence": "tools/faisal-build/evidence/m98-M91_PROVIDER_GATE_QEMU.log"},
+    "full_faisal_audit": {"status": "pass", "harnesses": 23, "evidence": "tools/faisal-build/evidence/m98-full-audit.log"},
+    "security_pattern_scan": {"status": "pass", "evidence": "tools/faisal-build/evidence/m98-security-scan.log"}
+  },
+  "non_claims": [
+    "No claim of general intelligence, consciousness, or model retraining.",
+    "No claim that model output can authorize an action.",
+    "No claim of truthful external observations or digest producers.",
+    "No claim of exactly-once remote side effects or rollback of irreversible actions.",
+    "No claim of distributed consensus, production readiness, or autonomous kernel self-modification.",
+    "No unmeasured speed, throughput, energy, or productivity claim."
+  ],
+  "implementation_commit": "pending",
+  "tag": "pending",
+  "forbidden_files_excluded": [
+    "M63-COMPUTE-CONTEXT-DESIGN.md",
+    "M63-SECURITY-REVIEW.md"
+  ]
+}
