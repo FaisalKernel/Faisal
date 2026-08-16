@@ -1,0 +1,5 @@
+scan: M91 added/modified lines plus new files
+new_lines_scanned: 203
+high_risk_pattern_matches: 0
+result: PASS
+hardware_claim_boundary: no hardware/provider support claimed; result is explicit UNSUPPORTED/UNVERIFIED only

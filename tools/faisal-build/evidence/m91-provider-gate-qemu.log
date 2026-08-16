@@ -1,0 +1,15 @@
+c[?7l[2J[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1EFCAE00+1EF0AE00 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...
+
+
+Booting from ROM..c[?7l[2JM91_BOOT_OK
+M91_PROVIDER_PROBE_OK provider=none status=1 device_present=0
+M91_ENV_METADATA_NOT_AUTHORITY_OK
+M91_INCOMPLETE_EVIDENCE_DENIAL_OK
+M91_HARDWARE_ATTESTATION_UNSUPPORTED_OK reason=no-provider
+M91_SELFTEST_EXIT=0
+M91_TEST_RC=0
+[    3.695537] reboot: Power down

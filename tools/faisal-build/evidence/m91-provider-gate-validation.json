@@ -1,0 +1,60 @@
+{
+  "milestone": "FAISAL-M91",
+  "dependency": "M90-production-key-provisioning",
+  "status": "validated_explicit_unsupported_provider",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "hardware_inspection": {
+    "environment": "virtualized x86_64 sandbox",
+    "tpm_device_exposed": false,
+    "tee_device_exposed": false,
+    "hsm_provider_credentials_exposed": false,
+    "provider_state": "unsupported",
+    "no_hardware_claim": true
+  },
+  "research": {
+    "linux_trusted_keys_documentation": "reviewed",
+    "linux_tee_driver_documentation": "reviewed",
+    "findings": "TPM/TEE paths require an identified trust source, device/provider evidence, and implementation-specific verification; environment metadata alone is not authority"
+  },
+  "contract": {
+    "observable_probe": true,
+    "environment_metadata_not_authority": true,
+    "incomplete_evidence_denial": true,
+    "unsupported_or_unverified_explicit": true,
+    "hardware_attestation_claim": false
+  },
+  "runs": {
+    "qemu": {
+      "passed": true,
+      "provider": "none",
+      "status": 1,
+      "evidence": "tools/faisal-build/evidence/m91-provider-gate-qemu.log"
+    },
+    "normal_smoke": {
+      "runs": 3,
+      "all_passed": true,
+      "wall_time_ms": [5346, 5275, 5279],
+      "mean_wall_time_ms_rounded": 5300,
+      "provider_status": [1, 1, 1],
+      "diagnostic_count": [0, 0, 0],
+      "evidence": "tools/faisal-build/evidence/m91-provider-gate-smoke.tsv"
+    }
+  },
+  "security_scan": {
+    "passed": true,
+    "new_lines_scanned": 203,
+    "high_risk_pattern_matches": 0,
+    "evidence": "tools/faisal-build/evidence/m91-security-scan.txt"
+  },
+  "non_claims": [
+    "TPM2 support",
+    "TEE support",
+    "HSM or KMS support",
+    "hardware-backed key provisioning",
+    "hardware attestation",
+    "secure boot integration",
+    "remote attestation",
+    "production readiness"
+  ]
+}
