@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "830a2c8e42968006e148b78daae7acba190d6a71",
+  "current_head": "a5c28bb5c93306ad697db4dce8b6f2abfdcf59a4",
   "current_tag": "FAISAL-M97",
   "current_abi": 38,
   "operating_loop": [
