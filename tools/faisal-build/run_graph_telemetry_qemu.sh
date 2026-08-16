@@ -4,6 +4,7 @@ OUT=/home/ubuntu/agi-kernel/build/recovered
 ROOT=/home/ubuntu/agi-kernel/build/qemu-faisal-graph-telemetry/rootfs
 IMAGE=/home/ubuntu/agi-kernel/build/qemu-faisal-graph-telemetry/initramfs.cpio.gz
 LOG=/home/ubuntu/agi-kernel/build/qemu-faisal-graph-telemetry/qemu.log
+SMP=${FAISAL_GRAPH_SMP:-1}
 rm -rf "$ROOT"
 mkdir -p "$ROOT/bin" "$ROOT/dev" "$ROOT/proc" "$ROOT/sys" "$ROOT/tmp"
 cp "$(command -v busybox)" "$ROOT/bin/busybox"
@@ -24,11 +25,15 @@ INIT
 chmod +x "$ROOT/init"
 (cd "$ROOT" && find . -print0 | cpio --null -o -H newc 2>/dev/null | gzip -9 > "$IMAGE")
 set +e
-timeout 90s qemu-system-x86_64 -M pc -m 512M -smp 2 -kernel "$OUT/arch/x86/boot/bzImage" -initrd "$IMAGE" -append 'console=ttyS0 rdinit=/init' -nographic -no-reboot -monitor none -serial "file:$LOG" >/tmp/faisal-m69-qemu-stderr.log 2>&1
+timeout 90s qemu-system-x86_64 -M pc -m 512M -smp "$SMP" -kernel "$OUT/arch/x86/boot/bzImage" -initrd "$IMAGE" -append 'console=ttyS0 rdinit=/init' -nographic -no-reboot -monitor none -serial "file:$LOG" >/tmp/faisal-m69-qemu-stderr.log 2>&1
 rc=$?
 set -e
 cat "$LOG"
 cat /tmp/faisal-m69-qemu-stderr.log 2>/dev/null || true
 printf 'QEMU_RC=%s\n' "$rc"
 grep -q 'M69_SELFTEST_EXIT=0' "$LOG"
+if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|Call Trace' "$LOG"; then
+  echo 'FAISAL_M69_KERNEL_DIAGNOSTIC_FOUND' >&2
+  exit 1
+fi
 printf 'FAISAL_M69_SELFTEST_EXIT=0\n'

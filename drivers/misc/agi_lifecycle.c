@@ -2526,6 +2526,32 @@ static void agi_lc_remove_record_locked(struct agi_lc_session *session,
 	session->count--;
 }
 
+static void agi_lc_get_current_parent_pid_t(pid_t *parent_pid,
+						pid_t *parent_tgid)
+{
+	struct task_struct *parent;
+
+	*parent_pid = 0;
+	*parent_tgid = 0;
+	rcu_read_lock();
+	parent = rcu_dereference(current->real_parent);
+	if (parent) {
+		*parent_pid = task_pid_nr(parent);
+		*parent_tgid = task_tgid_nr(parent);
+	}
+	rcu_read_unlock();
+}
+
+static void agi_lc_get_current_parent_ids(u64 *parent_pid, u64 *parent_tgid)
+{
+	pid_t parent_pid_value;
+	pid_t parent_tgid_value;
+
+	agi_lc_get_current_parent_pid_t(&parent_pid_value, &parent_tgid_value);
+	*parent_pid = parent_pid_value;
+	*parent_tgid = parent_tgid_value;
+}
+
 static void agi_lc_capture_attribution(struct agi_lc_session *session,
                                          struct agi_lc_attribution *attribution,
                                          u64 sequence, u16 type, s32 status,
@@ -2548,10 +2574,8 @@ static void agi_lc_capture_attribution(struct agi_lc_session *session,
     attribution->agent_id = agent_id;
     attribution->task_id = task_pid_nr(current);
     attribution->tgid = task_tgid_nr(current);
-    attribution->parent_task_id = current->real_parent ?
-        task_pid_nr(current->real_parent) : 0;
-    attribution->parent_tgid = current->real_parent ?
-        task_tgid_nr(current->real_parent) : 0;
+	agi_lc_get_current_parent_ids(&attribution->parent_task_id,
+				       &attribution->parent_tgid);
     attribution->capabilities_effective =
         agi_lc_capability_mask(current_cred()->cap_effective);
     attribution->capabilities_permitted =
@@ -5194,10 +5218,9 @@ static int agi_lc_register_agent(struct agi_lc_session *session,
 				session->agents[i].owner_tgid = owner_tgid;
 				session->agents[i].creator_pid = task_pid_nr(current);
 				session->agents[i].creator_tgid = owner_tgid;
-					session->agents[i].parent_pid = current->real_parent ?
-					 task_pid_nr(current->real_parent) : 0;
-				session->agents[i].parent_tgid = current->real_parent ?
-					 task_tgid_nr(current->real_parent) : 0;
+						agi_lc_get_current_parent_pid_t(
+						&session->agents[i].parent_pid,
+						&session->agents[i].parent_tgid);
 
 				session->agents[i].creator_uid =
 					from_kuid_munged(current_user_ns(), current_uid());
@@ -5349,10 +5372,8 @@ static int agi_lc_light_register(struct agi_lc_session *session,
 	record->capability = capability;
 	record->creator_pid = task_pid_nr(current);
 	record->creator_tgid = task_tgid_nr(current);
-	record->parent_pid = current->real_parent ?
-		task_pid_nr(current->real_parent) : 0;
-	record->parent_tgid = current->real_parent ?
-		task_tgid_nr(current->real_parent) : 0;
+	agi_lc_get_current_parent_pid_t(&record->parent_pid,
+								&record->parent_tgid);
 	record->creator_uid =
 		from_kuid_munged(current_user_ns(), current_uid());
 	record->creator_euid =
@@ -7216,6 +7237,7 @@ static bool agi_lc_cancel_task_matches(struct agi_lc_session *session,
 						const struct agi_lc_cancel_control *control)
 {
 	struct task_struct *parent;
+	struct task_struct *real_parent;
 
 	if (task == target)
 		return true;
@@ -7228,18 +7250,19 @@ static bool agi_lc_cancel_task_matches(struct agi_lc_session *session,
 	if (control->scope == AGI_LC_CANCEL_SCOPE_DEPENDENTS) {
 		if (control->target_agent &&
 		    agi_lc_cancel_agent_descendant(session,
-				faisal_task_get_agent(task), control->target_agent))
+			faisal_task_get_agent(task), control->target_agent))
 			return true;
+		real_parent = rcu_dereference(task->real_parent);
 		return control->dependency_policy == AGI_LC_CANCEL_DEPENDENCY_CHILDREN &&
-			(task->real_parent == target);
+			(real_parent == target);
 	}
-	parent = task->real_parent;
+	parent = rcu_dereference(task->real_parent);
 	while (parent && parent != task) {
 		if (parent == target)
 			return true;
-		if (parent == parent->real_parent)
+		if (parent == rcu_dereference(parent->real_parent))
 			break;
-		parent = parent->real_parent;
+		parent = rcu_dereference(parent->real_parent);
 	}
 	return false;
 }
@@ -7592,10 +7615,8 @@ static int agi_lc_get_identity(struct agi_lc_session *session, unsigned long arg
 	identity.agent_id = agent_id;
 	identity.task_id = task_pid_nr(current);
 	identity.tgid = task_tgid_nr(current);
-	identity.parent_task_id = current->real_parent ?
-		task_pid_nr(current->real_parent) : 0;
-	identity.parent_tgid = current->real_parent ?
-		task_tgid_nr(current->real_parent) : 0;
+	agi_lc_get_current_parent_ids(&identity.parent_task_id,
+				       &identity.parent_tgid);
 	identity.capabilities_effective =
 		agi_lc_capability_mask(current_cred()->cap_effective);
 	identity.capabilities_permitted =

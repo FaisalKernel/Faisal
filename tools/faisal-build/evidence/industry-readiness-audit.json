@@ -1,0 +1,33 @@
+{
+  "project": "FAISAL",
+  "audit_date": "2026-08-16",
+  "source_head_before_commit": "4de2a3bf17984ad858aa7fb4ea27fd33f968e754",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 38,
+  "verdict": "advanced_preproduction_research_prototype_not_production_ready",
+  "gates": {
+    "aggregate_qemu_harnesses": {"count": 26, "status": "pass", "diagnostic_scan": true},
+    "lifecycle_uapi_fuzz": {"iterations": 4096, "calls": 8192, "status": "pass"},
+    "bounded_soak": {"rounds": 3, "iterations_per_round": 16384, "total_ioctl_calls": 98304, "status": "pass"},
+    "sparse_lifecycle": {"checker": "upstream sparse v0.6.5-rc1", "errors": 0, "warnings": 2, "status": "pass_with_warnings"},
+    "production_profile_build": {"status": "pass"},
+    "production_profile_qemu_fuzz": {"status": "pass", "environment_warning": "QEMU ACPI shutdown messages retained"},
+    "unindependent_rebuild": {"status": "pass_build_failed_reproducibility", "hash_a": "221afe2837c6da9acbf6ab01b0f53e052930da4f04e2fc942efe90c5ccb93179", "hash_b": "911fc82c28db9ef3481668ae6872e049539fd821485d0edec1bf20e4e7cb7887"},
+    "checkpatch_full_driver": {"errors": 317, "warnings": 95, "status": "fail"}
+  },
+  "p0_blockers": [
+    "stable_or_lts_forward_port_and_security_update_policy",
+    "current_head_kasan_kcsan_lockdep_kcov_ubsan_matrix",
+    "trusted_signed_artifacts_and_independent_reproducible_rebuild",
+    "cve_intake_upstream_watch_and_release_revocation",
+    "real_accelerator_provider_and_iommu_hardware_qualification",
+    "staged_checkpatch_cleanup_for_reviewability"
+  ],
+  "non_fabrication": {
+    "model_output_is_kernel_authority": false,
+    "stored_experience_is_model_retraining": false,
+    "introspection_is_consciousness": false,
+    "provider_metadata_is_hardware_proof": false,
+    "production_requires_independent_supervisor_and_operator": true
+  }
+}

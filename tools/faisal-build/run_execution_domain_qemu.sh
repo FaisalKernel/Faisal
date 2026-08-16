@@ -4,6 +4,7 @@ OUT=/home/ubuntu/agi-kernel/build/recovered
 ROOT=/home/ubuntu/agi-kernel/build/qemu-faisal-execution-domain/rootfs
 IMAGE=/home/ubuntu/agi-kernel/build/qemu-faisal-execution-domain/initramfs.cpio.gz
 LOG=/home/ubuntu/agi-kernel/build/qemu-faisal-execution-domain/qemu.log
+QEMU_ACCEL=${FAISAL_QEMU_ACCEL:-tcg,thread=single}
 rm -rf "$ROOT"
 mkdir -p "$ROOT/bin" "$ROOT/dev" "$ROOT/proc" "$ROOT/sys" "$ROOT/tmp"
 cp "$(command -v busybox)" "$ROOT/bin/busybox"
@@ -24,7 +25,7 @@ INIT
 chmod +x "$ROOT/init"
 (cd "$ROOT" && find . -print0 | cpio --null -o -H newc 2>/dev/null | gzip -9 > "$IMAGE")
 set +e
-timeout 90s qemu-system-x86_64 -M pc -m 512M -smp 2 -kernel "$OUT/arch/x86/boot/bzImage" -initrd "$IMAGE" -append 'console=ttyS0 rdinit=/init' -nographic -no-reboot -monitor none -serial "file:$LOG" >/tmp/faisal-m67-qemu-stderr.log 2>&1
+timeout 90s qemu-system-x86_64 -M pc -accel "$QEMU_ACCEL" -m 512M -smp 2 -kernel "$OUT/arch/x86/boot/bzImage" -initrd "$IMAGE" -append 'console=ttyS0 rdinit=/init' -nographic -no-reboot -monitor none -serial "file:$LOG" >/tmp/faisal-m67-qemu-stderr.log 2>&1
 rc=$?
 set -e
 cat "$LOG"

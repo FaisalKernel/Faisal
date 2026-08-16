@@ -11,6 +11,10 @@ TESTER="$BUILD/cog_tester"
 
 cc -O2 -Wall -Wextra -Werror -static \
   "$LINUX/tools/cog-kernel/cog_tester.c" -o "$TESTER"
+# Keep the boot image and out-of-tree module on the exact same kernel release.
+# An incremental source change can otherwise leave a stale bzImage whose
+# vermagic rejects the freshly built cog_kernel.ko in QEMU.
+make -C "$LINUX" O="$BUILD" bzImage >/dev/null
 make -C "$LINUX/tools/cog-kernel" KDIR="$LINUX" \
   KBUILD_OUTPUT="$BUILD" >/dev/null
 [ -r "$MODULE" ]

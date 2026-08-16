@@ -67,6 +67,9 @@ set -- \
  tools/faisal-build/run_cross_subsystem_stress_qemu.sh \
  tools/faisal-build/run_memory_orchestrator_qemu.sh \
  tools/faisal-build/run_cog_kernel_qemu.sh \
+ tools/faisal-build/run_scheduler_urgency_qemu.sh \
+ tools/faisal-build/run_nondeterministic_adapter_qemu.sh \
+ tools/faisal-build/run_lifecycle_uapi_fuzz_qemu.sh \
  tools/faisal-build/run_self_healing_qemu.sh \
  tools/faisal-build/run_runtime_attestation_qemu.sh \
  tools/faisal-build/run_concurrent_lifecycle_ipc_qemu.sh \
@@ -76,6 +79,7 @@ count=0
 for harness do
 	count=$((count + 1))
 	start=$(date +%s%N)
+	rm -f "$BUILD/full-audit-${count}.log" "$BUILD/full-audit-${count}-retry.log"
 	set +e
 	"$harness" > "$BUILD/full-audit-${count}.log" 2>&1
 	rc=$?
@@ -85,6 +89,13 @@ for harness do
 		retry_rc=$?
 	fi
 	set -e
+	if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|Tainted: \[W\]=WARN' "$BUILD/full-audit-${count}.log" ||
+	   { [ "$rc" -ne 0 ] && [ -r "$BUILD/full-audit-${count}-retry.log" ] && grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|Tainted: \[W\]=WARN' "$BUILD/full-audit-${count}-retry.log"; }; then
+		printf '%02d harness=%s kernel_diagnostic=1\n' "$count" "$harness" | tee -a "$OUT"
+		tail -120 "$BUILD/full-audit-${count}.log"
+		[ -r "$BUILD/full-audit-${count}-retry.log" ] && tail -120 "$BUILD/full-audit-${count}-retry.log" || true
+		exit 1
+	fi
 	end=$(date +%s%N)
 	elapsed=$(( (end - start) / 1000000 ))
 	if [ "$rc" -ne 0 ] && [ "$retry_rc" -eq 0 ]; then
