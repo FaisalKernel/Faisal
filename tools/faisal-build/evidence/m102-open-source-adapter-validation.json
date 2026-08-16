@@ -1,0 +1,95 @@
+{
+  "milestone": "M102",
+  "title": "Network-Isolated Nondeterministic Tool Adapter",
+  "status": "validated_with_explicit_limits",
+  "implementation": {
+    "header": "tools/faisal-adapter/faisal_nondeterministic_adapter_service.h",
+    "source": "tools/faisal-adapter/faisal_nondeterministic_adapter_service.c",
+    "selftest": "tools/testing/selftests/agi_nondeterministic_adapter_test.c",
+    "qemu_harness": "tools/faisal-build/run_nondeterministic_adapter_qemu.sh",
+    "benchmark_script": "tools/faisal-build/benchmark_m102_adapter.sh",
+    "design": "M102-OPEN-SOURCE-INTEGRATION-DESIGN.md"
+  },
+  "open_source_provenance": [
+    {
+      "repository": "Gentleman-Programming/engram",
+      "url": "https://github.com/Gentleman-Programming/engram",
+      "decision": "userspace memory reference only; not imported into kernel"
+    },
+    {
+      "repository": "mem0ai/mem0",
+      "url": "https://github.com/mem0ai/mem0",
+      "decision": "semantic memory reference only; not an authority source"
+    },
+    {
+      "repository": "letta-ai/letta",
+      "url": "https://github.com/letta-ai/letta",
+      "decision": "stateful-agent architecture reference; archived server not used"
+    },
+    {
+      "repository": "opensandbox-group/OpenSandbox",
+      "url": "https://github.com/opensandbox-group/OpenSandbox",
+      "decision": "protocol, egress-policy, and backend-selection reference"
+    },
+    {
+      "repository": "anthropic-experimental/sandbox-runtime",
+      "url": "https://github.com/anthropic-experimental/sandbox-runtime",
+      "decision": "default-deny filesystem/network policy reference"
+    },
+    {
+      "repository": "google/gvisor",
+      "url": "https://github.com/google/gvisor",
+      "decision": "optional future backend; not included in M102"
+    },
+    {
+      "repository": "firecracker-microvm/firecracker",
+      "url": "https://github.com/firecracker-microvm/firecracker",
+      "decision": "optional future high-isolation backend; not included in M102"
+    }
+  ],
+  "controls": [
+    "M99 invocation, mission, authority, registry generation, and revocation checks",
+    "executable path, fixed arguments, and executable-content digest binding",
+    "clearenv and inherited-descriptor closure",
+    "unprivileged user/network namespace when available",
+    "Landlock scoped write control when available",
+    "seccomp default-kill network denial",
+    "seccomp writable-open denial in Landlock fallback",
+    "bounded raw output capture and sanitized receipt text",
+    "durable pending/effected/committed/failed/ambiguous receipts",
+    "idempotency, conflict, revocation, replay, and corruption fail-closed semantics"
+  ],
+  "tests": {
+    "strict_build": {"status": "pass", "log": "build/m102/strict-build.log"},
+    "static_build": {"status": "pass", "log": "build/m102/static-build.log"},
+    "host_selftest": {"status": "pass", "log": "build/m102/host-selftest.log"},
+    "qemu_real_kernel": {"status": "pass", "log": "build/m102/qemu-harness.log", "markers": ["FAISAL_M102_BOOT_OK", "M102_VERIFIED_NETWORK_DENY_EFFECT_COMMITTED_OK", "M102_NETWORK_SYSCALL_DENIED_OK", "M102_FILESYSTEM_WRITE_DENIED_OK", "M102_RESTART_REPLAY_STATES_OK", "M102_CORRUPTION_FAIL_CLOSED_OK", "FAISAL_M102_TEST_RC=0"]},
+    "m100_host_regression": {"status": "pass", "log": "build/m102/m100-host-regression.log"},
+    "m100_qemu_regression": {"status": "pass", "log": "build/m102/m100-qemu-regression.log"},
+    "ubsan": {"status": "pass", "summary": "build/m102/ubsan-run.log"},
+    "gcc_analyzer": {"status": "pass", "log": "build/m102/gcc-analyzer.log"},
+    "asan_ubsan": {"status": "compiled_runtime_limited", "summary": "build/m102/asan-ubsan-summary.log", "reason": "production seccomp policy rejects sanitizer runtime inside restricted child"},
+    "tsan": {"status": "compiled_runtime_limited", "summary": "build/m102/validation-summary.log", "reason": "production seccomp policy rejects sanitizer runtime inside restricted child"},
+    "aggregate_23_harness": {"status": "incomplete_external_failure", "log": "build/m102/full-audit.log", "reason": "existing run_cog_kernel_qemu.sh failed at harness 18 after harnesses 1-17 passed; failure is outside M102"},
+    "security_scan": {"status": "pass", "log": "build/m102/security-scan.log"},
+    "final_validation": {"status": "pass", "summary": "build/m102/final-validation-summary.log"}
+  },
+  "benchmark": {
+    "raw_csv": "build/m102/benchmark-host.csv",
+    "summary": "build/m102/benchmark-summary.txt",
+    "trials": 10,
+    "successful_trials": 10,
+    "mean_seconds": 0.024109,
+    "median_seconds": 0.023513,
+    "minimum_seconds": 0.022538,
+    "maximum_seconds": 0.028887,
+    "interpretation": "end-to-end host selftest timing only; not a universal performance or superiority claim"
+  },
+  "non_claims": [
+    "not a complete browser or network-proxy adapter",
+    "not a gVisor or Firecracker implementation",
+    "not a general arbitrary-shell execution authority",
+    "not proof of universal sandbox escape resistance",
+    "not proof of superiority over current kernels or runtimes"
+  ]
+}

@@ -1,0 +1,38 @@
+M102_SECURITY_SCAN_START
+[path-and-command-patterns]
+tools/faisal-adapter/faisal_nondeterministic_adapter_service.h:8:#include "../faisal-tool/faisal_tool_service.h"
+tools/testing/selftests/agi_nondeterministic_adapter_test.c:16:#include "../../faisal-adapter/faisal_nondeterministic_adapter_service.h"
+tools/testing/selftests/agi_nondeterministic_adapter_test.c:397:				  "/tmp/../tmp", echo_argv[0], echo_argv, 2,
+[network-policy-syscalls]
+[write-policy]
+27:#define M102_LANDLOCK_ACCESS_FS_WRITE_FILE (1ULL << 1)
+52:#define M102_READONLY_OPEN_FLAGS (O_ACCMODE | O_CREAT | O_TRUNC | O_APPEND | O_TMPFILE)
+424:		.handled_access_fs = M102_LANDLOCK_ACCESS_FS_WRITE_FILE |
+493:				M102_READONLY_OPEN_FLAGS),
+566:		close(fd);
+569:	close(fd);
+586:		close(fd);
+636:		(void)close(fd);
+742:				 O_RDWR | O_CREAT | O_APPEND, 0600);
+979:	fd = open(service->effect_path, O_WRONLY | O_APPEND | O_CLOEXEC);
+983:		close(fd);
+987:		close(fd);
+990:	close(fd);
+[descriptor-and-authority-gates]
+625:	if (dup2(output_fd, STDOUT_FILENO) < 0 ||
+626:	    dup2(output_fd, STDERR_FILENO) < 0)
+628:	close(output_fd);
+640:	(void)clearenv();
+820:	result = m99_invocation_query(&service->tools, invocation_id, &invocation);
+823:	result = m99_tool_query(&service->tools, invocation.tool_id, &tool);
+827:	if (memcmp(tool.implementation_digest, command_digest,
+852:				result = M102_ERR_AMBIGUOUS;
+922:			result = M102_ERR_AMBIGUOUS;
+927:		completion = m99_complete(&service->tools, invocation_id, now_ns + 2,
+931:			result = M102_ERR_AMBIGUOUS;
+941:		result = M102_ERR_AMBIGUOUS;
+945:	completion = m99_complete(&service->tools, invocation_id, now_ns + 2,
+953:		result = M102_ERR_AMBIGUOUS;
+961:		result = M102_ERR_AMBIGUOUS;
+[source-checks]
+M102_SECURITY_SCAN_PASS

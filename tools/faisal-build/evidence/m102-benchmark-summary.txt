@@ -1,0 +1,1 @@
+trials=10 mean_seconds=0.024109 median_seconds=0.023513 min_seconds=0.022538 max_seconds=0.028887
