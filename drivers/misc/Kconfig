@@ -658,8 +658,26 @@ config AGI_LIFECYCLE
 	select CRYPTO_SHA256
 	help
 	  Enable the FAISAL lifecycle control device. The kernel provides
-	  identity, resource accounting, isolation metadata, cancellation,
-	  provenance, and bounded control-plane objects. Model inference,
-	  reasoning, semantic memory, and browser logic remain in userspace.
+		  identity, resource accounting, isolation metadata, cancellation,
+		  provenance, and bounded control-plane objects. Model inference,
+		  reasoning, semantic memory, and browser logic remain in userspace.
+
+config AGI_LIFECYCLE_RV_BRIDGE
+	bool "FAISAL Runtime Verification observation bridge"
+	depends on AGI_LIFECYCLE = y
+	depends on RV_REACTORS
+	help
+	  Deliver upstream Runtime Verification monitor violations as
+	  capability-filtered FAISAL verification observations. The bridge
+	  never authorizes a repair, grants a capability, or changes the
+	  selected upstream reactor.
+
+config AGI_LIFECYCLE_RV_BRIDGE_TEST
+	bool "FAISAL RV bridge test hook"
+	depends on AGI_LIFECYCLE_RV_BRIDGE
+	help
+	  Export only the rv_react entry point needed by the M88 test fixture.
+	  This is intended for validation kernels and must remain disabled in
+	  production configurations.
 
 endmenu

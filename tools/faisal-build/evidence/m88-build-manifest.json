@@ -1,0 +1,34 @@
+{
+  "abi": 37,
+  "artifacts": {
+    "fixture_module": {
+      "bytes": 7152,
+      "path": "/home/ubuntu/agi-kernel/linux/tools/faisal-rv/faisal_rv_bridge_fixture.ko",
+      "sha256": "03b26b14b77e1d1e24f3bf67afea7ed150b3fd829b4eeff2319ed06907dc2c5d"
+    },
+    "kernel_config": {
+      "bytes": 147214,
+      "path": "/home/ubuntu/agi-kernel/build/m88-rv/.config",
+      "sha256": "63838339428f0e8cc8c6fe26d18a44cc20efaf8f593f9c237cf36b948d962624"
+    },
+    "kernel_image": {
+      "bytes": 14914560,
+      "path": "/home/ubuntu/agi-kernel/build/m88-rv/arch/x86/boot/bzImage",
+      "sha256": "22715cc4ba2d6b2f7a4267fa629662491781c5c625d17fc0c578d3d116e5ccc7"
+    },
+    "selftest": {
+      "bytes": 785760,
+      "path": "/home/ubuntu/agi-kernel/build/m88-rv/agi_rv_signal_bridge_test",
+      "sha256": "6063309e8cb4f242244246c110b8e64dbcdbc8d28cc867971c3ce67d0fa39644"
+    }
+  },
+  "config_symbols": {
+    "CONFIG_AGI_LIFECYCLE_RV_BRIDGE": "y",
+    "CONFIG_AGI_LIFECYCLE_RV_BRIDGE_TEST": "y",
+    "CONFIG_RV": "y",
+    "CONFIG_RV_MON_STALL": "y",
+    "CONFIG_RV_REACTORS": "y"
+  },
+  "kernel_base": "Linux v7.2-rc7",
+  "source_revision": "49de393753f957ee11c10deb1f879b8b9c3074ec"
+}

@@ -63,6 +63,10 @@
 
 #include <linux/lockdep.h>
 #include <linux/slab.h>
+#ifdef CONFIG_AGI_LIFECYCLE_RV_BRIDGE
+#include <linux/agi_lifecycle_rv.h>
+#include <linux/errno.h>
+#endif
 
 #include "rv.h"
 
@@ -473,9 +477,21 @@ void rv_react(struct rv_monitor *monitor, const char *msg, ...)
 
 	va_start(args, msg);
 
+#ifdef CONFIG_AGI_LIFECYCLE_RV_BRIDGE
+	/*
+	 * The bridge receives an observation only. It cannot select a reactor,
+	 * grant a capability, or authorize a repair. The selected upstream
+	 * reactor remains the owner of the actual reaction below.
+	 */
+	agi_lc_rv_report(monitor->name, -EIO);
+#endif
+
 	lock_map_acquire_try(&rv_react_map);
 	monitor->react(msg, args);
 	lock_map_release(&rv_react_map);
 
 	va_end(args);
 }
+#ifdef CONFIG_AGI_LIFECYCLE_RV_BRIDGE_TEST
+EXPORT_SYMBOL_GPL(rv_react);
+#endif

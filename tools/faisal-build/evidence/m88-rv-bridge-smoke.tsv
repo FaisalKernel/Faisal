@@ -1,0 +1,4 @@
+run	rc	elapsed_ms	qemu_seconds	rcu_warning_count	marker_count
+1	0	5791	38.060391	0	2
+2	0	5712	9519.437374	0	2
+3	0	6014	23.529189	0	2

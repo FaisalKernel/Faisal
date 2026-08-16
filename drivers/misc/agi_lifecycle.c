@@ -8,6 +8,9 @@
 #include <crypto/hash.h>
 #include <crypto/sha2.h>
 #include <linux/agi_lifecycle.h>
+#ifdef CONFIG_AGI_LIFECYCLE_RV_BRIDGE
+#include <linux/agi_lifecycle_rv.h>
+#endif
 #include <linux/atomic.h>
 #include <linux/capability.h>
 #include <linux/cgroup.h>
@@ -19,6 +22,7 @@
 #include <linux/file.h>
 #include <linux/fs.h>
 #include <linux/jiffies.h>
+#include <linux/list.h>
 #include <linux/miscdevice.h>
 #include <linux/mm.h>
 #include <linux/mman.h>
@@ -301,7 +305,12 @@ struct agi_lc_reflection_record {
 };
 
 struct agi_lc_session {
-	struct mutex ioctl_lock;
+			struct mutex ioctl_lock;
+#ifdef CONFIG_AGI_LIFECYCLE_RV_BRIDGE
+		struct list_head rv_node;
+		bool rv_registered;
+#endif
+
 struct mutex context_lock;
 struct mutex graph_lock;
 	spinlock_t queue_lock;
@@ -424,6 +433,11 @@ struct agi_lc_graph_node_record graph_nodes[AGI_LC_GRAPH_NODES];
 };
 
 static atomic64_t agi_lc_next_session = ATOMIC64_INIT(0);
+#ifdef CONFIG_AGI_LIFECYCLE_RV_BRIDGE
+static LIST_HEAD(agi_lc_rv_sessions);
+static DEFINE_SPINLOCK(agi_lc_rv_sessions_lock);
+static atomic64_t agi_lc_rv_sequence = ATOMIC64_INIT(0);
+#endif
 static atomic64_t agi_lc_next_recovery = ATOMIC64_INIT(0);
 static atomic64_t agi_lc_next_lease = ATOMIC64_INIT(0);
 static atomic64_t agi_lc_next_memory_region = ATOMIC64_INIT(0);
@@ -2745,7 +2759,11 @@ static int agi_lc_push_record_ex(struct agi_lc_session *session, u16 type,
 		record->pid = task_pid_nr(current);
 		record->tgid = task_tgid_nr(current);
 		record->type = type;
-		record->flags = world_event ? priority : 0;
+					record->flags = world_event ? priority : 0;
+			if (type == AGI_LC_EVENT_VERIFY &&
+			    (metadata & AGI_LC_RV_METADATA_TAG_MASK) == AGI_LC_RV_METADATA_TAG)
+				record->flags = AGI_LC_VERIFY_FLAG_RV_OBSERVATION;
+
 		record->status = status;
 		record->reserved = 0;
 		record->correlation = correlation;
@@ -2778,6 +2796,36 @@ static int agi_lc_push_record(struct agi_lc_session *session, u16 type,
 	return agi_lc_push_record_ex(session, type, status, correlation,
 		metadata, NULL);
 }
+
+#ifdef CONFIG_AGI_LIFECYCLE_RV_BRIDGE
+void agi_lc_rv_report(const char *monitor_name, s32 status)
+{
+	struct agi_lc_session *session;
+	unsigned long flags;
+	u64 sequence;
+	u64 metadata;
+	u32 monitor_hash = 2166136261U;
+	const unsigned char *p;
+
+	if (!monitor_name || !*monitor_name)
+		return;
+	for (p = (const unsigned char *)monitor_name; *p; p++)
+		monitor_hash = (monitor_hash ^ *p) * 16777619U;
+	sequence = atomic64_inc_return(&agi_lc_rv_sequence);
+	metadata = AGI_LC_RV_METADATA_TAG |
+		(((u64)(monitor_hash & 0xffffU)) << AGI_LC_RV_METADATA_MONITOR_SHIFT) |
+		(sequence & AGI_LC_RV_METADATA_SEQUENCE_MASK);
+
+	spin_lock_irqsave(&agi_lc_rv_sessions_lock, flags);
+	list_for_each_entry(session, &agi_lc_rv_sessions, rv_node) {
+		if (!READ_ONCE(session->revoked) && READ_ONCE(session->session_id))
+			(void)agi_lc_push_record_ex(session, AGI_LC_EVENT_VERIFY,
+						    status, sequence, metadata, NULL);
+	}
+	spin_unlock_irqrestore(&agi_lc_rv_sessions_lock, flags);
+}
+EXPORT_SYMBOL_GPL(agi_lc_rv_report);
+#endif
 
 static bool agi_lc_lease_resource_valid(u32 resource)
 {
@@ -4396,6 +4444,13 @@ mutex_init(&session->graph_lock);
 	init_waitqueue_head(&session->msg_wait);
 	init_waitqueue_head(&session->light_wait);
 	init_waitqueue_head(&session->ipc_wait);
+#ifdef CONFIG_AGI_LIFECYCLE_RV_BRIDGE
+	INIT_LIST_HEAD(&session->rv_node);
+	spin_lock(&agi_lc_rv_sessions_lock);
+	list_add_tail(&session->rv_node, &agi_lc_rv_sessions);
+	session->rv_registered = true;
+	spin_unlock(&agi_lc_rv_sessions_lock);
+#endif
 	session->gate_open = true;
 	session->event_mask = ~0ULL;
 	session->world_class_mask = 0;
@@ -4410,6 +4465,14 @@ static int agi_lc_release(struct inode *inode, struct file *file)
 	struct agi_lc_session *session = file->private_data;
 	unsigned long flags;
 
+#ifdef CONFIG_AGI_LIFECYCLE_RV_BRIDGE
+	spin_lock(&agi_lc_rv_sessions_lock);
+	if (session->rv_registered) {
+		list_del_init(&session->rv_node);
+		session->rv_registered = false;
+	}
+	spin_unlock(&agi_lc_rv_sessions_lock);
+#endif
 	spin_lock_irqsave(&session->queue_lock, flags);
 	session->revoked = true;
 	spin_unlock_irqrestore(&session->queue_lock, flags);
