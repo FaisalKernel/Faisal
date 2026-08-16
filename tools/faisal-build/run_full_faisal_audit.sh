@@ -47,7 +47,12 @@ cc -O2 -Wall -Wextra -Werror -Wno-cpp -static \
   tools/faisal-attestation/faisal_runtime_attestation.c \
   tools/faisal-runtime-verification/faisal_runtime_verification.c \
   tools/testing/selftests/agi_runtime_verification_test.c \
-  -o "$BUILD/agi_runtime_verification_test" -lcrypto -ldl -lpthread
+    -o "$BUILD/agi_runtime_verification_test" -lcrypto -ldl -lpthread
+
+cc -O2 -Wall -Wextra -Werror -Wno-cpp -static \
+  -Iinclude/uapi \
+  tools/testing/selftests/agi_autonomy_control_test.c \
+  -o "$BUILD/agi_autonomy_control_test"
 set -- \
  tools/faisal-build/run_agent_security_m64_qemu.sh \
  tools/faisal-build/run_transport_qemu.sh \
@@ -74,7 +79,8 @@ set -- \
  tools/faisal-build/run_runtime_attestation_qemu.sh \
  tools/faisal-build/run_concurrent_lifecycle_ipc_qemu.sh \
  tools/faisal-build/run_memory_transaction_qemu.sh \
- tools/faisal-build/run_runtime_verification_qemu.sh
+ tools/faisal-build/run_runtime_verification_qemu.sh \
+ tools/faisal-build/run_autonomy_control_qemu.sh
 count=0
 for harness do
 	count=$((count + 1))

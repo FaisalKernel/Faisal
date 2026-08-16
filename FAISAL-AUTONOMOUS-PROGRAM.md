@@ -142,3 +142,10 @@ The program maintains small, reviewable commits and milestone tags. Every change
 ## Industry-readiness checkpoint — 2026-08-16
 
 Commit `b66e7594904977a0d66e79b417cb5d37a80b0968` records the first comprehensive FAISAL industry-readiness audit. The current prototype passes a clean 26-harness QEMU aggregate with centralized diagnostic scanning, lifecycle UAPI fuzzing, a bounded multi-boot soak, current-head Sparse correctness checks, and a hardened production-profile boot/fuzz check. It remains active and not production-ready because stable/LTS maintenance, current-head sanitizer coverage, trusted signing and reproducible rebuilds, CVE/upstream response, checkpatch cleanup, and real accelerator qualification are incomplete. The next dependency remains M103 verified proxy-egress adapter, and all external effects remain subject to independent trusted-supervisor and operator approval.
+
+
+## M104 governance checkpoint — bounded autonomous world-observation control loop
+
+M104 is implemented as a kernel evidence and authorization gate, not as an in-kernel web crawler, neural model, unrestricted self-modifier, or physical actuator. It composes with existing user-space browser, verified-research, world-state, experience-learning, deployment-supervisor, and self-healing services. The kernel enforces bounded leases, owner lineage, signed evidence mode, state ordering, independent supervisor/operator approvals, canary prerequisites, generation changes, and rollback state. Model output remains non-authoritative.
+
+Measured acceptance: kernel build passed; strict static userspace build passed; the new selftest has zero checkpatch errors, warnings, and checks; lifecycle Sparse compilation passed; real-kernel QEMU control-loop validation passed; and the full 27-harness aggregate passed with centralized kernel-diagnostic scanning. The active program remains pre-production and incomplete. M105 is the next dependency: a user-space verified autonomy orchestrator that consumes live, provenance-preserving observations and repair evidence, then drives M104 under independent approval and rollback policy.

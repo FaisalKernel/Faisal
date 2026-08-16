@@ -24,7 +24,7 @@ INIT
 chmod +x "$ROOT/init"
 (cd "$ROOT" && find . -print0 | cpio --null -o -H newc 2>/dev/null | gzip -9 > "$IMAGE")
 set +e
-timeout 90s qemu-system-x86_64 -M pc -m 512M -smp 2 -kernel "$OUT/arch/x86/boot/bzImage" -initrd "$IMAGE" -append 'console=ttyS0 rdinit=/init' -nographic -no-reboot -monitor none -serial "file:$LOG" >/tmp/faisal-m68-qemu-stderr.log 2>&1
+timeout 90s qemu-system-x86_64 -M pc -accel tcg,thread=single -m 512M -smp 2 -kernel "$OUT/arch/x86/boot/bzImage" -initrd "$IMAGE" -append 'console=ttyS0 rdinit=/init' -nographic -no-reboot -monitor none -serial "file:$LOG" >/tmp/faisal-m68-qemu-stderr.log 2>&1
 rc=$?
 set -e
 cat "$LOG"

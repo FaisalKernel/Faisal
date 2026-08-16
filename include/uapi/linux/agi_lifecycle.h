@@ -367,6 +367,38 @@
 #define AGI_LC_RECOVERY_RESTORE_BEGIN 2
 #define AGI_LC_RECOVERY_CONTINUE 3
 #define AGI_LC_RECOVERY_ACTION_MAX AGI_LC_RECOVERY_CONTINUE
+#define AGI_LC_AUTONOMY_CREATE 1U
+#define AGI_LC_AUTONOMY_RECORD_EVIDENCE 2U
+#define AGI_LC_AUTONOMY_SUPERVISOR_APPROVE 3U
+#define AGI_LC_AUTONOMY_OPERATOR_APPROVE 4U
+#define AGI_LC_AUTONOMY_ADVANCE 5U
+#define AGI_LC_AUTONOMY_ROLLBACK 6U
+#define AGI_LC_AUTONOMY_QUERY 7U
+#define AGI_LC_AUTONOMY_CLOSE 8U
+#define AGI_LC_AUTONOMY_STATE_OBSERVE 1U
+#define AGI_LC_AUTONOMY_STATE_DIAGNOSE 2U
+#define AGI_LC_AUTONOMY_STATE_PROPOSE 3U
+#define AGI_LC_AUTONOMY_STATE_VERIFY 4U
+#define AGI_LC_AUTONOMY_STATE_CANARY 5U
+#define AGI_LC_AUTONOMY_STATE_DEPLOY 6U
+#define AGI_LC_AUTONOMY_STATE_MONITOR 7U
+#define AGI_LC_AUTONOMY_STATE_ROLLED_BACK 8U
+#define AGI_LC_AUTONOMY_STATE_FAILED 9U
+#define AGI_LC_AUTONOMY_STATE_CLOSED 10U
+#define AGI_LC_AUTONOMY_FLAG_REQUIRE_SIGNED_EVIDENCE (1U << 0)
+#define AGI_LC_AUTONOMY_FLAG_REQUIRE_OPERATOR (1U << 1)
+#define AGI_LC_AUTONOMY_FLAG_REQUIRE_SUPERVISOR (1U << 2)
+#define AGI_LC_AUTONOMY_FLAGS_ALL ((1U << 3) - 1)
+#define AGI_LC_AUTONOMY_EVIDENCE_OBSERVATION (1U << 0)
+#define AGI_LC_AUTONOMY_EVIDENCE_DIAGNOSIS (1U << 1)
+#define AGI_LC_AUTONOMY_EVIDENCE_PATCH (1U << 2)
+#define AGI_LC_AUTONOMY_EVIDENCE_BUILD (1U << 3)
+#define AGI_LC_AUTONOMY_EVIDENCE_TEST (1U << 4)
+#define AGI_LC_AUTONOMY_EVIDENCE_FUZZ (1U << 5)
+#define AGI_LC_AUTONOMY_EVIDENCE_SECURITY (1U << 6)
+#define AGI_LC_AUTONOMY_EVIDENCE_CANARY (1U << 7)
+#define AGI_LC_AUTONOMY_EVIDENCE_ALL ((1U << 8) - 1)
+#define AGI_LC_AUTONOMY_MAX_TTL_NS (7ULL * 24 * 60 * 60 * 1000000000ULL)
 
 #define AGI_LC_CHECKPOINT_SCOPE_TASK (1U << 0)
 #define AGI_LC_CHECKPOINT_SCOPE_MEMORY (1U << 1)
@@ -748,6 +780,29 @@ struct agi_lc_checkpoint_manifest {
 	__u64 region_generations[AGI_LC_CHECKPOINT_REGION_MAX];
 	__u8 user_state_digest[AGI_LC_DIGEST_SIZE];
 	__u8 manifest_digest[AGI_LC_DIGEST_SIZE];
+	__u64 correlation;
+	__u64 reserved[2];
+};
+
+struct agi_lc_autonomy_control {
+	__u32 size;
+	__u32 operation;
+	__u32 flags;
+	__u32 state;
+	__s32 status;
+	__u32 reserved32;
+	__u64 control_id;
+	__u64 capability;
+	__u64 owner_lineage;
+	__u64 evidence_mask;
+	__u64 required_evidence_mask;
+	__u64 supervisor_session;
+	__u64 operator_session;
+	__u64 attempt;
+	__u64 expires_ns;
+	__u64 generation;
+	__u8 candidate_digest[AGI_LC_DIGEST_SIZE];
+	__u8 evidence_digest[AGI_LC_DIGEST_SIZE];
 	__u64 correlation;
 	__u64 reserved[2];
 };
@@ -2239,6 +2294,7 @@ struct agi_lc_record {
 #define AGI_LC_ACCEL_DEVICE_ACCOUNT _IOWR(AGI_LC_IOC_MAGIC, 0x39, struct agi_lc_accel_device_account)
 #define AGI_LC_CHECKPOINT_MANIFEST _IOWR(AGI_LC_IOC_MAGIC, 0x3a, struct agi_lc_checkpoint_manifest)
 #define AGI_LC_RECOVERY _IOWR(AGI_LC_IOC_MAGIC, 0x3b, struct agi_lc_recovery)
+#define AGI_LC_AUTONOMY_CONTROL _IOWR(AGI_LC_IOC_MAGIC, 0x65, struct agi_lc_autonomy_control)
 #define AGI_LC_LIGHT_AGENT_REGISTER _IOWR(AGI_LC_IOC_MAGIC, 0x3c, struct agi_lc_light_agent)
 #define AGI_LC_LIGHT_AGENT_UNREGISTER _IOW(AGI_LC_IOC_MAGIC, 0x3d, struct agi_lc_light_agent)
 #define AGI_LC_LIGHT_AGENT_GET _IOWR(AGI_LC_IOC_MAGIC, 0x3e, struct agi_lc_light_agent)

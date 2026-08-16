@@ -1,0 +1,62 @@
+{
+  "milestone": "M104",
+  "name": "autonomous-world-observation-control-loop",
+  "abi": 38,
+  "kernel_base": "Linux v7.2-rc7",
+  "status": "validated-preproduction-control-plane",
+  "implementation": {
+    "uapi": "AGI_LC_AUTONOMY_CONTROL",
+    "bounded_records": 7,
+    "max_lease_ns": 604800000000000,
+    "state_machine": ["observe", "diagnose", "propose", "implement", "build", "test", "fuzz", "security", "verify", "canary", "deploy", "monitor", "rollback"],
+    "independent_approvals": ["trusted_supervisor", "operator"],
+    "signed_evidence_mode": true,
+    "fail_closed": true
+  },
+  "verification": {
+    "kernel_build": "pass",
+    "userspace_static_build_wall_extra_werror": "pass",
+    "selftest_checkpatch_errors": 0,
+    "selftest_checkpatch_warnings": 0,
+    "selftest_checkpatch_checks": 0,
+    "lifecycle_sparse_compile": "pass",
+    "qemu_control_loop": "pass",
+    "qemu_markers": [
+      "FAC_DEPLOY_BLOCKED_WITHOUT_APPROVALS_OK",
+      "FAC_INDEPENDENT_APPROVAL_CANARY_DEPLOY_OK",
+      "FAC_ROLLBACK_OK",
+      "FAC_SELFTEST_EXIT=0"
+    ],
+    "aggregate_harness_count": 27,
+    "aggregate_harness_failures": 0,
+    "aggregate_kernel_diagnostic_failures": 0,
+    "aggregate_retry_required": false,
+    "qemu_trials_after_harness_isolation": 2,
+    "qemu_trials_passed": 2
+  },
+  "security_properties": [
+    "model_output_is_not_authority",
+    "owner_only_evidence_recording",
+    "independent_supervisor_and_operator_sessions",
+    "capability_and_session_validation",
+    "bounded_expiring_lease",
+    "generation_change_on_expiry_and_rollback",
+    "missing_evidence_and_canary_fail_closed",
+    "no_kernel_execution_of_patches_or_web_content"
+  ],
+  "non_claims": [
+    "does_not_put_web_search_inside_kernel",
+    "does_not_embed_or_train_a_neural_model_in_kernel",
+    "does_not_claim_general_intelligence_or_consciousness",
+    "does_not_claim_physical-world healing or actuation",
+    "does_not claim production deployment readiness",
+    "does_not claim DAMON/CXL/HMM hardware execution"
+  ],
+  "next_dependency": "M105-user-space-verified-autonomy-orchestrator",
+  "evidence_files": [
+    "M104-AUTONOMOUS-WORLD-OBSERVATION-CONTROL-LOOP.md",
+    "tools/faisal-build/run_autonomy_control_qemu.sh",
+    "tools/testing/selftests/agi_autonomy_control_test.c",
+    "build/recovered/full-audit-summary.txt"
+  ]
+}

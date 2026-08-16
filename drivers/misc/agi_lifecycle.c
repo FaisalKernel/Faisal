@@ -70,6 +70,7 @@
 #define AGI_LC_POWER_POLICY_RECORDS 16
 #define AGI_LC_PROVENANCE_BINDING_RECORDS 64
 #define AGI_LC_INTENT_LEASE_RECORDS 64
+#define AGI_LC_AUTONOMY_RECORDS 32
 
 struct agi_lc_lease_record {
 	bool active;
@@ -83,6 +84,13 @@ struct agi_lc_intent_lease_record {
 	bool valid;
 	bool revoked;
 	struct agi_lc_intent_lease lease;
+};
+
+struct agi_lc_autonomy_record {
+	bool valid;
+	bool closed;
+	u64 owner_session;
+	struct agi_lc_autonomy_control control;
 };
 
 struct agi_lc_accel_record {
@@ -468,6 +476,11 @@ static DEFINE_MUTEX(agi_lc_artifact_lock);
 static struct agi_lc_artifact_record
 	agi_lc_artifact_records[AGI_LC_ARTIFACT_RECORDS];
 
+static DEFINE_MUTEX(agi_lc_autonomy_lock);
+static struct agi_lc_autonomy_record
+	agi_lc_autonomy_records[AGI_LC_AUTONOMY_RECORDS];
+static atomic64_t agi_lc_next_autonomy_control = ATOMIC64_INIT(0);
+
 static int agi_lc_push_record(struct agi_lc_session *session, u16 type,
 				      s32 status, u64 correlation, u64 metadata);
 static int agi_lc_push_record_ex(struct agi_lc_session *session, u16 type,
@@ -481,9 +494,241 @@ static struct agi_lc_provenance_record *agi_lc_find_provenance(
 			struct agi_lc_session *session, u64 provenance_id, u64 action_sequence);
 static struct agi_lc_capability_record *agi_lc_find_capability(
 			struct agi_lc_session *session, u64 grant_id,
-			u64 capability, bool include_revoked);
+							u64 capability, bool include_revoked);
+static u64 agi_lc_memory_new_capability(void);
 
 
+
+static struct agi_lc_autonomy_record *
+agi_lc_autonomy_find_locked(u64 control_id, u64 capability)
+{
+	u32 i;
+
+	if (!control_id || !capability)
+		return NULL;
+	for (i = 0; i < AGI_LC_AUTONOMY_RECORDS; i++) {
+		struct agi_lc_autonomy_record *record = &agi_lc_autonomy_records[i];
+
+		if (record->valid && record->control.control_id == control_id &&
+		    record->control.capability == capability)
+			return record;
+	}
+	return NULL;
+}
+
+
+static void agi_lc_autonomy_expire_locked(struct agi_lc_autonomy_record *record)
+{
+	if (record && record->valid && !record->closed &&
+	    record->control.expires_ns &&
+	    ktime_get_boottime_ns() > record->control.expires_ns) {
+		record->control.state = AGI_LC_AUTONOMY_STATE_FAILED;
+		record->control.status = -ETIME;
+		record->control.generation++;
+	}
+}
+
+static bool agi_lc_autonomy_has_approval(
+		const struct agi_lc_autonomy_control *control, u32 flag)
+{
+	if (flag == AGI_LC_AUTONOMY_FLAG_REQUIRE_SUPERVISOR)
+		return control->supervisor_session != 0;
+	if (flag == AGI_LC_AUTONOMY_FLAG_REQUIRE_OPERATOR)
+		return control->operator_session != 0;
+	return true;
+}
+
+static int agi_lc_autonomy_control(struct agi_lc_session *session,
+					unsigned long arg)
+{
+	struct agi_lc_autonomy_control request;
+	struct agi_lc_autonomy_record *record = NULL;
+	u64 now = ktime_get_boottime_ns();
+	u64 ttl;
+	bool privileged = capable(CAP_SYS_ADMIN);
+	int ret = 0;
+
+	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
+		return -EFAULT;
+	if (request.size != sizeof(request) || request.flags & ~AGI_LC_AUTONOMY_FLAGS_ALL ||
+	    request.required_evidence_mask & ~AGI_LC_AUTONOMY_EVIDENCE_ALL ||
+	    request.evidence_mask & ~AGI_LC_AUTONOMY_EVIDENCE_ALL ||
+	    request.reserved32 || request.reserved[0] || request.reserved[1])
+		return -EINVAL;
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+
+	mutex_lock(&agi_lc_autonomy_lock);
+	if (request.operation == AGI_LC_AUTONOMY_CREATE) {
+		u32 i;
+
+		if (request.control_id || request.capability || request.owner_lineage ||
+		    request.evidence_mask || request.state || request.status ||
+		    !request.required_evidence_mask ||
+		    !request.required_evidence_mask ||
+		    request.required_evidence_mask & ~AGI_LC_AUTONOMY_EVIDENCE_ALL) {
+			ret = -EINVAL;
+			goto out_unlock;
+		}
+		ttl = request.expires_ns ? request.expires_ns :
+			60ULL * 60 * 1000000000ULL;
+		if (ttl > AGI_LC_AUTONOMY_MAX_TTL_NS) {
+			ret = -ERANGE;
+			goto out_unlock;
+		}
+		for (i = 0; i < AGI_LC_AUTONOMY_RECORDS; i++)
+			if (!agi_lc_autonomy_records[i].valid ||
+			    agi_lc_autonomy_records[i].closed)
+				break;
+		if (i == AGI_LC_AUTONOMY_RECORDS) {
+			ret = -ENOSPC;
+			goto out_unlock;
+		}
+		record = &agi_lc_autonomy_records[i];
+		memset(record, 0, sizeof(*record));
+		record->valid = true;
+		record->owner_session = session->session_id;
+		record->control = request;
+		record->control.control_id = atomic64_inc_return(
+			&agi_lc_next_autonomy_control);
+		if (!record->control.control_id)
+			record->control.control_id = atomic64_inc_return(
+			&agi_lc_next_autonomy_control);
+		record->control.capability = agi_lc_memory_new_capability();
+		record->control.owner_lineage = faisal_task_get_lineage(current);
+		record->control.state = AGI_LC_AUTONOMY_STATE_OBSERVE;
+		record->control.status = 0;
+		record->control.expires_ns = now + ttl;
+		record->control.generation = 1;
+		ret = agi_lc_push_record(session, AGI_LC_EVENT_OBSERVABILITY, 0,
+					request.correlation,
+					record->control.control_id);
+		if (ret)
+			memset(record, 0, sizeof(*record));
+		else
+			request = record->control;
+		goto out_copy;
+	}
+
+	record = agi_lc_autonomy_find_locked(request.control_id,
+						request.capability);
+	if (!record) {
+		ret = -EACCES;
+		goto out_unlock;
+	}
+	agi_lc_autonomy_expire_locked(record);
+	if (request.operation != AGI_LC_AUTONOMY_QUERY &&
+	    record->control.state == AGI_LC_AUTONOMY_STATE_FAILED &&
+	    request.operation != AGI_LC_AUTONOMY_ROLLBACK) {
+		ret = record->control.status ? record->control.status : -ETIME;
+		goto out_unlock;
+	}
+	switch (request.operation) {
+	case AGI_LC_AUTONOMY_RECORD_EVIDENCE:
+		if (record->owner_session != session->session_id ||
+		    !request.evidence_mask ||
+		    (record->control.flags & AGI_LC_AUTONOMY_FLAG_REQUIRE_SIGNED_EVIDENCE &&
+		     !memchr_inv(request.evidence_digest, 0,
+				 sizeof(request.evidence_digest)))) {
+			if (record->control.flags & AGI_LC_AUTONOMY_FLAG_REQUIRE_SIGNED_EVIDENCE &&
+			    !memchr_inv(request.evidence_digest, 0,
+					 sizeof(request.evidence_digest)))
+				ret = -EKEYREJECTED;
+			else
+				ret = -EACCES;
+			goto out_unlock;
+		}
+		record->control.evidence_mask |= request.evidence_mask;
+		if (memchr_inv(request.evidence_digest, 0,
+			       sizeof(request.evidence_digest)))
+			memcpy(record->control.evidence_digest, request.evidence_digest,
+			       sizeof(record->control.evidence_digest));
+		record->control.generation++;
+		break;
+	case AGI_LC_AUTONOMY_SUPERVISOR_APPROVE:
+		if (!privileged || record->owner_session == session->session_id ||
+		    !(record->control.flags & AGI_LC_AUTONOMY_FLAG_REQUIRE_SUPERVISOR)) {
+			ret = -EPERM;
+			goto out_unlock;
+		}
+		record->control.supervisor_session = session->session_id;
+		record->control.generation++;
+		break;
+	case AGI_LC_AUTONOMY_OPERATOR_APPROVE:
+		if (!privileged || record->owner_session == session->session_id ||
+		    !(record->control.flags & AGI_LC_AUTONOMY_FLAG_REQUIRE_OPERATOR)) {
+			ret = -EPERM;
+			goto out_unlock;
+		}
+		record->control.operator_session = session->session_id;
+		record->control.generation++;
+		break;
+	case AGI_LC_AUTONOMY_ADVANCE:
+		if (record->owner_session != session->session_id ||
+		    request.state != record->control.state + 1)
+			{ ret = -EPERM; goto out_unlock; }
+		if (request.state == AGI_LC_AUTONOMY_STATE_DIAGNOSE &&
+		    !(record->control.evidence_mask & AGI_LC_AUTONOMY_EVIDENCE_OBSERVATION))
+			{ ret = -EAGAIN; goto out_unlock; }
+		if (request.state == AGI_LC_AUTONOMY_STATE_PROPOSE &&
+		    !(record->control.evidence_mask & AGI_LC_AUTONOMY_EVIDENCE_DIAGNOSIS))
+			{ ret = -EAGAIN; goto out_unlock; }
+		if (request.state == AGI_LC_AUTONOMY_STATE_VERIFY &&
+		    ((record->control.evidence_mask &
+		      (AGI_LC_AUTONOMY_EVIDENCE_PATCH | AGI_LC_AUTONOMY_EVIDENCE_BUILD |
+		       AGI_LC_AUTONOMY_EVIDENCE_TEST | AGI_LC_AUTONOMY_EVIDENCE_FUZZ |
+		       AGI_LC_AUTONOMY_EVIDENCE_SECURITY)) !=
+		     (AGI_LC_AUTONOMY_EVIDENCE_PATCH | AGI_LC_AUTONOMY_EVIDENCE_BUILD |
+		      AGI_LC_AUTONOMY_EVIDENCE_TEST | AGI_LC_AUTONOMY_EVIDENCE_FUZZ |
+		      AGI_LC_AUTONOMY_EVIDENCE_SECURITY)))
+			{ ret = -EAGAIN; goto out_unlock; }
+		if (request.state == AGI_LC_AUTONOMY_STATE_DEPLOY &&
+		    ((record->control.evidence_mask & record->control.required_evidence_mask) !=
+		     record->control.required_evidence_mask ||
+		     !(record->control.evidence_mask & AGI_LC_AUTONOMY_EVIDENCE_CANARY)))
+			{ ret = -EAGAIN; goto out_unlock; }
+		if (request.state == AGI_LC_AUTONOMY_STATE_CANARY &&
+		    ((!agi_lc_autonomy_has_approval(&record->control,
+			 AGI_LC_AUTONOMY_FLAG_REQUIRE_SUPERVISOR) &&
+		      (record->control.flags & AGI_LC_AUTONOMY_FLAG_REQUIRE_SUPERVISOR)) ||
+		     (!agi_lc_autonomy_has_approval(&record->control,
+			 AGI_LC_AUTONOMY_FLAG_REQUIRE_OPERATOR) &&
+		      (record->control.flags & AGI_LC_AUTONOMY_FLAG_REQUIRE_OPERATOR))))
+			{ ret = -EACCES; goto out_unlock; }
+		record->control.state = request.state;
+		record->control.attempt++;
+		record->control.generation++;
+		break;
+	case AGI_LC_AUTONOMY_ROLLBACK:
+		if (record->owner_session != session->session_id && !privileged)
+			{ ret = -EPERM; goto out_unlock; }
+		record->control.state = AGI_LC_AUTONOMY_STATE_ROLLED_BACK;
+		record->control.status = 0;
+		record->control.generation++;
+		break;
+	case AGI_LC_AUTONOMY_QUERY:
+		break;
+	case AGI_LC_AUTONOMY_CLOSE:
+		if (record->owner_session != session->session_id)
+			{ ret = -EPERM; goto out_unlock; }
+		record->closed = true;
+		record->control.state = AGI_LC_AUTONOMY_STATE_CLOSED;
+		record->control.generation++;
+		break;
+	default:
+		ret = -EINVAL;
+		goto out_unlock;
+	}
+	request = record->control;
+out_copy:
+	mutex_unlock(&agi_lc_autonomy_lock);
+	if (ret || copy_to_user((void __user *)arg, &request, sizeof(request)))
+		return ret ? ret : -EFAULT;
+	return 0;
+out_unlock:
+	mutex_unlock(&agi_lc_autonomy_lock);
+	return ret;
+}
 
 static int agi_lc_record_experience(struct agi_lc_session *session,
 					    unsigned long arg)
@@ -9600,9 +9845,13 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 	case AGI_LC_CHECKPOINT_MANIFEST:
 		ret = agi_lc_checkpoint_manifest(session, arg);
 		break;
-	case AGI_LC_RECOVERY:
-		ret = agi_lc_recovery(session, arg);
-		break;
+			case AGI_LC_RECOVERY:
+			ret = agi_lc_recovery(session, arg);
+			break;
+		case AGI_LC_AUTONOMY_CONTROL:
+			ret = agi_lc_autonomy_control(session, arg);
+			break;
+
 	case AGI_LC_LIGHT_AGENT_REGISTER:
 		ret = agi_lc_light_register(session, arg);
 		break;
