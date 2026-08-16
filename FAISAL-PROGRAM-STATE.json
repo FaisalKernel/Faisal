@@ -1,12 +1,12 @@
 {
   "project": "FAISAL",
   "program": "autonomous AGI-native Linux operating-system implementation",
-  "updated": "2026-08-15",
+  "updated": "2026-08-16",
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "ec12bed733239cd34cc897e7d2c6ba2ff44ceaa7",
-  "current_tag": "FAISAL-M85",
+  "current_head": "a030909d909eb65329670bbe745a1ed26a2f02e7",
+  "current_tag": "FAISAL-M86",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -216,6 +216,18 @@
       "next_action": "Retain bounded recovery and quarantine coverage; next integrate runtime-verification signals, signed content-addressed repair bundles, and hardware/provider-gated attestation without enabling arbitrary kernel self-modification."
     },
     {
+      "id": "M86-functional-audit-runtime-attestation",
+      "phase": 14,
+      "name": "Clean source-to-boot functional audit and ABI 37 runtime attestation",
+      "status": "validated_clean_build_boot_full_regression_and_runtime_attestation",
+      "priority": 85,
+      "depends_on": ["M80-stress-fuzz-hardening", "M84-cogos-control-plane", "M85-self-healing-future-tech"],
+      "unlocks": ["M87-runtime-verification-signal-integration"],
+      "evidence_required": ["clean_build", "clean_boot", "device_audit", "full_regression", "defect_reproduction", "defect_fix", "runtime_attestation", "security_review", "benchmark"],
+      "evidence": ["FAISAL-FUNCTIONAL-AUDIT.md", "MILESTONE86.md", "M86-RUNTIME-ATTESTATION-SECURITY.md", "M86-RUNTIME-ATTESTATION-BENCHMARKS.md", "tools/faisal-build/evidence/m86-runtime-attestation-validation.json"],
+      "next_action": "Integrate runtime-verification signal sources and provider-gated attestation only after concurrent sanitizer/lockdep validation is available."
+    },
+    {
       "id": "M81-concurrent-sanitizer-validation",
       "phase": 14,
       "name": "Concurrent lifecycle and IPC stress with sanitizer-enabled kernel validation",
@@ -226,7 +238,7 @@
       "evidence_required": ["concurrent_stress", "kasan_or_documented_blocker", "kcsan_or_documented_blocker", "lockdep_or_documented_blocker", "randomized_inputs", "security_review", "regression"]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M82", "FAISAL-M84", "FAISAL-M85"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M82", "FAISAL-M84", "FAISAL-M85", "FAISAL-M86"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",
