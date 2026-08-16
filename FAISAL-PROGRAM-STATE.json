@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "875abf7f1fe88e6d79e6967f05f0a830d41b2d16",
-  "current_tag": "FAISAL-M81",
+  "current_head": "a93dd87e58da40081c103eb9c3d02ed7a2830a45",
+  "current_tag": "FAISAL-M83",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -243,14 +243,26 @@
       "id": "M83-memory-transactional-concurrency",
       "phase": 10,
       "name": "Transactional persistent-memory concurrency and crash-safe cross-journal rollback",
-      "status": "next",
+      "status": "validated_two_journal_commit_partial_crash_rollback_and_concurrent_replay",
       "priority": 95,
       "depends_on": ["M82-memory-ecosystem", "M81-concurrent-sanitizer-validation"],
       "unlocks": [],
-      "evidence_required": ["atomic_multi_journal_commit", "crash_injection", "rollback_replay", "concurrent_read_write", "capability_isolation", "security_review", "benchmark", "regression"]
+      "evidence_required": ["atomic_multi_journal_commit", "crash_injection", "rollback_replay", "concurrent_read_write", "capability_isolation", "security_review", "benchmark", "regression"],
+      "evidence": ["MILESTONE83.md", "M83-TRANSACTION-DESIGN.md", "M83-SECURITY-REVIEW.md", "M83-BENCHMARKS.md", "M83-PERSISTENCE-RESEARCH.md", "tools/faisal-build/evidence/m83-transaction-validation.json"],
+      "next_action": "Retain bounded transaction and sanitizer regression coverage while M87 integrates runtime-verification signals and provider-gated attestation."
+    },
+    {
+      "id": "M87-runtime-verification-signal-integration",
+      "phase": 14,
+      "name": "Runtime-verification signal integration and attested repair gating",
+      "status": "next",
+      "priority": 90,
+      "depends_on": ["M86-runtime-attestation", "M81-concurrent-sanitizer-validation"],
+      "unlocks": [],
+      "evidence_required": ["runtime_verification_signals", "attestation_binding", "signed_content_addressed_repair_bundle", "provider_gated_attestation", "security_review", "benchmark", "regression"]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M81", "FAISAL-M82", "FAISAL-M84", "FAISAL-M85", "FAISAL-M86"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M81", "FAISAL-M82", "FAISAL-M83", "FAISAL-M84", "FAISAL-M85", "FAISAL-M86"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",
