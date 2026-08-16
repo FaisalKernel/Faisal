@@ -42,7 +42,7 @@ int main(void)
 	printf("FAISAL_M77_BROWSER_WORLD_OPEN_OK\n");
 	if (m77_collect(&service, "faisal-status", "https://example.test",
 			"FAISAL source says status green", M77_SOURCE_KIND_PRIMARY,
-			100, 900000, 0, 1000000000ULL, &primary) != 0)
+			100, 900000, 0, AGI_LC_KNOWLEDGE_MAX_TTL_NS, &primary) != 0)
 		return fail("primary collect", -1);
 	if (m77_test_unverified_denial(&service, primary.source_id) != 0)
 		return fail("unverified promotion denial", -1);
@@ -50,7 +50,7 @@ int main(void)
 	       (unsigned long long)primary.source_id);
 	if (m77_collect(&service, "faisal-status", "https://example.test",
 			"FAISAL source says status green", M77_SOURCE_KIND_SECONDARY,
-			50, 800000, 0, 1000000000ULL, &secondary) != 0)
+			50, 800000, 0, AGI_LC_KNOWLEDGE_MAX_TTL_NS, &secondary) != 0)
 		return fail("secondary collect", -1);
 	if (m77_preferred(&service, "faisal-status", &preferred) != 0 ||
 	    preferred.source_id != primary.source_id)
@@ -71,10 +71,10 @@ int main(void)
 	       (unsigned long long)fact.memory_record_id);
 	if (m77_collect(&service, "faisal-conflict", "https://example.test",
 			"FAISAL source says status red", M77_SOURCE_KIND_PRIMARY,
-			100, 950000, 0, 1000000000ULL, &conflict_a) != 0 ||
+			100, 950000, 0, AGI_LC_KNOWLEDGE_MAX_TTL_NS, &conflict_a) != 0 ||
 	    m77_collect(&service, "faisal-conflict", "https://example.test",
 			"FAISAL source says status blue", M77_SOURCE_KIND_SECONDARY,
-			50, 700000, 0, 1000000000ULL, &conflict_b) != 0)
+			50, 700000, 0, AGI_LC_KNOWLEDGE_MAX_TTL_NS, &conflict_b) != 0)
 		return fail("conflict collect", -1);
 	rc = m77_crosscheck(&service, conflict_a.source_id, conflict_b.source_id);
 	if (rc != 1 || service.sources[2].local_state != M77_CONFLICT ||

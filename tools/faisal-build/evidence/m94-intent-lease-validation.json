@@ -1,0 +1,104 @@
+{
+  "milestone": "FAISAL-M94",
+  "title": "Intent-bound authority leases",
+  "access_date": "2026-08-16",
+  "pre_commit_head": "ba8fa490817736e011bcdb6b908a255cff1a0ef8",
+  "previous_tag": "FAISAL-M93",
+  "previous_tag_target": "2631353d2182fda29cd7aacd8cff20cf762bf077",
+  "abi_version": 38,
+  "implementation": {
+    "uapi_ioctl": "AGI_LC_INTENT_LEASE at 0x63",
+    "per_session_records": 64,
+    "max_uses": 4096,
+    "max_ttl_ns": 604800000000000,
+    "operation_classes": [
+      "filesystem",
+      "network",
+      "browser",
+      "device",
+      "privileged",
+      "tool",
+      "model_deployment"
+    ],
+    "kernel_checks": [
+      "existing capability grant",
+      "agent identity and capability",
+      "execution lineage",
+      "operation class and rights mapping",
+      "resource mask",
+      "scope",
+      "generation",
+      "fixed-size intent digest",
+      "expiry",
+      "revocation",
+      "bounded remaining uses",
+      "session revoke and descriptor-close invalidation"
+    ]
+  },
+  "validation": {
+    "strict_driver_build": "passed",
+    "static_selftest_build_wall_wextra_werror": "passed",
+    "normal_qemu": "passed",
+    "normal_qemu_markers": [
+      "M94_INTENT_LEASE_ACQUIRE_OK",
+      "M94_SINGLE_USE_ATOMIC_CONSUME_OK",
+      "M94_REPLAY_DENIAL_OK",
+      "M94_BOUNDED_MULTI_USE_OK",
+      "M94_INTENT_QUERY_OK",
+      "M94_INTENT_MISMATCH_DENIAL_OK",
+      "M94_EXPIRY_FAIL_CLOSED_OK",
+      "M94_GRANT_GATING_DENIAL_OK",
+      "M94_REVOCATION_FAIL_CLOSED_OK",
+      "M94_SESSION_CLOSE_INVALIDATION_OK",
+      "M94_SELFTEST_EXIT=0"
+    ],
+    "three_qemu_smokes": {
+      "result": "passed",
+      "wall_ms": [4265, 4120, 4089],
+      "mean_wall_ms": 4158,
+      "min_wall_ms": 4089,
+      "max_wall_ms": 4265
+    },
+    "kasan_lockdep_qemu": "passed_clean_one_vcpu",
+    "kcsan_lockdep_qemu": "passed_clean_one_vcpu",
+    "sanitizer_diagnostics": "earlier_two_vcpu_runs_completed_the_selftest_but_emitted_qemu_virtual_clock_rcu_starvation_warnings; preserved separately and not counted as clean sanitizer evidence",
+    "m90_signed_provider_regression": "passed",
+    "m91_provider_gated_hardware_regression": "passed; explicit unsupported result preserved",
+    "full_faisal_audit": {
+      "result": "passed",
+      "harnesses": 23,
+      "retries_required": false
+    },
+    "security_scan": "passed",
+    "diff_check": "passed"
+  },
+  "regression_diagnosis": {
+    "initial_full_audit_failure": "verified-research fixture expired a one-second freshness window under QEMU virtual-clock latency",
+    "correction": "changed the test fixture to AGI_LC_KNOWLEDGE_MAX_TTL_NS",
+    "final_result": "verified-research passed and final 23-harness audit passed"
+  },
+  "changed_paths": [
+    "drivers/misc/agi_lifecycle.c",
+    "include/uapi/linux/agi_lifecycle.h",
+    "tools/testing/selftests/agi_intent_lease_test.c",
+    "tools/testing/selftests/agi_verified_research_test.c",
+    "tools/faisal-build/run_intent_lease_qemu.sh",
+    "M94-RESEARCH-NOTES.md",
+    "M94-INTENT-LEASE-DESIGN.md",
+    "M94-SECURITY-REVIEW.md",
+    "M94-BENCHMARKS.md",
+    "MILESTONE94.md"
+  ],
+  "non_claims": [
+    "not a claim of globally unprecedented novelty",
+    "model output is not kernel authority",
+    "no 1000x productivity claim",
+    "no performance improvement claim",
+    "no universal syscall enforcement claim",
+    "no hardware-backed attestation claim",
+    "no transparent process-crash recovery claim",
+    "no arbitrary unsynchronized userspace service-destruction safety claim",
+    "no production-readiness claim"
+  ],
+  "next_dependency": "M95 supervisor-mediated lease ownership and crash recovery"
+}

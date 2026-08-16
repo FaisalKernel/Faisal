@@ -5,7 +5,7 @@
 #include <linux/ioctl.h>
 #include <linux/types.h>
 
-#define AGI_LC_ABI_VERSION 37
+#define AGI_LC_ABI_VERSION 38
 #define AGI_LC_DEVICE_NAME "agi_lifecycle"
 
 #define AGI_LC_EVENT_BEGIN 1
@@ -48,6 +48,7 @@
 #define AGI_LC_EVENT_OBSERVABILITY 38
 #define AGI_LC_EVENT_GRAPH_OPERATION 39
 #define AGI_LC_EVENT_POWER_POLICY 40
+#define AGI_LC_EVENT_INTENT_LEASE 41
 
 /* ABI 37: verification records emitted from upstream Runtime Verification. */
 #define AGI_LC_VERIFY_FLAG_RV_OBSERVATION (1U << 0)
@@ -388,6 +389,30 @@
 #define AGI_LC_LEASE_STORAGE 2
 #define AGI_LC_LEASE_ACCELERATOR 3
 #define AGI_LC_LEASE_TOOL 4
+
+#define AGI_LC_INTENT_LEASE_ACQUIRE 1U
+#define AGI_LC_INTENT_LEASE_CONSUME 2U
+#define AGI_LC_INTENT_LEASE_QUERY 3U
+#define AGI_LC_INTENT_LEASE_REVOKE 4U
+#define AGI_LC_INTENT_LEASE_FLAG_SINGLE_USE (1U << 0)
+#define AGI_LC_INTENT_LEASE_FLAG_REVOKE_ON_CLOSE (1U << 1)
+#define AGI_LC_INTENT_LEASE_FLAG_REQUIRE_PROVENANCE (1U << 2)
+#define AGI_LC_INTENT_LEASE_FLAGS_ALL ((1U << 3) - 1)
+#define AGI_LC_INTENT_OP_FILESYSTEM 1U
+#define AGI_LC_INTENT_OP_NETWORK 2U
+#define AGI_LC_INTENT_OP_BROWSER 3U
+#define AGI_LC_INTENT_OP_DEVICE 4U
+#define AGI_LC_INTENT_OP_PRIVILEGED 5U
+#define AGI_LC_INTENT_OP_TOOL 6U
+#define AGI_LC_INTENT_OP_MODEL_DEPLOYMENT 7U
+#define AGI_LC_INTENT_OP_MAX AGI_LC_INTENT_OP_MODEL_DEPLOYMENT
+#define AGI_LC_INTENT_STATUS_ACTIVE 0U
+#define AGI_LC_INTENT_STATUS_EXPIRED 1U
+#define AGI_LC_INTENT_STATUS_REVOKED 2U
+#define AGI_LC_INTENT_STATUS_EXHAUSTED 3U
+#define AGI_LC_INTENT_STATUS_DENIED 4U
+#define AGI_LC_INTENT_MAX_USES 4096U
+#define AGI_LC_INTENT_MAX_TTL_NS (7ULL * 24 * 60 * 60 * 1000000000ULL)
 
 #define AGI_LC_MESSAGE_MAX 256
 #define AGI_LC_EXPERIENCE_MAX 256
@@ -1440,6 +1465,32 @@ struct agi_lc_lease {
 	__u64 reserved[2];
 };
 
+struct agi_lc_intent_lease {
+	__u32 size;
+	__u32 operation;
+	__u32 flags;
+	__u32 operation_class;
+	__u32 resource_mask;
+	__u32 status;
+	__u64 lease_id;
+	__u64 grant_id;
+	__u64 grant_capability;
+	__u64 agent_id;
+	__u64 agent_capability;
+	__u64 lineage_id;
+	__u64 scope_id;
+	__u64 generation;
+	__u64 expires_ns;
+	__u64 max_uses;
+	__u64 remaining_uses;
+	__u64 use_sequence;
+	__u64 created_ns;
+	__u64 last_used_ns;
+	__u8 intent_digest[AGI_LC_DIGEST_SIZE];
+	__u64 correlation;
+	__u64 reserved[2];
+};
+
 struct agi_lc_persistent_memory {
 	__u32 size;
 	__u32 operation;
@@ -2208,5 +2259,6 @@ struct agi_lc_record {
 #define AGI_LC_LEASE_ACQUIRE _IOWR(AGI_LC_IOC_MAGIC, 0x1d, struct agi_lc_lease)
 #define AGI_LC_LEASE_CHECK _IOWR(AGI_LC_IOC_MAGIC, 0x1e, struct agi_lc_lease)
 #define AGI_LC_LEASE_REVOKE _IOW(AGI_LC_IOC_MAGIC, 0x1f, struct agi_lc_lease)
+#define AGI_LC_INTENT_LEASE _IOWR(AGI_LC_IOC_MAGIC, 0x63, struct agi_lc_intent_lease)
 
 #endif /* _UAPI_LINUX_AGI_LIFECYCLE_H */

@@ -69,6 +69,7 @@
 #define AGI_LC_GRAPH_TELEMETRY_RECORDS 64
 #define AGI_LC_POWER_POLICY_RECORDS 16
 #define AGI_LC_PROVENANCE_BINDING_RECORDS 64
+#define AGI_LC_INTENT_LEASE_RECORDS 64
 
 struct agi_lc_lease_record {
 	bool active;
@@ -76,6 +77,12 @@ struct agi_lc_lease_record {
 	u64 lease_id;
 	u64 owner_agent;
 	u64 expires_ns;
+};
+
+struct agi_lc_intent_lease_record {
+	bool valid;
+	bool revoked;
+	struct agi_lc_intent_lease lease;
 };
 
 struct agi_lc_accel_record {
@@ -381,8 +388,10 @@ struct mutex graph_lock;
 	u64 verification_checkpoint_sequence;
 	u64 verification_parent_sequence;
 	u8 verification_digest[AGI_LC_DIGEST_SIZE];
-	struct agi_lc_lease_record leases[AGI_LC_LEASE_MAX];
-	struct agi_lc_agent_record agents[AGI_LC_AGENT_RECORDS];
+			struct agi_lc_lease_record leases[AGI_LC_LEASE_MAX];
+		struct agi_lc_intent_lease_record intent_leases[AGI_LC_INTENT_LEASE_RECORDS];
+		struct agi_lc_agent_record agents[AGI_LC_AGENT_RECORDS];
+
 struct agi_lc_compute_context_record contexts[AGI_LC_CONTEXT_RECORDS];
 	u64 next_context_id;
 struct agi_lc_graph_node_record graph_nodes[AGI_LC_GRAPH_NODES];
@@ -440,6 +449,7 @@ static atomic64_t agi_lc_rv_sequence = ATOMIC64_INIT(0);
 #endif
 static atomic64_t agi_lc_next_recovery = ATOMIC64_INIT(0);
 static atomic64_t agi_lc_next_lease = ATOMIC64_INIT(0);
+static atomic64_t agi_lc_next_intent_lease = ATOMIC64_INIT(0);
 static atomic64_t agi_lc_next_memory_region = ATOMIC64_INIT(0);
 static atomic64_t agi_lc_next_artifact = ATOMIC64_INIT(0);
 static DEFINE_MUTEX(agi_lc_memory_lock);
@@ -466,7 +476,12 @@ static struct agi_lc_agent_record *
 static u64 agi_lc_capability_mask(kernel_cap_t caps);
 static struct agi_lc_accel_record *agi_lc_find_accel_locked(u64 device_id);
 static struct agi_lc_provenance_record *agi_lc_find_provenance(
-		struct agi_lc_session *session, u64 provenance_id, u64 action_sequence);
+			struct agi_lc_session *session, u64 provenance_id, u64 action_sequence);
+static struct agi_lc_capability_record *agi_lc_find_capability(
+			struct agi_lc_session *session, u64 grant_id,
+			u64 capability, bool include_revoked);
+
+
 
 static int agi_lc_record_experience(struct agi_lc_session *session,
 					    unsigned long arg)
@@ -2975,6 +2990,242 @@ static int agi_lc_lease_revoke(struct agi_lc_session *session,
 	return ret;
 }
 
+static u64 agi_lc_intent_required_rights(u32 operation_class)
+{
+	switch (operation_class) {
+	case AGI_LC_INTENT_OP_FILESYSTEM:
+		return AGI_LC_CAP_FS_WRITE;
+	case AGI_LC_INTENT_OP_NETWORK:
+		return AGI_LC_CAP_NET_CONNECT;
+	case AGI_LC_INTENT_OP_BROWSER:
+		return AGI_LC_CAP_BROWSER_CONTROL;
+	case AGI_LC_INTENT_OP_DEVICE:
+		return AGI_LC_CAP_DEVICE_USE;
+	case AGI_LC_INTENT_OP_PRIVILEGED:
+	case AGI_LC_INTENT_OP_TOOL:
+		return AGI_LC_CAP_PRIVILEGED_API;
+	case AGI_LC_INTENT_OP_MODEL_DEPLOYMENT:
+		return AGI_LC_CAP_COMPUTE_EXECUTE;
+	default:
+		return 0;
+	}
+}
+
+static struct agi_lc_intent_lease_record *
+agi_lc_find_intent_lease(struct agi_lc_session *session, u64 lease_id)
+{
+	u32 i;
+
+	for (i = 0; i < AGI_LC_INTENT_LEASE_RECORDS; i++)
+		if (session->intent_leases[i].valid &&
+		    session->intent_leases[i].lease.lease_id == lease_id)
+			return &session->intent_leases[i];
+	return NULL;
+}
+
+static int agi_lc_intent_common_validate(struct agi_lc_session *session,
+						struct agi_lc_intent_lease *lease)
+{
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != session->session_id)
+		return -EPERM;
+	if (!faisal_task_get_agent(current) ||
+	    lease->agent_id != faisal_task_get_agent(current))
+		return -EPERM;
+	if (!lease->agent_capability || !lease->grant_id ||
+	    !lease->grant_capability)
+		return -EINVAL;
+	return 0;
+}
+
+static int agi_lc_intent_authority_validate(struct agi_lc_session *session,
+						struct agi_lc_intent_lease *lease)
+{
+	struct agi_lc_capability_record *record;
+	u64 required;
+	int ret;
+
+	ret = agi_lc_intent_common_validate(session, lease);
+	if (ret)
+		return ret;
+	record = agi_lc_find_capability(session, lease->grant_id,
+					lease->grant_capability, false);
+	if (!record || record->grant.agent_id != lease->agent_id ||
+	    record->grant.agent_capability != lease->agent_capability)
+		return -EACCES;
+	required = agi_lc_intent_required_rights(lease->operation_class);
+	if (!required || (record->grant.rights & required) != required)
+		return -EACCES;
+	if (record->grant.scope_kind != AGI_LC_CAP_SCOPE_NONE &&
+	    record->grant.scope_id != lease->scope_id)
+		return -EACCES;
+	return 0;
+}
+
+static void agi_lc_intent_set_status(struct agi_lc_intent_lease *lease,
+						u64 now)
+{
+	if (lease->status == AGI_LC_INTENT_STATUS_REVOKED)
+		return;
+	if (now >= lease->expires_ns)
+		lease->status = AGI_LC_INTENT_STATUS_EXPIRED;
+	else if (!lease->remaining_uses)
+		lease->status = AGI_LC_INTENT_STATUS_EXHAUSTED;
+	else
+		lease->status = AGI_LC_INTENT_STATUS_ACTIVE;
+}
+
+static int agi_lc_intent_lease_control(struct agi_lc_session *session,
+						unsigned long arg)
+{
+	struct agi_lc_intent_lease request;
+	struct agi_lc_intent_lease_record *record = NULL;
+	u64 now;
+	u32 i;
+	int ret;
+
+	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
+		return -EFAULT;
+	if (request.size != sizeof(request) ||
+	    request.operation < AGI_LC_INTENT_LEASE_ACQUIRE ||
+	    request.operation > AGI_LC_INTENT_LEASE_REVOKE ||
+	    request.flags & ~AGI_LC_INTENT_LEASE_FLAGS_ALL ||
+	    request.operation_class > AGI_LC_INTENT_OP_MAX ||
+	    request.resource_mask & ~AGI_LC_RESOURCE_ALL ||
+	    request.status || request.reserved[0] || request.reserved[1])
+		return -EINVAL;
+
+	if (request.operation == AGI_LC_INTENT_LEASE_ACQUIRE) {
+		if (!request.operation_class || !request.resource_mask ||
+		    request.lease_id || request.generation || request.expires_ns == 0 ||
+		    request.max_uses == 0 || request.remaining_uses ||
+		    request.use_sequence || request.created_ns || request.last_used_ns ||
+		    !request.grant_id || !request.grant_capability ||
+		    !request.agent_id || !request.agent_capability ||
+		    !memchr_inv(request.intent_digest, 0,
+				 sizeof(request.intent_digest)) ||
+		    (request.flags & AGI_LC_INTENT_LEASE_FLAG_SINGLE_USE &&
+		     request.max_uses != 1))
+			return -EINVAL;
+		if (request.max_uses > AGI_LC_INTENT_MAX_USES ||
+		    request.expires_ns > AGI_LC_INTENT_MAX_TTL_NS)
+			return -ERANGE;
+		ret = agi_lc_intent_authority_validate(session, &request);
+		if (ret)
+			return ret;
+		now = ktime_get_ns();
+		if (now > U64_MAX - request.expires_ns)
+			return -ERANGE;
+		for (i = 0; i < AGI_LC_INTENT_LEASE_RECORDS; i++) {
+			struct agi_lc_intent_lease_record *candidate =
+				&session->intent_leases[i];
+
+			if (!candidate->valid || candidate->revoked ||
+			    candidate->lease.status != AGI_LC_INTENT_STATUS_ACTIVE ||
+			    candidate->lease.expires_ns <= now ||
+			    !candidate->lease.remaining_uses) {
+				record = candidate;
+				break;
+			}
+		}
+		if (!record)
+			return -ENOSPC;
+		memset(record, 0, sizeof(*record));
+		record->valid = true;
+		record->lease = request;
+		record->lease.lease_id = atomic64_inc_return(&agi_lc_next_intent_lease);
+		if (!record->lease.lease_id)
+			record->lease.lease_id =
+				atomic64_inc_return(&agi_lc_next_intent_lease);
+		record->lease.lineage_id = session->session_id;
+		record->lease.generation = 1;
+		record->lease.created_ns = now;
+		record->lease.expires_ns = now + request.expires_ns;
+		record->lease.remaining_uses = request.max_uses;
+		record->lease.status = AGI_LC_INTENT_STATUS_ACTIVE;
+		request = record->lease;
+		ret = agi_lc_push_record(session, AGI_LC_EVENT_INTENT_LEASE, 0,
+					 request.correlation, request.lease_id);
+		if (ret) {
+			record->valid = false;
+			return ret;
+		}
+		if (copy_to_user((void __user *)arg, &request, sizeof(request)))
+			return -EFAULT;
+		return 0;
+	}
+
+	if (!request.lease_id || !request.operation_class ||
+	    !request.resource_mask || !request.generation ||
+	    !request.agent_id || !request.agent_capability ||
+	    !request.grant_id || !request.grant_capability ||
+	    !memchr_inv(request.intent_digest, 0, sizeof(request.intent_digest)))
+		return -EINVAL;
+	ret = agi_lc_intent_common_validate(session, &request);
+	if (ret)
+		return ret;
+	record = agi_lc_find_intent_lease(session, request.lease_id);
+	if (!record)
+		return -ENOENT;
+	if (record->lease.agent_id != request.agent_id ||
+	    record->lease.agent_capability != request.agent_capability ||
+	    record->lease.grant_id != request.grant_id ||
+	    record->lease.grant_capability != request.grant_capability ||
+	    record->lease.flags != request.flags ||
+	    record->lease.lineage_id != session->session_id ||
+	    record->lease.generation != request.generation ||
+	    record->lease.operation_class != request.operation_class ||
+	    record->lease.resource_mask != request.resource_mask ||
+	    record->lease.scope_id != request.scope_id ||
+	    memcmp(record->lease.intent_digest, request.intent_digest,
+		   sizeof(request.intent_digest)))
+		return -EACCES;
+
+	now = ktime_get_ns();
+	agi_lc_intent_set_status(&record->lease, now);
+	if (request.operation == AGI_LC_INTENT_LEASE_QUERY) {
+		request = record->lease;
+		request.operation = AGI_LC_INTENT_LEASE_QUERY;
+		if (copy_to_user((void __user *)arg, &request, sizeof(request)))
+			return -EFAULT;
+		return 0;
+	}
+	if (request.operation == AGI_LC_INTENT_LEASE_REVOKE) {
+		record->revoked = true;
+		record->lease.status = AGI_LC_INTENT_STATUS_REVOKED;
+		ret = agi_lc_push_record(session, AGI_LC_EVENT_INTENT_LEASE,
+					 -ECANCELED, request.correlation,
+					 request.lease_id);
+			return ret;
+	}
+	if (request.operation != AGI_LC_INTENT_LEASE_CONSUME)
+		return -EINVAL;
+	if (record->revoked || record->lease.status == AGI_LC_INTENT_STATUS_REVOKED)
+		return -EKEYREVOKED;
+	if (record->lease.status == AGI_LC_INTENT_STATUS_EXPIRED)
+		return -ETIME;
+	if (record->lease.status == AGI_LC_INTENT_STATUS_EXHAUSTED)
+		return -ENOSPC;
+	if (record->lease.flags & AGI_LC_INTENT_LEASE_FLAG_REQUIRE_PROVENANCE &&
+	    session->verification_state != AGI_LC_VERIFY_MATCHED)
+		return -EKEYREJECTED;
+
+	record->lease.remaining_uses--;
+	record->lease.use_sequence++;
+	record->lease.last_used_ns = now;
+	agi_lc_intent_set_status(&record->lease, now);
+	request = record->lease;
+	request.operation = AGI_LC_INTENT_LEASE_CONSUME;
+	ret = agi_lc_push_record(session, AGI_LC_EVENT_INTENT_LEASE, 0,
+				 request.correlation, request.use_sequence);
+	if (ret)
+		return ret;
+	if (copy_to_user((void __user *)arg, &request, sizeof(request)))
+		return -EFAULT;
+	return 0;
+}
+
 static int agi_lc_set_budget(struct agi_lc_session *session,
 					unsigned long arg)
 {
@@ -4464,6 +4715,7 @@ static int agi_lc_release(struct inode *inode, struct file *file)
 {
 	struct agi_lc_session *session = file->private_data;
 	unsigned long flags;
+	u32 i;
 
 #ifdef CONFIG_AGI_LIFECYCLE_RV_BRIDGE
 	spin_lock(&agi_lc_rv_sessions_lock);
@@ -4476,7 +4728,13 @@ static int agi_lc_release(struct inode *inode, struct file *file)
 	spin_lock_irqsave(&session->queue_lock, flags);
 	session->revoked = true;
 	spin_unlock_irqrestore(&session->queue_lock, flags);
+	for (i = 0; i < AGI_LC_INTENT_LEASE_RECORDS; i++) {
+		session->intent_leases[i].revoked = true;
+		session->intent_leases[i].lease.status =
+			AGI_LC_INTENT_STATUS_REVOKED;
+	}
 	WRITE_ONCE(session->gate_open, true);
+
 	wake_up_interruptible(&session->read_wait);
 	wake_up_interruptible(&session->gate_wait);
 	wake_up_interruptible(&session->msg_wait);
@@ -9038,6 +9296,9 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 	case AGI_LC_LEASE_REVOKE:
 		ret = agi_lc_lease_revoke(session, arg);
 		break;
+	case AGI_LC_INTENT_LEASE:
+		ret = agi_lc_intent_lease_control(session, arg);
+		break;
 	case AGI_LC_RECV:
 		mutex_unlock(&session->ioctl_lock);
 		return agi_lc_recv(session, arg);
@@ -9125,8 +9386,14 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 		spin_unlock_irqrestore(&session->queue_lock, flags);
 		for (i = 0; i < AGI_LC_LEASE_MAX; i++)
 			session->leases[i].active = false;
+		for (i = 0; i < AGI_LC_INTENT_LEASE_RECORDS; i++) {
+			session->intent_leases[i].revoked = true;
+			session->intent_leases[i].lease.status =
+				AGI_LC_INTENT_STATUS_REVOKED;
+		}
 		session->recovery_invalidated = true;
 		agi_lc_memory_release_session(session, false);
+
 		agi_lc_artifact_release_session(session, false);
 		memset(session->persistent_memory_records, 0, sizeof(session->persistent_memory_records));
 		wake_up_interruptible(&session->read_wait);

@@ -1,0 +1,4 @@
+make[1]: Entering directory '/home/ubuntu/agi-kernel/build/recovered'
+  DESCEND objtool
+  CC      drivers/misc/agi_lifecycle.o
+make[1]: Leaving directory '/home/ubuntu/agi-kernel/build/recovered'

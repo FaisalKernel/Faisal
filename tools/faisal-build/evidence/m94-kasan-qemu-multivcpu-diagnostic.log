@@ -1,0 +1,32 @@
+c[?7l[2J[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1EFCAE00+1EF0AE00 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...
+
+
+Booting from ROM..c[?7l[2J[  271.458628] rcu: INFO: rcu_preempt detected stalls on CPUs/tasks:
+[  271.458628] rcu: 	0-...!: (1 ticks this GP) idle=5254/1/0x4000000000000000 softirq=20/20 fqs=0
+[  271.464064] rcu: 	(detected by 1, t=45702 jiffies, g=-1155, q=9 ncpus=2)
+[  271.464064] rcu: rcu_preempt kthread timer wakeup didn't happen for 45700 jiffies! g-1155 f0x2 RCU_GP_WAIT_FQS(5) ->state=0x200
+[  271.464064] rcu: 	Possible timer handling issue on cpu=1 timer-softirq=12
+[  271.464064] rcu: rcu_preempt kthread starved for 45704 jiffies! g-1155 f0x2 RCU_GP_WAIT_FQS(5) ->state=0x200 ->cpu=1
+[  271.464064] rcu: 	Unless rcu_preempt kthread gets sufficient CPU time, OOM is now expected behavior.
+[  271.464064] rcu: RCU grace-period kthread stack dump:
+[  271.464064] rcu: Stack dump where RCU GP kthread last ran:
+FAISAL_M94_BOOT_OK
+M94_INTENT_LEASE_ACQUIRE_OK id=1
+M94_SINGLE_USE_ATOMIC_CONSUME_OK sequence=1
+M94_REPLAY_DENIAL_OK
+M94_BOUNDED_MULTI_USE_OK remaining=1
+M94_INTENT_QUERY_OK
+M94_INTENT_MISMATCH_DENIAL_OK
+M94_EXPIRY_FAIL_CLOSED_OK
+M94_GRANT_GATING_DENIAL_OK
+M94_REVOCATION_FAIL_CLOSED_OK
+M94_SESSION_CLOSE_INVALIDATION_OK
+M94_SELFTEST_EXIT=0
+FAISAL_M94_TEST_RC=0
+[  330.330724] reboot: Power down
+QEMU_RC=0
+FAISAL_M94_INTENT_LEASE_QEMU_PASS

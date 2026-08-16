@@ -1,0 +1,62 @@
+FAISAL M94 SECURITY SCAN
+access_date=2026-08-16
+
+SCANNED_PATHS
+- drivers/misc/agi_lifecycle.c
+- include/uapi/linux/agi_lifecycle.h
+- tools/testing/selftests/agi_intent_lease_test.c
+- tools/testing/selftests/agi_verified_research_test.c
+- tools/faisal-build/run_intent_lease_qemu.sh
+- M94-RESEARCH-NOTES.md
+- M94-INTENT-LEASE-DESIGN.md
+- M94-SECURITY-REVIEW.md
+- M94-BENCHMARKS.md
+- MILESTONE94.md
+
+PROHIBITED_PATTERNS
+system(=not_found_in_M94_added_or_modified_scope
+popen(=not_found_in_M94_added_or_modified_scope
+execve(=not_found_in_M94_added_or_modified_scope
+setuid(=not_found_in_M94_added_or_modified_scope
+ptrace(=not_found_in_M94_added_or_modified_scope
+invokeLLM=not_found_in_M94_added_or_modified_scope
+model_output=not_found_in_M94_added_or_modified_scope
+livepatch=not_found_in_M94_added_or_modified_scope
+unchecked_new_authority_from_model_output=not_found
+
+EXPECTED_SECURITY_REVIEW_MATCHES
+CAP_SYS_ADMIN=not_used_by_final_M94_intent_lease_path
+copy_from_user=used_only_for_fixed_size_intent_lease_request_and_existing_driver_paths
+copy_to_user=used_only_for_validated_fixed_size_response_and_existing_driver_paths
+
+AUTHORITY_BOUNDARY
+- acquisition requires an active FAISAL capability grant
+- operation class maps to an existing FAISAL right
+- current agent and execution lineage are checked
+- operation, resource mask, scope, flags, generation, and digest are matched on consume
+- model output is never kernel authorization
+- expiry, revocation, and bounded-use exhaustion fail closed
+
+LIFETIME
+- 64 bounded per-session records
+- no userspace service pointer stored by M94
+- explicit session revoke invalidates records
+- descriptor close invalidates records before session free
+- arbitrary unsynchronized userspace object destruction is not claimed safe
+
+SANITIZERS
+- Generic KASAN plus lockdep QEMU: passed
+- strict KCSAN plus lockdep QEMU: passed
+- no KASAN, KCSAN, lockdep, BUG, Oops, panic, or Call Trace diagnostics in final M94 sanitizer logs
+
+REGRESSIONS
+- M90 signed-provider QEMU: passed
+- M91 provider-gated hardware QEMU: passed; unsupported result preserved
+- full FAISAL audit: passed 23/23
+
+M63_EXCLUSION
+- M63-COMPUTE-CONTEXT-DESIGN.md remains intentionally untracked
+- M63-SECURITY-REVIEW.md remains intentionally untracked
+- neither M63 path is staged or committed
+
+RESULT=PASS
