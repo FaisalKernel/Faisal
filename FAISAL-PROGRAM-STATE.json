@@ -1168,7 +1168,7 @@
       "id": "M100-verified-tool-adapter-sandbox",
       "phase": 13,
       "name": "Verified deterministic tool-adapter sandbox with effect scoping, idempotency, output sanitization, and revocation",
-      "status": "next",
+      "status": "validated_bounded_deterministic_userspace_effect_contract",
       "priority": 100,
       "depends_on": [
         "M99-tool-registry-execution-broker",
@@ -1176,7 +1176,9 @@
         "M80-stress-fuzz-hardening",
         "M81-concurrent-sanitizer-validation"
       ],
-      "unlocks": [],
+      "unlocks": [
+        "M101-network-isolated-nondeterministic-tool-adapter"
+      ],
       "evidence_required": [
         "adapter_identity",
         "sandbox_isolation",
@@ -1192,7 +1194,17 @@
         "benchmark",
         "full_regression"
       ],
-      "next_action": "Implement a non-network deterministic adapter first; do not expose irreversible filesystem, network, browser, payment, deployment, or device effects until adapter-specific isolation and receipt evidence exists."
+      "next_action": "Retain effect-scope, idempotency, ambiguity, revocation, receipt, QEMU, sanitizer, and full-regression coverage while M101 designs a separate network-isolated non-deterministic adapter.",
+      "evidence": [
+        "MILESTONE100.md",
+        "M100-FIRST-PRINCIPLES-DESIGN.md",
+        "M100-SANDBOX-RESEARCH.md",
+        "M100-SECURITY-REVIEW.md",
+        "M100-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m100-adapter-sandbox-validation.json",
+        "tools/faisal-build/evidence/m100-adapter-qemu.log",
+        "tools/faisal-build/evidence/m100-full-audit.log"
+      ]
     }
   ],
   "completed_milestones": [
@@ -1230,7 +1242,8 @@
     "FAISAL-M96",
     "FAISAL-M97",
     "FAISAL-M98",
-    "FAISAL-M99"
+    "FAISAL-M99",
+    "FAISAL-M100"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1241,5 +1254,5 @@
     "M63-SECURITY-REVIEW.md"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "M100-verified-tool-adapter-sandbox"
+  "next_dependency": "M101-network-isolated-nondeterministic-tool-adapter"
 }

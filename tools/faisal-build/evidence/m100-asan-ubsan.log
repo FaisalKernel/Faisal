@@ -1,0 +1,3 @@
+M100_FAIL:selftest result=-7 errno=No such file or directory
+M100_SERVICE_OPEN_OK kernel=0
+M100_TOOL_REGISTER_OK id=1

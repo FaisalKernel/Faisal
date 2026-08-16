@@ -1,0 +1,52 @@
+{
+  "milestone": "FAISAL-M100",
+  "date": "2026-08-16",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 38,
+  "implementation": "Verified Effect Capsule and deterministic Landlock/seccomp tool-adapter sandbox",
+  "production_effect": "fixed effect.bin payload write inside caller-provided scratch directory",
+  "host_selftest": {"build": "pass", "run": "pass", "markers": 11},
+  "qemu_kernel_selftest": {"run": "pass", "require_kernel": true, "qemu_rc": 0, "elapsed_ms": 6290},
+  "sanitizers": {
+    "ubsan": "pass",
+    "tsan": "pass",
+    "asan_ubsan_build": "pass",
+    "asan_ubsan_run": "failed_closed_seccomp_runtime_incompatibility_not_counted_as_pass"
+  },
+  "static_analysis": {"gcc_fanalyzer": "pass"},
+  "regression": {"full_faisal_audit_harnesses": 23, "passed": 23, "failed": 0},
+  "measured_host_wall_ms": {"min": 20, "max": 21, "runs": 5},
+  "security_controls": [
+    "M99 capability and mission admission",
+    "M94 authority lease binding",
+    "Landlock when available",
+    "seccomp syscall allowlist",
+    "PR_SET_NO_NEW_PRIVS",
+    "fixed effect scope and O_NOFOLLOW",
+    "pre/post/output digests",
+    "durable idempotency and ambiguity states",
+    "fail-closed journal replay"
+  ],
+  "non_claims": [
+    "not a general command sandbox",
+    "not kernel exploit resistance",
+    "not remote exactly-once semantics",
+    "not arbitrary external-side-effect rollback",
+    "not prompt-injection immunity",
+    "not production readiness",
+    "not a performance comparison against upstream Linux"
+  ],
+  "evidence": [
+    "MILESTONE100.md",
+    "M100-SECURITY-REVIEW.md",
+    "M100-BENCHMARKS.md",
+    "tools/faisal-build/evidence/m100-host-selftest.log",
+    "tools/faisal-build/evidence/m100-adapter-qemu.log",
+    "tools/faisal-build/evidence/m100-full-audit.log",
+    "tools/faisal-build/evidence/m100-ubsan.log",
+    "tools/faisal-build/evidence/m100-tsan.log",
+    "tools/faisal-build/evidence/m100-gcc-analyzer.log",
+    "tools/faisal-build/evidence/m100-host-benchmark.csv",
+    "tools/faisal-build/evidence/m100-qemu-benchmark.csv"
+  ]
+}

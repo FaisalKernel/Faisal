@@ -1,0 +1,108 @@
+FAISAL M100 targeted security scan
+No shell command execution primitives:
+PASS: no command-execution primitive found
+Path and effect controls:
+19:#define M100_SANDBOX_KIND_LANDLOCK_SECCOMP 3U
+20:#define M100_LANDLOCK_RULE_PATH_BENEATH 1U
+21:#define M100_LANDLOCK_ACCESS_FS_EXECUTE (1ULL << 0)
+22:#define M100_LANDLOCK_ACCESS_FS_WRITE_FILE (1ULL << 1)
+23:#define M100_LANDLOCK_ACCESS_FS_READ_FILE (1ULL << 2)
+24:#define M100_LANDLOCK_ACCESS_FS_READ_DIR (1ULL << 3)
+25:#define M100_LANDLOCK_ACCESS_FS_REMOVE_DIR (1ULL << 4)
+26:#define M100_LANDLOCK_ACCESS_FS_REMOVE_FILE (1ULL << 5)
+27:#define M100_LANDLOCK_ACCESS_FS_MAKE_CHAR (1ULL << 6)
+28:#define M100_LANDLOCK_ACCESS_FS_MAKE_DIR (1ULL << 7)
+29:#define M100_LANDLOCK_ACCESS_FS_MAKE_REG (1ULL << 8)
+30:#define M100_LANDLOCK_ACCESS_FS_MAKE_SOCK (1ULL << 9)
+31:#define M100_LANDLOCK_ACCESS_FS_MAKE_FIFO (1ULL << 10)
+32:#define M100_LANDLOCK_ACCESS_FS_MAKE_BLOCK (1ULL << 11)
+33:#define M100_LANDLOCK_ACCESS_FS_MAKE_SYM (1ULL << 12)
+34:#define M100_LANDLOCK_ACCESS_FS_REFER (1ULL << 13)
+35:#define M100_LANDLOCK_ACCESS_FS_TRUNCATE (1ULL << 14)
+36:#define M100_SECCOMP_MODE_FILTER 2
+37:#define M100_SECCOMP_RET_KILL_PROCESS 0x80000000U
+38:#define M100_SECCOMP_RET_ALLOW 0x7fff0000U
+89:	uint8_t digest[M100_DIGEST_SIZE];
+132:static int digest_bytes(const void *data, size_t length,
+133:			uint8_t digest[M100_DIGEST_SIZE])
+139:	if (!context || (!data && length) || !digest)
+143:	    EVP_DigestFinal_ex(context, digest, &output_length) == 1 &&
+151:static int nonzero_digest(const uint8_t digest[M100_DIGEST_SIZE])
+155:	if (!digest)
+158:		if (digest[index])
+222:static int digest_effect(const struct m100_effect *effect,
+223:				 uint8_t digest[M100_DIGEST_SIZE])
+230:	memset(canonical.post_state_digest, 0, sizeof(canonical.post_state_digest));
+231:	return digest_bytes(&canonical, sizeof(canonical), digest);
+238:	uint8_t digest[M100_DIGEST_SIZE];
+243:	result = digest_effect(effect, digest);
+252:	memcpy(header.digest, digest, sizeof(header.digest));
+256:	if (result == M100_OK && fdatasync(service->effect_fd) < 0)
+284:	    !nonzero_digest(effect->idempotency_digest) ||
+285:	    !nonzero_digest(effect->input_digest) ||
+286:	    !nonzero_digest(effect->policy_digest) ||
+287:	    !nonzero_digest(effect->pre_state_digest) ||
+289:	    effect->sandbox_kind != M100_SANDBOX_KIND_LANDLOCK_SECCOMP)
+307:		uint8_t digest[M100_DIGEST_SIZE];
+320:		    digest_effect(&effect, digest) != M100_OK ||
+321:		    memcmp(digest, header.digest, sizeof(digest)) != 0 ||
+396:			(void)fdatasync(service->effect_fd);
+413:		.handled_access_fs = M100_LANDLOCK_ACCESS_FS_EXECUTE |
+414:			M100_LANDLOCK_ACCESS_FS_WRITE_FILE |
+415:			M100_LANDLOCK_ACCESS_FS_READ_FILE |
+416:			M100_LANDLOCK_ACCESS_FS_READ_DIR |
+417:			M100_LANDLOCK_ACCESS_FS_REMOVE_DIR |
+418:			M100_LANDLOCK_ACCESS_FS_REMOVE_FILE |
+419:			M100_LANDLOCK_ACCESS_FS_MAKE_CHAR |
+420:			M100_LANDLOCK_ACCESS_FS_MAKE_DIR |
+421:			M100_LANDLOCK_ACCESS_FS_MAKE_REG |
+422:			M100_LANDLOCK_ACCESS_FS_MAKE_SOCK |
+423:			M100_LANDLOCK_ACCESS_FS_MAKE_FIFO |
+424:			M100_LANDLOCK_ACCESS_FS_MAKE_BLOCK |
+425:			M100_LANDLOCK_ACCESS_FS_MAKE_SYM |
+426:			M100_LANDLOCK_ACCESS_FS_REFER |
+427:			M100_LANDLOCK_ACCESS_FS_TRUNCATE,
+449:			M100_LANDLOCK_RULE_PATH_BENEATH, &path_attr, 0) < 0 ||
+450:	    prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0 ||
+463:    M100_BPF_STMT(M100_BPF_RET | M100_BPF_K, M100_SECCOMP_RET_ALLOW)
+471:		M100_BPF_STMT(M100_BPF_RET | M100_BPF_K, M100_SECCOMP_RET_KILL_PROCESS),
+482:		M100_ALLOW_SYSCALL(__NR_fdatasync),
+496:		M100_BPF_STMT(M100_BPF_RET | M100_BPF_K, M100_SECCOMP_RET_KILL_PROCESS),
+503:	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0 ||
+504:	    prctl(PR_SET_SECCOMP, M100_SECCOMP_MODE_FILTER, &program) < 0)
+509:static int validate_scope(const char *scratch_dir, char *path, size_t path_size)
+514:	    strstr(scratch_dir, "..") ||
+524:static int read_effect_file(const char *path, uint8_t digest[M100_DIGEST_SIZE],
+536:			return digest_bytes(absent, sizeof(absent) - 1, digest);
+542:	fd = open(path, O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
+551:	result = digest_bytes(buffer, (size_t)length, digest);
+571:	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW | O_CLOEXEC, 0600);
+575:	if (result == M100_OK && fdatasync(fd) < 0)
+593:	uint8_t key_digest[M100_DIGEST_SIZE];
+594:	uint8_t pre_digest[M100_DIGEST_SIZE];
+595:	uint8_t post_digest[M100_DIGEST_SIZE];
+596:	uint8_t output_digest[M100_DIGEST_SIZE];
+597:	uint8_t policy_digest[M100_DIGEST_SIZE];
+608:	result = validate_scope(scratch_dir, path, sizeof(path));
+618:	if (digest_bytes(idempotency_key, strlen(idempotency_key), key_digest) != M100_OK ||
+619:	    digest_bytes("M100-LANDLOCK-SECCOMP-NNP-V1", 28, policy_digest) != M100_OK ||
+620:	    !nonzero_digest(invocation.input_digest))
+630:			if (memcmp(existing->input_digest, invocation.input_digest,
+631:				   sizeof(existing->input_digest)) != 0)
+647:	result = read_effect_file(path, pre_digest, NULL);
+662:	effect.sandbox_kind = M100_SANDBOX_KIND_LANDLOCK_SECCOMP;
+663:	memcpy(effect.idempotency_digest, key_digest, sizeof(effect.idempotency_digest));
+664:	memcpy(effect.input_digest, invocation.input_digest, sizeof(effect.input_digest));
+665:	memcpy(effect.policy_digest, policy_digest, sizeof(effect.policy_digest));
+666:	memcpy(effect.pre_state_digest, pre_digest, sizeof(effect.pre_state_digest));
+676:	child = fork();
+690:	if (waitpid(child, &status, 0) < 0 || !WIFEXITED(status) ||
+701:	result = read_effect_file(path, post_digest, readback);
+703:	    digest_bytes(readback, strlen(readback), output_digest) != M100_OK) {
+717:	memcpy(updated.post_state_digest, post_digest, sizeof(updated.post_state_digest));
+718:	memcpy(updated.output_digest, output_digest, sizeof(updated.output_digest));
+731:				 output_digest, readback, &invocation);
+792:	    (ssize_t)sizeof(corrupt) || fdatasync(mutable_service->effect_fd) < 0)
+Compiler and whitespace checks:
+Shell syntax check:
+Protected-file staging rule: M63 files must not be staged.
