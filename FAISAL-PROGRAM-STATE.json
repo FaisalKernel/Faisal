@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "b28a7e5a46218aa8e85fd3bd5aa833f0b171a00c",
-  "current_tag": "FAISAL-M91",
+  "current_head": "ada661fd51e5652fad86b6aa6100d2ddb99c2b01",
+  "current_tag": "FAISAL-M92",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -790,7 +790,7 @@
         "benchmark",
         "regression"
       ],
-      "next_action": "Retain the explicit unsupported/unverified gate; do not implement a hardware path until an identified provider or real device supplies public-key, attestation, rotation, revocation, and secret-isolation evidence.",
+      "next_action": "Retain explicit unsupported/unverified hardware gating while M93 hardens the userspace provider for multi-service lifetime and crash recovery.",
       "evidence": [
         "MILESTONE91.md",
         "M91-PROVIDER-RESEARCH.md",
@@ -807,7 +807,7 @@
       "id": "M92-key-provider-fuzz-concurrency",
       "phase": 14,
       "name": "Userspace key-provider malformed-input, fuzz, concurrency, and lifetime hardening",
-      "status": "next",
+      "status": "validated_userspace_provider_malformed_input_concurrency_lifetime_hardening",
       "priority": 86,
       "depends_on": [
         "M90-production-key-provisioning",
@@ -824,7 +824,45 @@
         "benchmark",
         "regression"
       ],
-      "next_action": "Fuzz M90 provider metadata and state transitions, exercise concurrent rotation/revocation and service lifetime under sanitizers, and preserve M91 unsupported hardware gating."
+      "next_action": "Retain malformed-input, mutex, sanitizer, QEMU, and regression coverage while M93 designs multi-service provider registration and crash-safe lifetime recovery.",
+      "evidence": [
+        "MILESTONE92.md",
+        "M92-KEY-PROVIDER-HARDENING-DESIGN.md",
+        "M92-SECURITY-REVIEW.md",
+        "M92-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m92-key-provider-hardening-validation.json",
+        "tools/faisal-build/evidence/m92-key-provider-hardening-qemu.log",
+        "tools/faisal-build/evidence/m92-key-provider-hardening-smoke.tsv",
+        "tools/faisal-build/evidence/m92-strict-run.log",
+        "tools/faisal-build/evidence/m92-asan-ubsan-run.log",
+        "tools/faisal-build/evidence/m92-tsan-run.log",
+        "tools/faisal-build/evidence/m90-after-m92-qemu.log",
+        "tools/faisal-build/evidence/m91-after-m92-qemu.log",
+        "tools/faisal-build/evidence/m92-security-scan.txt"
+      ]
+    },
+    {
+      "id": "M93-provider-multiservice-lifetime",
+      "phase": 14,
+      "name": "Multi-service provider registration, safe close, revocation broadcast, and crash recovery",
+      "status": "next",
+      "priority": 84,
+      "depends_on": [
+        "M90-production-key-provisioning",
+        "M92-key-provider-fuzz-concurrency"
+      ],
+      "unlocks": [],
+      "evidence_required": [
+        "multi_service_registration",
+        "safe_service_close",
+        "provider_crash_recovery",
+        "revocation_broadcast",
+        "sanitizer",
+        "security_review",
+        "benchmark",
+        "regression"
+      ],
+      "next_action": "Replace the bounded single-service pointer with a lifetime-safe multi-service registration contract, add crash/revocation tests, and preserve private-key userspace isolation and M91 unsupported hardware gating."
     }
   ],
   "completed_milestones": [
@@ -854,7 +892,8 @@
     "FAISAL-M88",
     "FAISAL-M89",
     "FAISAL-M90",
-    "FAISAL-M91"
+    "FAISAL-M91",
+    "FAISAL-M92"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
