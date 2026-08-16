@@ -1,0 +1,87 @@
+{
+  "milestone": "M95",
+  "feature": "durable objective and task execution service",
+  "source_revision_before_commit": "7f49a2fb8ec3c9afabb8842702c8534220195c37",
+  "previous_tag": "FAISAL-M94",
+  "previous_tag_target": "79e8e3322c8161d86cf14a90b1614bbd34be4d40",
+  "abi": 38,
+  "implementation": {
+    "bounded_tasks": 128,
+    "max_dependencies": 8,
+    "max_retries": 16,
+    "max_lease_ns": 604800000000000,
+    "max_backoff_ns": 86400000000000,
+    "journal": "append-only fixed-size snapshots with fdatasync, monotonic sequence, canonical SHA-256 digest, replay validation, and fail-closed corruption handling",
+    "states": ["READY", "LEASED", "RUNNING", "RETRY_WAIT", "SUCCEEDED", "FAILED", "CANCELLED", "DEAD_LETTER"],
+    "kernel_binding": "QEMU path verified ABI 38, created lifecycle session, attached task, registered planner light agent, and selected it"
+  },
+  "markers": [
+    "M95_DURABLE_TASK_SERVICE_OPEN_OK",
+    "M95_IDEMPOTENT_SUBMIT_OK",
+    "M95_DEPENDENCY_GATE_OK",
+    "M95_LEASE_HEARTBEAT_COMPLETE_OK",
+    "M95_RETRY_BACKOFF_REPLAN_OK",
+    "M95_RESTART_RECOVERY_OK",
+    "M95_POLICY_CANCEL_STOP_OK",
+    "M95_DEADLINE_STOP_OK",
+    "M95_BUDGET_STOP_OK",
+    "M95_RETRY_EXHAUSTION_DEAD_LETTER_OK",
+    "M95_CONCURRENT_QUERY_OK",
+    "M95_REPLAY_STATE_OK",
+    "M95_CORRUPTION_FAIL_CLOSED_OK",
+    "M95_SELFTEST_EXIT=0",
+    "FAISAL_M95_DURABLE_TASK_QEMU_PASS"
+  ],
+  "validation": {
+    "strict_static_build": "PASS",
+    "host_selftest": "PASS",
+    "asan_ubsan_leak_detection": "PASS",
+    "tsan": "PASS_NO_RACE_DIAGNOSTICS",
+    "qemu_kernel_integration": "PASS",
+    "qemu_smokes": {
+      "count": 3,
+      "wall_ms": [6243, 6184, 6210],
+      "min_ms": 6184,
+      "max_ms": 6243,
+      "mean_ms": 6212
+    },
+    "full_faisal_audit": {
+      "harness_count": 23,
+      "result": "PASS"
+    },
+    "m90_signed_provider_regression": "PASS",
+    "m91_provider_gated_hardware_attestation_regression": "PASS",
+    "security_scan": "PASS",
+    "diff_hygiene": "PASS"
+  },
+  "evidence_paths": {
+    "design": "M95-DURABLE-TASK-DESIGN.md",
+    "security_review": "M95-SECURITY-REVIEW.md",
+    "benchmarks": "M95-BENCHMARKS.md",
+    "milestone": "MILESTONE95.md",
+    "research": "M95-RESEARCH-NOTES.md",
+    "requirement_map": "PASTED-CONTENT-REQUIREMENT-MAP.md",
+    "qemu": "tools/faisal-build/evidence/m95-qemu-final.log",
+    "smoke_times": "tools/faisal-build/evidence/m95-smoke-times.tsv",
+    "asan_ubsan": "tools/faisal-build/evidence/m95-asan-ubsan.log",
+    "tsan": "tools/faisal-build/evidence/m95-tsan.log",
+    "full_audit": "tools/faisal-build/evidence/m95-full-audit.log",
+    "m90_regression": "tools/faisal-build/evidence/m95-m90.log",
+    "m91_regression": "tools/faisal-build/evidence/m95-m91.log",
+    "security_scan": "tools/faisal-build/evidence/m95-security-scan.txt"
+  },
+  "non_claims": [
+    "no distributed consensus or multi-node journal replication",
+    "no exactly-once external side effects",
+    "no transparent arbitrary process crash recovery",
+    "no hardware-backed identity or attestation",
+    "no universal kernel syscall interception",
+    "no general AGI, model training, consciousness, or productivity multiplier claim",
+    "no enterprise tenancy or production readiness claim"
+  ],
+  "next_dependency": "M96-supervisor-mediated-provider-ownership-and-crash-recovery",
+  "forbidden_files_not_staged": [
+    "M63-COMPUTE-CONTEXT-DESIGN.md",
+    "M63-SECURITY-REVIEW.md"
+  ]
+}

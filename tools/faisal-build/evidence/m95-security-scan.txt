@@ -1,0 +1,18 @@
+FAISAL M95 SECURITY SCAN
+Date: 2026-08-16
+Scanned paths:
+- tools/faisal-task/faisal_task_service.h
+- tools/faisal-task/faisal_task_service.c
+- tools/testing/selftests/agi_durable_task_test.c
+- tools/faisal-build/run_durable_task_qemu.sh
+Checks:
+- unsafe process execution patterns (system, popen, execve): PASS; none in M95 source
+- privilege escalation patterns (setuid, ptrace, CAP_SYS_ADMIN): PASS; none in M95 source
+- model-output authority patterns: PASS; no model execution or model authorization in M95
+- bounded strings and counts: PASS; fixed-size fields and explicit maximums
+- journal integrity: PASS; fixed headers, monotonic sequence, canonical SHA-256, fdatasync, corruption fail-closed
+- state concurrency: PASS; service mutex, four-worker query stress, TSan clean
+- stale lease handling: PASS; lease generation, expiry recovery, zero/exhausted retry dead-lettering
+- ABI boundary: PASS; QEMU verifies ABI 38 through AGI_LC_GET_INFO
+- M63 files staged: PASS; M63-COMPUTE-CONTEXT-DESIGN.md and M63-SECURITY-REVIEW.md remain untracked and are excluded
+Result: PASS
