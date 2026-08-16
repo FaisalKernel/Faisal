@@ -9845,12 +9845,12 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 	case AGI_LC_CHECKPOINT_MANIFEST:
 		ret = agi_lc_checkpoint_manifest(session, arg);
 		break;
-			case AGI_LC_RECOVERY:
-			ret = agi_lc_recovery(session, arg);
-			break;
-		case AGI_LC_AUTONOMY_CONTROL:
-			ret = agi_lc_autonomy_control(session, arg);
-			break;
+	case AGI_LC_RECOVERY:
+		ret = agi_lc_recovery(session, arg);
+		break;
+	case AGI_LC_AUTONOMY_CONTROL:
+		ret = agi_lc_autonomy_control(session, arg);
+		break;
 
 	case AGI_LC_LIGHT_AGENT_REGISTER:
 		ret = agi_lc_light_register(session, arg);
@@ -9966,7 +9966,7 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 	case AGI_LC_ADAPTIVE_MEMORY_POLICY:
 		ret = agi_lc_adaptive_memory_policy_control(session, arg);
 		break;
-case AGI_LC_GRAPH_NODE:
+	case AGI_LC_GRAPH_NODE:
 		ret = agi_lc_graph_node_control(session, arg);
 		break;
 	case AGI_LC_COMPUTE_CONTEXT:

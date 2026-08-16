@@ -1,0 +1,79 @@
+{
+  "audit": "FAISAL-FUNCTIONALITY-AUDIT-M104",
+  "source": {
+    "base": "Linux v7.2-rc7",
+    "audited_tag": "FAISAL-M104",
+    "audited_commit": "797392fefa0fc970f9f9860f1458a4af17e0ecf2",
+    "abi": 38,
+    "clean_build_output": "/home/ubuntu/agi-kernel/build/functionality-clean",
+    "clean_image_sha256": "1fc40687ada97e17c1d967f1f68c7c0088f6a38f43449dc8217d88c1ea41919a",
+    "toolchain": "gcc 13.3.0; GNU Make 4.3"
+  },
+  "functional_gates": {
+    "clean_olddefconfig": "pass",
+    "clean_bzimage": "pass",
+    "clean_qemu_boot": "pass",
+    "m104_control_loop_clean_qemu": "pass",
+    "lifecycle_uapi_fuzz_iterations": 8192,
+    "lifecycle_uapi_fuzz_clean_qemu": "pass",
+    "aggregate_harnesses": 27,
+    "aggregate_passed": 27,
+    "aggregate_failed": 0,
+    "aggregate_diagnostic_gate": "pass",
+    "repeated_clean_m104_trials": 3,
+    "repeated_clean_m104_passed": 3,
+    "repeated_clean_m104_elapsed_ms": [5315, 5191, 5284],
+    "repeated_clean_m104_mean_ms": 5263.33
+  },
+  "static_analysis": {
+    "new_m104_selftest_checkpatch": {"errors": 0, "warnings": 0, "checks": 0},
+    "full_lifecycle_driver_checkpatch": {"errors": 325, "warnings": 95, "checks": 360, "status": "not_clean"},
+    "sparse": "not_counted_pass_kbuild_rejected_checker_as_unavailable_or_not_up_to_date"
+  },
+  "sanitizer_compile": {
+    "kasan_ubsan_lockdep_lifecycle_driver": "pass_compile_only",
+    "kcsan_lockdep_lifecycle_driver": "pass_compile_only",
+    "runtime_sanitizer_claim": false
+  },
+  "repairs": [
+    "M104 autonomy QEMU harness changed from two-vCPU multi-threaded TCG to one-vCPU single-threaded TCG after fresh RCU stall diagnostics",
+    "lifecycle ioctl dispatch indentation corrected for recovery, autonomy, adaptive-memory, and graph-node cases"
+  ],
+  "security_properties": [
+    "model_output_is_not_kernel_authority",
+    "independent_supervisor_and_operator_approval_required_by_M104",
+    "bounded_expiring_leases",
+    "stale-generation_invalidation",
+    "centralized_kernel_diagnostic_scanning"
+  ],
+  "release_blockers": [
+    "full_lifecycle_driver_checkpatch_debt",
+    "accepted_sparse_toolchain_and_clean_analysis",
+    "runtime_kasan_kcsan_ubsan_lockdep_kcov_evidence",
+    "signed_release_artifacts",
+    "independent_reproducible_build_equality",
+    "stable_or_lts_forward_port_strategy",
+    "real_accelerator_hardware_qualification",
+    "production_autonomy_orchestrator_and_operations"
+  ],
+  "non_claims": [
+    "not_complete_production_operating_system",
+    "not_limitless_or_general_intelligence",
+    "not_consciousness",
+    "not_physical_world_healing",
+    "not_unrestricted_self_modification",
+    "not_hardware_qualification",
+    "not_runtime_sanitizer_coverage"
+  ],
+  "evidence": [
+    "FAISAL-FUNCTIONALITY-AUDIT-M104.md",
+    "build/functionality-inventory.txt",
+    "build/functionality-clean-provenance.txt",
+    "build/functionality-clean-boot2.log",
+    "build/functionality-clean-uapi-fuzz.log",
+    "build/functionality-final-regression-summary.txt",
+    "build/functionality-quality-audit.txt",
+    "build/functionality-sparse-final.log",
+    "build/functionality-soak.tsv"
+  ]
+}

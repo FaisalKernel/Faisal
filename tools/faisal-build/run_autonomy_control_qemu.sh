@@ -42,7 +42,7 @@ EOF
 chmod +x "$ROOTFS/init"
 ( cd "$ROOTFS" && find . -print0 | cpio --null -o -H newc 2>/dev/null | gzip -9 > "$ROOTFS/initramfs.cpio.gz" )
 qemu-system-x86_64 \
-  -M pc -accel tcg,thread=multi -cpu qemu64 -smp 2 -m 768M \
+  -M pc -accel tcg,thread=single -cpu qemu64 -smp 1 -m 768M \
   -kernel "$BUILD/arch/x86/boot/bzImage" \
   -initrd "$ROOTFS/initramfs.cpio.gz" \
   -append 'console=ttyS0 quiet' -nographic -no-reboot > "$LOG" 2>&1 || true
