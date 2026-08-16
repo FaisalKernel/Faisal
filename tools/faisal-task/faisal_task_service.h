@@ -21,10 +21,13 @@
 #define FTS_MAX_BACKOFF_NS (24ULL * 60ULL * 60ULL * 1000000000ULL)
 #define FTS_MAX_BRANCHES 64U
 #define FTS_MAX_EVIDENCE 8U
+#define FTS_MAX_CONTINUITY 64U
 #define FTS_MAX_ACTION 256U
 #define FTS_MAX_EVIDENCE_DETAIL 128U
 #define FTS_CAUSAL_JOURNAL_MAGIC 0x46434131U
 #define FTS_CAUSAL_JOURNAL_VERSION 1U
+#define FTS_CONTINUITY_JOURNAL_MAGIC 0x46434331U
+#define FTS_CONTINUITY_JOURNAL_VERSION 1U
 
 /* Task state is persisted; numeric values are part of the journal contract. */
 enum fts_task_state {
@@ -80,6 +83,11 @@ enum fts_evidence_kind {
 	FTS_EVIDENCE_VERIFICATION = 3,
 	FTS_EVIDENCE_RESOURCE = 4,
 	FTS_EVIDENCE_PROVENANCE = 5
+};
+
+enum fts_continuity_state {
+	FTS_CONTINUITY_SEALED = 1,
+	FTS_CONTINUITY_INVALIDATED = 2
 };
 
 enum fts_status {
@@ -187,10 +195,28 @@ struct fts_branch {
 	struct fts_evidence evidence[FTS_MAX_EVIDENCE];
 };
 
+struct fts_continuity {
+	uint64_t capsule_id;
+	uint64_t branch_id;
+	uint64_t task_id;
+	uint64_t objective_generation;
+	uint64_t causal_sequence;
+	uint64_t created_at_ns;
+	uint64_t invalidated_at_ns;
+	uint32_t state;
+	uint32_t invalidation_reason;
+	uint8_t working_state_digest[FTS_DIGEST_SIZE];
+	uint8_t world_state_digest[FTS_DIGEST_SIZE];
+	uint8_t resource_state_digest[FTS_DIGEST_SIZE];
+	uint8_t branch_digest[FTS_DIGEST_SIZE];
+	uint8_t capsule_digest[FTS_DIGEST_SIZE];
+};
+
 struct fts_service {
 	int kernel_fd;
 	int journal_fd;
 	int causal_fd;
+	int continuity_fd;
 	int require_kernel;
 	uint64_t session_id;
 	uint64_t agent_id;
@@ -199,13 +225,18 @@ struct fts_service {
 	uint64_t next_sequence;
 	uint64_t journal_sequence;
 	uint64_t causal_sequence;
+	uint64_t continuity_sequence;
 	uint64_t next_branch_id;
+	uint64_t next_capsule_id;
 	char journal_path[FTS_MAX_JOURNAL_PATH];
 	char causal_journal_path[FTS_MAX_JOURNAL_PATH];
+	char continuity_journal_path[FTS_MAX_JOURNAL_PATH];
 	struct fts_task tasks[FTS_MAX_TASKS];
 	size_t task_count;
 	struct fts_branch branches[FTS_MAX_BRANCHES];
 	size_t branch_count;
+	struct fts_continuity capsules[FTS_MAX_CONTINUITY];
+	size_t capsule_count;
 	pthread_mutex_t lock;
 	int lock_initialized;
 };
@@ -260,5 +291,21 @@ int fts_branch_invalidate(struct fts_service *service, uint64_t branch_id,
 int fts_branch_query(const struct fts_service *service, uint64_t branch_id,
 			struct fts_branch *out);
 int fts_test_causal_corrupt_tail(const struct fts_service *service);
+int fts_continuity_seal(struct fts_service *service, uint64_t branch_id,
+			uint64_t now_ns,
+			const uint8_t working_state_digest[FTS_DIGEST_SIZE],
+			const uint8_t world_state_digest[FTS_DIGEST_SIZE],
+			const uint8_t resource_state_digest[FTS_DIGEST_SIZE],
+			struct fts_continuity *out);
+int fts_continuity_check(struct fts_service *service, uint64_t capsule_id,
+			const uint8_t working_state_digest[FTS_DIGEST_SIZE],
+			const uint8_t world_state_digest[FTS_DIGEST_SIZE],
+			const uint8_t resource_state_digest[FTS_DIGEST_SIZE],
+			struct fts_continuity *out);
+int fts_continuity_invalidate(struct fts_service *service, uint64_t capsule_id,
+			uint64_t now_ns, uint32_t reason, struct fts_continuity *out);
+int fts_continuity_query(const struct fts_service *service, uint64_t capsule_id,
+			struct fts_continuity *out);
+int fts_test_continuity_corrupt_tail(const struct fts_service *service);
 
 #endif

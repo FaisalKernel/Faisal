@@ -1,0 +1,77 @@
+{
+  "milestone": "FAISAL-M97",
+  "feature": "Continuity Capsules and Causal Residency Contracts",
+  "date": "2026-08-16",
+  "parent_milestone": "FAISAL-M96",
+  "parent_commit": "e627466ed063173c6edc53a4802f630cfe91c579",
+  "abi": 38,
+  "kernel_ioctl_added": false,
+  "journal": {
+    "path_suffix": ".continuity",
+    "magic": "0x46434331",
+    "version": 1,
+    "max_capsules": 64,
+    "states": ["SEALED", "INVALIDATED"],
+    "digest": "canonical SHA-256 with capsule_digest field zeroed"
+  },
+  "continuity_vector": [
+    "working_state_digest",
+    "world_state_digest",
+    "resource_state_digest",
+    "objective_generation",
+    "committed_branch_digest"
+  ],
+  "validation": {
+    "strict_static_build": {"status": "pass", "log": "m97-strict-build.log"},
+    "host_selftest": {"status": "pass", "marker": "M97_SELFTEST_EXIT=0", "log": "m97-host-selftest.log"},
+    "asan_ubsan": {"status": "pass", "exit_code": 0, "log": "m97-asan-ubsan.log"},
+    "tsan": {"status": "pass", "exit_code": 0, "log": "m97-tsan.log"},
+    "qemu_kernel_integrated": {
+      "status": "pass",
+      "require_kernel": true,
+      "exit_code": 0,
+      "markers": [
+        "FAISAL_M97_BOOT_OK",
+        "M97_CONTINUITY_SERVICE_OPEN_OK kernel=1",
+        "M97_CONTINUITY_AUTHORITY_REFERENCE_OK lease=1",
+        "M97_COMMITTED_BRANCH_PRECONDITION_OK",
+        "M97_CONTINUITY_CAPSULE_SEALED_OK",
+        "M97_CONTINUITY_RESUME_EXACT_OK",
+        "M97_WORKING_STATE_DRIFT_REJECTED_OK",
+        "M97_WORLD_STATE_DRIFT_REJECTED_OK",
+        "M97_RESOURCE_STATE_DRIFT_REJECTED_OK",
+        "M97_CONTINUITY_REPLAY_OK",
+        "M97_CONTINUITY_INVALIDATION_REVOKED_OK",
+        "M97_CONTINUITY_CORRUPTION_FAIL_CLOSED_OK",
+        "M97_SELFTEST_EXIT=0",
+        "FAISAL_M97_TEST_RC=0"
+      ],
+      "log": "m97-qemu.log"
+    },
+    "qemu_smokes": {"status": "pass", "runs": 3, "times_ms": [6534, 6413, 6460], "min_ms": 6413, "mean_ms": 6469.0, "max_ms": 6534, "log": "m97-smoke-times.tsv"},
+    "m96_regression": {"status": "pass", "host_log": "m97-m96-regression-host.log", "qemu_log": "m97-m96-regression-qemu.log"},
+    "m95_regression": {"status": "pass", "host_log": "m97-m95-regression-host.log", "qemu_log": "m97-m95-regression-qemu.log"},
+    "m90_regression": {"status": "pass", "marker": "M90_KEY_PROVIDER_QEMU_VALIDATION_OK", "log": "m97-m90-regression.log"},
+    "m91_regression": {"status": "pass", "marker": "M91_PROVIDER_GATE_QEMU_VALIDATION_OK", "log": "m97-m91-regression.log"},
+    "full_faisal_audit": {"status": "pass", "harness_count": 23, "log": "m97-full-audit.log"},
+    "security_scan": {"status": "pass", "patterns_clear": ["system(", "popen(", "execve(", "setuid(", "ptrace(", "invokeLLM", "model_output", "livepatch", "CAP_SYS_ADMIN"], "log": "m97-security-scan.log"}
+  },
+  "measured_claims": [
+    "Exact state-vector equality resumes a committed capsule.",
+    "Working-state, world-state, and resource-state drift are independently rejected.",
+    "Objective-generation and committed-branch digest consistency are checked.",
+    "Invalidated capsules return revoked and corrupted journals fail closed.",
+    "The real ABI-38 kernel path acquired an M94 intent lease in QEMU."
+  ],
+  "non_claims": [
+    "No claim of a new hardware interconnect or memory-management algorithm.",
+    "No claim of automatic checkpoint creation or memory migration.",
+    "No claim that supplied digests are truthful without trusted producers.",
+    "No claim of exactly-once remote side effects or rollback of irreversible actions.",
+    "No claim of model retraining, consciousness, or general AGI.",
+    "No unmeasured speed, throughput, energy, or productivity claim."
+  ],
+  "implementation_commit": "pending",
+  "tag": "pending",
+  "forbidden_files_excluded": ["M63-COMPUTE-CONTEXT-DESIGN.md", "M63-SECURITY-REVIEW.md"]
+}

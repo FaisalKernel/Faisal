@@ -32,6 +32,16 @@ struct fts_causal_disk_header {
 	uint8_t branch_digest[FTS_DIGEST_SIZE];
 };
 
+struct fts_continuity_disk_header {
+	uint32_t magic;
+	uint32_t version;
+	uint32_t header_size;
+	uint32_t record_size;
+	uint64_t continuity_sequence;
+	uint64_t capsule_id;
+	uint8_t capsule_digest[FTS_DIGEST_SIZE];
+};
+
 static int write_all(int fd, const void *buffer, size_t length)
 {
 	const unsigned char *cursor = buffer;
@@ -104,6 +114,26 @@ static int digest_branch(const struct fts_branch *branch,
 	if (!context)
 		return FTS_ERR_IO;
 	memset(canonical.branch_digest, 0, sizeof(canonical.branch_digest));
+	if (EVP_DigestInit_ex(context, EVP_sha256(), NULL) == 1 &&
+	    EVP_DigestUpdate(context, &canonical, sizeof(canonical)) == 1 &&
+	    EVP_DigestFinal_ex(context, digest, &output_length) == 1 &&
+	    output_length == FTS_DIGEST_SIZE)
+		result = FTS_OK;
+	EVP_MD_CTX_free(context);
+	return result;
+}
+
+static int digest_continuity(const struct fts_continuity *continuity,
+				     uint8_t digest[FTS_DIGEST_SIZE])
+{
+	struct fts_continuity canonical = *continuity;
+	EVP_MD_CTX *context = EVP_MD_CTX_new();
+	unsigned int output_length = 0;
+	int result = FTS_ERR_IO;
+
+	if (!context)
+		return FTS_ERR_IO;
+	memset(canonical.capsule_digest, 0, sizeof(canonical.capsule_digest));
 	if (EVP_DigestInit_ex(context, EVP_sha256(), NULL) == 1 &&
 	    EVP_DigestUpdate(context, &canonical, sizeof(canonical)) == 1 &&
 	    EVP_DigestFinal_ex(context, digest, &output_length) == 1 &&
@@ -295,8 +325,40 @@ static int append_branch(struct fts_service *service,
 	return result;
 }
 
+static int append_continuity(struct fts_service *service,
+				      const struct fts_continuity *continuity)
+{
+	struct fts_continuity_disk_header header;
+	struct fts_continuity disk_continuity = *continuity;
+	uint8_t digest[FTS_DIGEST_SIZE];
+	uint64_t continuity_sequence = service->continuity_sequence + 1;
+	int result;
+
+	disk_continuity.causal_sequence = continuity->causal_sequence;
+	result = digest_continuity(&disk_continuity, digest);
+	if (result != FTS_OK)
+		return result;
+	memset(&header, 0, sizeof(header));
+	header.magic = FTS_CONTINUITY_JOURNAL_MAGIC;
+	header.version = FTS_CONTINUITY_JOURNAL_VERSION;
+	header.header_size = sizeof(header);
+	header.record_size = sizeof(header) + sizeof(disk_continuity);
+	header.continuity_sequence = continuity_sequence;
+	header.capsule_id = disk_continuity.capsule_id;
+	memcpy(header.capsule_digest, digest, sizeof(header.capsule_digest));
+	result = write_all(service->continuity_fd, &header, sizeof(header));
+	if (result == FTS_OK)
+		result = write_all(service->continuity_fd, &disk_continuity,
+				   sizeof(disk_continuity));
+	if (result == FTS_OK && fdatasync(service->continuity_fd) < 0)
+		result = FTS_ERR_IO;
+	if (result == FTS_OK)
+		service->continuity_sequence = continuity_sequence;
+	return result;
+}
+
 static int apply_replayed_branch(struct fts_service *service,
-				 const struct fts_branch *branch)
+					 const struct fts_branch *branch)
 {
 	size_t index;
 
@@ -375,6 +437,74 @@ static int apply_replayed_task(struct fts_service *service,
 	return FTS_OK;
 }
 
+static int nonzero_digest(const uint8_t digest[FTS_DIGEST_SIZE]);
+
+static int apply_replayed_continuity(struct fts_service *service,
+					     const struct fts_continuity *continuity)
+{
+	size_t index;
+
+	for (index = 0; index < service->capsule_count; index++)
+		if (service->capsules[index].capsule_id == continuity->capsule_id) {
+			service->capsules[index] = *continuity;
+			return FTS_OK;
+		}
+	if (service->capsule_count >= FTS_MAX_CONTINUITY)
+		return FTS_ERR_FULL;
+	service->capsules[service->capsule_count++] = *continuity;
+	return FTS_OK;
+}
+
+static int replay_continuity_unlocked(struct fts_service *service)
+{
+	struct fts_continuity_disk_header header;
+	uint64_t last_sequence = 0;
+	int result;
+
+	if (lseek(service->continuity_fd, 0, SEEK_SET) < 0)
+		return FTS_ERR_IO;
+	service->capsule_count = 0;
+	service->continuity_sequence = 0;
+	service->next_capsule_id = 1;
+	for (;;) {
+		struct fts_continuity continuity;
+		uint8_t digest[FTS_DIGEST_SIZE];
+
+		result = read_exact_or_eof(service->continuity_fd, &header,
+					   sizeof(header));
+		if (result == 1)
+			break;
+		if (result != FTS_OK ||
+		    header.magic != FTS_CONTINUITY_JOURNAL_MAGIC ||
+		    header.version != FTS_CONTINUITY_JOURNAL_VERSION ||
+		    header.header_size != sizeof(header) ||
+		    header.record_size != sizeof(header) + sizeof(continuity) ||
+		    header.continuity_sequence <= last_sequence || !header.capsule_id)
+			return FTS_ERR_CORRUPT;
+		result = read_exact_or_eof(service->continuity_fd, &continuity,
+					   sizeof(continuity));
+		if (result != FTS_OK || continuity.capsule_id != header.capsule_id ||
+		    continuity.state < FTS_CONTINUITY_SEALED ||
+		    continuity.state > FTS_CONTINUITY_INVALIDATED ||
+		    !continuity.branch_id || !continuity.task_id ||
+		    !nonzero_digest(continuity.working_state_digest) ||
+		    !nonzero_digest(continuity.world_state_digest) ||
+		    !nonzero_digest(continuity.resource_state_digest) ||
+		    !nonzero_digest(continuity.branch_digest) ||
+		    digest_continuity(&continuity, digest) != FTS_OK ||
+		    memcmp(digest, header.capsule_digest, sizeof(digest)) != 0)
+			return FTS_ERR_CORRUPT;
+		result = apply_replayed_continuity(service, &continuity);
+		if (result != FTS_OK)
+			return result;
+		last_sequence = header.continuity_sequence;
+		if (continuity.capsule_id >= service->next_capsule_id)
+			service->next_capsule_id = continuity.capsule_id + 1;
+	}
+	service->continuity_sequence = last_sequence;
+	return lseek(service->continuity_fd, 0, SEEK_END) < 0 ? FTS_ERR_IO : FTS_OK;
+}
+
 static int replay_unlocked(struct fts_service *service)
 {
 	struct fts_disk_header header;
@@ -432,6 +562,8 @@ int fts_replay(struct fts_service *service)
 	result = replay_unlocked(service);
 	if (result == FTS_OK)
 		result = replay_causal_unlocked(service);
+	if (result == FTS_OK)
+		result = replay_continuity_unlocked(service);
 	unlock_service(service);
 	return result;
 }
@@ -448,6 +580,7 @@ int fts_open(struct fts_service *service, const char *journal_path,
 	service->kernel_fd = -1;
 	service->journal_fd = -1;
 	service->causal_fd = -1;
+	service->continuity_fd = -1;
 	service->require_kernel = require_kernel != 0;
 	memcpy(service->journal_path, journal_path, strlen(journal_path) + 1);
 	if (pthread_mutex_init(&service->lock, NULL) != 0)
@@ -471,14 +604,29 @@ int fts_open(struct fts_service *service, const char *journal_path,
 		goto fail;
 	}
 	service->causal_fd = open(service->causal_journal_path,
-				  O_RDWR | O_CREAT | O_APPEND | O_CLOEXEC, 0600);
+					  O_RDWR | O_CREAT | O_APPEND | O_CLOEXEC, 0600);
 	if (service->causal_fd < 0) {
+		result = FTS_ERR_IO;
+		goto fail;
+	}
+	if (snprintf(service->continuity_journal_path,
+		     sizeof(service->continuity_journal_path), "%s.continuity",
+		     journal_path) < 0 ||
+	    strlen(service->continuity_journal_path) >= sizeof(service->continuity_journal_path)) {
+		result = FTS_ERR_ARGUMENT;
+		goto fail;
+	}
+	service->continuity_fd = open(service->continuity_journal_path,
+					     O_RDWR | O_CREAT | O_APPEND | O_CLOEXEC, 0600);
+	if (service->continuity_fd < 0) {
 		result = FTS_ERR_IO;
 		goto fail;
 	}
 	result = replay_unlocked(service);
 	if (result == FTS_OK)
 		result = replay_causal_unlocked(service);
+	if (result == FTS_OK)
+		result = replay_continuity_unlocked(service);
 	if (result != FTS_OK)
 		goto fail;
 	return FTS_OK;
@@ -487,6 +635,8 @@ fail:
 		close(service->journal_fd);
 	if (service->causal_fd >= 0)
 		close(service->causal_fd);
+	if (service->continuity_fd >= 0)
+		close(service->continuity_fd);
 	if (service->kernel_fd >= 0)
 		close(service->kernel_fd);
 	pthread_mutex_destroy(&service->lock);
@@ -503,10 +653,13 @@ void fts_close(struct fts_service *service)
 		close(service->journal_fd);
 	if (service->causal_fd >= 0)
 		close(service->causal_fd);
+	if (service->continuity_fd >= 0)
+		close(service->continuity_fd);
 	if (service->kernel_fd >= 0)
 		close(service->kernel_fd);
 	service->journal_fd = -1;
 	service->causal_fd = -1;
+	service->continuity_fd = -1;
 	service->kernel_fd = -1;
 	(void)pthread_mutex_unlock(&service->lock);
 	pthread_mutex_destroy(&service->lock);
@@ -950,6 +1103,17 @@ static struct fts_branch *find_branch(struct fts_service *service,
 	return NULL;
 }
 
+static struct fts_continuity *find_continuity(struct fts_service *service,
+						 uint64_t capsule_id)
+{
+	size_t index;
+
+	for (index = 0; index < service->capsule_count; index++)
+		if (service->capsules[index].capsule_id == capsule_id)
+			return &service->capsules[index];
+	return NULL;
+}
+
 static int nonzero_digest(const uint8_t digest[FTS_DIGEST_SIZE])
 {
 	uint32_t index;
@@ -1323,6 +1487,187 @@ int fts_branch_query(const struct fts_service *service, uint64_t branch_id,
 	return result;
 }
 
+int fts_continuity_seal(struct fts_service *service, uint64_t branch_id,
+			       uint64_t now_ns,
+			       const uint8_t working_state_digest[FTS_DIGEST_SIZE],
+			       const uint8_t world_state_digest[FTS_DIGEST_SIZE],
+			       const uint8_t resource_state_digest[FTS_DIGEST_SIZE],
+			       struct fts_continuity *out)
+{
+	struct fts_branch *branch;
+	struct fts_continuity capsule;
+	uint8_t digest[FTS_DIGEST_SIZE];
+	int result;
+
+	if (!service || !branch_id || !now_ns || !out ||
+	    !working_state_digest || !world_state_digest ||
+	    !resource_state_digest || !nonzero_digest(working_state_digest) ||
+	    !nonzero_digest(world_state_digest) ||
+	    !nonzero_digest(resource_state_digest))
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(service);
+	if (result != FTS_OK)
+		return result;
+	if (service->capsule_count >= FTS_MAX_CONTINUITY) {
+		result = FTS_ERR_FULL;
+		goto out_unlock;
+	}
+	branch = find_branch(service, branch_id);
+	if (!branch) {
+		result = FTS_ERR_NOT_FOUND;
+		goto out_unlock;
+	}
+	if (branch->state != FTS_BRANCH_COMMITTED) {
+		result = branch->state == FTS_BRANCH_INVALIDATED ?
+			FTS_ERR_REVOKED : FTS_ERR_STATE;
+		goto out_unlock;
+	}
+	memset(&capsule, 0, sizeof(capsule));
+	capsule.capsule_id = service->next_capsule_id++;
+	capsule.branch_id = branch->branch_id;
+	capsule.task_id = branch->task_id;
+	capsule.objective_generation = branch->objective_generation;
+	capsule.causal_sequence = branch->causal_sequence;
+	capsule.created_at_ns = now_ns;
+	capsule.state = FTS_CONTINUITY_SEALED;
+	memcpy(capsule.working_state_digest, working_state_digest,
+	       sizeof(capsule.working_state_digest));
+	memcpy(capsule.world_state_digest, world_state_digest,
+	       sizeof(capsule.world_state_digest));
+	memcpy(capsule.resource_state_digest, resource_state_digest,
+	       sizeof(capsule.resource_state_digest));
+	result = digest_branch(branch, capsule.branch_digest);
+	if (result != FTS_OK)
+		goto out_unlock;
+	result = digest_continuity(&capsule, digest);
+	if (result != FTS_OK)
+		goto out_unlock;
+	memcpy(capsule.capsule_digest, digest, sizeof(capsule.capsule_digest));
+	result = append_continuity(service, &capsule);
+	if (result == FTS_OK)
+		*out = service->capsules[service->capsule_count++] = capsule;
+out_unlock:
+	unlock_service(service);
+	return result;
+}
+
+int fts_continuity_check(struct fts_service *service, uint64_t capsule_id,
+			 const uint8_t working_state_digest[FTS_DIGEST_SIZE],
+			 const uint8_t world_state_digest[FTS_DIGEST_SIZE],
+			 const uint8_t resource_state_digest[FTS_DIGEST_SIZE],
+			 struct fts_continuity *out)
+{
+	struct fts_continuity *capsule;
+	struct fts_branch *branch;
+	struct fts_task *task;
+	uint8_t branch_digest[FTS_DIGEST_SIZE];
+	int result;
+
+	if (!service || !capsule_id || !working_state_digest ||
+	    !world_state_digest || !resource_state_digest || !out ||
+	    !nonzero_digest(working_state_digest) ||
+	    !nonzero_digest(world_state_digest) ||
+	    !nonzero_digest(resource_state_digest))
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(service);
+	if (result != FTS_OK)
+		return result;
+	capsule = find_continuity(service, capsule_id);
+	if (!capsule) {
+		result = FTS_ERR_NOT_FOUND;
+		goto out_unlock;
+	}
+	*out = *capsule;
+	if (capsule->state == FTS_CONTINUITY_INVALIDATED) {
+		result = FTS_ERR_REVOKED;
+		goto out_unlock;
+	}
+	branch = find_branch(service, capsule->branch_id);
+	task = find_task(service, capsule->task_id);
+	if (!branch || branch->state != FTS_BRANCH_COMMITTED || !task ||
+	    task->sequence != capsule->objective_generation ||
+	    digest_branch(branch, branch_digest) != FTS_OK ||
+	    memcmp(branch_digest, capsule->branch_digest, FTS_DIGEST_SIZE) ||
+	    memcmp(capsule->working_state_digest, working_state_digest,
+		   FTS_DIGEST_SIZE) ||
+	    memcmp(capsule->world_state_digest, world_state_digest,
+		   FTS_DIGEST_SIZE) ||
+	    memcmp(capsule->resource_state_digest, resource_state_digest,
+		   FTS_DIGEST_SIZE)) {
+		result = branch && branch->state == FTS_BRANCH_INVALIDATED ?
+			FTS_ERR_REVOKED : FTS_ERR_STALE;
+		goto out_unlock;
+	}
+	result = FTS_OK;
+out_unlock:
+	unlock_service(service);
+	return result;
+}
+
+int fts_continuity_invalidate(struct fts_service *service, uint64_t capsule_id,
+			      uint64_t now_ns, uint32_t reason,
+			      struct fts_continuity *out)
+{
+	struct fts_continuity *capsule;
+	struct fts_continuity candidate;
+	uint8_t digest[FTS_DIGEST_SIZE];
+	int result;
+
+	if (!service || !capsule_id || !now_ns || !reason || !out)
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(service);
+	if (result != FTS_OK)
+		return result;
+	capsule = find_continuity(service, capsule_id);
+	if (!capsule) {
+		result = FTS_ERR_NOT_FOUND;
+		goto out_unlock;
+	}
+	if (capsule->state == FTS_CONTINUITY_INVALIDATED) {
+		result = FTS_ERR_STATE;
+		goto out_unlock;
+	}
+	candidate = *capsule;
+	candidate.state = FTS_CONTINUITY_INVALIDATED;
+	candidate.invalidated_at_ns = now_ns;
+	candidate.invalidation_reason = reason;
+	result = digest_continuity(&candidate, digest);
+	if (result != FTS_OK)
+		goto out_unlock;
+	memcpy(candidate.capsule_digest, digest, sizeof(candidate.capsule_digest));
+	result = append_continuity(service, &candidate);
+	if (result == FTS_OK) {
+		*capsule = candidate;
+		*out = candidate;
+	}
+out_unlock:
+	unlock_service(service);
+	return result;
+}
+
+int fts_continuity_query(const struct fts_service *service, uint64_t capsule_id,
+			struct fts_continuity *out)
+{
+	struct fts_service *mutable_service = (struct fts_service *)service;
+	struct fts_continuity *capsule;
+	int result;
+
+	if (!service || !capsule_id || !out)
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(mutable_service);
+	if (result != FTS_OK)
+		return result;
+	capsule = find_continuity(mutable_service, capsule_id);
+	if (!capsule)
+		result = FTS_ERR_NOT_FOUND;
+	else {
+		*out = *capsule;
+		result = FTS_OK;
+	}
+	unlock_service(mutable_service);
+	return result;
+}
+
 int fts_recover_expired(struct fts_service *service, uint64_t now_ns,
 			uint32_t *recovered, uint32_t *dead_lettered)
 {
@@ -1378,6 +1723,26 @@ int fts_test_corrupt_tail(const struct fts_service *service)
 		return result;
 	if (write_all(mutable_service->journal_fd, &corrupt, sizeof(corrupt)) ==
 	    FTS_OK && fdatasync(mutable_service->journal_fd) == 0)
+		result = FTS_OK;
+	else
+		result = FTS_ERR_IO;
+	unlock_service(mutable_service);
+	return result;
+}
+
+int fts_test_continuity_corrupt_tail(const struct fts_service *service)
+{
+	struct fts_service *mutable_service = (struct fts_service *)service;
+	unsigned char corrupt = 0xff;
+	int result;
+
+	if (!service)
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(mutable_service);
+	if (result != FTS_OK)
+		return result;
+	if (write_all(mutable_service->continuity_fd, &corrupt, sizeof(corrupt)) ==
+	    FTS_OK && fdatasync(mutable_service->continuity_fd) == 0)
 		result = FTS_OK;
 	else
 		result = FTS_ERR_IO;
