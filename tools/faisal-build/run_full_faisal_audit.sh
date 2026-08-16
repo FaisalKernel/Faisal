@@ -95,6 +95,10 @@ cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -pthread \
   -Itools/faisal-engineering tools/faisal-engineering/faisal_engineering_service.c \
   tools/testing/selftests/agi_software_engineering_test.c \
   -o "$BUILD/agi_software_engineering_test" -ldl -lpthread
+cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -pthread \
+  -Itools/faisal-repo-adapter tools/faisal-repo-adapter/faisal_repo_adapter.c \
+  tools/testing/selftests/agi_repository_adapter_test.c \
+  -o "$BUILD/agi_repository_adapter_test" -lcrypto -ldl -lpthread
 set -- \
  tools/faisal-build/run_agent_security_m64_qemu.sh \
  tools/faisal-build/run_transport_qemu.sh \
@@ -128,7 +132,8 @@ set -- \
  tools/faisal-build/run_collaboration_memory_qemu.sh \
  tools/faisal-build/run_world_model_router_qemu.sh \
  tools/faisal-build/run_sandbox_fabric_qemu.sh \
- tools/faisal-build/run_software_engineering_qemu.sh
+ tools/faisal-build/run_software_engineering_qemu.sh \
+ tools/faisal-build/run_repository_adapter_qemu.sh
 count=0
 for harness do
 	count=$((count + 1))
