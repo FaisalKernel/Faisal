@@ -1,0 +1,129 @@
+{
+  "milestone": "FAISAL-M93",
+  "dependency": "M93-provider-multiservice-lifetime",
+  "status": "validated_bounded_userspace_multiservice_lifetime_contract",
+  "foundation": "Linux v7.2-rc7",
+  "abi": 37,
+  "implementation": {
+    "max_services": 8,
+    "multi_service_registration": true,
+    "duplicate_registration_idempotent": true,
+    "capacity_denial": true,
+    "revocation_broadcast": true,
+    "safe_unregister_before_close": true,
+    "provider_close_cleanup": true,
+    "controlled_restart_recovery": true,
+    "transparent_process_crash_recovery": false,
+    "concurrent_workers": 8,
+    "concurrent_iterations_per_worker": 64,
+    "private_keys_remain_userspace": true,
+    "abi_unchanged": true
+  },
+  "runs": {
+    "strict": {
+      "status": "passed",
+      "build_log": "tools/faisal-build/evidence/m93-strict-build.log",
+      "run_log": "tools/faisal-build/evidence/m93-strict-run.log"
+    },
+    "qemu": {
+      "status": "passed",
+      "kernel": "build/recovered",
+      "configuration": "QEMU x86_64 TCG, 2 vCPU, 768 MiB",
+      "markers": [
+        "M93_BOOT_OK",
+        "M93_MULTI_SERVICE_BIND_OK services=8",
+        "M93_SERVICE_CAPACITY_DENIAL_OK capacity=8",
+        "M93_REVOCATION_BROADCAST_OK services=8",
+        "M93_SAFE_SERVICE_CLOSE_OK remaining=7",
+        "M93_PROVIDER_CLOSE_CLEANUP_OK",
+        "M93_CONTROLLED_RESTART_RECOVERY_OK services=7",
+        "M93_CONCURRENT_TABLE_STRESS_OK workers=8 iterations=64",
+        "M93_PROCESS_CRASH_RECOVERY_NONCLAIM_OK",
+        "M93_SELFTEST_EXIT=0",
+        "M93_TEST_RC=0"
+      ],
+      "qemu_log": "tools/faisal-build/evidence/m93-multiservice-qemu.log",
+      "run_log": "tools/faisal-build/evidence/m93-multiservice-qemu-run.log"
+    },
+    "asan_ubsan": {
+      "status": "passed",
+      "host_fixture": true,
+      "leak_detection": true,
+      "initial_failure_diagnosed": "host lacked /dev/agi_lifecycle and attempted real m87_open before assertions",
+      "build_log": "tools/faisal-build/evidence/m93-asan-ubsan-build.log",
+      "run_log": "tools/faisal-build/evidence/m93-asan-ubsan-final.log"
+    },
+    "tsan": {
+      "status": "passed",
+      "host_fixture": true,
+      "workers": 8,
+      "iterations_per_worker": 64,
+      "data_race_diagnostics": false,
+      "build_log": "tools/faisal-build/evidence/m93-tsan-build.log",
+      "run_log": "tools/faisal-build/evidence/m93-tsan-final.log"
+    },
+    "smoke": {
+      "status": "passed",
+      "count": 3,
+      "timings_ms": [6809, 7781, 7031],
+      "mean_ms": 7207,
+      "table": "tools/faisal-build/evidence/m93-multiservice-smoke.tsv",
+      "mean_table": "tools/faisal-build/evidence/m93-multiservice-smoke-mean.tsv",
+      "run_logs": [
+        "tools/faisal-build/evidence/m93-multiservice-smoke-1-run.log",
+        "tools/faisal-build/evidence/m93-multiservice-smoke-2-run.log",
+        "tools/faisal-build/evidence/m93-multiservice-smoke-3-run.log"
+      ]
+    },
+    "regression": {
+      "m90": {
+        "status": "passed",
+        "configuration": "QEMU x86_64 TCG, 4 vCPU rerun",
+        "log": "tools/faisal-build/evidence/m90-after-m93-qemu.log",
+        "run_log": "tools/faisal-build/evidence/m90-after-m93-qemu-run.log"
+      },
+      "m91": {
+        "status": "passed",
+        "provider": "none",
+        "status_code": 1,
+        "hardware_claim": false,
+        "log": "tools/faisal-build/evidence/m91-after-m93-qemu.log",
+        "run_log": "tools/faisal-build/evidence/m91-after-m93-qemu-run.log"
+      }
+    }
+  },
+  "security_scan": {
+    "status": "passed",
+    "prohibited_pattern_matches": 0,
+    "artifact": "tools/faisal-build/evidence/m93-security-scan.txt",
+    "review": "M93-SECURITY-REVIEW.md"
+  },
+  "diff_hygiene": {
+    "status": "passed",
+    "git_diff_check": true,
+    "forbidden_m63_files_staged": false
+  },
+  "evidence": {
+    "milestone": "MILESTONE93.md",
+    "design": "M93-MULTISERVICE-DESIGN.md",
+    "security": "M93-SECURITY-REVIEW.md",
+    "benchmarks": "M93-BENCHMARKS.md"
+  },
+  "preserved_gates": [
+    "Model output is never kernel authorization.",
+    "Private signing keys remain in the userspace provider boundary.",
+    "M91 hardware/provider evidence remains explicit and unsupported in the current environment.",
+    "ABI 37 and existing ioctl assignments are unchanged.",
+    "The complete FAISAL operating system remains active and not complete."
+  ],
+  "non_claims": [
+    "No claim of race freedom or formal verification.",
+    "No claim of arbitrary unsynchronized service-destruction safety.",
+    "No claim of transparent provider-process crash recovery.",
+    "No claim of durable key persistence or hardware-backed key storage.",
+    "No claim of TPM, TEE, HSM, remote attestation, or secure boot support.",
+    "No claim of performance improvement or upstream Linux benchmark superiority.",
+    "No claim of model retraining, consciousness, or unrestricted autonomous authority.",
+    "No claim of production readiness."
+  ]
+}

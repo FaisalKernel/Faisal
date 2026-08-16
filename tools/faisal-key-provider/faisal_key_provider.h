@@ -10,6 +10,7 @@
 #include "../faisal-runtime-verification/faisal_runtime_verification.h"
 
 #define M90_MAX_KEYS 4
+#define M93_MAX_SERVICES 8
 #define M90_PUBLIC_KEY_SIZE 32
 #define M90_KEY_ID_SIZE M87_KEY_ID_SIZE
 
@@ -30,11 +31,16 @@ struct m90_key_slot {
 	int revoked;
 };
 
+struct m93_service_binding {
+	struct m87_service *service;
+};
+
 struct m90_key_provider {
 	struct m90_key_slot slots[M90_MAX_KEYS];
+	struct m93_service_binding services[M93_MAX_SERVICES];
 	size_t count;
+	size_t service_count;
 	uint64_t next_generation;
-	struct m87_service *bound_service;
 	pthread_mutex_t lock;
 	int initialized;
 };
@@ -53,8 +59,13 @@ int m90_provider_revoke(struct m90_key_provider *provider,
 int m90_provider_sign_active(struct m90_key_provider *provider,
 			     const void *data, size_t size,
 			     uint8_t signature[M87_SIGNATURE_SIZE]);
+int m90_provider_register_service(struct m90_key_provider *provider,
+					struct m87_service *service);
+int m90_provider_unregister_service(struct m90_key_provider *provider,
+				      struct m87_service *service);
 int m90_provider_bind_service(struct m90_key_provider *provider,
-			      struct m87_service *service);
+				      struct m87_service *service);
+
 int m90_provider_unbind_service(struct m90_key_provider *provider,
 				struct m87_service *service);
 

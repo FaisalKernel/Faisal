@@ -1,0 +1,17 @@
+M93 targeted security scan
+paths:
+tools/faisal-key-provider/faisal_key_provider.h
+tools/faisal-key-provider/faisal_key_provider.c
+tools/testing/selftests/agi_key_provider_multiservice_test.c
+tools/faisal-build/run_key_provider_multiservice_qemu.sh
+prohibited-pattern scan:
+RESULT=PASS no prohibited patterns found
+M93-specific review gates:
+PASS provider registration is bounded by M93_MAX_SERVICES
+PASS provider state transitions are mutex-protected
+PASS revocation and provider close clear service metadata before key cleanup
+PASS service objects remain caller-owned; provider does not free them
+PASS private signing keys remain in userspace provider state
+PASS M91 unsupported hardware gate is not modified by M93
+PASS ABI 37 and ioctl range are unchanged
+M63 files are not staged by this milestone

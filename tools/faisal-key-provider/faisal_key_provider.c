@@ -24,6 +24,17 @@ static struct m90_key_slot *active_key_locked(struct m90_key_provider *provider)
 	return NULL;
 }
 
+static int service_index_locked(struct m90_key_provider *provider,
+				struct m87_service *service)
+{
+	size_t i;
+
+	for (i = 0; i < provider->service_count; i++)
+		if (provider->services[i].service == service)
+			return (int)i;
+	return -1;
+}
+
 static void invalidate_service(struct m87_service *service)
 {
 	if (!service)
@@ -36,8 +47,8 @@ static void invalidate_service(struct m87_service *service)
 	}
 }
 
-static void unbind_service_locked(struct m90_key_provider *provider,
-				  struct m87_service *service)
+static void clear_service_locked(struct m90_key_provider *provider,
+				 struct m87_service *service)
 {
 	if (!service)
 		return;
@@ -47,8 +58,45 @@ static void unbind_service_locked(struct m90_key_provider *provider,
 	service->trusted_key_generation = 0;
 	service->trusted_key_required = 1;
 	invalidate_service(service);
-	if (provider->bound_service == service)
-		provider->bound_service = NULL;
+	(void)provider;
+}
+
+static int register_service_locked(struct m90_key_provider *provider,
+				   struct m87_service *service)
+{
+	if (!service)
+		return M90_ERR_ARGUMENT;
+	if (service_index_locked(provider, service) >= 0)
+		return M90_OK;
+	if (provider->service_count >= M93_MAX_SERVICES)
+		return M90_ERR_CAPACITY;
+	provider->services[provider->service_count++].service = service;
+	return M90_OK;
+}
+
+static void unregister_service_locked(struct m90_key_provider *provider,
+				      struct m87_service *service)
+{
+	int index = service_index_locked(provider, service);
+	size_t i;
+
+	if (index < 0)
+		return;
+	clear_service_locked(provider, service);
+	for (i = (size_t)index; i + 1 < provider->service_count; i++)
+		provider->services[i] = provider->services[i + 1];
+	provider->services[provider->service_count - 1].service = NULL;
+	provider->service_count--;
+}
+
+static void clear_all_services_locked(struct m90_key_provider *provider)
+{
+	size_t i;
+
+	for (i = 0; i < provider->service_count; i++)
+		clear_service_locked(provider, provider->services[i].service);
+	memset(provider->services, 0, sizeof(provider->services));
+	provider->service_count = 0;
 }
 
 int m90_provider_init(struct m90_key_provider *provider)
@@ -70,8 +118,7 @@ void m90_provider_close(struct m90_key_provider *provider)
 	if (!provider || !provider->initialized)
 		return;
 	pthread_mutex_lock(&provider->lock);
-	if (provider->bound_service)
-		unbind_service_locked(provider, provider->bound_service);
+	clear_all_services_locked(provider);
 	for (i = 0; i < provider->count; i++) {
 		EVP_PKEY_free(provider->slots[i].private_key);
 		provider->slots[i].private_key = NULL;
@@ -164,6 +211,7 @@ int m90_provider_revoke(struct m90_key_provider *provider,
 			const uint8_t key_id[M90_KEY_ID_SIZE])
 {
 	struct m90_key_slot *slot;
+	size_t i;
 	int rc = M90_OK;
 
 	if (!provider || !provider->initialized || !key_id)
@@ -176,10 +224,10 @@ int m90_provider_revoke(struct m90_key_provider *provider,
 	}
 	slot->active = 0;
 	slot->revoked = 1;
-	if (provider->bound_service &&
-	    memcmp(provider->bound_service->trusted_key_id, key_id,
-		   M90_KEY_ID_SIZE) == 0)
-		unbind_service_locked(provider, provider->bound_service);
+	for (i = 0; i < provider->service_count; i++)
+		if (memcmp(provider->services[i].service->trusted_key_id, key_id,
+			   M90_KEY_ID_SIZE) == 0)
+			clear_service_locked(provider, provider->services[i].service);
 	EVP_PKEY_free(slot->private_key);
 	slot->private_key = NULL;
 out:
@@ -215,6 +263,30 @@ out:
 	return rc;
 }
 
+int m90_provider_register_service(struct m90_key_provider *provider,
+					struct m87_service *service)
+{
+	int rc;
+
+	if (!provider || !provider->initialized || !service)
+		return M90_ERR_ARGUMENT;
+	pthread_mutex_lock(&provider->lock);
+	rc = register_service_locked(provider, service);
+	pthread_mutex_unlock(&provider->lock);
+	return rc;
+}
+
+int m90_provider_unregister_service(struct m90_key_provider *provider,
+				      struct m87_service *service)
+{
+	if (!provider || !provider->initialized || !service)
+		return M90_ERR_ARGUMENT;
+	pthread_mutex_lock(&provider->lock);
+	unregister_service_locked(provider, service);
+	pthread_mutex_unlock(&provider->lock);
+	return M90_OK;
+}
+
 int m90_provider_bind_service(struct m90_key_provider *provider,
 			      struct m87_service *service)
 {
@@ -225,6 +297,9 @@ int m90_provider_bind_service(struct m90_key_provider *provider,
 	if (!provider || !provider->initialized || !service)
 		return M90_ERR_ARGUMENT;
 	pthread_mutex_lock(&provider->lock);
+	rc = register_service_locked(provider, service);
+	if (rc != M90_OK)
+		goto out;
 	slot = active_key_locked(provider);
 	if (!slot) {
 		rc = M90_ERR_REVOKED;
@@ -242,7 +317,6 @@ int m90_provider_bind_service(struct m90_key_provider *provider,
 	service->trusted_key_required = 1;
 	service->trusted_public_key_size = public_size;
 	invalidate_service(service);
-	provider->bound_service = service;
 out:
 	pthread_mutex_unlock(&provider->lock);
 	return rc;
@@ -256,7 +330,11 @@ int m90_provider_unbind_service(struct m90_key_provider *provider,
 	if (!provider || !provider->initialized)
 		return M90_ERR_STATE;
 	pthread_mutex_lock(&provider->lock);
-	unbind_service_locked(provider, service);
+	if (service_index_locked(provider, service) < 0) {
+		pthread_mutex_unlock(&provider->lock);
+		return M90_ERR_NOT_FOUND;
+	}
+	clear_service_locked(provider, service);
 	pthread_mutex_unlock(&provider->lock);
 	return M90_OK;
 }

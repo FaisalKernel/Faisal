@@ -1,0 +1,4 @@
+run	configuration	result	host_wall_ms	qemu_log
+smoke-1	normal QEMU recovered kernel	passed	6809	/home/ubuntu/agi-kernel/build/qemu-faisal-m93-multiservice-final-smoke-1/qemu.log
+smoke-2	normal QEMU recovered kernel	passed	7781	/home/ubuntu/agi-kernel/build/qemu-faisal-m93-multiservice-final-smoke-2/qemu.log
+smoke-3	normal QEMU recovered kernel	passed	7031	/home/ubuntu/agi-kernel/build/qemu-faisal-m93-multiservice-final-smoke-3/qemu.log
