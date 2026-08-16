@@ -1337,7 +1337,8 @@
     "FAISAL-M106",
     "FAISAL-M108",
     "FAISAL-M109",
-    "FAISAL-M110"
+    "FAISAL-M110",
+    "FAISAL-M111"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1353,7 +1354,7 @@
     "tools/testing/selftests/agi_autonomy_orchestrator_test.c"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "M111-worker-supervision-migration-multitenant-isolation-and-deployment-governance",
+  "next_dependency": "M112-kernel-enforced-sandbox-identity-and-multitenant-worker-supervision",
   "industry_readiness": {
     "status": "preproduction_prototype_not_production_ready",
     "audit_document": "FAISAL-INDUSTRY-READINESS-AUDIT.md",
@@ -1377,6 +1378,10 @@
     "m110_aggregate_qemu_harnesses": 31,
     "m110_world_model_features": "typed_entities_observed_expected_state_reconciliation_actionable_drift_signals_provenance_persistence_replay_and_corruption_fail_closed",
     "m110_model_router_features": "provider_neutral_registry_health_history_latency_cost_accuracy_context_privacy_locality_hardware_filtering_and_escalation_deescalation",
+    "m111_sandbox_fabric_qemu": "pass",
+    "m111_aggregate_qemu_harnesses": 32,
+    "m111_sandbox_features": "separate_task_command_memory_browser_bug_finder_debugger_research_model_build_deploy_secret_recovery_classes_policy_capability_resource_network_filesystem_device_checkpoint_cancel_recovery_replay",
+    "m111_sandbox_authority_boundary": "model_output_never_authorizes; verified_deployment_and_recovery_profiles_require_explicit_verification",
     "m105_verified_autonomy_orchestrator_qemu": "pass",
     "m105_evidence_chain": "verified_observation_crosscheck_promotion_experience_and_kernel_evidence",
     "m105_model_authority_boundary": "pass_unverified_model_output_denied_promotion",
@@ -1399,7 +1404,8 @@
       "worker_supervision_and_agent_migration",
       "distributed_adapter_conformance",
       "worker_supervision_and_agent_migration",
-      "deployment_governance_and_rollback"
+      "deployment_governance_and_rollback",
+      "kernel_enforced_sandbox_identity_and_multitenant_worker_supervision"
     ]
   }
 }
