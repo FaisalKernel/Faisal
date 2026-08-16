@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "fb23ed6a808d9ed7e88b4cddfc9adf1ad712241d",
-  "current_tag": "FAISAL-M87",
+  "current_head": "b1b948cf5e4246a31810dbf640ecded0ae1586a5",
+  "current_tag": "FAISAL-M88",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -662,13 +662,13 @@
         "M87-RUNTIME-VERIFICATION-RESEARCH.md",
         "tools/faisal-build/evidence/m87-runtime-verification-validation.json"
       ],
-      "next_action": "Retain attestation and approval gates while M88 bridges upstream kernel Runtime Verification monitor events into an authenticated FAISAL signal source."
+      "next_action": "Retain attestation and approval gates while M88 and subsequent RV sanitizer validation remain active."
     },
     {
       "id": "M88-kernel-rv-signal-bridge",
       "phase": 4,
       "name": "Kernel Runtime Verification signal bridge into FAISAL attested supervision",
-      "status": "next",
+      "status": "validated_kernel_rv_bridge",
       "priority": 90,
       "depends_on": [
         "M87-runtime-verification-signal-integration"
@@ -683,7 +683,42 @@
         "security_review",
         "benchmark",
         "regression"
-      ]
+      ],
+      "evidence": [
+        "MILESTONE88.md",
+        "M88-RV-BRIDGE-DESIGN.md",
+        "M88-SECURITY-REVIEW.md",
+        "M88-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m88-build-manifest.json",
+        "tools/faisal-build/evidence/m88-rv-bridge-qemu.log",
+        "tools/faisal-build/evidence/m88-rv-bridge-smoke.tsv",
+        "tools/faisal-build/evidence/m88-full-23-regression-summary.txt",
+        "tools/faisal-build/evidence/m88-security-scan.txt"
+      ],
+      "next_action": "Retain RV provenance, subscription isolation, readiness-handshake, and clean QEMU regression coverage while M89 adds sanitizer and lockdep validation for the bridge."
+    },
+    {
+      "id": "M89-rv-bridge-sanitizer-validation",
+      "phase": 14,
+      "name": "Concurrent sanitizer and lockdep validation for the kernel RV signal bridge",
+      "status": "next",
+      "priority": 95,
+      "depends_on": [
+        "M88-kernel-rv-signal-bridge",
+        "M81-concurrent-sanitizer-validation"
+      ],
+      "unlocks": [],
+      "evidence_required": [
+        "kasan",
+        "kcsan",
+        "lockdep",
+        "concurrent_open_release_report",
+        "malformed_event_consumer",
+        "security_review",
+        "benchmark",
+        "regression"
+      ],
+      "next_action": "Build dedicated KASAN/KCSAN/lockdep RV bridge kernels, exercise concurrent report/open/release and malformed consumers, then retain only validated coverage."
     }
   ],
   "completed_milestones": [
@@ -709,7 +744,8 @@
     "FAISAL-M84",
     "FAISAL-M85",
     "FAISAL-M86",
-    "FAISAL-M87"
+    "FAISAL-M87",
+    "FAISAL-M88"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
