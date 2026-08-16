@@ -1,0 +1,63 @@
+M85_SECURITY_SCAN
+--- dangerous execution primitives ---
+--- unsafe copies ---
+--- bounds and state controls ---
+tools/faisal-self-healing/faisal_self_healing.h:7:#define FAS_MAX_SIGNALS 32
+tools/faisal-self-healing/faisal_self_healing.h:8:#define FAS_MAX_ATTEMPTS 3
+tools/faisal-self-healing/faisal_self_healing.h:9:#define FAS_MAX_DETAIL 192
+tools/faisal-self-healing/faisal_self_healing.h:10:#define FAS_MAX_REPAIR_ID 96
+tools/faisal-self-healing/faisal_self_healing.h:12:#define FAS_APPROVAL_AUTOMATIC_ROLLBACK (1U << 0)
+tools/faisal-self-healing/faisal_self_healing.h:33:#define FAS_ACTION_ROLLBACK 1U
+tools/faisal-self-healing/faisal_self_healing.h:44:#define FAS_ERR_ROLLBACK -7
+tools/faisal-self-healing/faisal_self_healing.h:55:	char detail[FAS_MAX_DETAIL];
+tools/faisal-self-healing/faisal_self_healing.h:66:	FAS_STATE_ROLLBACK_REQUIRED = 7,
+tools/faisal-self-healing/faisal_self_healing.h:67:	FAS_STATE_QUARANTINED = 8,
+tools/faisal-self-healing/faisal_self_healing.h:77:	char explanation[FAS_MAX_DETAIL];
+tools/faisal-self-healing/faisal_self_healing.h:82:	uint32_t max_attempts;
+tools/faisal-self-healing/faisal_self_healing.h:84:	uint32_t require_canary;
+tools/faisal-self-healing/faisal_self_healing.h:103:	struct fas_signal signals[FAS_MAX_SIGNALS];
+tools/faisal-self-healing/faisal_self_healing.h:105:	struct fas_audit_record audit[FAS_MAX_SIGNALS];
+tools/faisal-self-healing/faisal_self_healing.c:16:static void copy_detail(char dst[FAS_MAX_DETAIL], const char *src)
+tools/faisal-self-healing/faisal_self_healing.c:22:	snprintf(dst, FAS_MAX_DETAIL, "%s", src);
+tools/faisal-self-healing/faisal_self_healing.c:32:	if (!service || service->audit_count >= FAS_MAX_SIGNALS)
+tools/faisal-self-healing/faisal_self_healing.c:47:	if (service->deployment.memory.checkpoint_valid)
+tools/faisal-self-healing/faisal_self_healing.c:75:		FAS_APPROVAL_AUTOMATIC_ROLLBACK | FAS_APPROVAL_REPAIR_CANDIDATE;
+tools/faisal-self-healing/faisal_self_healing.c:76:	service->policy.max_attempts = FAS_MAX_ATTEMPTS;
+tools/faisal-self-healing/faisal_self_healing.c:78:	service->policy.require_canary = 1;
+tools/faisal-self-healing/faisal_self_healing.c:101:	    signal->severity > 5 || service->signal_count >= FAS_MAX_SIGNALS)
+tools/faisal-self-healing/faisal_self_healing.c:112:	if (!service->deployment.memory.checkpoint_valid &&
+tools/faisal-self-healing/faisal_self_healing.c:149:		action = FAS_ACTION_ROLLBACK;
+tools/faisal-self-healing/faisal_self_healing.c:153:		action = FAS_ACTION_ROLLBACK;
+tools/faisal-self-healing/faisal_self_healing.c:157:		action = FAS_ACTION_ROLLBACK;
+tools/faisal-self-healing/faisal_self_healing.c:165:		action = FAS_ACTION_ROLLBACK;
+tools/faisal-self-healing/faisal_self_healing.c:193:	if (m78_compute_candidate_digest(candidate, digest) != 0 ||
+tools/faisal-self-healing/faisal_self_healing.c:198:	     !candidate->operator_approved) ||
+tools/faisal-self-healing/faisal_self_healing.c:199:	    m78_validate_candidate(candidate) != 0 ||
+tools/faisal-self-healing/faisal_self_healing.c:217:	if (++service->attempts > service->policy.max_attempts)
+tools/faisal-self-healing/faisal_self_healing.c:228:	if (service->policy.require_canary) {
+tools/faisal-self-healing/faisal_self_healing.c:239:	service->deployment.deployment.state = M78_STATE_ROLLBACK_PENDING;
+tools/faisal-self-healing/faisal_self_healing.c:241:		set_state(service, FAS_STATE_FAILED, FAS_ACTION_ROLLBACK,
+tools/faisal-self-healing/faisal_self_healing.c:242:			  FAS_REASON_CANARY, FAS_ERR_ROLLBACK);
+tools/faisal-self-healing/faisal_self_healing.c:243:		return FAS_ERR_ROLLBACK;
+tools/faisal-self-healing/faisal_self_healing.c:247:	set_state(service, FAS_STATE_RECOVERED, FAS_ACTION_ROLLBACK,
+tools/faisal-self-healing/faisal_self_healing.c:261:	    service->diagnosis.action != FAS_ACTION_ROLLBACK)
+tools/faisal-self-healing/faisal_self_healing.c:264:	      FAS_APPROVAL_AUTOMATIC_ROLLBACK) ||
+tools/faisal-self-healing/faisal_self_healing.c:265:	    ++service->attempts > service->policy.max_attempts) {
+tools/faisal-self-healing/faisal_self_healing.c:266:		set_state(service, FAS_STATE_QUARANTINED, FAS_ACTION_QUARANTINE,
+tools/faisal-self-healing/faisal_self_healing.c:267:			  service->attempts > service->policy.max_attempts ?
+tools/faisal-self-healing/faisal_self_healing.c:272:	service->deployment.deployment.state = M78_STATE_ROLLBACK_PENDING;
+tools/faisal-self-healing/faisal_self_healing.c:273:	set_state(service, FAS_STATE_ROLLBACK_REQUIRED, FAS_ACTION_ROLLBACK,
+tools/faisal-self-healing/faisal_self_healing.c:277:		set_state(service, FAS_STATE_FAILED, FAS_ACTION_ROLLBACK,
+tools/faisal-self-healing/faisal_self_healing.c:278:			  service->diagnosis.reason, FAS_ERR_ROLLBACK);
+tools/faisal-self-healing/faisal_self_healing.c:279:		return FAS_ERR_ROLLBACK;
+tools/faisal-self-healing/faisal_self_healing.c:283:	set_state(service, FAS_STATE_RECOVERED, FAS_ACTION_ROLLBACK,
+tools/faisal-self-healing/faisal_self_healing.c:300:	if (service->diagnosis.action == FAS_ACTION_ROLLBACK)
+tools/faisal-self-healing/faisal_self_healing.c:303:		set_state(service, FAS_STATE_QUARANTINED, FAS_ACTION_QUARANTINE,
+tools/faisal-self-healing/faisal_self_healing.c:319:	service->attempts = service->policy.max_attempts;
+tools/testing/selftests/agi_self_healing_test.c:36:	candidate->operator_approved = 1;
+tools/testing/selftests/agi_self_healing_test.c:40:	return m78_compute_candidate_digest(candidate, candidate->artifact_digest);
+tools/testing/selftests/agi_self_healing_test.c:92:	printf("FAS_AUTOMATIC_ROLLBACK_OK recovery=%llu\n",
+tools/testing/selftests/agi_self_healing_test.c:124:	printf("FAS_CANARY_FAILURE_ROLLBACK_OK\n");
+tools/testing/selftests/agi_self_healing_test.c:134:	if (rc != FAS_ERR_POLICY || service.state != FAS_STATE_QUARANTINED)
+tools/testing/selftests/agi_self_healing_test.c:149:	if (rc != FAS_ERR_POLICY || service.state != FAS_STATE_QUARANTINED)
+--- source loops ---

@@ -1,0 +1,90 @@
+{
+  "project": "FAISAL",
+  "milestone": "M85",
+  "title": "Controlled self-healing supervisor with future-tech research integration",
+  "date": "2026-08-16",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "future_research": {
+    "sources": [
+      "https://docs.kernel.org/livepatch/livepatch.html",
+      "https://docs.kernel.org/trace/rv/runtime-verification.html",
+      "https://docs.kernel.org/security/self-protection.html",
+      "https://www.nist.gov/itl/executive-order-14028-improving-nations-cybersecurity/software-supply-chain-security-guidance-11",
+      "https://cxl.docs.kernel.org/research.html",
+      "https://docs.kernel.org/driver-api/cxl/linux/early-boot.html",
+      "https://docs.kernel.org/bpf/ringbuf.html"
+    ],
+    "selected_directions": [
+      "runtime verification monitors",
+      "reversible stateful livepatch concepts",
+      "kernel self-protection",
+      "lifecycle supply-chain attestation",
+      "CXL heterogeneous memory tiers",
+      "BPF ordered event transport"
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-self-healing/faisal_self_healing.h",
+    "source": "tools/faisal-self-healing/faisal_self_healing.c",
+    "selftest": "tools/testing/selftests/agi_self_healing_test.c",
+    "qemu_harness": "tools/faisal-build/run_self_healing_qemu.sh",
+    "reuses": ["M71 persistent memory", "M78 deployment supervisor", "M78 checkpoint/canary/rollback", "M64–M80 governance and audit discipline"],
+    "states": ["observed", "detected", "diagnosed", "repair_validated", "canary", "recovered", "rollback_required", "quarantined", "failed"],
+    "max_signals": 32,
+    "max_attempts": 3
+  },
+  "build": {
+    "status": "passed",
+    "command_class": "cc -O2 -Wall -Wextra -Werror -Wno-cpp -static",
+    "log": "/home/ubuntu/agi-kernel/build/recovered/faisal-self-healing-build5.log"
+  },
+  "qemu": {
+    "status": "passed",
+    "boot_marker": "FAISAL_M85_BOOT_OK",
+    "markers": {
+      "FAS_AUTOMATIC_ROLLBACK_OK": "recovery=4",
+      "FAS_AUDIT_RETENTION_OK": "records=5",
+      "FAS_APPROVED_REPAIR_CANARY_OK": "attempts=1",
+      "FAS_CANARY_FAILURE_ROLLBACK_OK": true,
+      "FAS_SECURITY_QUARANTINE_OK": true,
+      "FAS_RETRY_LIMIT_QUARANTINE_OK": "attempts=4",
+      "FAS_SELFTEST_EXIT": 0,
+      "FAISAL_M85_TEST_RC": 0
+    },
+    "log": "/home/ubuntu/agi-kernel/build/qemu-faisal-self-healing/qemu.log"
+  },
+  "regression": {
+    "M78_deployment_supervisor": "passed",
+    "log": "/home/ubuntu/agi-kernel/build/recovered/m85-regression-m78.log"
+  },
+  "smoke_runs": {
+    "count": 4,
+    "exit_codes": [0, 0, 0, 0],
+    "elapsed_ms": [4964, 5036, 5011, 5064],
+    "mean_ms": 5018.7,
+    "min_ms": 4964,
+    "max_ms": 5064,
+    "range_ms": 100,
+    "summary": "/home/ubuntu/agi-kernel/build/recovered/m85-smoke-summary.txt"
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "automatic_kernel_code_modification": false,
+    "security_signal_auto_repair": false,
+    "repair_requires_existing_approvals": true,
+    "canary_required": true,
+    "retry_limit_quarantine": true,
+    "review": "M85-SELF-HEALING-SECURITY-REVIEW.md"
+  },
+  "non_claims": [
+    "No arbitrary error repair claim",
+    "No autonomous kernel text patching claim",
+    "No model-output authorization claim",
+    "No KASAN/KCSAN/UBSAN/lockdep/syzkaller coverage",
+    "No signed repair bundle or hardware-backed attestation claim",
+    "No distributed transactional rollback claim",
+    "No production readiness claim"
+  ],
+  "status": "validated_bounded_self_healing_userspace_supervisor"
+}

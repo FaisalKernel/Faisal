@@ -204,6 +204,18 @@
       "next_action": "Keep this as an experimental private module; do not promote it into the stable FAISAL ABI until randomized ioctl fuzzing, sanitizer/lockdep coverage, namespace/capability policy, and scalability benchmarks are available."
     },
     {
+      "id": "M85-self-healing-future-tech",
+      "phase": 14,
+      "name": "Future-technology research integration and controlled self-healing supervisor",
+      "status": "validated_bounded_self_healing_userspace_supervisor",
+      "priority": 90,
+      "depends_on": ["M78-deployment-supervisor", "M80-stress-fuzz-hardening", "M82-memory-ecosystem"],
+      "unlocks": ["M86-runtime-verification-and-attested-repair"],
+      "evidence_required": ["future_research", "detection", "diagnosis", "automatic_rollback", "approved_repair", "canary_failure", "quarantine", "retry_limit", "security_review", "benchmark", "regression"],
+      "evidence": ["M85-FUTURE-TECH-RESEARCH.md", "M85-SELF-HEALING-DESIGN.md", "M85-SELF-HEALING-SECURITY-REVIEW.md", "M85-SELF-HEALING-BENCHMARKS.md", "tools/faisal-build/evidence/m85-self-healing-validation.json"],
+      "next_action": "Retain bounded recovery and quarantine coverage; next integrate runtime-verification signals, signed content-addressed repair bundles, and hardware/provider-gated attestation without enabling arbitrary kernel self-modification."
+    },
+    {
       "id": "M81-concurrent-sanitizer-validation",
       "phase": 14,
       "name": "Concurrent lifecycle and IPC stress with sanitizer-enabled kernel validation",
@@ -214,7 +226,7 @@
       "evidence_required": ["concurrent_stress", "kasan_or_documented_blocker", "kcsan_or_documented_blocker", "lockdep_or_documented_blocker", "randomized_inputs", "security_review", "regression"]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M82", "FAISAL-M84"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M82", "FAISAL-M84", "FAISAL-M85"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",
