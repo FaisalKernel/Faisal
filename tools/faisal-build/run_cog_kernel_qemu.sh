@@ -7,8 +7,14 @@ BUILD="$ROOT/build/recovered"
 ROOTFS="$ROOT/build/qemu-cog-kernel"
 LOG="$ROOTFS/qemu.log"
 MODULE="$LINUX/tools/cog-kernel/cog_kernel.ko"
-TESTER="$LINUX/tools/cog-kernel/cog_tester"
+TESTER="$BUILD/cog_tester"
 
+cc -O2 -Wall -Wextra -Werror -static \
+  "$LINUX/tools/cog-kernel/cog_tester.c" -o "$TESTER"
+make -C "$LINUX/tools/cog-kernel" KDIR="$LINUX" \
+  KBUILD_OUTPUT="$BUILD" >/dev/null
+[ -r "$MODULE" ]
+[ -x "$TESTER" ]
 rm -rf "$ROOTFS"
 mkdir -p "$ROOTFS/bin" "$ROOTFS/dev" "$ROOTFS/proc" "$ROOTFS/sys" "$ROOTFS/tmp" "$ROOTFS/lib/modules"
 cp "$BUILD/arch/x86/boot/bzImage" "$ROOTFS/boot.bzImage" 2>/dev/null || true

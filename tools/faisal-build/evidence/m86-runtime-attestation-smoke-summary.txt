@@ -1,0 +1,4 @@
+run=1 rc=0 elapsed_ms=4953
+run=2 rc=0 elapsed_ms=4861
+run=3 rc=0 elapsed_ms=5155
+M86_SMOKE_RUNS=3

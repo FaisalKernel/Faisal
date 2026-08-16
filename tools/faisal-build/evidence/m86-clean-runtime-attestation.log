@@ -1,0 +1,17 @@
+c[?7l[2J[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+2EFCAE00+2EF0AE00 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...
+
+
+Booting from ROM..c[?7l[2J[0m.FAISAL_CLEAN_M86_BOOT_OK
+FRA_VERIFIER_IDENTITY_OK agent=1 capability=5789734267084894642
+FRA_ATTESTATION_OK valid=0x1f health=0x1f state=1 generation=2
+FRA_RESOURCE_OK rss=1908736 cpu=27809137 network_denied=0
+FRA_SELF_STATE_OK runnable=1 blocked=0 failed=0 cancelled=0
+FRA_RESAMPLE_OK generation=2
+FRA_DIGEST_CHANGED_ON_RESAMPLE_OK
+FRA_SELFTEST_EXIT=0
+FAISAL_CLEAN_M86_TEST_RC=0
+[   40.455445] reboot: Power down

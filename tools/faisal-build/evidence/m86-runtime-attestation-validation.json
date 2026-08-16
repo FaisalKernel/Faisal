@@ -1,0 +1,96 @@
+{
+  "project": "FAISAL",
+  "milestone": "M86",
+  "title": "Clean functional audit and runtime attestation",
+  "date": "2026-08-16",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "clean_build": {
+    "status": "passed",
+    "output": "/home/ubuntu/agi-kernel/build/audit-clean",
+    "bzImage_sha256": "436fbf876786fb5d61051543dcc7a81b96ca0f73bf94b491dbafdf6c6facc742",
+    "bzImage_size_bytes": 15728640,
+    "config": "build/audit-clean/.config",
+    "command": "make O=build/audit-clean olddefconfig && make O=build/audit-clean -j2 bzImage modules"
+  },
+  "clean_boot": {
+    "status": "passed",
+    "marker": "FAISAL_CLEAN_BOOT_VALIDATION_OK",
+    "device": "/dev/agi_lifecycle",
+    "tested_with": "M78 deployment supervisor selftest",
+    "clean_image_runtime_attestation": "FAISAL_CLEAN_M86_VALIDATION_OK"
+  },
+  "audit_defects_fixed": [
+    {
+      "area": "CogOS QEMU harness",
+      "failure": "Harness assumed untracked cog_tester binary and failed with cp ENOENT",
+      "fix": "Harness now builds static tester and external module from source before initramfs packaging",
+      "validation": "COG_QEMU_TEST_RC=0"
+    },
+    {
+      "area": "M73 audit reproducibility",
+      "failure": "Full audit used stale prebuilt world-state selftest and exposed a false conflict-resolution failure",
+      "fix": "Rebuilt current selftest and added tracked full-audit runner; source service remained correct",
+      "validation": "M73_SELFTEST_EXIT=0"
+    }
+  ],
+  "full_regression": {
+    "count": 20,
+    "passed": 20,
+    "failed": 0,
+    "runner": "tools/faisal-build/run_full_faisal_audit.sh",
+    "summary": "tools/faisal-build/evidence/m86-full-audit-summary.txt"
+  },
+  "implementation": {
+    "header": "tools/faisal-attestation/faisal_runtime_attestation.h",
+    "source": "tools/faisal-attestation/faisal_runtime_attestation.c",
+    "selftest": "tools/testing/selftests/agi_runtime_attestation_test.c",
+    "qemu_harness": "tools/faisal-build/run_runtime_attestation_qemu.sh",
+    "interfaces": ["AGI_LC_GET_SELF_STATE", "AGI_LC_GET_RESOURCE_SNAPSHOT", "AGI_LC_OBSERVABILITY"],
+    "identity": "AGI_LC_LIGHT_AGENT_ROLE_VERIFIER / AGI_LC_WORKLOAD_VERIFICATION",
+    "mutation": false
+  },
+  "qemu": {
+    "status": "passed",
+    "markers": {
+      "FAISAL_M86_BOOT_OK": true,
+      "FRA_VERIFIER_IDENTITY_OK": true,
+      "FRA_ATTESTATION_OK": "valid=0x1f health=0x1f state=1 generation=2",
+      "FRA_RESOURCE_OK": true,
+      "FRA_SELF_STATE_OK": true,
+      "FRA_RESAMPLE_OK": true,
+      "FRA_DIGEST_CHANGED_ON_RESAMPLE_OK": true,
+      "FRA_SELFTEST_EXIT": 0,
+      "FAISAL_M86_TEST_RC": 0
+    },
+    "log": "tools/faisal-build/evidence/m86-runtime-attestation-qemu.log"
+  },
+  "smoke_runs": {
+    "count": 3,
+    "exit_codes": [0, 0, 0],
+    "elapsed_ms": [4953, 4861, 5155],
+    "mean_ms": 4989.6,
+    "min_ms": 4861,
+    "max_ms": 5155,
+    "range_ms": 294,
+    "summary": "tools/faisal-build/evidence/m86-runtime-attestation-smoke-summary.txt"
+  },
+  "security": {
+    "forbidden_execution_primitives": false,
+    "unsafe_copy_primitives": false,
+    "model_output_authority": false,
+    "mutation_of_policy_or_capabilities": false,
+    "review": "M86-RUNTIME-ATTESTATION-SECURITY.md"
+  },
+  "non_claims": [
+    "No production readiness claim",
+    "No hardware-backed remote attestation claim",
+    "No secure-boot measurement claim",
+    "No physical accelerator claim",
+    "No sanitizer/fuzzer coverage claim",
+    "No formal proof of all kernel invariants",
+    "No semantic correctness proof for model output"
+  ],
+  "audit_fixes": ["CogOS harness now builds tester/module from source", "tracked audit runner rebuilds M73/M86 selftests"],
+  "status": "validated_clean_build_boot_full_regression_and_runtime_attestation"
+}
