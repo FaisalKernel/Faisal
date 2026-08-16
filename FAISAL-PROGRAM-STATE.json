@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "7a2cee191fc929c111b314509a36810ee419e981",
-  "current_tag": "FAISAL-M94",
+  "current_head": "f82d7bac8e22c5bc5f47de1469674ce48a9de9e2",
+  "current_tag": "FAISAL-M95",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -895,7 +895,7 @@
         "M78-deployment-supervisor"
       ],
       "unlocks": [
-        "M95-provider-supervised-recovery"
+        "M95-durable-objective-task-execution"
       ],
       "evidence_required": [
         "intent_digest_binding",
@@ -924,10 +924,60 @@
         "tools/faisal-build/evidence/m94-kcsan-qemu-final.log",
         "tools/faisal-build/evidence/m94-smoke-times.tsv"
       ],
-      "next_action": "Retain intent, capability, expiry, revocation, sanitizer, and full-regression coverage while M95 defines supervisor-mediated provider ownership, stale-service reclamation, and explicit crash recovery."
+      "next_action": "Retain intent, capability, expiry, revocation, sanitizer, and full-regression coverage while M95 adds durable objective/task state; provider-supervised recovery follows as M96."
     },
     {
-      "id": "M95-provider-supervised-recovery",
+      "id": "M95-durable-objective-task-execution",
+      "phase": 14,
+      "name": "Durable objective and task execution service with leases, retries, dependencies, stop conditions, and replay",
+      "status": "validated_bounded_userspace_service_with_kernel_session_binding",
+      "priority": 96,
+      "depends_on": [
+        "M94-intent-bound-authority-lease",
+        "M72-experience-learning",
+        "M78-deployment-supervisor"
+      ],
+      "unlocks": [
+        "M96-provider-supervised-recovery"
+      ],
+      "evidence_required": [
+        "append_only_journal",
+        "replay_integrity",
+        "idempotency",
+        "dependency_gate",
+        "lease_heartbeat",
+        "retry_backoff",
+        "dead_letter",
+        "deadline_stop",
+        "budget_stop",
+        "cancellation",
+        "kernel_session_binding",
+        "sanitizer",
+        "security_review",
+        "benchmark",
+        "full_regression"
+      ],
+      "evidence": [
+        "MILESTONE95.md",
+        "M95-DURABLE-TASK-DESIGN.md",
+        "M95-SECURITY-REVIEW.md",
+        "M95-BENCHMARKS.md",
+        "M95-RESEARCH-NOTES.md",
+        "PASTED-CONTENT-REQUIREMENT-MAP.md",
+        "tools/faisal-build/evidence/m95-durable-task-validation.json",
+        "tools/faisal-build/evidence/m95-qemu-final.log",
+        "tools/faisal-build/evidence/m95-smoke-times.tsv",
+        "tools/faisal-build/evidence/m95-asan-ubsan.log",
+        "tools/faisal-build/evidence/m95-tsan.log",
+        "tools/faisal-build/evidence/m95-full-audit.log",
+        "tools/faisal-build/evidence/m95-m90.log",
+        "tools/faisal-build/evidence/m95-m91.log",
+        "tools/faisal-build/evidence/m95-security-scan.txt"
+      ],
+      "next_action": "Retain durable journal, dependency, lease, retry, dead-letter, stop-condition, replay, sanitizer, QEMU, and regression coverage while M96 adds supervisor-mediated provider ownership and explicit crash recovery."
+    },
+    {
+      "id": "M96-provider-supervised-recovery",
       "phase": 14,
       "name": "Supervisor-mediated provider ownership, stale-service reclamation, and explicit crash recovery",
       "status": "next",
@@ -935,6 +985,7 @@
       "depends_on": [
         "M93-provider-multiservice-lifetime",
         "M94-intent-bound-authority-lease",
+        "M95-durable-objective-task-execution",
         "M78-deployment-supervisor"
       ],
       "unlocks": [],
@@ -982,7 +1033,8 @@
     "FAISAL-M91",
     "FAISAL-M92",
     "FAISAL-M93",
-    "FAISAL-M94"
+    "FAISAL-M94",
+    "FAISAL-M95"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",

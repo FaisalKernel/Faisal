@@ -1,6 +1,6 @@
 # FAISAL M95: Durable Objective and Task Execution Design
 
-**Status:** Implemented and under final evidence integration
+**Status:** Validated and committed as `FAISAL-M95`
 **Access date:** 2026-08-16
 **Specification source:** `PASTED-CONTENT-STRUCTURED.md`, sections 2–4, 18, 21–22, 28, 35, 50–51, 55, 57, 65–67
 
