@@ -1,6 +1,6 @@
 # FAISAL M98 — Mission Autonomy Control Loop
 
-**Status:** Implementation and validation in progress; not yet committed
+**Status:** Validated and committed as `FAISAL-M98` at `08947b8f1ccac5d24b523baf29d7976b2627e66a`
 
 **Date:** 2026-08-16
 

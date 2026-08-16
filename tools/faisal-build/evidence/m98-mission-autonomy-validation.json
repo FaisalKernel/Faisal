@@ -2,7 +2,7 @@
   "project": "FAISAL",
   "milestone": "M98",
   "name": "Mission Autonomy Control Loop",
-  "status": "validated_pending_commit",
+  "status": "validated_and_committed",
   "date": "2026-08-16",
   "kernel_base": "Linux v7.2-rc7",
   "abi": 38,
@@ -70,8 +70,8 @@
     "No claim of distributed consensus, production readiness, or autonomous kernel self-modification.",
     "No unmeasured speed, throughput, energy, or productivity claim."
   ],
-  "implementation_commit": "pending",
-  "tag": "pending",
+  "implementation_commit": "08947b8f1ccac5d24b523baf29d7976b2627e66a",
+  "tag": "FAISAL-M98",
   "forbidden_files_excluded": [
     "M63-COMPUTE-CONTEXT-DESIGN.md",
     "M63-SECURITY-REVIEW.md"

@@ -2,7 +2,7 @@
 
 **Project:** FAISAL
 **Current kernel base:** Linux `v7.2-rc7`
-**Current tagged milestone:** `FAISAL-M97`
+**Current tagged milestone:** `FAISAL-M98`
 **Program status:** Active; not complete.
 
 ## End goal
@@ -127,10 +127,10 @@ The actual next dependency is selected from the live graph. M64 agent-oriented s
 
 ## Current validated milestone
 
-`FAISAL-M97` is validated at implementation commit `830a2c8e42968006e148b78daae7acba190d6a71` and tag `FAISAL-M97`. M97 adds a bounded `.continuity` append-only journal beside the M95 task journal and M96 causal journal, canonical capsule digests, committed-branch and objective-generation binding, exact working/world/resource state-vector checks, independent drift rejection, invalidation, replay, corruption fail-closed behavior, and a non-authorizing resume check. Its final verification includes strict static build, host selftest, ASan/UBSan, TSan, real-kernel QEMU integration with `--require-kernel`, three smokes, full 23/23 audit, M95/M96/M90/M91 regressions, security scan, benchmark evidence, and a tagged implementation commit. M97 does not claim automatic checkpoint creation, truthful digest producers, external-side-effect rollback, a new hardware memory algorithm, model retraining, consciousness, performance improvement, or complete AGI.
+`FAISAL-M98` is validated at implementation commit `08947b8f1ccac5d24b523baf29d7976b2627e66a` and tag `FAISAL-M98`. M98 adds a bounded `.mission` append-only journal and deterministic observe/propose/authorize/execute/verify/continue/replan/stop/escalate control loop composed from M95 durable tasks, M96 evidence-complete causal authority, and M97 continuity capsules. It rejects unauthorized model proposals, requires real M94 per-invocation tool authority in QEMU, escalates in-flight execution after restart, rejects world-state drift, enforces deadline/budget/step/risk stops, validates concurrent queries, and fails closed on journal corruption. Its final verification includes strict static build, host selftest, ASan/UBSan, TSan, real-kernel QEMU integration with `--require-kernel`, three smokes, full 23/23 audit, M95/M96/M90/M91 regressions, security scan, benchmark evidence, and a tagged implementation commit. M98 does not claim model intelligence, truthful observations, exactly-once remote effects, autonomous kernel modification, production readiness, or complete AGI.
 
-The next selected dependency is **M98 capability-scoped tool registry with risk, cost, provenance, verification, revocation, and independent approval**. It must bind tool selection to explicit capabilities and M96/M97 continuity state, fail closed on missing risk or provenance metadata, and keep model output non-authoritative.
+The next selected dependency is **M99 capability-scoped tool registry and execution broker with risk, cost, provenance, verification, revocation, and independent approval**. It must bind selection and invocation to explicit capabilities, M96/M97/M98 state, and per-invocation authority, fail closed on missing metadata, and keep model output non-authoritative.
 
 ## Governance
 
-The program maintains small, reviewable commits and milestone tags. Every change records affected subsystems, compatibility impact, security impact, tests, benchmarks, and rollback. Unrelated untracked work is never silently included in a milestone. M73, M74, M75, M76, M77, M78, M79, M80, M81, M82, M83, M84, M85, M86, M87, M88, M89, M90, M91, M92, M93, M94, M95, M96, and M97 evidence is stored under `tools/faisal-build/evidence/`, including machine-readable validation, QEMU, regression, benchmark, sanitizer, and build records. The active program state is updated after meaningful implementation, validation, failure, or dependency changes.
+The program maintains small, reviewable commits and milestone tags. Every change records affected subsystems, compatibility impact, security impact, tests, benchmarks, and rollback. Unrelated untracked work is never silently included in a milestone. M73, M74, M75, M76, M77, M78, M79, M80, M81, M82, M83, M84, M85, M86, M87, M88, M89, M90, M91, M92, M93, M94, M95, M96, M97, and M98 evidence is stored under `tools/faisal-build/evidence/`, including machine-readable validation, QEMU, regression, benchmark, sanitizer, and build records. The active program state is updated after meaningful implementation, validation, failure, or dependency changes.
