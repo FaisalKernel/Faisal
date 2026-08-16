@@ -1,0 +1,12 @@
+c[?7l[2J[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+2EFCAE00+2EF0AE00 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from ROM...
+c[?7l[2JFAISAL_UAPI_FUZZ_BOOT_OK
+FAISAL_UAPI_FUZZ_OK calls=512 accepted=0 rejected=512 unexpected_errno=0 iterations=256
+FAISAL_UAPI_FUZZ_RC=0
+[  563.659212] reboot: Power down

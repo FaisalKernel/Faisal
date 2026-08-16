@@ -1,0 +1,4 @@
+mode	build	config	compile	runtime	diagnostics
+kasan	/home/ubuntu/agi-kernel/build/m106-sanitizers/kasan	pass	pass	pass	clean
+kcsan	/home/ubuntu/agi-kernel/build/m106-sanitizers/kcsan	pass	pass	pass	clean
+scope	kcsan=headless;legacy-PS2-input-drivers-disabled

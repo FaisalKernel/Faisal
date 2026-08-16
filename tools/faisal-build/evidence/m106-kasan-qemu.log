@@ -1,0 +1,15 @@
+c[?7l[2J[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+2EFCAE00+2EF0AE00 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from ROM..c[?7l[2J[  601.995344] INFO: rcu_tasks detected stalls on tasks:
+[  602.000638] (____ptrval____): .. nvcsw: 3/3 holdout: 1 idle_cpu: -1/1
+[  626.994691] ACPI Error: Aborting method \_SB.PCI0._PRT due to previous error (AE_AML_LOOP_TIMEOUT) (20260408/psparse-543)
+[  627.150146] ACPI Error: Method execution failed \_SB.PCI0._PRT due to previous error (AE_AML_LOOP_TIMEOUT) (20260408/uteval-68)
+FAISAL_UAPI_FUZZ_BOOT_OK
+FAISAL_UAPI_FUZZ_OK calls=512 accepted=0 rejected=512 unexpected_errno=0 iterations=256
+FAISAL_UAPI_FUZZ_RC=0
+[  633.969391] reboot: Power down

@@ -7,6 +7,7 @@ BUILD=${FAISAL_BUILD:-$ROOT/build/recovered}
 ROOTFS=${FAISAL_FUZZ_ROOTFS:-$ROOT/build/qemu-faisal-uapi-fuzz}
 LOG="$ROOTFS/qemu.log"
 TEST="$BUILD/agi_lifecycle_uapi_fuzz_test"
+FUZZ_ITERATIONS=${FAISAL_UAPI_FUZZ_ITERATIONS:-4096}
 
 cc -O2 -Wall -Wextra -Werror -Wno-cpp -static \
   -I"$LINUX/include/uapi" \
@@ -40,12 +41,13 @@ if [ ! -e /dev/agi_lifecycle ]; then
   poweroff -f
 fi
 echo FAISAL_UAPI_FUZZ_BOOT_OK
-  /bin/agi_lifecycle_uapi_fuzz_test /dev/agi_lifecycle ${FAISAL_UAPI_FUZZ_ITERATIONS:-4096}
+  /bin/agi_lifecycle_uapi_fuzz_test /dev/agi_lifecycle __FAISAL_UAPI_FUZZ_ITERATIONS__
 
 rc=$?
 echo FAISAL_UAPI_FUZZ_RC=$rc
 poweroff -f
 EOF
+sed -i "s/__FAISAL_UAPI_FUZZ_ITERATIONS__/$FUZZ_ITERATIONS/" "$ROOTFS/init"
 chmod +x "$ROOTFS/init"
 ( cd "$ROOTFS" && find . -print0 | cpio --null -o -H newc 2>/dev/null | gzip -9 > "$ROOTFS/initramfs.cpio.gz" )
 qemu-system-x86_64 \
