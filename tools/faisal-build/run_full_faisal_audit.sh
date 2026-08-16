@@ -53,6 +53,21 @@ cc -O2 -Wall -Wextra -Werror -Wno-cpp -static \
   -Iinclude/uapi \
   tools/testing/selftests/agi_autonomy_control_test.c \
   -o "$BUILD/agi_autonomy_control_test"
+cc -O2 -Wall -Wextra -Werror -Wno-cpp -static \
+  -Iinclude/uapi -Itools/faisal-memory -Itools/faisal-world \
+  -Itools/faisal-browser -Itools/faisal-research -Itools/faisal-experience \
+  -Itools/faisal-self-healing -Itools/faisal-deploy -Itools/faisal-autonomy \
+  tools/faisal-memory/faisal_memory_service.c \
+  tools/faisal-memory/faisal_memory_transaction.c \
+  tools/faisal-world/faisal_world_state_service.c \
+  tools/faisal-browser/faisal_browser_tool_service.c \
+  tools/faisal-research/faisal_research_service.c \
+  tools/faisal-experience/faisal_experience_service.c \
+  tools/faisal-deploy/faisal_deploy_supervisor.c \
+  tools/faisal-self-healing/faisal_self_healing.c \
+  tools/faisal-autonomy/faisal_autonomy_orchestrator.c \
+  tools/testing/selftests/agi_autonomy_orchestrator_test.c \
+  -o "$BUILD/agi_autonomy_orchestrator_test" -lcrypto -ldl -lpthread
 set -- \
  tools/faisal-build/run_agent_security_m64_qemu.sh \
  tools/faisal-build/run_transport_qemu.sh \
@@ -80,7 +95,8 @@ set -- \
  tools/faisal-build/run_concurrent_lifecycle_ipc_qemu.sh \
  tools/faisal-build/run_memory_transaction_qemu.sh \
  tools/faisal-build/run_runtime_verification_qemu.sh \
- tools/faisal-build/run_autonomy_control_qemu.sh
+ tools/faisal-build/run_autonomy_control_qemu.sh \
+ tools/faisal-build/run_autonomy_orchestrator_qemu.sh
 count=0
 for harness do
 	count=$((count + 1))
