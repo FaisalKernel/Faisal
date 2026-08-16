@@ -141,6 +141,8 @@ int m87_compute_bundle_digest(const struct m87_repair_bundle *bundle,
 	    digest_update(ctx, bundle->bundle_id, sizeof(bundle->bundle_id)) == M87_OK &&
 	    digest_update(ctx, bundle->payload_digest, sizeof(bundle->payload_digest)) == M87_OK &&
 	    digest_update(ctx, bundle->attestation_digest, sizeof(bundle->attestation_digest)) == M87_OK &&
+	    digest_update(ctx, bundle->signing_key_id, sizeof(bundle->signing_key_id)) == M87_OK &&
+	    digest_update(ctx, &bundle->key_generation, sizeof(bundle->key_generation)) == M87_OK &&
 	    digest_update(ctx, &bundle->signal_sequence, sizeof(bundle->signal_sequence)) == M87_OK &&
 	    digest_update(ctx, &bundle->required_provider, sizeof(bundle->required_provider)) == M87_OK &&
 	    digest_update(ctx, &bundle->policy_generation, sizeof(bundle->policy_generation)) == M87_OK &&
@@ -185,10 +187,17 @@ int m87_verify_bundle(struct m87_service *service,
 	if (m87_compute_payload_digest(bundle, payload_digest) != M87_OK ||
 	    memcmp(payload_digest, bundle->payload_digest, M87_DIGEST_SIZE) != 0)
 		return M87_ERR_DIGEST;
-	if (m87_compute_bundle_digest(bundle, bundle_digest) != M87_OK ||
-	    memcmp(bundle_digest, bundle->bundle_digest, M87_DIGEST_SIZE) != 0)
-		return M87_ERR_DIGEST;
-	if (!m87_provider_available(service, bundle->required_provider))
+			if (m87_compute_bundle_digest(bundle, bundle_digest) != M87_OK ||
+		    memcmp(bundle_digest, bundle->bundle_digest, M87_DIGEST_SIZE) != 0)
+			return M87_ERR_DIGEST;
+		if (service->trusted_key_required &&
+		    (!service->trusted_key_generation ||
+		     bundle->key_generation != service->trusted_key_generation ||
+		     memcmp(bundle->signing_key_id, service->trusted_key_id,
+			    M87_KEY_ID_SIZE) != 0))
+			return M87_ERR_SIGNATURE;
+		if (!m87_provider_available(service, bundle->required_provider))
+
 		return M87_ERR_PROVIDER;
 	if (verify_signature(service, bundle) != M87_OK)
 		return M87_ERR_SIGNATURE;
@@ -197,6 +206,9 @@ int m87_verify_bundle(struct m87_service *service,
 		return M87_ERR_APPROVAL;
 	memcpy(service->verification.payload_digest, payload_digest, M87_DIGEST_SIZE);
 	memcpy(service->verification.bundle_digest, bundle_digest, M87_DIGEST_SIZE);
+	memcpy(service->verification.signing_key_id, bundle->signing_key_id,
+	       M87_KEY_ID_SIZE);
+	service->verification.key_generation = bundle->key_generation;
 	service->verification.provider_mask = service->provider_mask;
 	service->verification.valid_mask |= M87_BUNDLE_DIGEST_VALID |
 		M87_SIGNATURE_VALID | M87_PROVIDER_VALID | M87_APPROVALS_VALID;

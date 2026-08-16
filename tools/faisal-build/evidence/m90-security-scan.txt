@@ -1,0 +1,5 @@
+scan: M90 added/modified lines plus new files
+new_lines_scanned: 972
+high_risk_pattern_matches: 0
+result: PASS
+private_key_boundary: provider-only userspace EVP_PKEY storage; no kernel source changed by M90

@@ -1,0 +1,53 @@
+{
+  "milestone": "FAISAL-M90",
+  "dependency": "M89-rv-bridge-sanitizer-validation",
+  "status": "validated_bounded_userspace_key_provider",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "boundary": "Private signing keys remain in a userspace provider; M87 receives only public key bytes, key identity, and generation metadata.",
+  "contract": {
+    "provisioning": true,
+    "duplicate_key_rejection": true,
+    "monotonic_generation": true,
+    "active_rotation": true,
+    "retired_key_isolation": true,
+    "independent_approval_denial": true,
+    "revocation": true,
+    "automatic_bound_service_invalidation": true,
+    "post_revocation_signing_denial": true
+  },
+  "runs": {
+    "m90_qemu": {
+      "passed": true,
+      "evidence": "tools/faisal-build/evidence/m90-key-provider-qemu.log"
+    },
+    "m87_regression_after_m90": {
+      "passed": true,
+      "evidence": "tools/faisal-build/evidence/m87-after-m90-qemu.log"
+    },
+    "normal_smoke": {
+      "runs": 3,
+      "all_passed": true,
+      "wall_time_ms": [8001, 7779, 7247],
+      "mean_wall_time_ms_rounded": 7676,
+      "diagnostic_count": [0, 0, 0],
+      "evidence": "tools/faisal-build/evidence/m90-key-provider-smoke.tsv"
+    }
+  },
+  "security_scan": {
+    "passed": true,
+    "new_lines_scanned": 972,
+    "high_risk_pattern_matches": 0,
+    "evidence": "tools/faisal-build/evidence/m90-security-scan.txt"
+  },
+  "non_claims": [
+    "hardware security module or TPM integration",
+    "remote attestation",
+    "secure boot key provisioning",
+    "encrypted persistent secret storage",
+    "formal key-lifecycle proof",
+    "kernel-held private signing keys",
+    "model output as authorization",
+    "production readiness"
+  ]
+}

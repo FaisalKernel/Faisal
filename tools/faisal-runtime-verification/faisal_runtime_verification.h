@@ -7,6 +7,7 @@
 
 #define M87_DIGEST_SIZE FRA_DIGEST_SIZE
 #define M87_SIGNATURE_SIZE 64
+#define M87_KEY_ID_SIZE M87_DIGEST_SIZE
 #define M87_MAX_BUNDLE_ID 96
 #define M87_MAX_PAYLOAD 512
 #define M87_MAX_SIGNED_BYTES (M87_MAX_BUNDLE_ID + M87_MAX_PAYLOAD + 128)
@@ -56,6 +57,8 @@ struct m87_repair_bundle {
 	uint8_t payload_digest[M87_DIGEST_SIZE];
 	uint8_t bundle_digest[M87_DIGEST_SIZE];
 	uint8_t attestation_digest[M87_DIGEST_SIZE];
+	uint8_t signing_key_id[M87_KEY_ID_SIZE];
+	uint64_t key_generation;
 	uint64_t signal_sequence;
 	uint32_t supervisor_approved;
 	uint32_t operator_approved;
@@ -74,6 +77,8 @@ struct m87_verification {
 	uint8_t attestation_digest[M87_DIGEST_SIZE];
 	uint8_t payload_digest[M87_DIGEST_SIZE];
 	uint8_t bundle_digest[M87_DIGEST_SIZE];
+	uint8_t signing_key_id[M87_KEY_ID_SIZE];
+	uint64_t key_generation;
 	uint32_t state;
 };
 
@@ -96,6 +101,9 @@ struct m87_service {
 	struct m87_verification verification;
 	uint8_t trusted_public_key[32];
 	uint32_t trusted_public_key_size;
+	uint8_t trusted_key_id[M87_KEY_ID_SIZE];
+	uint64_t trusted_key_generation;
+	uint32_t trusted_key_required;
 	uint32_t provider_mask;
 	uint32_t state;
 };
