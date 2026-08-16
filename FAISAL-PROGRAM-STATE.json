@@ -5,9 +5,9 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "b99a869b8f1978689c04b0acf90e057e7a342e0d",
-  "current_tag": "FAISAL-M93",
-  "current_abi": 37,
+  "current_head": "7a2cee191fc929c111b314509a36810ee419e981",
+  "current_tag": "FAISAL-M94",
+  "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
     "DESIGN",
@@ -852,7 +852,7 @@
         "M92-key-provider-fuzz-concurrency"
       ],
       "unlocks": [
-        "M94-provider-supervised-recovery"
+        "M94-intent-bound-authority-lease"
       ],
       "evidence_required": [
         "multi_service_registration",
@@ -881,16 +881,60 @@
         "tools/faisal-build/evidence/m91-after-m93-qemu.log",
         "tools/faisal-build/evidence/m93-security-scan.txt"
       ],
-      "next_action": "Retain bounded registration, close-ordering, revocation, sanitizer, and regression coverage while M94 defines supervisor-mediated provider ownership, stale-service reclamation, and explicit crash recovery without durable secret fabrication."
+      "next_action": "Retain bounded registration, close-ordering, revocation, sanitizer, and regression coverage while M94 intent leases add a separate kernel authority boundary; provider-supervised recovery is deferred to M95."
     },
     {
-      "id": "M94-provider-supervised-recovery",
+      "id": "M94-intent-bound-authority-lease",
+      "phase": 7,
+      "name": "Kernel intent-bound authority leases with bounded use, expiry, revocation, and lineage binding",
+      "status": "validated_additive_abi38_kernel_primitive",
+      "priority": 84,
+      "depends_on": [
+        "M64-security-stabilization",
+        "M74-model-orchestration",
+        "M78-deployment-supervisor"
+      ],
+      "unlocks": [
+        "M95-provider-supervised-recovery"
+      ],
+      "evidence_required": [
+        "intent_digest_binding",
+        "capability_grant_gating",
+        "bounded_single_and_multi_use",
+        "expiry",
+        "revocation",
+        "lineage_binding",
+        "session_close_invalidation",
+        "kasan",
+        "kcsan",
+        "security_review",
+        "benchmark",
+        "full_regression"
+      ],
+      "evidence": [
+        "MILESTONE94.md",
+        "M94-INTENT-LEASE-DESIGN.md",
+        "M94-SECURITY-REVIEW.md",
+        "M94-BENCHMARKS.md",
+        "M94-RESEARCH-NOTES.md",
+        "tools/faisal-build/evidence/m94-intent-lease-validation.json",
+        "tools/faisal-build/evidence/m94-security-scan.txt",
+        "tools/faisal-build/evidence/m94-full-audit-summary.txt",
+        "tools/faisal-build/evidence/m94-kasan-qemu-final.log",
+        "tools/faisal-build/evidence/m94-kcsan-qemu-final.log",
+        "tools/faisal-build/evidence/m94-smoke-times.tsv"
+      ],
+      "next_action": "Retain intent, capability, expiry, revocation, sanitizer, and full-regression coverage while M95 defines supervisor-mediated provider ownership, stale-service reclamation, and explicit crash recovery."
+    },
+    {
+      "id": "M95-provider-supervised-recovery",
       "phase": 14,
       "name": "Supervisor-mediated provider ownership, stale-service reclamation, and explicit crash recovery",
       "status": "next",
       "priority": 83,
       "depends_on": [
         "M93-provider-multiservice-lifetime",
+        "M94-intent-bound-authority-lease",
         "M78-deployment-supervisor"
       ],
       "unlocks": [],
@@ -937,7 +981,8 @@
     "FAISAL-M90",
     "FAISAL-M91",
     "FAISAL-M92",
-    "FAISAL-M93"
+    "FAISAL-M93",
+    "FAISAL-M94"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",

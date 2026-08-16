@@ -17,12 +17,15 @@ This roadmap is an active dependency graph. The 14 strategic phases are not a se
 | M77 evidence | Validated as `FAISAL-M77`; scoped source acquisition, primary-source preference, equal/conflicting cross-checks, explicit verification, world-state promotion, unverified denial, metadata fuzz, QEMU, and regression evidence stored |
 | M78 evidence | Validated as `FAISAL-M78`; independent deployment approvals, candidate digest binding, checkpoint verification, health monitoring, canary failure rollback, audit provenance, activation, manifest fuzz, QEMU, and regression evidence stored |
 | M79 evidence | Validated as `FAISAL-M79` for the provider-neutral control plane; provider discovery, honest unsupported state, context/fabric masks, tensor transport, graph telemetry, resource masks, power-policy intent, stale-capability denials, 64 metadata fuzz cases, authoritative research, QEMU, and regression evidence stored |
+| M94 evidence | Validated as `FAISAL-M94`; additive ABI 38 intent-bound lease ioctl, capability-grant gating, operation/resource/scope/digest/lineage binding, bounded single and multi-use consumption, expiry, revocation, session invalidation, KASAN, KCSAN, three smokes, M90/M91 regressions, and 23-harness full audit evidence stored |
 | Linux foundation | Verified Linux `v7.2-rc7`, local tag `upstream-v7.2-rc7` |
-| Latest tagged FAISAL milestone | `FAISAL-M93`, multi-service provider registration and revocation broadcast |
-| Kernel ABI | 37 |
+| Latest tagged FAISAL milestone | `FAISAL-M94`, intent-bound authority leases with bounded use, expiry, revocation, and lineage binding |
+| Kernel ABI | 38 |
 | Validated kernel and service primitives | Lifecycle, agent/task identity, scoped capabilities, provenance binding, tensor/graph/context control plane, tensor transport metadata, deterministic domains, heterogeneous-context negotiation, graph telemetry, CPU PM QoS policy intent, durable userspace memory journal, checkpoint/recovery integration, verified experience retention, skill-artifact gating, correction/re-evaluation, selective world subscriptions, world-sync acknowledgement, freshness/conflict state, temporal checks, honest resource snapshots, trusted model admission, explicit approval gates, kernel budget enforcement, checkpoint verification, rollback sequencing, model-output non-authority boundary, capability-scoped browser sessions, network policy, semantic action records, transfer scopes, hostile-content denial, cancellation, bounded multi-agent IPC, queued-message cancellation, reflection, observability, deployment-gate separation, deterministic recovery, verified source records, retrieval/provenance metadata, primary-source preference, kernel cross-check/conflict state, evidence-backed verification, unverified world-promotion denial, deployment candidate digest binding, independent approval separation, canary monitoring, explicit rollback, audit records, provider-neutral accelerator evidence and explicit unsupported-state reporting |
-| Next selected dependency | M94 supervisor-mediated provider ownership, stale-service reclamation, and explicit crash recovery |
+| Next selected dependency | M95 supervisor-mediated provider ownership, stale-service reclamation, and explicit crash recovery |
 | Complete-system status | Not operational; userspace services and end-to-end autonomous integration remain unfinished |
+
+M94 establishes a temporal and causal authority boundary for trusted userspace brokers. The kernel does not evaluate natural language, model output, or semantic intent; it verifies a fixed digest and existing capability constraints. No performance or world-first novelty claim is made.
 
 ## Strategic domains and implementation gates
 
