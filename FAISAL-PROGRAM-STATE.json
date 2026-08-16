@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "a93dd87e58da40081c103eb9c3d02ed7a2830a45",
-  "current_tag": "FAISAL-M83",
+  "current_head": "4e709fb17b9f0088c9a20af44b7b9ff93748ffd3",
+  "current_tag": "FAISAL-M87",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -36,20 +36,76 @@
     "production_deployment_without_independent_supervisor_and_operator": false
   },
   "strategic_phases": [
-    {"id": 1, "name": "Linux foundation and verified baseline", "status": "validated_and_revisitable"},
-    {"id": 2, "name": "AGI task, agent, and lifecycle substrate", "status": "implemented_foundation_revisitable"},
-    {"id": 3, "name": "Cognitive-aware scheduling and deterministic execution domains", "status": "partial_control_plane_validated"},
-    {"id": 4, "name": "Selective events, world-state observation, and observability", "status": "partial_control_plane_validated"},
-    {"id": 5, "name": "Memory, tensor objects, checkpoint, and recovery primitives", "status": "partial_kernel_primitives"},
-    {"id": 6, "name": "Agent IPC and cancellation", "status": "partial_kernel_primitives"},
-    {"id": 7, "name": "Capability security and provenance", "status": "validated_and_completed_on_abi37"},
-    {"id": 8, "name": "Heterogeneous accelerator and resource integration", "status": "provider_neutral_control_plane_validated_hardware_gated"},
-    {"id": 9, "name": "AGI system services and model orchestration", "status": "partial_trusted_orchestration_validated"},
-    {"id": 10, "name": "Persistent memory and experience learning", "status": "unfinished"},
-    {"id": 11, "name": "World model and temporal/causal state", "status": "partial_userspace_service_validated"},
-    {"id": 12, "name": "Verified internet research and source provenance", "status": "validated_bounded_userspace_service"},
-    {"id": 13, "name": "Browser and computer-use service", "status": "partial_capability_scoped_broker_validated"},
-    {"id": 14, "name": "Multi-agent integration, deployment, rollback, and continuous improvement", "status": "partial_controlled_deployment_supervisor_validated"}
+    {
+      "id": 1,
+      "name": "Linux foundation and verified baseline",
+      "status": "validated_and_revisitable"
+    },
+    {
+      "id": 2,
+      "name": "AGI task, agent, and lifecycle substrate",
+      "status": "implemented_foundation_revisitable"
+    },
+    {
+      "id": 3,
+      "name": "Cognitive-aware scheduling and deterministic execution domains",
+      "status": "partial_control_plane_validated"
+    },
+    {
+      "id": 4,
+      "name": "Selective events, world-state observation, and observability",
+      "status": "partial_control_plane_validated"
+    },
+    {
+      "id": 5,
+      "name": "Memory, tensor objects, checkpoint, and recovery primitives",
+      "status": "partial_kernel_primitives"
+    },
+    {
+      "id": 6,
+      "name": "Agent IPC and cancellation",
+      "status": "partial_kernel_primitives"
+    },
+    {
+      "id": 7,
+      "name": "Capability security and provenance",
+      "status": "validated_and_completed_on_abi37"
+    },
+    {
+      "id": 8,
+      "name": "Heterogeneous accelerator and resource integration",
+      "status": "provider_neutral_control_plane_validated_hardware_gated"
+    },
+    {
+      "id": 9,
+      "name": "AGI system services and model orchestration",
+      "status": "partial_trusted_orchestration_validated"
+    },
+    {
+      "id": 10,
+      "name": "Persistent memory and experience learning",
+      "status": "unfinished"
+    },
+    {
+      "id": 11,
+      "name": "World model and temporal/causal state",
+      "status": "partial_userspace_service_validated"
+    },
+    {
+      "id": 12,
+      "name": "Verified internet research and source provenance",
+      "status": "validated_bounded_userspace_service"
+    },
+    {
+      "id": 13,
+      "name": "Browser and computer-use service",
+      "status": "partial_capability_scoped_broker_validated"
+    },
+    {
+      "id": 14,
+      "name": "Multi-agent integration, deployment, rollback, and continuous improvement",
+      "status": "partial_controlled_deployment_supervisor_validated"
+    }
   ],
   "dependencies": [
     {
@@ -58,9 +114,26 @@
       "name": "Complete scoped agent-oriented capability and provenance validation",
       "status": "validated",
       "priority": 100,
-      "depends_on": ["M63-compute-context-foundation"],
-      "unlocks": ["M71-persistent-memory-service", "M74-browser-tool-supervision", "M75-multi-agent-coordination"],
-      "evidence_required": ["full_build", "static_selftest", "QEMU_boot", "cross_agent_denial", "cross_resource_denial", "stale_generation_denial", "provenance_bind_query", "security_review", "benchmark_or_blocker", "commit_and_tag"],
+      "depends_on": [
+        "M63-compute-context-foundation"
+      ],
+      "unlocks": [
+        "M71-persistent-memory-service",
+        "M74-browser-tool-supervision",
+        "M75-multi-agent-coordination"
+      ],
+      "evidence_required": [
+        "full_build",
+        "static_selftest",
+        "QEMU_boot",
+        "cross_agent_denial",
+        "cross_resource_denial",
+        "stale_generation_denial",
+        "provenance_bind_query",
+        "security_review",
+        "benchmark_or_blocker",
+        "commit_and_tag"
+      ],
       "next_action": "Retain M64 regression coverage while downstream services proceed."
     },
     {
@@ -69,9 +142,23 @@
       "name": "Userspace persistent memory service integrated with kernel capabilities and checkpoint references",
       "status": "validated",
       "priority": 100,
-      "depends_on": ["M64-security-stabilization", "M61-memory-primitives"],
-      "unlocks": ["M72-experience-learning", "M73-world-model"],
-      "evidence_required": ["service_fixture", "persistence_restart", "capability_denial", "checkpoint_recovery", "fuzzing", "security_review", "baseline_benchmark"]
+      "depends_on": [
+        "M64-security-stabilization",
+        "M61-memory-primitives"
+      ],
+      "unlocks": [
+        "M72-experience-learning",
+        "M73-world-model"
+      ],
+      "evidence_required": [
+        "service_fixture",
+        "persistence_restart",
+        "capability_denial",
+        "checkpoint_recovery",
+        "fuzzing",
+        "security_review",
+        "baseline_benchmark"
+      ]
     },
     {
       "id": "M72-experience-learning",
@@ -79,20 +166,50 @@
       "name": "Experience record, evaluation, retrieval, and skill operationalization service",
       "status": "validated",
       "priority": 100,
-      "depends_on": ["M71-persistent-memory-service", "M69-graph-telemetry"],
-      "unlocks": ["M74-model-orchestration"],
-      "evidence_required": ["one_query_retention", "second_query_retrieval", "skill_reuse", "correction", "provenance", "explicit_no_retraining_claim"]
+      "depends_on": [
+        "M71-persistent-memory-service",
+        "M69-graph-telemetry"
+      ],
+      "unlocks": [
+        "M74-model-orchestration"
+      ],
+      "evidence_required": [
+        "one_query_retention",
+        "second_query_retrieval",
+        "skill_reuse",
+        "correction",
+        "provenance",
+        "explicit_no_retraining_claim"
+      ]
     },
     {
-"id": "M73-world-model",
+      "id": "M73-world-model",
       "phase": 11,
       "name": "Persistent world-state service with temporal/causal synchronization",
       "status": "validated",
       "priority": 100,
-      "depends_on": ["M71-persistent-memory-service", "M69-graph-telemetry"],
-      "unlocks": ["M74-model-orchestration", "M75-multi-agent-coordination"],
-      "evidence_required": ["event_ordering", "freshness", "conflict_state", "self_resource_query", "recovery"],
-      "evidence": ["MILESTONE73.md", "M73-WORLD-STATE-DESIGN.md", "M73-SECURITY-REVIEW.md", "M73-BENCHMARKS.md", "tools/faisal-build/evidence/m73-world-state-validation.json"],
+      "depends_on": [
+        "M71-persistent-memory-service",
+        "M69-graph-telemetry"
+      ],
+      "unlocks": [
+        "M74-model-orchestration",
+        "M75-multi-agent-coordination"
+      ],
+      "evidence_required": [
+        "event_ordering",
+        "freshness",
+        "conflict_state",
+        "self_resource_query",
+        "recovery"
+      ],
+      "evidence": [
+        "MILESTONE73.md",
+        "M73-WORLD-STATE-DESIGN.md",
+        "M73-SECURITY-REVIEW.md",
+        "M73-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m73-world-state-validation.json"
+      ],
       "next_action": "Retain world-sync loss, freshness, conflict, temporal-capability, and resource-mask regression coverage."
     },
     {
@@ -101,10 +218,29 @@
       "name": "Trusted model/runtime orchestration and policy supervisor",
       "status": "validated",
       "priority": 100,
-      "depends_on": ["M64-security-stabilization", "M72-experience-learning", "M73-world-model", "M70-power-policy"],
-      "unlocks": ["M76-end_to_end_agent"],
-      "evidence_required": ["model_output_not_authority", "resource_admission", "checkpoint", "rollback", "independent_policy_gate"],
-      "evidence": ["MILESTONE74.md", "M74-MODEL-ORCHESTRATION-DESIGN.md", "M74-SECURITY-REVIEW.md", "M74-BENCHMARKS.md", "tools/faisal-build/evidence/m74-model-orchestration-validation.json"],
+      "depends_on": [
+        "M64-security-stabilization",
+        "M72-experience-learning",
+        "M73-world-model",
+        "M70-power-policy"
+      ],
+      "unlocks": [
+        "M76-end_to_end_agent"
+      ],
+      "evidence_required": [
+        "model_output_not_authority",
+        "resource_admission",
+        "checkpoint",
+        "rollback",
+        "independent_policy_gate"
+      ],
+      "evidence": [
+        "MILESTONE74.md",
+        "M74-MODEL-ORCHESTRATION-DESIGN.md",
+        "M74-SECURITY-REVIEW.md",
+        "M74-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m74-model-orchestration-validation.json"
+      ],
       "next_action": "Retain approval, resource-admission, checkpoint/rollback, policy-fuzz, and model-output non-authority regression coverage."
     },
     {
@@ -113,10 +249,27 @@
       "name": "Capability-scoped browser and tool broker",
       "status": "validated",
       "priority": 100,
-      "depends_on": ["M64-security-stabilization", "M74-model-orchestration"],
-      "unlocks": ["M76-end_to_end_agent"],
-      "evidence_required": ["semantic_browser_fixture", "network_scope", "upload_download_scope", "prompt_injection_resistance", "audit_provenance"],
-      "evidence": ["MILESTONE75.md", "M75-BROWSER-TOOL-DESIGN.md", "M75-SECURITY-REVIEW.md", "M75-BENCHMARKS.md", "tools/faisal-build/evidence/m75-browser-tool-validation.json"],
+      "depends_on": [
+        "M64-security-stabilization",
+        "M74-model-orchestration"
+      ],
+      "unlocks": [
+        "M76-end_to_end_agent"
+      ],
+      "evidence_required": [
+        "semantic_browser_fixture",
+        "network_scope",
+        "upload_download_scope",
+        "prompt_injection_resistance",
+        "audit_provenance"
+      ],
+      "evidence": [
+        "MILESTONE75.md",
+        "M75-BROWSER-TOOL-DESIGN.md",
+        "M75-SECURITY-REVIEW.md",
+        "M75-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m75-browser-tool-validation.json"
+      ],
       "next_action": "Retain browser grant, network-scope, transfer-scope, hostile-content, provenance, and cancellation regression coverage."
     },
     {
@@ -125,11 +278,31 @@
       "name": "Multi-agent autonomous integration, deployment, monitoring, and rollback",
       "status": "validated",
       "priority": 100,
-      "depends_on": ["M74-model-orchestration", "M75-browser-tool-supervision", "M73-world-model", "M72-experience-learning"],
+      "depends_on": [
+        "M74-model-orchestration",
+        "M75-browser-tool-supervision",
+        "M73-world-model",
+        "M72-experience-learning"
+      ],
       "unlocks": [],
-      "evidence_required": ["long_horizon_task", "multi_agent_coordination", "failure_recovery", "fuzzing", "security_audit", "baseline_comparison", "canary", "rollback"],
-      "evidence": ["MILESTONE76.md", "M76-END-TO-END-DESIGN.md", "M76-SECURITY-REVIEW.md", "M76-BENCHMARKS.md", "tools/faisal-build/evidence/m76-end-to-end-validation.json"],
-      "next_action": "Retain M64–M76 regression coverage; expand concurrent multi-agent, source-verification, deployment-canary, and rollback validation."
+      "evidence_required": [
+        "long_horizon_task",
+        "multi_agent_coordination",
+        "failure_recovery",
+        "fuzzing",
+        "security_audit",
+        "baseline_comparison",
+        "canary",
+        "rollback"
+      ],
+      "evidence": [
+        "MILESTONE76.md",
+        "M76-END-TO-END-DESIGN.md",
+        "M76-SECURITY-REVIEW.md",
+        "M76-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m76-end-to-end-validation.json"
+      ],
+      "next_action": "Retain M64\u2013M76 regression coverage; expand concurrent multi-agent, source-verification, deployment-canary, and rollback validation."
     },
     {
       "id": "M77-verified-internet-research",
@@ -137,10 +310,28 @@
       "name": "Verified internet research and source provenance service",
       "status": "validated",
       "priority": 100,
-      "depends_on": ["M73-world-model", "M75-browser-tool-supervision", "M76-end_to_end_agent"],
+      "depends_on": [
+        "M73-world-model",
+        "M75-browser-tool-supervision",
+        "M76-end_to_end_agent"
+      ],
       "unlocks": [],
-      "evidence_required": ["primary_source_preference", "retrieval_timestamp", "cross_check", "conflict_detection", "provenance_audit", "unverified_fact_denial"],
-      "evidence": ["M77-RESEARCH-NOTES.md", "M77-VERIFIED-RESEARCH-DESIGN.md", "MILESTONE77.md", "M77-SECURITY-REVIEW.md", "M77-BENCHMARKS.md", "tools/faisal-build/evidence/m77-verified-research-validation.json"],
+      "evidence_required": [
+        "primary_source_preference",
+        "retrieval_timestamp",
+        "cross_check",
+        "conflict_detection",
+        "provenance_audit",
+        "unverified_fact_denial"
+      ],
+      "evidence": [
+        "M77-RESEARCH-NOTES.md",
+        "M77-VERIFIED-RESEARCH-DESIGN.md",
+        "MILESTONE77.md",
+        "M77-SECURITY-REVIEW.md",
+        "M77-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m77-verified-research-validation.json"
+      ],
       "next_action": "Retain source provenance, primary-source preference, cross-check/conflict, explicit verification, freshness, and unverified-denial coverage."
     },
     {
@@ -149,11 +340,30 @@
       "name": "Persistent deployment, canary, monitoring, and rollback supervisor",
       "status": "validated_bounded_test_environment",
       "priority": 100,
-      "depends_on": ["M74-model-orchestration", "M75-browser-tool-supervision", "M76-end_to_end_agent", "M77-verified-internet-research"],
+      "depends_on": [
+        "M74-model-orchestration",
+        "M75-browser-tool-supervision",
+        "M76-end_to_end_agent",
+        "M77-verified-internet-research"
+      ],
       "unlocks": [],
-      "evidence_required": ["independent_supervisor", "operator_approval", "canary", "health_monitoring", "rollback", "audit_log", "no_model_authority"],
-      "evidence": ["MILESTONE78.md", "M78-DEPLOYMENT-SUPERVISOR-DESIGN.md", "M78-SECURITY-REVIEW.md", "M78-BENCHMARKS.md", "tools/faisal-build/evidence/m78-deployment-supervisor-validation.json"],
-      "next_action": "Retain independent approval, candidate digest, checkpoint verification, canary failure, rollback, audit, and M64–M78 regression coverage."
+      "evidence_required": [
+        "independent_supervisor",
+        "operator_approval",
+        "canary",
+        "health_monitoring",
+        "rollback",
+        "audit_log",
+        "no_model_authority"
+      ],
+      "evidence": [
+        "MILESTONE78.md",
+        "M78-DEPLOYMENT-SUPERVISOR-DESIGN.md",
+        "M78-SECURITY-REVIEW.md",
+        "M78-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m78-deployment-supervisor-validation.json"
+      ],
+      "next_action": "Retain independent approval, candidate digest, checkpoint verification, canary failure, rollback, audit, and M64\u2013M78 regression coverage."
     },
     {
       "id": "M79-accelerator-validation",
@@ -161,10 +371,30 @@
       "name": "Provider-gated heterogeneous accelerator validation",
       "status": "validated_provider_neutral_hardware_gated",
       "priority": 100,
-      "depends_on": ["M68-heterogeneous-context", "M69-graph-telemetry", "M70-power-policy", "M78-deployment-supervisor"],
+      "depends_on": [
+        "M68-heterogeneous-context",
+        "M69-graph-telemetry",
+        "M70-power-policy",
+        "M78-deployment-supervisor"
+      ],
       "unlocks": [],
-      "evidence_required": ["real_hardware_or_identified_provider", "device_discovery", "isolation", "resource_accounting", "tensor_transport", "power_coordination", "provider_limits"],
-      "evidence": ["M79-RESEARCH-NOTES.md", "M79-ACCELERATOR-VALIDATION-DESIGN.md", "MILESTONE79.md", "M79-SECURITY-REVIEW.md", "M79-BENCHMARKS.md", "tools/faisal-build/evidence/m79-accelerator-validation.json"],
+      "evidence_required": [
+        "real_hardware_or_identified_provider",
+        "device_discovery",
+        "isolation",
+        "resource_accounting",
+        "tensor_transport",
+        "power_coordination",
+        "provider_limits"
+      ],
+      "evidence": [
+        "M79-RESEARCH-NOTES.md",
+        "M79-ACCELERATOR-VALIDATION-DESIGN.md",
+        "MILESTONE79.md",
+        "M79-SECURITY-REVIEW.md",
+        "M79-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m79-accelerator-validation.json"
+      ],
       "next_action": "Do not claim provider execution until real hardware or an explicitly identified provider supplies device, isolation, transport, telemetry, and power evidence."
     },
     {
@@ -173,11 +403,36 @@
       "name": "Cross-subsystem stress, fuzz, and failure-injection hardening",
       "status": "validated_bounded_test_environment",
       "priority": 100,
-      "depends_on": ["M73-world-model", "M74-model-orchestration", "M75-browser-tool-supervision", "M76-end_to_end_agent", "M77-verified-internet-research", "M78-deployment-supervisor", "M79-accelerator-validation"],
-      "unlocks": ["M81-concurrent-sanitizer-validation"],
-      "evidence_required": ["long_running_composition", "malformed_uapi", "cancellation", "resource_pressure", "audit_retention", "rollback_fault_injection", "security_review", "regression"],
-      "evidence": ["M80-STRESS-FAILURE-DESIGN.md", "MILESTONE80.md", "M80-SECURITY-REVIEW.md", "M80-BENCHMARKS.md", "tools/faisal-build/evidence/m80-stress-validation.json"],
-      "next_action": "Retain M64–M80 regression coverage; next select concurrent lifecycle/IPC stress with sanitizer-enabled kernel validation when the required build infrastructure is available."
+      "depends_on": [
+        "M73-world-model",
+        "M74-model-orchestration",
+        "M75-browser-tool-supervision",
+        "M76-end_to_end_agent",
+        "M77-verified-internet-research",
+        "M78-deployment-supervisor",
+        "M79-accelerator-validation"
+      ],
+      "unlocks": [
+        "M81-concurrent-sanitizer-validation"
+      ],
+      "evidence_required": [
+        "long_running_composition",
+        "malformed_uapi",
+        "cancellation",
+        "resource_pressure",
+        "audit_retention",
+        "rollback_fault_injection",
+        "security_review",
+        "regression"
+      ],
+      "evidence": [
+        "M80-STRESS-FAILURE-DESIGN.md",
+        "MILESTONE80.md",
+        "M80-SECURITY-REVIEW.md",
+        "M80-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m80-stress-validation.json"
+      ],
+      "next_action": "Retain M64\u2013M80 regression coverage; next select concurrent lifecycle/IPC stress with sanitizer-enabled kernel validation when the required build infrastructure is available."
     },
     {
       "id": "M82-memory-ecosystem",
@@ -185,11 +440,37 @@
       "name": "Unified memory ecosystem, provenance-aware consolidation, bounded hybrid retrieval, and simulation truth boundary",
       "status": "validated_bounded_userspace_integration",
       "priority": 100,
-      "depends_on": ["M71-persistent-memory-service", "M72-experience-learning", "M73-world-model", "M76-end_to_end_agent", "M77-verified-internet-research"],
-      "unlocks": ["M83-memory-transactional-concurrency"],
-      "evidence_required": ["repository_inspection", "consolidation", "hybrid_retrieval", "provenance", "freshness", "contradiction", "simulation_boundary", "restart_replay", "security_review", "regression", "benchmark"],
-      "evidence": ["M82-MEMORY-ECOSYSTEM-DESIGN.md", "MILESTONE82.md", "M82-MEMORY-SECURITY-REVIEW.md", "M82-MEMORY-BENCHMARKS.md", "tools/faisal-build/evidence/m82-memory-validation.json"],
-      "next_action": "Retain provenance, truth-class separation, freshness, contradiction, restart, and M71–M76 regression coverage; do not claim transactional cross-journal rollback until M83 validates it."
+      "depends_on": [
+        "M71-persistent-memory-service",
+        "M72-experience-learning",
+        "M73-world-model",
+        "M76-end_to_end_agent",
+        "M77-verified-internet-research"
+      ],
+      "unlocks": [
+        "M83-memory-transactional-concurrency"
+      ],
+      "evidence_required": [
+        "repository_inspection",
+        "consolidation",
+        "hybrid_retrieval",
+        "provenance",
+        "freshness",
+        "contradiction",
+        "simulation_boundary",
+        "restart_replay",
+        "security_review",
+        "regression",
+        "benchmark"
+      ],
+      "evidence": [
+        "M82-MEMORY-ECOSYSTEM-DESIGN.md",
+        "MILESTONE82.md",
+        "M82-MEMORY-SECURITY-REVIEW.md",
+        "M82-MEMORY-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m82-memory-validation.json"
+      ],
+      "next_action": "Retain provenance, truth-class separation, freshness, contradiction, restart, and M71\u2013M76 regression coverage; do not claim transactional cross-journal rollback until M83 validates it."
     },
     {
       "id": "M84-cogos-atom-control-plane",
@@ -197,10 +478,26 @@
       "name": "CogOS bounded atom metadata control-plane module with RCU, shrinker, scheduler stub, and ioctl lifecycle",
       "status": "validated_experimental_module",
       "priority": 90,
-      "depends_on": ["M64-security-stabilization", "M71-persistent-memory-service"],
+      "depends_on": [
+        "M64-security-stabilization",
+        "M71-persistent-memory-service"
+      ],
       "unlocks": [],
-      "evidence_required": ["strict_module_build", "ioctl_selftest", "qemu_insert", "qemu_unload", "attention_thread", "security_review", "benchmark"],
-      "evidence": ["MILESTONE84.md", "tools/cog-kernel/COGOS-FAISAL-DESIGN.md", "tools/cog-kernel/COGOS-FAISAL-SECURITY-REVIEW.md", "tools/faisal-build/evidence/cog-kernel-validation.json"],
+      "evidence_required": [
+        "strict_module_build",
+        "ioctl_selftest",
+        "qemu_insert",
+        "qemu_unload",
+        "attention_thread",
+        "security_review",
+        "benchmark"
+      ],
+      "evidence": [
+        "MILESTONE84.md",
+        "tools/cog-kernel/COGOS-FAISAL-DESIGN.md",
+        "tools/cog-kernel/COGOS-FAISAL-SECURITY-REVIEW.md",
+        "tools/faisal-build/evidence/cog-kernel-validation.json"
+      ],
       "next_action": "Keep this as an experimental private module; do not promote it into the stable FAISAL ABI until randomized ioctl fuzzing, sanitizer/lockdep coverage, namespace/capability policy, and scalability benchmarks are available."
     },
     {
@@ -209,10 +506,34 @@
       "name": "Future-technology research integration and controlled self-healing supervisor",
       "status": "validated_bounded_self_healing_userspace_supervisor",
       "priority": 90,
-      "depends_on": ["M78-deployment-supervisor", "M80-stress-fuzz-hardening", "M82-memory-ecosystem"],
-      "unlocks": ["M86-runtime-verification-and-attested-repair"],
-      "evidence_required": ["future_research", "detection", "diagnosis", "automatic_rollback", "approved_repair", "canary_failure", "quarantine", "retry_limit", "security_review", "benchmark", "regression"],
-      "evidence": ["M85-FUTURE-TECH-RESEARCH.md", "M85-SELF-HEALING-DESIGN.md", "M85-SELF-HEALING-SECURITY-REVIEW.md", "M85-SELF-HEALING-BENCHMARKS.md", "tools/faisal-build/evidence/m85-self-healing-validation.json"],
+      "depends_on": [
+        "M78-deployment-supervisor",
+        "M80-stress-fuzz-hardening",
+        "M82-memory-ecosystem"
+      ],
+      "unlocks": [
+        "M86-runtime-verification-and-attested-repair"
+      ],
+      "evidence_required": [
+        "future_research",
+        "detection",
+        "diagnosis",
+        "automatic_rollback",
+        "approved_repair",
+        "canary_failure",
+        "quarantine",
+        "retry_limit",
+        "security_review",
+        "benchmark",
+        "regression"
+      ],
+      "evidence": [
+        "M85-FUTURE-TECH-RESEARCH.md",
+        "M85-SELF-HEALING-DESIGN.md",
+        "M85-SELF-HEALING-SECURITY-REVIEW.md",
+        "M85-SELF-HEALING-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m85-self-healing-validation.json"
+      ],
       "next_action": "Retain bounded recovery and quarantine coverage; next integrate runtime-verification signals, signed content-addressed repair bundles, and hardware/provider-gated attestation without enabling arbitrary kernel self-modification."
     },
     {
@@ -221,10 +542,32 @@
       "name": "Clean source-to-boot functional audit and ABI 37 runtime attestation",
       "status": "validated_clean_build_boot_full_regression_and_runtime_attestation",
       "priority": 85,
-      "depends_on": ["M80-stress-fuzz-hardening", "M84-cogos-control-plane", "M85-self-healing-future-tech"],
-      "unlocks": ["M87-runtime-verification-signal-integration"],
-      "evidence_required": ["clean_build", "clean_boot", "device_audit", "full_regression", "defect_reproduction", "defect_fix", "runtime_attestation", "security_review", "benchmark"],
-      "evidence": ["FAISAL-FUNCTIONAL-AUDIT.md", "MILESTONE86.md", "M86-RUNTIME-ATTESTATION-SECURITY.md", "M86-RUNTIME-ATTESTATION-BENCHMARKS.md", "tools/faisal-build/evidence/m86-runtime-attestation-validation.json"],
+      "depends_on": [
+        "M80-stress-fuzz-hardening",
+        "M84-cogos-control-plane",
+        "M85-self-healing-future-tech"
+      ],
+      "unlocks": [
+        "M87-runtime-verification-signal-integration"
+      ],
+      "evidence_required": [
+        "clean_build",
+        "clean_boot",
+        "device_audit",
+        "full_regression",
+        "defect_reproduction",
+        "defect_fix",
+        "runtime_attestation",
+        "security_review",
+        "benchmark"
+      ],
+      "evidence": [
+        "FAISAL-FUNCTIONAL-AUDIT.md",
+        "MILESTONE86.md",
+        "M86-RUNTIME-ATTESTATION-SECURITY.md",
+        "M86-RUNTIME-ATTESTATION-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m86-runtime-attestation-validation.json"
+      ],
       "next_action": "Integrate runtime-verification signal sources and provider-gated attestation only after concurrent sanitizer/lockdep validation is available."
     },
     {
@@ -233,10 +576,29 @@
       "name": "Concurrent lifecycle and IPC stress with sanitizer-enabled kernel validation",
       "status": "validated_concurrent_stress_kasan_kcsan_lockdep_and_regression",
       "priority": 95,
-      "depends_on": ["M80-stress-fuzz-hardening"],
-      "unlocks": ["M83-memory-transactional-concurrency"],
-      "evidence_required": ["concurrent_stress", "kasan", "kcsan", "lockdep", "randomized_inputs", "security_review", "regression", "benchmark"],
-      "evidence": ["MILESTONE81.md", "M81-CONCURRENCY-DESIGN.md", "M81-SECURITY-REVIEW.md", "M81-BENCHMARKS.md", "tools/faisal-build/evidence/m81-concurrent-validation.json"],
+      "depends_on": [
+        "M80-stress-fuzz-hardening"
+      ],
+      "unlocks": [
+        "M83-memory-transactional-concurrency"
+      ],
+      "evidence_required": [
+        "concurrent_stress",
+        "kasan",
+        "kcsan",
+        "lockdep",
+        "randomized_inputs",
+        "security_review",
+        "regression",
+        "benchmark"
+      ],
+      "evidence": [
+        "MILESTONE81.md",
+        "M81-CONCURRENCY-DESIGN.md",
+        "M81-SECURITY-REVIEW.md",
+        "M81-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m81-concurrent-validation.json"
+      ],
       "next_action": "Retain sanitizer and concurrent regression coverage while M83 validates transactional memory concurrency and crash-safe cross-journal rollback."
     },
     {
@@ -245,24 +607,110 @@
       "name": "Transactional persistent-memory concurrency and crash-safe cross-journal rollback",
       "status": "validated_two_journal_commit_partial_crash_rollback_and_concurrent_replay",
       "priority": 95,
-      "depends_on": ["M82-memory-ecosystem", "M81-concurrent-sanitizer-validation"],
+      "depends_on": [
+        "M82-memory-ecosystem",
+        "M81-concurrent-sanitizer-validation"
+      ],
       "unlocks": [],
-      "evidence_required": ["atomic_multi_journal_commit", "crash_injection", "rollback_replay", "concurrent_read_write", "capability_isolation", "security_review", "benchmark", "regression"],
-      "evidence": ["MILESTONE83.md", "M83-TRANSACTION-DESIGN.md", "M83-SECURITY-REVIEW.md", "M83-BENCHMARKS.md", "M83-PERSISTENCE-RESEARCH.md", "tools/faisal-build/evidence/m83-transaction-validation.json"],
+      "evidence_required": [
+        "atomic_multi_journal_commit",
+        "crash_injection",
+        "rollback_replay",
+        "concurrent_read_write",
+        "capability_isolation",
+        "security_review",
+        "benchmark",
+        "regression"
+      ],
+      "evidence": [
+        "MILESTONE83.md",
+        "M83-TRANSACTION-DESIGN.md",
+        "M83-SECURITY-REVIEW.md",
+        "M83-BENCHMARKS.md",
+        "M83-PERSISTENCE-RESEARCH.md",
+        "tools/faisal-build/evidence/m83-transaction-validation.json"
+      ],
       "next_action": "Retain bounded transaction and sanitizer regression coverage while M87 integrates runtime-verification signals and provider-gated attestation."
     },
     {
       "id": "M87-runtime-verification-signal-integration",
       "phase": 14,
       "name": "Runtime-verification signal integration and attested repair gating",
+      "status": "validated_attestation_bound_signed_bundle_provider_gate_and_canary_rollback",
+      "priority": 90,
+      "depends_on": [
+        "M86-runtime-attestation",
+        "M81-concurrent-sanitizer-validation"
+      ],
+      "unlocks": [
+        "M88-kernel-rv-signal-bridge"
+      ],
+      "evidence_required": [
+        "runtime_verification_signals",
+        "attestation_binding",
+        "signed_content_addressed_repair_bundle",
+        "provider_gated_attestation",
+        "security_review",
+        "benchmark",
+        "regression"
+      ],
+      "evidence": [
+        "MILESTONE87.md",
+        "M87-RUNTIME-VERIFICATION-DESIGN.md",
+        "M87-SECURITY-REVIEW.md",
+        "M87-BENCHMARKS.md",
+        "M87-RUNTIME-VERIFICATION-RESEARCH.md",
+        "tools/faisal-build/evidence/m87-runtime-verification-validation.json"
+      ],
+      "next_action": "Retain attestation and approval gates while M88 bridges upstream kernel Runtime Verification monitor events into an authenticated FAISAL signal source."
+    },
+    {
+      "id": "M88-kernel-rv-signal-bridge",
+      "phase": 4,
+      "name": "Kernel Runtime Verification signal bridge into FAISAL attested supervision",
       "status": "next",
       "priority": 90,
-      "depends_on": ["M86-runtime-attestation", "M81-concurrent-sanitizer-validation"],
+      "depends_on": [
+        "M87-runtime-verification-signal-integration"
+      ],
       "unlocks": [],
-      "evidence_required": ["runtime_verification_signals", "attestation_binding", "signed_content_addressed_repair_bundle", "provider_gated_attestation", "security_review", "benchmark", "regression"]
+      "evidence_required": [
+        "upstream_rv_monitor_selection",
+        "tracefs_or_kernel_signal_bridge",
+        "signal_provenance",
+        "capability_isolation",
+        "qemu",
+        "security_review",
+        "benchmark",
+        "regression"
+      ]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M81", "FAISAL-M82", "FAISAL-M83", "FAISAL-M84", "FAISAL-M85", "FAISAL-M86"],
+  "completed_milestones": [
+    "FAISAL-M64-SECURITY-COMPLETION",
+    "FAISAL-M66",
+    "FAISAL-M67",
+    "FAISAL-M68",
+    "FAISAL-M69",
+    "FAISAL-M70",
+    "FAISAL-M71",
+    "FAISAL-M72",
+    "FAISAL-M73",
+    "FAISAL-M74",
+    "FAISAL-M75",
+    "FAISAL-M76",
+    "FAISAL-M77",
+    "FAISAL-M78",
+    "FAISAL-M79",
+    "FAISAL-M80",
+    "FAISAL-M81",
+    "FAISAL-M82",
+    "FAISAL-M83",
+    "FAISAL-M84",
+    "FAISAL-M85",
+    "FAISAL-M86",
+    "FAISAL-M87"
+  ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",
