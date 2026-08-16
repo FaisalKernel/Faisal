@@ -146,3 +146,11 @@ M100 does not claim arbitrary command isolation, kernel exploit resistance, hard
 The next selected dependency is **M103 verified proxy-egress adapter**. It must retain M100 receipts, M99 capability admission, M98 mission binding, M101 scheduling signals, independent supervisor/operator approval, explicit revocation, ambiguity handling, source/destination policy, credential separation, and an independently verifiable network proxy boundary before external browser or research effects are exposed.
 
 The queue is provisional and must be recomputed after every failure, security finding, benchmark regression, or new provider dependency.
+
+## Industry Readiness Audit — 2026-08-16
+
+FAISAL remains an active pre-production research prototype, not a production release. Commit `b66e7594904977a0d66e79b417cb5d37a80b0968` adds a comprehensive readiness matrix, deterministic artifact/SBOM/checksum generation, a hardened production configuration generator, lifecycle UAPI fuzzing, a bounded multi-boot soak, strict aggregate diagnostic scanning, and current-head Sparse correctness fixes. The clean aggregate gate reached 26/26 QEMU harnesses.
+
+Release blockers remain: stable/LTS forward-port and update policy, current-head KASAN/KCSAN/lockdep/KCOV/UBSAN evidence, trusted signatures and independent reproducible builds, staged checkpatch cleanup, CVE/upstream response operations, real accelerator/provider qualification, and production canary/rollback monitoring. The exact findings are in `FAISAL-INDUSTRY-READINESS-AUDIT.md` and `tools/faisal-build/evidence/industry-readiness-audit.json`.
+
+The next dependency remains M103 verified proxy-egress adapter, under the invariant that model output never equals kernel authority and production deployment requires both an independent trusted supervisor and explicit operator approval.
