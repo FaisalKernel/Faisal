@@ -1,0 +1,15 @@
+c[?7l[2J[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1EFCAE00+1EF0AE00 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...
+
+
+Booting from ROM...
+c[?7l[2JM92_BOOT_OK
+M92_MALFORMED_INPUTS_OK cases=261
+M92_CONCURRENT_STRESS_OK sign_ops=1 rotate_ops=3 revoke_ops=256
+M92_SERVICE_LIFETIME_OK
+M92_SELFTEST_EXIT=0
+M92_TEST_RC=0
+[    5.794745] reboot: Power down

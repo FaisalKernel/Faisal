@@ -1,0 +1,79 @@
+{
+  "milestone": "FAISAL-M92",
+  "dependency": "M91-provider-backed-key-attestation",
+  "status": "validated_userspace_provider_hardening",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "implementation": {
+    "mutex_protected_provider_state": true,
+    "malformed_input_cases": 261,
+    "concurrent_signing": true,
+    "concurrent_rotation": true,
+    "concurrent_revocation": true,
+    "concurrent_bind_unbind": true,
+    "service_lifetime_cleanup": true,
+    "private_keys_userspace_only": true
+  },
+  "runs": {
+    "strict_host": {
+      "passed": true,
+      "sign_ops": 512,
+      "rotate_ops": 3,
+      "revoke_ops": 256,
+      "evidence": "tools/faisal-build/evidence/m92-strict-run.log"
+    },
+    "qemu": {
+      "passed": true,
+      "sign_ops": 1,
+      "rotate_ops": 3,
+      "revoke_ops": 256,
+      "evidence": "tools/faisal-build/evidence/m92-key-provider-hardening-qemu.log"
+    },
+    "asan_ubsan": {
+      "passed": true,
+      "sign_ops": 128,
+      "rotate_ops": 3,
+      "revoke_ops": 256,
+      "evidence": "tools/faisal-build/evidence/m92-asan-ubsan-run.log"
+    },
+    "tsan": {
+      "passed": true,
+      "sign_ops": 510,
+      "rotate_ops": 3,
+      "revoke_ops": 256,
+      "evidence": "tools/faisal-build/evidence/m92-tsan-run.log"
+    },
+    "m90_regression_after_m92": {
+      "passed": true,
+      "evidence": "tools/faisal-build/evidence/m90-after-m92-qemu.log"
+    },
+    "m91_regression_after_m92": {
+      "passed": true,
+      "evidence": "tools/faisal-build/evidence/m91-after-m92-qemu.log"
+    },
+    "normal_smoke": {
+      "runs": 3,
+      "all_passed": true,
+      "wall_time_ms": [7821, 7535, 7354],
+      "mean_wall_time_ms_rounded": 7570,
+      "diagnostic_count": [0, 0, 0],
+      "evidence": "tools/faisal-build/evidence/m92-key-provider-hardening-smoke.tsv"
+    }
+  },
+  "security_scan": {
+    "passed": true,
+    "new_lines_scanned": 595,
+    "high_risk_pattern_matches": 0,
+    "evidence": "tools/faisal-build/evidence/m92-security-scan.txt"
+  },
+  "preserved_gate": "M91 explicit unsupported/unverified hardware-provider result remains unchanged",
+  "non_claims": [
+    "race freedom beyond exercised TSan schedule",
+    "formal verification",
+    "hardware-backed key storage",
+    "TPM2 or TEE integration",
+    "remote attestation",
+    "production readiness",
+    "model output as authorization"
+  ]
+}

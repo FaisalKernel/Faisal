@@ -1,0 +1,4 @@
+run	rc	elapsed_ms	sign_ops	rotate_ops	revoke_ops	diagnostic_count
+1	0	7821	512	3	256	0
+2	0	7535	385	3	256	0
+3	0	7354	256	3	256	0

@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include <openssl/evp.h>
+#include <pthread.h>
 
 #include "../faisal-runtime-verification/faisal_runtime_verification.h"
 
@@ -34,6 +35,8 @@ struct m90_key_provider {
 	size_t count;
 	uint64_t next_generation;
 	struct m87_service *bound_service;
+	pthread_mutex_t lock;
+	int initialized;
 };
 
 int m90_provider_init(struct m90_key_provider *provider);

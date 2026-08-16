@@ -1,0 +1,5 @@
+scan: M92 added/modified lines plus new files
+new_lines_scanned: 595
+high_risk_pattern_matches: 0
+result: PASS
+provider_boundary: private EVP_PKEY objects remain userspace; mutex protects bounded provider state
