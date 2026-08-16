@@ -68,6 +68,12 @@ cc -O2 -Wall -Wextra -Werror -Wno-cpp -static \
   tools/faisal-autonomy/faisal_autonomy_orchestrator.c \
   tools/testing/selftests/agi_autonomy_orchestrator_test.c \
   -o "$BUILD/agi_autonomy_orchestrator_test" -lcrypto -ldl -lpthread
+cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -pthread \
+  -Iinclude/uapi -Itools/faisal-task -Itools/faisal-execution \
+  tools/faisal-task/faisal_task_service.c \
+  tools/faisal-execution/faisal_execution_engine.c \
+  tools/testing/selftests/agi_durable_execution_test.c \
+  -o "$BUILD/agi_durable_execution_test" -lcrypto -ldl -lpthread
 set -- \
  tools/faisal-build/run_agent_security_m64_qemu.sh \
  tools/faisal-build/run_transport_qemu.sh \
@@ -96,7 +102,8 @@ set -- \
  tools/faisal-build/run_memory_transaction_qemu.sh \
  tools/faisal-build/run_runtime_verification_qemu.sh \
  tools/faisal-build/run_autonomy_control_qemu.sh \
- tools/faisal-build/run_autonomy_orchestrator_qemu.sh
+ tools/faisal-build/run_autonomy_orchestrator_qemu.sh \
+ tools/faisal-build/run_durable_execution_qemu.sh
 count=0
 for harness do
 	count=$((count + 1))

@@ -1334,7 +1334,8 @@
     "FAISAL-M103",
     "FAISAL-M104",
     "FAISAL-M105",
-    "FAISAL-M106"
+    "FAISAL-M106",
+    "FAISAL-M108"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1350,7 +1351,7 @@
     "tools/testing/selftests/agi_autonomy_orchestrator_test.c"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "M107-staged-checkpatch-cleanup-and-multitenant-isolation-gate",
+  "next_dependency": "M109-worker-supervision-and-multitenant-isolation-gate",
   "industry_readiness": {
     "status": "preproduction_prototype_not_production_ready",
     "audit_document": "FAISAL-INDUSTRY-READINESS-AUDIT.md",
@@ -1362,6 +1363,9 @@
     "m106_current_head_kcsan_qemu": "pass_headless_profile_legacy_ps2_disabled",
     "m106_uapi_fuzz_iterations_per_profile": 256,
     "m106_sanitizer_matrix_diagnostic_gate": "pass",
+    "m108_durable_execution_qemu": "pass",
+    "m108_aggregate_qemu_harnesses": 29,
+    "m108_execution_features": "intent_dag_dispatch_retry_backoff_checkpoint_restart_recovery_replay_cancellation_and_authority_denial",
     "m105_verified_autonomy_orchestrator_qemu": "pass",
     "m105_evidence_chain": "verified_observation_crosscheck_promotion_experience_and_kernel_evidence",
     "m105_model_authority_boundary": "pass_unverified_model_output_denied_promotion",
@@ -1378,7 +1382,9 @@
       "independent_reproducible_rebuild",
       "cve_and_upstream_response_process",
       "real_accelerator_hardware_qualification",
-      "staged_checkpatch_cleanup"
+      "staged_checkpatch_cleanup",
+      "worker_supervision_and_agent_migration",
+      "multitenant_isolation_and_resource_accounting"
     ]
   }
 }
