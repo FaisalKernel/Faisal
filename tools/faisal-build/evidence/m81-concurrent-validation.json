@@ -1,0 +1,85 @@
+{
+  "milestone": "FAISAL-M81",
+  "status": "validated_bounded_concurrent_lifecycle_ipc_stress",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "implementation": {
+    "service": "tools/faisal-concurrency/faisal_concurrency_service.c",
+    "header": "tools/faisal-concurrency/faisal_concurrency_service.h",
+    "selftest": "tools/testing/selftests/agi_concurrent_lifecycle_ipc_test.c",
+    "qemu_harness": "tools/faisal-build/run_concurrent_lifecycle_ipc_qemu.sh",
+    "tracked_full_audit_runner": "tools/faisal-build/run_full_faisal_audit.sh"
+  },
+  "clean_workload": {
+    "workers": 8,
+    "worker_passes": 8,
+    "malformed_rejections": 512,
+    "capability_denials": 16,
+    "cancellation_passes": 48,
+    "live_messages_sent": 768,
+    "live_messages_received": 768,
+    "randomized_inputs": 872,
+    "queue_pressure": "nonzero_observed",
+    "selftest_exit": 0,
+    "qemu_status": "passed"
+  },
+  "clean_smoke": {
+    "runs": 3,
+    "elapsed_ms": [
+      4494,
+      4518,
+      4525
+    ],
+    "mean_ms": 4512.3,
+    "range_ms": 31,
+    "timing_scope": "QEMU_boot_initramfs_selftest_shutdown"
+  },
+  "sanitizers": {
+    "kasan": {
+      "config": "tools/faisal-build/evidence/m81-sanitizer-configs.txt",
+      "build": "passed",
+      "qemu": "passed_final_four_vcpu_run",
+      "diagnostics": "no_kasan_lockdep_oops_panic_signatures",
+      "exploratory_two_vcpu_note": "RCU_starvation_warnings_under_heavy_instrumentation_retained_and_not_counted_as_clean",
+      "qemu_log": "tools/faisal-build/evidence/m81-kasan-qemu.log"
+    },
+    "kcsan": {
+      "config": "tools/faisal-build/evidence/m81-sanitizer-configs.txt",
+      "build": "passed",
+      "qemu": "passed",
+      "diagnostics": "no_kcsan_lockdep_oops_panic_signatures",
+      "qemu_log": "tools/faisal-build/evidence/m81-kcsan-qemu.log"
+    }
+  },
+  "full_regression": {
+    "count": 21,
+    "passed": 21,
+    "failed": 0,
+    "runner": "tools/faisal-build/run_full_faisal_audit.sh",
+    "summary": "tools/faisal-build/evidence/m81-full-audit-summary.txt",
+    "source_rebuilds": [
+      "M73_world_state",
+      "M77_verified_research",
+      "M81_concurrency",
+      "M86_runtime_attestation"
+    ]
+  },
+  "security": {
+    "source_scan": "passed",
+    "forbidden_primitive_scan": "no_process_launch_identity_change_ptrace_or_cap_sys_admin",
+    "model_output_authority": false,
+    "security_review": "M81-SECURITY-REVIEW.md"
+  },
+  "limitations": [
+    "No claim of race freedom; KCSAN is sampling-based",
+    "No hardware, accelerator, NUMA, DMA, syzkaller, fuzzing, or long-duration soak claim",
+    "No production readiness claim",
+    "No upstream baseline IPC latency comparison"
+  ],
+  "evidence": [
+    "MILESTONE81.md",
+    "M81-CONCURRENCY-DESIGN.md",
+    "M81-SECURITY-REVIEW.md",
+    "M81-BENCHMARKS.md"
+  ]
+}

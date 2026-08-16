@@ -1,0 +1,18 @@
+c[?7l[2J[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+7EFCAE00+7EF0AE00 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...
+
+
+Booting from ROM..c[?7l[2JFAISAL_M81_BOOT_OK
+M81_WORKERS_OK workers=8 passes=8
+M81_MALFORMED_UAPI_REJECT_OK cases=512
+M81_CAPABILITY_ISOLATION_OK denials=16
+M81_CANCELLATION_OK passes=48
+M81_IPC_ROUNDTRIP_OK sent=768 received=768
+M81_QUEUE_PRESSURE_OK events=0
+M81_RANDOMIZED_INPUTS_OK cases=872
+M81_SELFTEST_EXIT=0
+FAISAL_M81_TEST_RC=0
+[  316.782956] reboot: Power down
