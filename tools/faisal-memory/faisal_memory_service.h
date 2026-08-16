@@ -62,6 +62,7 @@ struct fms_service {
 
 int fms_open(struct fms_service *service, const char *journal_path);
 void fms_close(struct fms_service *service);
+int fms_reactivate(struct fms_service *service);
 int fms_put(struct fms_service *service, const char *content,
 	    uint32_t tier, uint32_t confidence_ppm, uint32_t importance_ppm,
 	    uint64_t provenance_sequence, struct fms_entry *out);

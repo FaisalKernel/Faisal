@@ -1,0 +1,99 @@
+{
+  "milestone": "FAISAL-M83",
+  "status": "validated_bounded_two_journal_transaction_and_rollback",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "implementation": {
+    "transaction_header": "tools/faisal-memory/faisal_memory_transaction.h",
+    "transaction_service": "tools/faisal-memory/faisal_memory_transaction.c",
+    "memory_service_header": "tools/faisal-memory/faisal_memory_service.h",
+    "memory_service": "tools/faisal-memory/faisal_memory_service.c",
+    "selftest": "tools/testing/selftests/agi_memory_transaction_test.c",
+    "qemu_harness": "tools/faisal-build/run_memory_transaction_qemu.sh",
+    "tracked_full_audit_runner": "tools/faisal-build/run_full_faisal_audit.sh"
+  },
+  "clean_workload": {
+    "transaction_input_validation": "duplicate_journal_target_rejected",
+    "crash_transaction_id": 83010,
+    "crash_injected_after_operation": 2,
+    "prepared_state": 1,
+    "rollback_state": 3,
+    "baseline_entries_after_rollback": [
+      1,
+      1
+    ],
+    "successful_transaction_id": 83020,
+    "successful_commit_state": 2,
+    "capability_isolation": "stale_capability_denied",
+    "concurrent_writes": 16,
+    "concurrent_reads": 2000,
+    "selftest_exit": 0,
+    "qemu_status": "passed"
+  },
+  "clean_smoke": {
+    "runs": 3,
+    "elapsed_ms": [
+      6541,
+      5919,
+      5766
+    ],
+    "mean_ms": 6075.3,
+    "range_ms": 775,
+    "timing_scope": "QEMU_boot_initramfs_transaction_workload_shutdown"
+  },
+  "sanitizers": {
+    "kasan": {
+      "kernel_build": "/home/ubuntu/agi-kernel/build/m81-kasan",
+      "qemu": "passed_four_vcpu",
+      "diagnostics": "no_kasan_lockdep_oops_panic_signatures",
+      "qemu_log": "tools/faisal-build/evidence/m83-kasan-qemu.log"
+    },
+    "kcsan": {
+      "kernel_build": "/home/ubuntu/agi-kcsan",
+      "four_vcpu_qemu": "workload_passed_but_rcu_starvation_warning_observed",
+      "eight_vcpu_qemu": "clean_pass",
+      "diagnostics": "no_kcsan_lockdep_oops_panic_signatures_in_clean_eight_vcpu_run",
+      "qemu_log": "tools/faisal-build/evidence/m83-kcsan-qemu.log",
+      "clean_run_vcpus": 8
+    }
+  },
+  "focused_regression": {
+    "M71_persistent_memory": "passed",
+    "M74_model_orchestration": "passed",
+    "M82_memory_orchestrator": "passed"
+  },
+  "full_regression": {
+    "count": 22,
+    "passed": 22,
+    "failed": 0,
+    "runner": "tools/faisal-build/run_full_faisal_audit.sh",
+    "summary": "tools/faisal-build/evidence/m83-full-audit-summary.txt",
+    "source_rebuilds": [
+      "M73_world_state",
+      "M77_verified_research",
+      "M81_concurrency",
+      "M83_memory_transaction",
+      "M86_runtime_attestation"
+    ]
+  },
+  "security": {
+    "source_scan": "passed",
+    "forbidden_primitive_scan": "no_process_launch_identity_change_ptrace_cap_sys_admin_model_invocation_or_model_authority",
+    "security_review": "M83-SECURITY-REVIEW.md"
+  },
+  "limitations": [
+    "Bounded to two journals and a userspace coordinator",
+    "No claim of power-loss atomicity or filesystem directory-entry durability",
+    "No distributed transaction or hardware persistent-memory claim",
+    "No race-freedom or production-readiness claim",
+    "Model output is not authorization"
+  ],
+  "research": "M83-PERSISTENCE-RESEARCH.md",
+  "evidence": [
+    "MILESTONE83.md",
+    "M83-TRANSACTION-DESIGN.md",
+    "M83-SECURITY-REVIEW.md",
+    "M83-BENCHMARKS.md",
+    "tools/faisal-build/evidence/m83-transaction-run.log"
+  ]
+}

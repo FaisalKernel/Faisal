@@ -1,0 +1,2 @@
+M83_SECURITY_SCAN=PASS
+No process-launch, identity-changing, ptrace, CAP_SYS_ADMIN, model invocation, or model-authority primitive found in M83 sources/harness.

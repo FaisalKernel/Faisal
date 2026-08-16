@@ -374,6 +374,22 @@ int fms_open(struct fms_service *service, const char *journal_path)
 	return rehydrate_kernel_records(service);
 }
 
+int fms_reactivate(struct fms_service *service)
+{
+	struct agi_lc_agent selected;
+	if (!service || service->kernel_fd < 0 || !service->session_id ||
+	    !service->agent_id)
+		return FMS_ERR_ARGUMENT;
+	if (ioctl(service->kernel_fd, AGI_LC_ATTACH_TASK) < 0)
+		return FMS_ERR_KERNEL;
+	memset(&selected, 0, sizeof(selected));
+	selected.size = sizeof(selected);
+	selected.agent_id = service->agent_id;
+	selected.correlation = 71003;
+	return ioctl(service->kernel_fd, AGI_LC_SET_AGENT, &selected) < 0 ?
+		FMS_ERR_KERNEL : FMS_OK;
+}
+
 void fms_close(struct fms_service *service)
 {
 	if (!service)
