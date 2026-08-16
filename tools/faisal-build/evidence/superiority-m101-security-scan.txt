@@ -1,0 +1,103 @@
+FAISAL M101 deadline urgency security scan
+---Authorization and scheduler boundary---
+8665:	if (faisal_task_get_lineage(current) != session->session_id)
+8698:	if (!session->session_id || READ_ONCE(session->revoked))
+8700:	if (faisal_task_get_lineage(current) != session->session_id)
+8723:		    faisal_task_get_lineage(task) == session->session_id &&
+8763:	if (!session->session_id || READ_ONCE(session->revoked))
+8765:	if (faisal_task_get_lineage(current) != session->session_id)
+8770:	message.sender_lineage = session->session_id;
+8803:	if (!session->session_id || READ_ONCE(session->revoked))
+8805:	if (faisal_task_get_lineage(current) != session->session_id)
+8843:		if (session->revoked) {
+8875:	if (!session->session_id || READ_ONCE(session->revoked))
+8877:	if (faisal_task_get_lineage(current) != session->session_id)
+8898:	if (!session->session_id || READ_ONCE(session->revoked))
+8900:	if (faisal_task_get_lineage(current) != session->session_id)
+8906:			READ_ONCE(session->gate_open) || READ_ONCE(session->revoked),
+8910:	if (READ_ONCE(session->revoked))
+8933:	if (!session->session_id || READ_ONCE(session->revoked))
+8935:	if (faisal_task_get_lineage(current) != session->session_id)
+8956:	if (!session->session_id || READ_ONCE(session->revoked))
+8958:	if (faisal_task_get_lineage(current) != session->session_id)
+8965:	domain.lineage_id = session->session_id;
+9020:	    !domain.correlation || !session->session_id ||
+9021:	    READ_ONCE(session->revoked))
+9023:	if (faisal_task_get_lineage(current) != session->session_id)
+9151:	if (!session->session_id || READ_ONCE(session->revoked))
+9153:	if (faisal_task_get_lineage(current) != session->session_id)
+9181:		if (!memory || !memory->tensor_valid || memory->revoked ||
+9265:		    session->session_id) {
+9269:		session->session_id = atomic64_inc_return(&agi_lc_next_session);
+9272:		ret = agi_lc_register_agent(session, session->session_id, 0,
+9275:			session->session_id = 0;
+9278:		create.session_id = session->session_id;
+9384:		if (!session->session_id)
+9386:		else if (READ_ONCE(session->revoked))
+9390:							session->session_id);
+9407:		    revoke.reserved[1] || !session->session_id) {
+9412:		session->revoked = true;
+9417:			session->intent_leases[i].revoked = true;
+9438:	case AGI_LC_SET_SCHED_HINT:
+9623:		info.session_id = session->session_id;
+---Time and bounds---
+6518:	if (browser.deadline_ns && browser.deadline_ns <= now_boot &&
+6573:		    browser.deadline_ns || !agi_lc_browser_authorized(session, &browser,
+7175:	if (record->control.deadline_ns &&
+7176:	    ktime_get_ns() >= record->control.deadline_ns &&
+7313:		.sched_util_min = 0,
+7314:		.sched_util_max = priority,
+7355:				record->control.deadline_ns, record->control.priority,
+7397:	unsigned long now = ktime_get_ns();
+7481:	    (control.escalation_deadline_ns &&
+7482:	     control.escalation_deadline_ns < control.deadline_ns) ||
+7483:	    (control.deadline_ns && control.deadline_ns < now) ||
+7484:	    (control.escalation_deadline_ns && control.escalation_deadline_ns < now))
+7640:	identity.sampled_at_ns = ktime_get_ns();
+7888:	record->provenance.result_recorded_at_ns = ktime_get_ns();
+8021:	snapshot.sampled_at_ns = ktime_get_ns();
+8125:	    demand.cpu_util_min > demand.cpu_util_max ||
+8126:	    demand.cpu_util_max > SCHED_CAPACITY_SCALE ||
+8136:	    !demand.cpu_util_max)
+8143:	    (demand.cpu_util_min || demand.cpu_util_max))
+8165:			.sched_util_min = demand.cpu_util_min,
+8166:			.sched_util_max = demand.cpu_util_max,
+8227:	    demand.latency_sensitive || demand.deadline_ns || demand.cpu_util_min ||
+8228:	    demand.cpu_util_max || demand.memory_min_bytes || demand.memory_max_bytes ||
+8484:	    query.latency_sensitive || query.deadline_ns || query.isolation_flags ||
+8559:static u32 agi_lc_deadline_urgency(u64 deadline_ns)
+8564:	if (!deadline_ns)
+8566:	now_ns = ktime_get_ns();
+8567:	if (deadline_ns <= now_ns)
+8568:		return SCHED_CAPACITY_SCALE;
+8569:	slack_ns = deadline_ns - now_ns;
+8570:	if (slack_ns <= 5ULL * NSEC_PER_MSEC)
+8571:		return SCHED_CAPACITY_SCALE;
+8572:	if (slack_ns <= 20ULL * NSEC_PER_MSEC)
+8573:		return (SCHED_CAPACITY_SCALE * 3U) / 4U;
+8574:	if (slack_ns <= 100ULL * NSEC_PER_MSEC)
+8575:		return SCHED_CAPACITY_SCALE / 2U;
+8593:	    hint.unblock_credit > AGI_LC_SCHED_PRIORITY_MAX ||
+8594:	    hint.latency_sensitive > 1 || hint.util_min > hint.util_max ||
+8595:	    hint.util_max > SCHED_CAPACITY_SCALE || hint.reserved ||
+8610:		u32 urgency = agi_lc_deadline_urgency(hint.deadline_ns);
+8613:			urgency = max(urgency, SCHED_CAPACITY_SCALE / 2U);
+8614:		urgency = max(urgency, hint.unblock_credit);
+8615:		attr.sched_util_min = max(hint.util_min, urgency);
+8616:		attr.sched_util_max = hint.util_max;
+8617:		if (attr.sched_util_min > attr.sched_util_max)
+8633:	record->unblock_credit = hint.unblock_credit;
+8634:	record->deadline_ns = hint.deadline_ns;
+8636:	record->util_min = hint.util_min;
+8637:	record->util_max = hint.util_max;
+8659:	    hint.unblock_credit || hint.deadline_ns || hint.latency_sensitive ||
+8660:	    hint.util_min || hint.util_max || hint.reserved ||
+8674:	hint.unblock_credit = record->unblock_credit;
+8675:	hint.deadline_ns = record->deadline_ns;
+8677:	hint.util_min = record->util_min;
+8678:	hint.util_max = record->util_max;
+---Source and harness checks---
+---Protected M63 staging guard---
+PASS: protected files not staged
+---Explicit non-claims---
+No hard real-time guarantee, CPU-bandwidth guarantee, model authority, universal kernel superiority, or hardware performance claim is made.

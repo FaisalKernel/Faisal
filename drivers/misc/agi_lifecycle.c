@@ -8555,6 +8555,28 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 					 account.correlation, account.device_id);
 }
 
+#ifdef CONFIG_UCLAMP_TASK
+static u32 agi_lc_deadline_urgency(u64 deadline_ns)
+{
+	u64 now_ns;
+	u64 slack_ns;
+
+	if (!deadline_ns)
+		return 0;
+	now_ns = ktime_get_ns();
+	if (deadline_ns <= now_ns)
+		return SCHED_CAPACITY_SCALE;
+	slack_ns = deadline_ns - now_ns;
+	if (slack_ns <= 5ULL * NSEC_PER_MSEC)
+		return SCHED_CAPACITY_SCALE;
+	if (slack_ns <= 20ULL * NSEC_PER_MSEC)
+		return (SCHED_CAPACITY_SCALE * 3U) / 4U;
+	if (slack_ns <= 100ULL * NSEC_PER_MSEC)
+		return SCHED_CAPACITY_SCALE / 2U;
+	return 0;
+}
+#endif
+
 static int agi_lc_set_sched_hint(struct agi_lc_session *session,
 					 unsigned long arg)
 {
@@ -8585,7 +8607,12 @@ static int agi_lc_set_sched_hint(struct agi_lc_session *session,
 			.sched_flags = SCHED_FLAG_UTIL_CLAMP_MIN |
 					       SCHED_FLAG_UTIL_CLAMP_MAX,
 		};
-		attr.sched_util_min = max(hint.util_min, hint.unblock_credit);
+		u32 urgency = agi_lc_deadline_urgency(hint.deadline_ns);
+
+		if (hint.latency_sensitive)
+			urgency = max(urgency, SCHED_CAPACITY_SCALE / 2U);
+		urgency = max(urgency, hint.unblock_credit);
+		attr.sched_util_min = max(hint.util_min, urgency);
 		attr.sched_util_max = hint.util_max;
 		if (attr.sched_util_min > attr.sched_util_max)
 			return -EINVAL;

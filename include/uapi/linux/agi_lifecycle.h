@@ -920,6 +920,7 @@ struct agi_lc_sched_hint {
 	__u32 state;
 	__u32 dependency_count;
 	__u32 unblock_credit;
+	/* Absolute CLOCK_MONOTONIC deadline; zero means no deadline. */
 	__u64 deadline_ns;
 	__u32 latency_sensitive;
 	__u32 util_min;
