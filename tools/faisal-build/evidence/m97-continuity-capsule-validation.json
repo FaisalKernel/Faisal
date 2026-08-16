@@ -71,7 +71,7 @@
     "No claim of model retraining, consciousness, or general AGI.",
     "No unmeasured speed, throughput, energy, or productivity claim."
   ],
-  "implementation_commit": "pending",
-  "tag": "pending",
+  "implementation_commit": "830a2c8e42968006e148b78daae7acba190d6a71",
+  "tag": "FAISAL-M97",
   "forbidden_files_excluded": ["M63-COMPUTE-CONTEXT-DESIGN.md", "M63-SECURITY-REVIEW.md"]
 }

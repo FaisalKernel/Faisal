@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "fd214b1c1fbc8b64c23e15d0f358c95b4511feaa",
-  "current_tag": "FAISAL-M96",
+  "current_head": "830a2c8e42968006e148b78daae7acba190d6a71",
+  "current_tag": "FAISAL-M97",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -989,7 +989,7 @@
         "M78-deployment-supervisor"
       ],
       "unlocks": [
-        "M97-tool-registry-risk-cost-contract"
+        "M97-continuity-capsules"
       ],
       "evidence_required": [
         "causal_append_only_journal",
@@ -1006,7 +1006,7 @@
         "benchmark",
         "full_regression"
       ],
-      "next_action": "Retain causal authorization, evidence, invalidation, corruption, sanitizer, QEMU, and full-regression coverage while M97 defines a capability-scoped tool registry with risk, cost, provenance, and independent approval contracts.",
+      "next_action": "Retain causal authority, evidence, invalidation, corruption, sanitizer, QEMU, and full-regression coverage while M97 continuity capsules validate cross-domain state-vector resume decisions.",
       "evidence": [
         "MILESTONE96.md",
         "M96-CAUSAL-DESIGN.md",
@@ -1026,13 +1026,62 @@
       ]
     },
     {
-      "id": "M97-tool-registry-risk-cost-contract",
-      "phase": 9,
-      "name": "Capability-scoped tool registry with risk, cost, provenance, verification, and independent approval contract",
-      "status": "next",
-      "priority": 97,
+      "id": "M97-continuity-capsules",
+      "phase": 14,
+      "name": "Continuity Capsules and Causal Residency Contracts for state-vector-consistent autonomous resume",
+      "status": "validated_bounded_userspace_cross_layer_continuity_contract",
+      "priority": 99,
       "depends_on": [
         "M96-causal-authority-fabric",
+        "M71-persistent-memory-service",
+        "M73-world-model",
+        "M70-power-policy"
+      ],
+      "unlocks": [
+        "M98-tool-registry-risk-cost-contract"
+      ],
+      "evidence_required": [
+        "working_state_drift_rejection",
+        "world_state_drift_rejection",
+        "resource_state_drift_rejection",
+        "objective_generation_binding",
+        "branch_digest_binding",
+        "invalidation",
+        "replay",
+        "corruption_fail_closed",
+        "kernel_qemu",
+        "asan_ubsan",
+        "tsan",
+        "security_review",
+        "benchmark",
+        "full_regression"
+      ],
+      "next_action": "Retain state-vector consistency, invalidation, replay, corruption, sanitizer, QEMU, and regression coverage while M98 defines a capability-scoped tool registry with risk, cost, provenance, verification, revocation, and independent approval.",
+      "evidence": [
+        "MILESTONE97.md",
+        "M97-FIRST-PRINCIPLES-DESIGN.md",
+        "M97-WORLD-TECH-RESEARCH.md",
+        "M97-SECURITY-REVIEW.md",
+        "M97-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m97-continuity-capsule-validation.json",
+        "tools/faisal-build/evidence/m97-qemu.log",
+        "tools/faisal-build/evidence/m97-smoke-times.tsv",
+        "tools/faisal-build/evidence/m97-asan-ubsan.log",
+        "tools/faisal-build/evidence/m97-tsan.log",
+        "tools/faisal-build/evidence/m97-full-audit.log",
+        "tools/faisal-build/evidence/m97-m90-regression.log",
+        "tools/faisal-build/evidence/m97-m91-regression.log",
+        "tools/faisal-build/evidence/m97-security-scan.log"
+      ]
+    },
+    {
+      "id": "M98-tool-registry-risk-cost-contract",
+      "phase": 9,
+      "name": "Capability-scoped tool registry with risk, cost, provenance, verification, revocation, and independent approval contract",
+      "status": "next",
+      "priority": 98,
+      "depends_on": [
+        "M97-continuity-capsules",
         "M74-model-orchestration",
         "M75-browser-tool-supervision"
       ],
@@ -1084,7 +1133,8 @@
     "FAISAL-M93",
     "FAISAL-M94",
     "FAISAL-M95",
-    "FAISAL-M96"
+    "FAISAL-M96",
+    "FAISAL-M97"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1095,5 +1145,5 @@
     "M63-SECURITY-REVIEW.md"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "M97-tool-registry-risk-cost-contract"
+  "next_dependency": "M98-tool-registry-risk-cost-contract"
 }
