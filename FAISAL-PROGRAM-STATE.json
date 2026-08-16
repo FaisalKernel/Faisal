@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "a030909d909eb65329670bbe745a1ed26a2f02e7",
-  "current_tag": "FAISAL-M86",
+  "current_head": "875abf7f1fe88e6d79e6967f05f0a830d41b2d16",
+  "current_tag": "FAISAL-M81",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -231,14 +231,26 @@
       "id": "M81-concurrent-sanitizer-validation",
       "phase": 14,
       "name": "Concurrent lifecycle and IPC stress with sanitizer-enabled kernel validation",
-      "status": "next",
+      "status": "validated_concurrent_stress_kasan_kcsan_lockdep_and_regression",
       "priority": 95,
       "depends_on": ["M80-stress-fuzz-hardening"],
+      "unlocks": ["M83-memory-transactional-concurrency"],
+      "evidence_required": ["concurrent_stress", "kasan", "kcsan", "lockdep", "randomized_inputs", "security_review", "regression", "benchmark"],
+      "evidence": ["MILESTONE81.md", "M81-CONCURRENCY-DESIGN.md", "M81-SECURITY-REVIEW.md", "M81-BENCHMARKS.md", "tools/faisal-build/evidence/m81-concurrent-validation.json"],
+      "next_action": "Retain sanitizer and concurrent regression coverage while M83 validates transactional memory concurrency and crash-safe cross-journal rollback."
+    },
+    {
+      "id": "M83-memory-transactional-concurrency",
+      "phase": 10,
+      "name": "Transactional persistent-memory concurrency and crash-safe cross-journal rollback",
+      "status": "next",
+      "priority": 95,
+      "depends_on": ["M82-memory-ecosystem", "M81-concurrent-sanitizer-validation"],
       "unlocks": [],
-      "evidence_required": ["concurrent_stress", "kasan_or_documented_blocker", "kcsan_or_documented_blocker", "lockdep_or_documented_blocker", "randomized_inputs", "security_review", "regression"]
+      "evidence_required": ["atomic_multi_journal_commit", "crash_injection", "rollback_replay", "concurrent_read_write", "capability_isolation", "security_review", "benchmark", "regression"]
     }
   ],
-  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M82", "FAISAL-M84", "FAISAL-M85", "FAISAL-M86"],
+  "completed_milestones": ["FAISAL-M64-SECURITY-COMPLETION", "FAISAL-M66", "FAISAL-M67", "FAISAL-M68", "FAISAL-M69", "FAISAL-M70", "FAISAL-M71", "FAISAL-M72", "FAISAL-M73", "FAISAL-M74", "FAISAL-M75", "FAISAL-M76", "FAISAL-M77", "FAISAL-M78", "FAISAL-M79", "FAISAL-M80", "FAISAL-M81", "FAISAL-M82", "FAISAL-M84", "FAISAL-M85", "FAISAL-M86"],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
     "AGI-KERNEL-DESIGN-DECISIONS.md",
