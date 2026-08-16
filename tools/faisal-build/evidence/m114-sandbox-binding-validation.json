@@ -1,0 +1,54 @@
+{
+  "milestone": "FAISAL-M114",
+  "capability": "kernel-attested sandbox identity binding",
+  "status": "validated_in_qemu",
+  "source_base": "Linux v7.2-rc7",
+  "abi": 38,
+  "kernel_enforcement": {
+    "bound_fields": ["pid_namespace", "mount_namespace", "net_namespace", "ipc_namespace", "uts_namespace", "user_namespace", "cgroup_id", "owner_tgid"],
+    "drift_action": "reject lifecycle ioctls with EXDEV",
+    "authority_source": "kernel-captured task namespace and cgroup identity",
+    "model_output_authority": false
+  },
+  "build": {
+    "focused_lifecycle_object": "PASS",
+    "full_vmlinux": "PASS",
+    "bootable_bzImage": "PASS",
+    "userspace_selftest_static_build": "PASS",
+    "git_diff_check": "PASS",
+    "shell_syntax": "PASS"
+  },
+  "qemu": {
+    "boot": "PASS",
+    "bind_attestation": "PASS",
+    "query": "PASS",
+    "cross_tgid_drift_denial": "PASS",
+    "release": "PASS",
+    "kernel_diagnostics": "ZERO",
+    "aggregate_existing_harnesses": 34,
+    "aggregate_existing_harnesses_status": "PASS"
+  },
+  "benchmark": {
+    "m113_harness_count": 34,
+    "m114_harness_count": 34,
+    "m113_mean_elapsed_ms": 6816.06,
+    "m114_mean_elapsed_ms": 7049.53,
+    "mean_delta_ms": 233.47,
+    "m113_median_elapsed_ms": 5149.5,
+    "m114_median_elapsed_ms": 5185.0,
+    "median_delta_ms": 35.5,
+    "interpretation": "QEMU aggregate wall time is noisy and is not a syscall microbenchmark; no performance superiority claim is made"
+  },
+  "limitations": [
+    "This binds and attests identity; it does not itself create namespaces, cgroups, Landlock rules, or seccomp filters.",
+    "A trusted launcher must establish isolation before binding.",
+    "Full sanitizer matrix was not rerun specifically for this additive ABI in this milestone; existing 34-harness regression remained clean."
+  ],
+  "artifacts": [
+    "drivers/misc/agi_lifecycle.c",
+    "include/uapi/linux/agi_lifecycle.h",
+    "tools/testing/selftests/agi_sandbox_binding_test.c",
+    "tools/faisal-build/run_sandbox_binding_qemu.sh",
+    "tools/faisal-build/evidence/m114-sandbox-binding-validation.json"
+  ]
+}

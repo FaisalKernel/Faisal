@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "program": "autonomous AGI-native Linux operating-system implementation",
-  "updated": "2026-08-16",
+  "updated": "2026-08-17",
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
@@ -1290,6 +1290,31 @@
         "tools/faisal-build/evidence/m102-m100-qemu-regression.log",
         "tools/faisal-build/evidence/m102-full-audit.log"
       ]
+    },
+    {
+      "id": "M114-kernel-enforced-sandbox-identity-multitenant-worker-supervision-and-real-build-scanner-adapters",
+      "phase": 7,
+      "name": "Kernel-attested sandbox identity binding and real security/build adapters",
+      "status": "partially_validated_kernel_identity_binding",
+      "priority": 110,
+      "depends_on": [
+        "M113-repository-adapter"
+      ],
+      "evidence": [
+        "tools/faisal-build/evidence/m114-sandbox-binding-validation.json"
+      ],
+      "next_action": "Implement the trusted launcher and real scanner adapters.",
+      "remaining_gates": [
+        "launcher_namespace_creation",
+        "cgroup_resource_enforcement",
+        "landlock_enforcement",
+        "seccomp_enforcement",
+        "build_scanner_adapter",
+        "dependency_analyzer_adapter",
+        "vulnerability_scanner_adapter",
+        "tenant_accounting_qemu",
+        "sanitizer_matrix"
+      ]
     }
   ],
   "completed_milestones": [
@@ -1340,7 +1365,8 @@
     "FAISAL-M110",
     "FAISAL-M111",
     "FAISAL-M112",
-    "FAISAL-M113"
+    "FAISAL-M113",
+    "FAISAL-M114"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1356,7 +1382,7 @@
     "tools/testing/selftests/agi_autonomy_orchestrator_test.c"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "M114-kernel-enforced-sandbox-identity-multitenant-worker-supervision-and-real-build-scanner-adapters",
+  "next_dependency": "M114-followup-trusted-sandbox-launcher-and-real-build-vulnerability-scanner-adapters",
   "industry_readiness": {
     "status": "preproduction_prototype_not_production_ready",
     "audit_document": "FAISAL-INDUSTRY-READINESS-AUDIT.md",

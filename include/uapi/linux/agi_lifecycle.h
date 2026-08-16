@@ -655,6 +655,22 @@
 #define AGI_LC_NET_POLICY_MAX_SOCKETS 4096
 #define AGI_LC_NET_POLICY_MAX_FAMILY 63
 
+/* ABI 38: kernel-attested sandbox identity binding. */
+#define AGI_LC_SANDBOX_BIND 1U
+#define AGI_LC_SANDBOX_QUERY 2U
+#define AGI_LC_SANDBOX_RELEASE 3U
+#define AGI_LC_SANDBOX_STATE_UNBOUND 0U
+#define AGI_LC_SANDBOX_STATE_BOUND 1U
+#define AGI_LC_SANDBOX_STATE_REVOKED 2U
+#define AGI_LC_SANDBOX_REQUIRE_PID_NS (1U << 0)
+#define AGI_LC_SANDBOX_REQUIRE_MOUNT_NS (1U << 1)
+#define AGI_LC_SANDBOX_REQUIRE_NET_NS (1U << 2)
+#define AGI_LC_SANDBOX_REQUIRE_IPC_NS (1U << 3)
+#define AGI_LC_SANDBOX_REQUIRE_UTS_NS (1U << 4)
+#define AGI_LC_SANDBOX_REQUIRE_USER_NS (1U << 5)
+#define AGI_LC_SANDBOX_REQUIRE_CGROUP (1U << 6)
+#define AGI_LC_SANDBOX_FLAGS_ALL ((1U << 7) - 1)
+
 #define AGI_LC_RESOURCE_STATUS_REQUESTED 0
 #define AGI_LC_RESOURCE_STATUS_PARTIAL 1
 #define AGI_LC_RESOURCE_STATUS_ENFORCED 2
@@ -1057,6 +1073,28 @@ struct agi_lc_accel_device_account {
 	__u64 agent_id;
 	__u32 status;
 	__u32 reserved32;
+	__u64 correlation;
+	__u64 reserved[2];
+};
+
+struct agi_lc_sandbox_binding {
+	__u32 size;
+	__u32 operation;
+	__u32 flags;
+	__u32 state;
+	__s32 status;
+	__u32 reserved32;
+	__u64 binding_id;
+	__u64 generation;
+	__u64 owner_pid;
+	__u64 owner_tgid;
+	__u64 pid_namespace;
+	__u64 mount_namespace;
+	__u64 net_namespace;
+	__u64 ipc_namespace;
+	__u64 uts_namespace;
+	__u64 user_namespace;
+	__u64 cgroup_id;
 	__u64 correlation;
 	__u64 reserved[2];
 };
@@ -2285,6 +2323,7 @@ struct agi_lc_record {
 #define AGI_LC_GET_ARTIFACT _IOWR(AGI_LC_IOC_MAGIC, 0x2e, struct agi_lc_learning_artifact)
 #define AGI_LC_GET_SELF_STATE _IOWR(AGI_LC_IOC_MAGIC, 0x31, struct agi_lc_self_state)
 #define AGI_LC_SET_RESOURCE_DEMAND _IOWR(AGI_LC_IOC_MAGIC, 0x32, struct agi_lc_resource_demand)
+#define AGI_LC_SANDBOX _IOWR(AGI_LC_IOC_MAGIC, 0x66, struct agi_lc_sandbox_binding)
 #define AGI_LC_GET_RESOURCE_DEMAND _IOWR(AGI_LC_IOC_MAGIC, 0x33, struct agi_lc_resource_demand)
 #define AGI_LC_ACCEL_REGISTER _IOWR(AGI_LC_IOC_MAGIC, 0x34, struct agi_lc_accel_device)
 #define AGI_LC_ACCEL_UNREGISTER _IOW(AGI_LC_IOC_MAGIC, 0x35, struct agi_lc_accel_device)

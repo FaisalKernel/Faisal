@@ -26,6 +26,13 @@
 #include <linux/miscdevice.h>
 #include <linux/mm.h>
 #include <linux/mman.h>
+#include <linux/mnt_namespace.h>
+#include <linux/nsproxy.h>
+#include <net/net_namespace.h>
+#include <linux/ipc_namespace.h>
+#include <linux/utsname.h>
+#include <linux/pid_namespace.h>
+#include <linux/user_namespace.h>
 #include <linux/numa.h>
 #include <linux/module.h>
 #include <linux/pid.h>
@@ -359,6 +366,12 @@ struct mutex graph_lock;
 	u64 failure_count;
 	u64 last_failure_sequence;
 	u64 session_id;
+	bool sandbox_bound;
+	u32 sandbox_flags;
+	u32 sandbox_state;
+	u64 sandbox_binding_id;
+	u64 sandbox_generation;
+	struct agi_lc_sandbox_binding sandbox_binding;
 	u64 dropped_records;
 	pid_t owner_pid;
 	pid_t owner_tgid;
@@ -480,6 +493,134 @@ static DEFINE_MUTEX(agi_lc_autonomy_lock);
 static struct agi_lc_autonomy_record
 	agi_lc_autonomy_records[AGI_LC_AUTONOMY_RECORDS];
 static atomic64_t agi_lc_next_autonomy_control = ATOMIC64_INIT(0);
+static int agi_lc_push_record(struct agi_lc_session *session, u16 type,
+				      s32 status, u64 correlation, u64 metadata);
+
+static void agi_lc_sandbox_capture(struct agi_lc_sandbox_binding *binding)
+{
+	struct nsproxy *ns = current->nsproxy;
+
+	binding->owner_pid = task_pid_nr(current);
+	binding->owner_tgid = task_tgid_nr(current);
+	binding->pid_namespace = task_active_pid_ns(current)->ns.inum;
+	binding->mount_namespace = ns->mnt_ns ? from_mnt_ns(ns->mnt_ns)->inum : 0;
+	binding->net_namespace = ns->net_ns ? ns->net_ns->ns.inum : 0;
+	binding->ipc_namespace = ns->ipc_ns ? ns->ipc_ns->ns.inum : 0;
+	binding->uts_namespace = ns->uts_ns ? ns->uts_ns->ns.inum : 0;
+	binding->user_namespace = current_user_ns()->ns.inum;
+	binding->cgroup_id = cgroup_id(task_dfl_cgroup(current));
+}
+
+static bool agi_lc_sandbox_matches_current(
+		const struct agi_lc_sandbox_binding *expected)
+{
+	struct agi_lc_sandbox_binding observed = { 0 };
+
+	agi_lc_sandbox_capture(&observed);
+	return observed.owner_tgid == expected->owner_tgid &&
+		observed.pid_namespace == expected->pid_namespace &&
+		observed.mount_namespace == expected->mount_namespace &&
+		observed.net_namespace == expected->net_namespace &&
+		observed.ipc_namespace == expected->ipc_namespace &&
+		observed.uts_namespace == expected->uts_namespace &&
+		observed.user_namespace == expected->user_namespace &&
+		observed.cgroup_id == expected->cgroup_id;
+}
+
+static int agi_lc_sandbox_validate_requirements(u32 flags,
+		const struct agi_lc_sandbox_binding *binding)
+{
+	if (flags & ~AGI_LC_SANDBOX_FLAGS_ALL)
+		return -EINVAL;
+	if ((flags & AGI_LC_SANDBOX_REQUIRE_PID_NS) && !binding->pid_namespace)
+		return -EOPNOTSUPP;
+	if ((flags & AGI_LC_SANDBOX_REQUIRE_MOUNT_NS) && !binding->mount_namespace)
+		return -EOPNOTSUPP;
+	if ((flags & AGI_LC_SANDBOX_REQUIRE_NET_NS) && !binding->net_namespace)
+		return -EOPNOTSUPP;
+	if ((flags & AGI_LC_SANDBOX_REQUIRE_IPC_NS) && !binding->ipc_namespace)
+		return -EOPNOTSUPP;
+	if ((flags & AGI_LC_SANDBOX_REQUIRE_UTS_NS) && !binding->uts_namespace)
+		return -EOPNOTSUPP;
+	if ((flags & AGI_LC_SANDBOX_REQUIRE_USER_NS) && !binding->user_namespace)
+		return -EOPNOTSUPP;
+	if ((flags & AGI_LC_SANDBOX_REQUIRE_CGROUP) && !binding->cgroup_id)
+		return -EOPNOTSUPP;
+	return 0;
+}
+
+static int agi_lc_sandbox_ioctl(struct agi_lc_session *session,
+			unsigned long arg)
+{
+	struct agi_lc_sandbox_binding binding;
+	int ret;
+
+	if (copy_from_user(&binding, (void __user *)arg, sizeof(binding)))
+		return -EFAULT;
+	if (binding.size != sizeof(binding) || binding.reserved32 ||
+	    binding.reserved[0] || binding.reserved[1])
+		return -EINVAL;
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+	if (binding.operation == AGI_LC_SANDBOX_BIND) {
+		u32 requested_flags;
+
+		if (session->sandbox_bound)
+			return -EALREADY;
+		requested_flags = binding.flags;
+		memset(&binding, 0, sizeof(binding));
+		binding.size = sizeof(binding);
+		binding.operation = AGI_LC_SANDBOX_BIND;
+		binding.flags = requested_flags;
+		agi_lc_sandbox_capture(&binding);
+		ret = agi_lc_sandbox_validate_requirements(requested_flags,
+							  &binding);
+		if (ret)
+			return ret;
+		session->sandbox_flags = requested_flags;
+		session->sandbox_state = AGI_LC_SANDBOX_STATE_BOUND;
+		session->sandbox_binding_id = atomic64_inc_return(&agi_lc_next_session);
+		session->sandbox_generation = 1;
+		binding.state = session->sandbox_state;
+		binding.status = 0;
+		binding.binding_id = session->sandbox_binding_id;
+		binding.generation = session->sandbox_generation;
+		session->sandbox_binding = binding;
+		session->sandbox_bound = true;
+		ret = agi_lc_push_record(session, AGI_LC_EVENT_SECURITY_CAPABILITY,
+					 0, binding.correlation, binding.binding_id);
+	} else if (binding.operation == AGI_LC_SANDBOX_QUERY) {
+		if (!session->sandbox_bound)
+			return -ENOENT;
+		binding = session->sandbox_binding;
+		binding.operation = AGI_LC_SANDBOX_QUERY;
+		binding.state = agi_lc_sandbox_matches_current(&binding) ?
+			AGI_LC_SANDBOX_STATE_BOUND : AGI_LC_SANDBOX_STATE_REVOKED;
+		binding.status = binding.state == AGI_LC_SANDBOX_STATE_BOUND ? 0 : -EXDEV;
+		ret = binding.status;
+	} else if (binding.operation == AGI_LC_SANDBOX_RELEASE) {
+		if (!session->sandbox_bound)
+			return -ENOENT;
+		if (!agi_lc_sandbox_matches_current(&session->sandbox_binding))
+			return -EXDEV;
+		session->sandbox_state = AGI_LC_SANDBOX_STATE_REVOKED;
+		session->sandbox_generation++;
+		binding = session->sandbox_binding;
+		binding.operation = AGI_LC_SANDBOX_RELEASE;
+		binding.state = session->sandbox_state;
+		binding.status = 0;
+		binding.generation = session->sandbox_generation;
+		session->sandbox_binding = binding;
+		session->sandbox_bound = false;
+		ret = agi_lc_push_record(session, AGI_LC_EVENT_SECURITY_CAPABILITY,
+					 0, binding.correlation, binding.binding_id);
+	} else {
+		return -EINVAL;
+	}
+	if (copy_to_user((void __user *)arg, &binding, sizeof(binding)))
+		return -EFAULT;
+	return ret;
+}
 
 static int agi_lc_push_record(struct agi_lc_session *session, u16 type,
 				      s32 status, u64 correlation, u64 metadata);
@@ -9626,7 +9767,16 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 	if (_IOC_TYPE(command) != AGI_LC_IOC_MAGIC)
 		return -ENOTTY;
 	mutex_lock(&session->ioctl_lock);
+	if (session->sandbox_bound && command != AGI_LC_SANDBOX &&
+	    !agi_lc_sandbox_matches_current(&session->sandbox_binding)) {
+		session->sandbox_state = AGI_LC_SANDBOX_STATE_REVOKED;
+		mutex_unlock(&session->ioctl_lock);
+		return -EXDEV;
+	}
 	switch (command) {
+	case AGI_LC_SANDBOX:
+		ret = agi_lc_sandbox_ioctl(session, arg);
+		break;
 	case AGI_LC_CREATE: {
 		struct agi_lc_create create;
 
