@@ -432,6 +432,24 @@
 #define AGI_LC_MEMORY_REGION_SNAPSHOTABLE (1U << 3)
 #define AGI_LC_TENSOR_POLICY_SET 1U
 #define AGI_LC_TENSOR_POLICY_GET 2U
+#define AGI_LC_ADAPTIVE_MEMORY_POLICY_SET 1U
+#define AGI_LC_ADAPTIVE_MEMORY_POLICY_GET 2U
+#define AGI_LC_ADAPTIVE_MEMORY_POLICY_CLEAR 3U
+#define AGI_LC_ADAPTIVE_MEMORY_ACTION_OBSERVE 1U
+#define AGI_LC_ADAPTIVE_MEMORY_ACTION_MIGRATE_HOT 2U
+#define AGI_LC_ADAPTIVE_MEMORY_ACTION_MIGRATE_COLD 3U
+#define AGI_LC_ADAPTIVE_MEMORY_ACTION_RECLAIM_COLD 4U
+#define AGI_LC_ADAPTIVE_MEMORY_ACTION_MAX AGI_LC_ADAPTIVE_MEMORY_ACTION_RECLAIM_COLD
+#define AGI_LC_ADAPTIVE_MEMORY_FLAG_TIER_AWARE (1U << 0)
+#define AGI_LC_ADAPTIVE_MEMORY_FLAG_PROVIDER_REQUIRED (1U << 1)
+#define AGI_LC_ADAPTIVE_MEMORY_FLAGS_ALL ((1U << 2) - 1)
+#define AGI_LC_ADAPTIVE_MEMORY_PROVIDER_DAMON (1U << 0)
+#define AGI_LC_ADAPTIVE_MEMORY_PROVIDER_CXL (1U << 1)
+#define AGI_LC_ADAPTIVE_MEMORY_PROVIDER_HMM (1U << 2)
+#define AGI_LC_ADAPTIVE_MEMORY_PROVIDER_ALL ((1U << 3) - 1)
+#define AGI_LC_ADAPTIVE_MEMORY_STATUS_RECORDED 0
+#define AGI_LC_ADAPTIVE_MEMORY_STATUS_OBSERVE_ONLY 1
+#define AGI_LC_ADAPTIVE_MEMORY_STATUS_UNSUPPORTED 2
 #define AGI_LC_TENSOR_FLAG_READ_MOSTLY (1U << 0)
 #define AGI_LC_TENSOR_FLAG_NO_SWAP_PREFERRED (1U << 1)
 #define AGI_LC_TENSOR_FLAG_HUGEPAGE_PREFERRED (1U << 2)
@@ -1599,6 +1617,25 @@ __u64 state_sequence;
 __u64 correlation;
 __u64 reserved[2];
 };
+struct agi_lc_adaptive_memory_policy {
+	__u32 size;
+	__u32 operation;
+	__u32 flags;
+	__u32 action;
+	__s32 status;
+	__u32 provider_mask;
+	__u64 region_id;
+	__u64 capability;
+	__u64 sample_interval_ns;
+	__u64 aggregation_interval_ns;
+	__u64 apply_interval_ns;
+	__u32 max_overhead_ppm;
+	__u32 max_bytes_per_interval;
+	__u64 generation;
+	__u64 unsupported_provider_mask;
+	__u64 correlation;
+	__u64 reserved[2];
+};
 struct agi_lc_tensor_policy {
 __u32 size;
 __u32 operation;
@@ -2179,6 +2216,7 @@ struct agi_lc_record {
 #define AGI_LC_MEMORY_REGION_SNAPSHOT _IOWR(AGI_LC_IOC_MAGIC, 0x29, struct agi_lc_memory_snapshot)
 #define AGI_LC_MEMORY_REGION_REVOKE _IOW(AGI_LC_IOC_MAGIC, 0x2a, struct agi_lc_memory_revoke)
 #define AGI_LC_TENSOR_POLICY _IOWR(AGI_LC_IOC_MAGIC, 0x5b, struct agi_lc_tensor_policy)
+#define AGI_LC_ADAPTIVE_MEMORY_POLICY _IOWR(AGI_LC_IOC_MAGIC, 0x64, struct agi_lc_adaptive_memory_policy)
 #define AGI_LC_GRAPH_NODE _IOWR(AGI_LC_IOC_MAGIC, 0x5c, struct agi_lc_graph_node)
 #define AGI_LC_COMPUTE_CONTEXT _IOWR(AGI_LC_IOC_MAGIC, 0x5d, struct agi_lc_compute_context)
 #define AGI_LC_PROVENANCE_BINDING _IOWR(AGI_LC_IOC_MAGIC, 0x5e, struct agi_lc_provenance_binding)

@@ -262,6 +262,8 @@ struct agi_lc_memory_record {
 	u64 capability;
 	bool tensor_valid;
 	struct agi_lc_tensor_policy tensor;
+	bool adaptive_memory_valid;
+	struct agi_lc_adaptive_memory_policy adaptive_memory;
 	struct agi_lc_memory_share_record shares[AGI_LC_MEMORY_SHARES];
 };
 
@@ -1548,6 +1550,112 @@ static int agi_lc_tensor_policy_validate_set(const struct agi_lc_tensor_policy *
 	if (policy->flags & AGI_LC_TENSOR_FLAG_PHYSICALLY_CONTIGUOUS)
 		return -EOPNOTSUPP;
 	return 0;
+}
+
+#define FAISAL_ADAPTIVE_MEMORY_MIN_SAMPLE_NS (1000ULL * 1000ULL)
+#define FAISAL_ADAPTIVE_MEMORY_MAX_SAMPLE_NS (1000ULL * 1000ULL * 1000ULL)
+#define FAISAL_ADAPTIVE_MEMORY_MAX_AGGREGATION_NS (60ULL * NSEC_PER_SEC)
+#define FAISAL_ADAPTIVE_MEMORY_MAX_APPLY_NS (5ULL * 60ULL * NSEC_PER_SEC)
+#define FAISAL_ADAPTIVE_MEMORY_MAX_BYTES_PER_INTERVAL (1U << 30)
+
+static int agi_lc_adaptive_memory_policy_control(struct agi_lc_session *session,
+							 unsigned long arg)
+{
+	struct agi_lc_adaptive_memory_policy policy;
+	struct agi_lc_memory_record *record;
+	u64 available_providers = 0;
+	int ret;
+
+	if (copy_from_user(&policy, (void __user *)arg, sizeof(policy)))
+		return -EFAULT;
+	if (policy.size != sizeof(policy) || policy.reserved[0] ||
+	    policy.reserved[1] || !policy.region_id || !policy.capability ||
+	    policy.flags & ~AGI_LC_ADAPTIVE_MEMORY_FLAGS_ALL ||
+	    policy.provider_mask & ~AGI_LC_ADAPTIVE_MEMORY_PROVIDER_ALL ||
+	    policy.operation < AGI_LC_ADAPTIVE_MEMORY_POLICY_SET ||
+	    policy.operation > AGI_LC_ADAPTIVE_MEMORY_POLICY_CLEAR)
+		return -EINVAL;
+	if (policy.operation == AGI_LC_ADAPTIVE_MEMORY_POLICY_SET &&
+	    (policy.action < AGI_LC_ADAPTIVE_MEMORY_ACTION_OBSERVE ||
+	     policy.action > AGI_LC_ADAPTIVE_MEMORY_ACTION_MAX ||
+	     !policy.provider_mask ||
+	     policy.sample_interval_ns < FAISAL_ADAPTIVE_MEMORY_MIN_SAMPLE_NS ||
+	     policy.sample_interval_ns > FAISAL_ADAPTIVE_MEMORY_MAX_SAMPLE_NS ||
+	     policy.aggregation_interval_ns < policy.sample_interval_ns ||
+	     policy.aggregation_interval_ns > FAISAL_ADAPTIVE_MEMORY_MAX_AGGREGATION_NS ||
+	     policy.apply_interval_ns < policy.aggregation_interval_ns ||
+	     policy.apply_interval_ns > FAISAL_ADAPTIVE_MEMORY_MAX_APPLY_NS ||
+	     policy.max_overhead_ppm > 100000U ||
+	     policy.max_bytes_per_interval > FAISAL_ADAPTIVE_MEMORY_MAX_BYTES_PER_INTERVAL))
+		return -EINVAL;
+	if (policy.operation != AGI_LC_ADAPTIVE_MEMORY_POLICY_SET &&
+	    (policy.action || policy.provider_mask || policy.sample_interval_ns ||
+	     policy.aggregation_interval_ns || policy.apply_interval_ns ||
+	     policy.max_overhead_ppm || policy.max_bytes_per_interval))
+		return -EINVAL;
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != session->session_id)
+		return -EPERM;
+
+	mutex_lock(&agi_lc_memory_lock);
+	record = agi_lc_memory_find_locked(session, policy.region_id);
+	if (!record || !agi_lc_memory_authorized_locked(session, record,
+								 policy.capability,
+								 AGI_LC_MEMORY_ACCESS_READ)) {
+		ret = -EACCES;
+		goto out_unlock;
+	}
+	if (policy.operation == AGI_LC_ADAPTIVE_MEMORY_POLICY_GET) {
+		if (!record->adaptive_memory_valid) {
+			ret = -ENODATA;
+			goto out_unlock;
+		}
+		policy = record->adaptive_memory;
+		policy.operation = AGI_LC_ADAPTIVE_MEMORY_POLICY_GET;
+		ret = copy_to_user((void __user *)arg, &policy, sizeof(policy)) ?
+			-EFAULT : 0;
+		goto out_unlock;
+	}
+	if (policy.operation == AGI_LC_ADAPTIVE_MEMORY_POLICY_CLEAR) {
+		if (!record->adaptive_memory_valid) {
+			ret = -ENODATA;
+			goto out_unlock;
+		}
+		record->adaptive_memory_valid = false;
+		record->generation++;
+		policy.status = AGI_LC_ADAPTIVE_MEMORY_STATUS_RECORDED;
+		policy.generation = record->generation;
+		ret = agi_lc_push_record(session, AGI_LC_EVENT_MEMORY_REGION,
+					  0, policy.correlation, record->generation);
+		if (!ret && copy_to_user((void __user *)arg, &policy, sizeof(policy)))
+			ret = -EFAULT;
+		goto out_unlock;
+
+	}
+
+	/* No provider is asserted by the kernel; providers must prove themselves. */
+	policy.unsupported_provider_mask = policy.provider_mask & ~available_providers;
+	policy.status = policy.unsupported_provider_mask ?
+		AGI_LC_ADAPTIVE_MEMORY_STATUS_OBSERVE_ONLY :
+		AGI_LC_ADAPTIVE_MEMORY_STATUS_RECORDED;
+	if ((policy.flags & AGI_LC_ADAPTIVE_MEMORY_FLAG_PROVIDER_REQUIRED) &&
+	    policy.unsupported_provider_mask) {
+		ret = -EOPNOTSUPP;
+		goto out_unlock;
+	}
+	record->adaptive_memory = policy;
+	record->adaptive_memory_valid = true;
+	record->generation++;
+	record->adaptive_memory.generation = record->generation;
+	policy = record->adaptive_memory;
+	ret = agi_lc_push_record(session, AGI_LC_EVENT_MEMORY_REGION,
+				 0, policy.correlation, record->generation);
+	if (!ret && copy_to_user((void __user *)arg, &policy, sizeof(policy)))
+		ret = -EFAULT;
+out_unlock:
+	mutex_unlock(&agi_lc_memory_lock);
+	return ret;
 }
 
 static int agi_lc_tensor_policy_control(struct agi_lc_session *session,
@@ -9605,6 +9713,9 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 		break;
 	case AGI_LC_TENSOR_POLICY:
 		ret = agi_lc_tensor_policy_control(session, arg);
+		break;
+	case AGI_LC_ADAPTIVE_MEMORY_POLICY:
+		ret = agi_lc_adaptive_memory_policy_control(session, arg);
 		break;
 case AGI_LC_GRAPH_NODE:
 		ret = agi_lc_graph_node_control(session, arg);

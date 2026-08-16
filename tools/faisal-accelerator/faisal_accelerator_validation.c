@@ -161,6 +161,7 @@ int m79_run(struct m79_service *service,
 	    const struct m79_provider_evidence *evidence)
 {
 	struct agi_lc_tensor_policy tensor;
+	struct agi_lc_adaptive_memory_policy adaptive;
 	struct agi_lc_graph_node node;
 	struct agi_lc_resource_snapshot snapshot;
 	if (!service || !evidence || m79_validate_provider_evidence(evidence) != 0)
@@ -207,7 +208,62 @@ int m79_run(struct m79_service *service,
 	if (ioctl(service->kernel_fd, AGI_LC_TENSOR_POLICY, &tensor) < 0 ||
 	    drain_record(service->kernel_fd) < 0 || !tensor.generation)
 		return fail_stage(service, "tensor-policy");
+	memset(&adaptive, 0, sizeof(adaptive));
+	adaptive.size = sizeof(adaptive);
+	adaptive.operation = AGI_LC_ADAPTIVE_MEMORY_POLICY_SET;
+	adaptive.flags = AGI_LC_ADAPTIVE_MEMORY_FLAG_TIER_AWARE;
+	adaptive.action = AGI_LC_ADAPTIVE_MEMORY_ACTION_MIGRATE_HOT;
+	adaptive.provider_mask = AGI_LC_ADAPTIVE_MEMORY_PROVIDER_ALL;
+	adaptive.region_id = service->region.region_id;
+	adaptive.capability = service->region.capability;
+	adaptive.sample_interval_ns = 10ULL * 1000ULL * 1000ULL;
+	adaptive.aggregation_interval_ns = 100ULL * 1000ULL * 1000ULL;
+	adaptive.apply_interval_ns = 1000ULL * 1000ULL * 1000ULL;
+	adaptive.max_overhead_ppm = 40000;
+	adaptive.max_bytes_per_interval = 4096;
+	adaptive.correlation = 790051;
+	if (ioctl(service->kernel_fd, AGI_LC_ADAPTIVE_MEMORY_POLICY, &adaptive) < 0 ||
+		adaptive.status != AGI_LC_ADAPTIVE_MEMORY_STATUS_OBSERVE_ONLY ||
+		adaptive.unsupported_provider_mask != AGI_LC_ADAPTIVE_MEMORY_PROVIDER_ALL ||
+		!adaptive.generation || drain_record(service->kernel_fd) < 0)
+		return fail_stage(service, "adaptive-memory-set");
+	adaptive.flags |= AGI_LC_ADAPTIVE_MEMORY_FLAG_PROVIDER_REQUIRED;
+	if (ioctl(service->kernel_fd, AGI_LC_ADAPTIVE_MEMORY_POLICY, &adaptive) >= 0 ||
+		errno != EOPNOTSUPP)
+		return fail_stage(service, "adaptive-memory-provider-gate");
+	adaptive.flags = AGI_LC_ADAPTIVE_MEMORY_FLAG_TIER_AWARE;
+	adaptive.operation = AGI_LC_ADAPTIVE_MEMORY_POLICY_GET;
+	adaptive.action = 0;
+	adaptive.provider_mask = 0;
+	adaptive.sample_interval_ns = 0;
+	adaptive.aggregation_interval_ns = 0;
+	adaptive.apply_interval_ns = 0;
+	adaptive.max_overhead_ppm = 0;
+	adaptive.max_bytes_per_interval = 0;
+	if (ioctl(service->kernel_fd, AGI_LC_ADAPTIVE_MEMORY_POLICY, &adaptive) < 0 ||
+		adaptive.status != AGI_LC_ADAPTIVE_MEMORY_STATUS_OBSERVE_ONLY ||
+		adaptive.unsupported_provider_mask != AGI_LC_ADAPTIVE_MEMORY_PROVIDER_ALL ||
+		!adaptive.generation)
+		return fail_stage(service, "adaptive-memory-get");
+	adaptive.operation = AGI_LC_ADAPTIVE_MEMORY_POLICY_CLEAR;
+	adaptive.flags = 0;
+	adaptive.action = 0;
+	adaptive.status = 0;
+	adaptive.provider_mask = 0;
+	adaptive.sample_interval_ns = 0;
+	adaptive.aggregation_interval_ns = 0;
+	adaptive.apply_interval_ns = 0;
+	adaptive.max_overhead_ppm = 0;
+	adaptive.max_bytes_per_interval = 0;
+	adaptive.generation = 0;
+	adaptive.unsupported_provider_mask = 0;
+	adaptive.correlation = 790052;
+	if (ioctl(service->kernel_fd, AGI_LC_ADAPTIVE_MEMORY_POLICY, &adaptive) < 0 ||
+		drain_record(service->kernel_fd) < 0 || !adaptive.generation)
+		return fail_stage(service, "adaptive-memory-clear");
+	tensor.generation = adaptive.generation;
 	memset(&service->transport, 0, sizeof(service->transport));
+
 	service->transport.size = sizeof(service->transport);
 	service->transport.operation = AGI_LC_TENSOR_TRANSPORT_REGISTER;
 	service->transport.transport_kind = AGI_LC_TRANSPORT_DMA_BUF;

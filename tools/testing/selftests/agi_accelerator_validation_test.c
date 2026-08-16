@@ -46,6 +46,7 @@ int main(void)
 	       service.report.unsupported_fabric);
 	printf("M79_TENSOR_TRANSPORT_OK id=%llu\n",
 	       (unsigned long long)service.report.transport_id);
+	printf("M79_ADAPTIVE_MEMORY_POLICY_OK status=observe-only providers=damon,cxl,hmm\n");
 	printf("M79_GRAPH_TELEMETRY_OK id=%llu state=%u\n",
 	       (unsigned long long)service.report.telemetry_id,
 	       service.report.telemetry_state);

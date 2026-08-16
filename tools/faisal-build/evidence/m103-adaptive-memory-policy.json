@@ -1,0 +1,55 @@
+{
+  "milestone": "M103-adaptive-memory-policy-intent",
+  "date": "2026-08-16",
+  "abi": 38,
+  "kernel_base": "Linux v7.2-rc7",
+  "future_technology": "capability-scoped adaptive memory policy intent for DAMON/CXL/HMM providers",
+  "status": "validated_bounded_provider_gated",
+  "implementation": [
+    "include/uapi/linux/agi_lifecycle.h",
+    "drivers/misc/agi_lifecycle.c",
+    "tools/faisal-accelerator/faisal_accelerator_validation.c",
+    "tools/testing/selftests/agi_accelerator_validation_test.c"
+  ],
+  "checks": {
+    "kernel_driver_compile": "pass",
+    "userspace_static_validator_build": "pass",
+    "qemu_m79": "pass",
+    "adaptive_set": "pass",
+    "provider_required_denial": "pass_eopnotsupp_without_provider",
+    "adaptive_get": "pass",
+    "adaptive_clear": "pass",
+    "generation_handoff_to_tensor_transport": "pass",
+    "stale_capability_denial": "pass",
+    "kernel_diagnostic_scan": "clean",
+    "aggregate_qemu_harnesses": 26,
+    "aggregate_qemu": "pass"
+  },
+  "provider_state_in_qemu": {
+    "damon": "unsupported",
+    "cxl": "unsupported",
+    "hmm": "unsupported",
+    "reported_status": "observe-only"
+  },
+  "bounds": {
+    "sample_interval_ns": [1000000, 1000000000],
+    "aggregation_interval_ns_max": 60000000000,
+    "apply_interval_ns_max": 300000000000,
+    "max_overhead_ppm": 100000,
+    "max_bytes_per_interval": 1073741824
+  },
+  "non_claims": [
+    "does_not_execute DAMON",
+    "does_not_claim CXL hardware support",
+    "does_not_claim HMM device migration",
+    "does_not_reclaim_or_migrate_memory",
+    "does_not_claim GPU/NPU coherence",
+    "does_not_claim performance improvement",
+    "does_not_claim production readiness"
+  ],
+  "references": [
+    "https://docs.kernel.org/mm/damon/design.html",
+    "https://docs.kernel.org/driver-api/cxl/index.html",
+    "https://www.kernel.org/doc/html/v5.0/vm/hmm.html"
+  ]
+}
