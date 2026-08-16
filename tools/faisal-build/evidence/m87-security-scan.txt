@@ -1,0 +1,2 @@
+M87_SECURITY_SCAN=PASS
+No process launch, identity change, privileged capability, model invocation, module mutation, livepatch, or model-authority primitive found in M87 sources/harness.

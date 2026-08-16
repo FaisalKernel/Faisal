@@ -1,0 +1,90 @@
+{
+  "milestone": "FAISAL-M87",
+  "status": "validated_bounded_runtime_signal_attestation_and_repair_gating",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "implementation": {
+    "header": "tools/faisal-runtime-verification/faisal_runtime_verification.h",
+    "service": "tools/faisal-runtime-verification/faisal_runtime_verification.c",
+    "selftest": "tools/testing/selftests/agi_runtime_verification_test.c",
+    "qemu_harness": "tools/faisal-build/run_runtime_verification_qemu.sh",
+    "full_audit_runner": "tools/faisal-build/run_full_faisal_audit.sh",
+    "research": "M87-RUNTIME-VERIFICATION-RESEARCH.md"
+  },
+  "acceptance_markers": {
+    "attestation_bound": true,
+    "signal_mismatch_denied": true,
+    "runtime_signal_bound": true,
+    "degraded_attestation_denied": true,
+    "unsupported_provider_denied": true,
+    "payload_digest_tamper_denied": true,
+    "signature_tamper_denied": true,
+    "signed_bundle_verified": true,
+    "model_authority_denied": true,
+    "attested_repair_canary_success": true,
+    "canary_rollback": true,
+    "selftest_exit": 0
+  },
+  "clean_smoke": {
+    "runs": 3,
+    "elapsed_ms": [6350, 6496, 6390],
+    "mean_ms": 6412.0,
+    "range_ms": 146,
+    "timing_scope": "source_build_initramfs_qemu_boot_attestation_signature_policy_canary_rollback_shutdown",
+    "summary": "tools/faisal-build/evidence/m87-clean-smoke-summary.txt"
+  },
+  "kernel_images": {
+    "recovered_image": "passed",
+    "clean_audit_image": "passed",
+    "clean_image_sha256": "436fbf876786fb5d61051543dcc7a81b96ca0f73bf94b491dbafdf6c6facc742"
+  },
+  "sanitizers": {
+    "kasan_lockdep": {
+      "qemu": "passed_four_vcpu",
+      "diagnostics": "no_kasan_lockdep_oops_panic_signatures",
+      "log": "tools/faisal-build/evidence/m87-kasan-qemu.log"
+    },
+    "kcsan_lockdep": {
+      "eight_vcpu_qemu": "workload_passed_but_rcu_starvation_warning_observed",
+      "sixteen_vcpu_qemu": "clean_pass",
+      "clean_diagnostics": "no_kcsan_lockdep_oops_panic_or_rcu_stall_signatures",
+      "log": "tools/faisal-build/evidence/m87-kcsan-16cpu-qemu.log"
+    }
+  },
+  "full_regression": {
+    "count": 23,
+    "passed": 23,
+    "failed": 0,
+    "retry_required": false,
+    "summary": "tools/faisal-build/evidence/m87-full-audit-summary.txt",
+    "source_rebuilds": ["M73_world_state", "M77_verified_research", "M81_concurrency", "M83_memory_transaction", "M86_runtime_attestation", "M87_runtime_verification"]
+  },
+  "security": {
+    "source_scan": "passed",
+    "forbidden_primitive_scan": "no_process_launch_identity_change_privileged_capability_model_invocation_module_mutation_livepatch_or_model_authority",
+    "review": "M87-SECURITY-REVIEW.md"
+  },
+  "trust_boundary": {
+    "provider_mask": "software_only_in_current_validation",
+    "hardware_attestation": "unsupported_and_denied",
+    "remote_attestation": "unsupported_and_denied",
+    "test_key": "ephemeral_in_process_fixture_only",
+    "repair_payload_execution": "not_performed",
+    "model_output_authority": false
+  },
+  "limitations": [
+    "Synthetic structured signal in selftest; no production tracefs RV monitor is claimed",
+    "Ephemeral test key is not a production trust root",
+    "No hardware-backed, remote, or secure-boot attestation claim",
+    "No arbitrary kernel self-modification or payload execution",
+    "No formal proof, race-freedom, or production-readiness claim"
+  ],
+  "evidence": [
+    "MILESTONE87.md",
+    "M87-RUNTIME-VERIFICATION-DESIGN.md",
+    "M87-SECURITY-REVIEW.md",
+    "M87-BENCHMARKS.md",
+    "M87-RUNTIME-VERIFICATION-RESEARCH.md",
+    "tools/faisal-build/evidence/m87-runtime-verification-validation.json"
+  ]
+}
