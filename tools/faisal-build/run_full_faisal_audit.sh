@@ -81,6 +81,12 @@ cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -pthread \
   tools/faisal-memory-unified/faisal_unified_memory.c \
   tools/testing/selftests/agi_collaboration_memory_test.c \
   -o "$BUILD/agi_collaboration_memory_test" -lcrypto -ldl -lpthread
+cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -pthread \
+  -Iinclude/uapi -Itools/faisal-world-model -Itools/faisal-model-router \
+  tools/faisal-world-model/faisal_world_model_service.c \
+  tools/faisal-model-router/faisal_model_router.c \
+  tools/testing/selftests/agi_world_model_router_test.c \
+  -o "$BUILD/agi_world_model_router_test" -lcrypto -ldl -lpthread
 set -- \
  tools/faisal-build/run_agent_security_m64_qemu.sh \
  tools/faisal-build/run_transport_qemu.sh \
@@ -111,7 +117,8 @@ set -- \
  tools/faisal-build/run_autonomy_control_qemu.sh \
  tools/faisal-build/run_autonomy_orchestrator_qemu.sh \
  tools/faisal-build/run_durable_execution_qemu.sh \
- tools/faisal-build/run_collaboration_memory_qemu.sh
+ tools/faisal-build/run_collaboration_memory_qemu.sh \
+ tools/faisal-build/run_world_model_router_qemu.sh
 count=0
 for harness do
 	count=$((count + 1))
