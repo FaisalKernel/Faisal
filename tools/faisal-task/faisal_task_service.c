@@ -22,6 +22,16 @@ struct fts_disk_header {
 	uint8_t task_digest[FTS_DIGEST_SIZE];
 };
 
+struct fts_causal_disk_header {
+	uint32_t magic;
+	uint32_t version;
+	uint32_t header_size;
+	uint32_t record_size;
+	uint64_t causal_sequence;
+	uint64_t branch_id;
+	uint8_t branch_digest[FTS_DIGEST_SIZE];
+};
+
 static int write_all(int fd, const void *buffer, size_t length)
 {
 	const unsigned char *cursor = buffer;
@@ -74,6 +84,26 @@ static int digest_task(const struct fts_task *task,
 	if (!context)
 		return FTS_ERR_IO;
 	memset(canonical.objective_digest, 0, sizeof(canonical.objective_digest));
+	if (EVP_DigestInit_ex(context, EVP_sha256(), NULL) == 1 &&
+	    EVP_DigestUpdate(context, &canonical, sizeof(canonical)) == 1 &&
+	    EVP_DigestFinal_ex(context, digest, &output_length) == 1 &&
+	    output_length == FTS_DIGEST_SIZE)
+		result = FTS_OK;
+	EVP_MD_CTX_free(context);
+	return result;
+}
+
+static int digest_branch(const struct fts_branch *branch,
+			  uint8_t digest[FTS_DIGEST_SIZE])
+{
+	struct fts_branch canonical = *branch;
+	EVP_MD_CTX *context = EVP_MD_CTX_new();
+	unsigned int output_length = 0;
+	int result = FTS_ERR_IO;
+
+	if (!context)
+		return FTS_ERR_IO;
+	memset(canonical.branch_digest, 0, sizeof(canonical.branch_digest));
 	if (EVP_DigestInit_ex(context, EVP_sha256(), NULL) == 1 &&
 	    EVP_DigestUpdate(context, &canonical, sizeof(canonical)) == 1 &&
 	    EVP_DigestFinal_ex(context, digest, &output_length) == 1 &&
@@ -234,8 +264,104 @@ static int append_task(struct fts_service *service, const struct fts_task *task)
 	return result;
 }
 
+static int append_branch(struct fts_service *service,
+			 const struct fts_branch *branch)
+{
+	struct fts_causal_disk_header header;
+	struct fts_branch disk_branch = *branch;
+	uint8_t digest[FTS_DIGEST_SIZE];
+	uint64_t causal_sequence = service->causal_sequence + 1;
+	int result;
+
+	disk_branch.causal_sequence = causal_sequence;
+	result = digest_branch(&disk_branch, digest);
+	if (result != FTS_OK)
+		return result;
+	memset(&header, 0, sizeof(header));
+	header.magic = FTS_CAUSAL_JOURNAL_MAGIC;
+	header.version = FTS_CAUSAL_JOURNAL_VERSION;
+	header.header_size = sizeof(header);
+	header.record_size = sizeof(header) + sizeof(disk_branch);
+	header.causal_sequence = causal_sequence;
+	header.branch_id = disk_branch.branch_id;
+	memcpy(header.branch_digest, digest, sizeof(header.branch_digest));
+	result = write_all(service->causal_fd, &header, sizeof(header));
+	if (result == FTS_OK)
+		result = write_all(service->causal_fd, &disk_branch, sizeof(disk_branch));
+	if (result == FTS_OK && fdatasync(service->causal_fd) < 0)
+		result = FTS_ERR_IO;
+	if (result == FTS_OK)
+		service->causal_sequence = causal_sequence;
+	return result;
+}
+
+static int apply_replayed_branch(struct fts_service *service,
+				 const struct fts_branch *branch)
+{
+	size_t index;
+
+	for (index = 0; index < service->branch_count; index++)
+		if (service->branches[index].branch_id == branch->branch_id) {
+			service->branches[index] = *branch;
+			return FTS_OK;
+		}
+	if (service->branch_count >= FTS_MAX_BRANCHES)
+		return FTS_ERR_FULL;
+	service->branches[service->branch_count++] = *branch;
+	return FTS_OK;
+}
+
+static int replay_causal_unlocked(struct fts_service *service)
+{
+	struct fts_causal_disk_header header;
+	uint64_t last_sequence = 0;
+	int result;
+
+	if (lseek(service->causal_fd, 0, SEEK_SET) < 0)
+		return FTS_ERR_IO;
+	service->branch_count = 0;
+	service->causal_sequence = 0;
+	service->next_branch_id = 1;
+	for (;;) {
+		struct fts_branch branch;
+		uint8_t digest[FTS_DIGEST_SIZE];
+
+		result = read_exact_or_eof(service->causal_fd, &header,
+					   sizeof(header));
+		if (result == 1)
+			break;
+		if (result != FTS_OK || header.magic != FTS_CAUSAL_JOURNAL_MAGIC ||
+		    header.version != FTS_CAUSAL_JOURNAL_VERSION ||
+		    header.header_size != sizeof(header) ||
+		    header.record_size != sizeof(header) + sizeof(branch) ||
+		    header.causal_sequence <= last_sequence || !header.branch_id)
+			return FTS_ERR_CORRUPT;
+		result = read_exact_or_eof(service->causal_fd, &branch,
+					   sizeof(branch));
+		if (result != FTS_OK || branch.branch_id != header.branch_id ||
+		    branch.causal_sequence != header.causal_sequence ||
+		    branch.state < FTS_BRANCH_PROPOSED ||
+		    branch.state > FTS_BRANCH_INVALIDATED ||
+		    branch.evidence_count > FTS_MAX_EVIDENCE ||
+		    branch.evidence_required > FTS_MAX_EVIDENCE ||
+		    branch.evidence_verified > branch.evidence_count ||
+		    digest_branch(&branch, digest) != FTS_OK ||
+		    memcmp(digest, header.branch_digest, sizeof(digest)) != 0)
+			return FTS_ERR_CORRUPT;
+		result = apply_replayed_branch(service, &branch);
+		if (result != FTS_OK)
+			return result;
+		last_sequence = header.causal_sequence;
+		if (branch.branch_id >= service->next_branch_id)
+			service->next_branch_id = branch.branch_id + 1;
+	}
+	service->causal_sequence = last_sequence;
+	return lseek(service->causal_fd, 0, SEEK_END) < 0 ? FTS_ERR_IO : FTS_OK;
+}
+
 static int apply_replayed_task(struct fts_service *service,
-			       const struct fts_task *task)
+				       const struct fts_task *task)
+
 {
 	struct fts_task *existing = find_task(service, task->task_id);
 
@@ -304,6 +430,8 @@ int fts_replay(struct fts_service *service)
 	if (result != FTS_OK)
 		return result;
 	result = replay_unlocked(service);
+	if (result == FTS_OK)
+		result = replay_causal_unlocked(service);
 	unlock_service(service);
 	return result;
 }
@@ -319,6 +447,7 @@ int fts_open(struct fts_service *service, const char *journal_path,
 	memset(service, 0, sizeof(*service));
 	service->kernel_fd = -1;
 	service->journal_fd = -1;
+	service->causal_fd = -1;
 	service->require_kernel = require_kernel != 0;
 	memcpy(service->journal_path, journal_path, strlen(journal_path) + 1);
 	if (pthread_mutex_init(&service->lock, NULL) != 0)
@@ -335,13 +464,29 @@ int fts_open(struct fts_service *service, const char *journal_path,
 		result = FTS_ERR_IO;
 		goto fail;
 	}
+	if (snprintf(service->causal_journal_path,
+		     sizeof(service->causal_journal_path), "%s.causal", journal_path) < 0 ||
+	    strlen(service->causal_journal_path) >= sizeof(service->causal_journal_path)) {
+		result = FTS_ERR_ARGUMENT;
+		goto fail;
+	}
+	service->causal_fd = open(service->causal_journal_path,
+				  O_RDWR | O_CREAT | O_APPEND | O_CLOEXEC, 0600);
+	if (service->causal_fd < 0) {
+		result = FTS_ERR_IO;
+		goto fail;
+	}
 	result = replay_unlocked(service);
+	if (result == FTS_OK)
+		result = replay_causal_unlocked(service);
 	if (result != FTS_OK)
 		goto fail;
 	return FTS_OK;
 fail:
 	if (service->journal_fd >= 0)
 		close(service->journal_fd);
+	if (service->causal_fd >= 0)
+		close(service->causal_fd);
 	if (service->kernel_fd >= 0)
 		close(service->kernel_fd);
 	pthread_mutex_destroy(&service->lock);
@@ -356,9 +501,12 @@ void fts_close(struct fts_service *service)
 	(void)pthread_mutex_lock(&service->lock);
 	if (service->journal_fd >= 0)
 		close(service->journal_fd);
+	if (service->causal_fd >= 0)
+		close(service->causal_fd);
 	if (service->kernel_fd >= 0)
 		close(service->kernel_fd);
 	service->journal_fd = -1;
+	service->causal_fd = -1;
 	service->kernel_fd = -1;
 	(void)pthread_mutex_unlock(&service->lock);
 	pthread_mutex_destroy(&service->lock);
@@ -791,6 +939,390 @@ int fts_query(const struct fts_service *service, uint64_t task_id,
 	return result;
 }
 
+static struct fts_branch *find_branch(struct fts_service *service,
+					uint64_t branch_id)
+{
+	size_t index;
+
+	for (index = 0; index < service->branch_count; index++)
+		if (service->branches[index].branch_id == branch_id)
+			return &service->branches[index];
+	return NULL;
+}
+
+static int nonzero_digest(const uint8_t digest[FTS_DIGEST_SIZE])
+{
+	uint32_t index;
+
+	for (index = 0; index < FTS_DIGEST_SIZE; index++)
+		if (digest[index])
+			return 1;
+	return 0;
+}
+
+static int authority_kernel_check(struct fts_service *service,
+				  const struct fts_branch *branch, int consume)
+{
+	struct agi_lc_intent_lease request;
+
+	if (service->kernel_fd < 0)
+		return FTS_OK;
+	memset(&request, 0, sizeof(request));
+	request.size = sizeof(request);
+	request.operation = consume ? AGI_LC_INTENT_LEASE_CONSUME :
+		AGI_LC_INTENT_LEASE_QUERY;
+	request.flags = branch->authority.flags;
+	request.operation_class = branch->required_operation;
+	request.resource_mask = branch->resource_mask;
+	request.lease_id = branch->authority.lease_id;
+	request.grant_id = branch->authority.grant_id;
+	request.grant_capability = branch->authority.grant_capability;
+	request.agent_id = branch->authority.agent_id;
+	request.agent_capability = branch->authority.agent_capability;
+	request.lineage_id = branch->authority.lineage_id;
+	request.scope_id = branch->authority.scope_id;
+	request.generation = branch->authority.generation;
+	memcpy(request.intent_digest, branch->authority.intent_digest,
+	       sizeof(request.intent_digest));
+	request.correlation = 96000 + branch->branch_id;
+	if (ioctl(service->kernel_fd, AGI_LC_INTENT_LEASE, &request) < 0)
+		return errno == EKEYREVOKED ? FTS_ERR_REVOKED : FTS_ERR_STALE;
+	if ((!consume && request.status != AGI_LC_INTENT_STATUS_ACTIVE) ||
+	    (consume && request.status != AGI_LC_INTENT_STATUS_ACTIVE &&
+	     request.status != AGI_LC_INTENT_STATUS_EXHAUSTED))
+		return request.status == AGI_LC_INTENT_STATUS_REVOKED ?
+			FTS_ERR_REVOKED : FTS_ERR_STALE;
+	if (request.lease_id != branch->authority.lease_id ||
+	    request.agent_id != branch->authority.agent_id ||
+	    request.agent_capability != branch->authority.agent_capability ||
+	    request.generation != branch->authority.generation ||
+	    request.operation_class != branch->required_operation ||
+	    request.resource_mask != branch->resource_mask ||
+	    memcmp(request.intent_digest, branch->authority.intent_digest,
+		   sizeof(request.intent_digest)))
+		return FTS_ERR_STALE;
+	return FTS_OK;
+}
+
+static int branch_has_kind(const struct fts_branch *branch, uint32_t kind)
+{
+	uint32_t index;
+
+	for (index = 0; index < branch->evidence_count; index++)
+		if (branch->evidence[index].kind == kind &&
+		    branch->evidence[index].verified)
+			return 1;
+	return 0;
+}
+
+int fts_branch_propose(struct fts_service *service, uint64_t task_id,
+		       const struct fts_authority_ref *authority,
+		       uint32_t required_operation, uint32_t resource_mask,
+		       uint64_t resource_admission,
+		       const uint8_t action_digest[FTS_DIGEST_SIZE],
+		       const uint8_t observation_digest[FTS_DIGEST_SIZE],
+		       const char *action, struct fts_branch *out)
+{
+	struct fts_task *task;
+	struct fts_branch branch;
+	int result;
+
+	if (!service || !authority || !out || !task_id || !action_digest ||
+	    !observation_digest || !action || !*action ||
+	    required_operation == 0 || required_operation > AGI_LC_INTENT_OP_MAX || !resource_mask ||
+	    !resource_admission || !authority->lease_id ||
+	    authority->operation_class != required_operation ||
+	    authority->resource_mask != resource_mask ||
+	    !authority->grant_id || !authority->grant_capability ||
+	    !authority->agent_id || !authority->agent_capability ||
+	    !authority->lineage_id || !authority->generation ||
+	    !nonzero_digest(authority->intent_digest) ||
+	    !nonzero_digest(action_digest) || !nonzero_digest(observation_digest))
+		return FTS_ERR_ARGUMENT;
+	if (strlen(action) >= FTS_MAX_ACTION)
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(service);
+	if (result != FTS_OK)
+		return result;
+	if (service->branch_count >= FTS_MAX_BRANCHES) {
+		result = FTS_ERR_FULL;
+		goto out_unlock;
+	}
+	task = find_task(service, task_id);
+	if (!task) {
+		result = FTS_ERR_NOT_FOUND;
+		goto out_unlock;
+	}
+	if (service->agent_id && authority->agent_id != service->agent_id) {
+		result = FTS_ERR_POLICY;
+		goto out_unlock;
+	}
+	memset(&branch, 0, sizeof(branch));
+	branch.branch_id = service->next_branch_id++;
+	branch.task_id = task_id;
+	branch.objective_generation = task->sequence;
+	branch.observation_generation = task->sequence;
+	branch.authority = *authority;
+	branch.resource_admission = resource_admission;
+	branch.required_operation = required_operation;
+	branch.resource_mask = resource_mask;
+	branch.state = FTS_BRANCH_PROPOSED;
+	branch.evidence_required = 3;
+	memcpy(branch.action_digest, action_digest, FTS_DIGEST_SIZE);
+	memcpy(branch.observation_digest, observation_digest, FTS_DIGEST_SIZE);
+	result = copy_text(branch.action, sizeof(branch.action), action);
+	if (result != FTS_OK)
+		goto out_unlock;
+	result = append_branch(service, &branch);
+	if (result == FTS_OK) {
+		branch.causal_sequence = service->causal_sequence;
+		service->branches[service->branch_count++] = branch;
+		*out = branch;
+	}
+out_unlock:
+	unlock_service(service);
+	return result;
+}
+
+int fts_branch_add_evidence(struct fts_service *service, uint64_t branch_id,
+			    uint32_t kind, const uint8_t digest[FTS_DIGEST_SIZE],
+			    uint32_t verified, const char *detail, struct fts_branch *out)
+{
+	struct fts_branch *branch;
+	struct fts_branch candidate;
+	uint32_t index;
+	int result;
+
+	if (!service || !branch_id || !digest || !detail || !*detail ||
+	    kind < FTS_EVIDENCE_OBSERVATION || kind > FTS_EVIDENCE_PROVENANCE ||
+	    verified > 1 || !nonzero_digest(digest) ||
+	    strlen(detail) >= FTS_MAX_EVIDENCE_DETAIL || !out)
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(service);
+	if (result != FTS_OK)
+		return result;
+	branch = find_branch(service, branch_id);
+	if (!branch) {
+		result = FTS_ERR_NOT_FOUND;
+		goto out_unlock;
+	}
+	if (branch->state != FTS_BRANCH_PROPOSED &&
+	    branch->state != FTS_BRANCH_PREPARED) {
+		result = FTS_ERR_STATE;
+		goto out_unlock;
+	}
+	for (index = 0; index < branch->evidence_count; index++)
+		if (branch->evidence[index].kind == kind) {
+			result = FTS_ERR_CONFLICT;
+			goto out_unlock;
+		}
+	if (branch->evidence_count >= FTS_MAX_EVIDENCE) {
+		result = FTS_ERR_FULL;
+		goto out_unlock;
+	}
+	candidate = *branch;
+	candidate.evidence[index].kind = kind;
+	candidate.evidence[index].verified = verified;
+	candidate.evidence[index].sequence = candidate.causal_sequence;
+	memcpy(candidate.evidence[index].digest, digest, FTS_DIGEST_SIZE);
+	result = copy_text(candidate.evidence[index].detail,
+			   sizeof(candidate.evidence[index].detail), detail);
+	if (result != FTS_OK)
+		goto out_unlock;
+	candidate.evidence_count++;
+	if (verified)
+		candidate.evidence_verified++;
+	result = append_branch(service, &candidate);
+	if (result == FTS_OK) {
+		candidate.causal_sequence = service->causal_sequence;
+		*branch = candidate;
+		*out = candidate;
+	}
+out_unlock:
+	unlock_service(service);
+	return result;
+}
+
+int fts_branch_prepare(struct fts_service *service, uint64_t branch_id,
+			   uint64_t now_ns, struct fts_branch *out)
+{
+	struct fts_branch *branch;
+	struct fts_task *task;
+	struct fts_branch candidate;
+	int result;
+
+	if (!service || !branch_id || !now_ns || !out)
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(service);
+	if (result != FTS_OK)
+		return result;
+	branch = find_branch(service, branch_id);
+	if (!branch) {
+		result = FTS_ERR_NOT_FOUND;
+		goto out_unlock;
+	}
+	if (branch->state != FTS_BRANCH_PROPOSED) {
+		result = FTS_ERR_STATE;
+		goto out_unlock;
+	}
+	task = find_task(service, branch->task_id);
+	if (!task || task->sequence != branch->objective_generation ||
+	    (task->state != FTS_TASK_LEASED && task->state != FTS_TASK_RUNNING) ||
+	    task->lease_until_ns <= now_ns || !branch->resource_admission) {
+		result = FTS_ERR_STALE;
+		goto reject;
+	}
+	result = authority_kernel_check(service, branch, 0);
+	if (result != FTS_OK)
+		goto reject;
+	candidate = *branch;
+	candidate.state = FTS_BRANCH_PREPARED;
+	candidate.prepared_at_ns = now_ns;
+	result = append_branch(service, &candidate);
+	if (result == FTS_OK) {
+		candidate.causal_sequence = service->causal_sequence;
+		*branch = candidate;
+		*out = candidate;
+	}
+	goto out_unlock;
+ reject:
+	candidate = *branch;
+	candidate.state = FTS_BRANCH_REJECTED;
+	candidate.rejection_reason = (uint32_t)(-result);
+	if (append_branch(service, &candidate) == FTS_OK) {
+		candidate.causal_sequence = service->causal_sequence;
+		*branch = candidate;
+	}
+	goto out_unlock;
+out_unlock:
+	unlock_service(service);
+	return result;
+}
+
+int fts_branch_commit(struct fts_service *service, uint64_t branch_id,
+			  uint64_t now_ns, struct fts_branch *out)
+{
+	struct fts_branch *branch;
+	struct fts_task *task;
+	struct fts_branch candidate;
+	int result;
+
+	if (!service || !branch_id || !now_ns || !out)
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(service);
+	if (result != FTS_OK)
+		return result;
+	branch = find_branch(service, branch_id);
+	if (!branch) {
+		result = FTS_ERR_NOT_FOUND;
+		goto out_unlock;
+	}
+	if (branch->state != FTS_BRANCH_PREPARED) {
+		result = FTS_ERR_STATE;
+		goto out_unlock;
+	}
+	task = find_task(service, branch->task_id);
+	if (!task || task->sequence != branch->objective_generation ||
+	    (task->state != FTS_TASK_LEASED && task->state != FTS_TASK_RUNNING) ||
+	    task->lease_until_ns <= now_ns) {
+		result = FTS_ERR_STALE;
+		goto reject;
+	}
+	if (branch->evidence_count < branch->evidence_required ||
+	    branch->evidence_verified != branch->evidence_count ||
+	    !branch_has_kind(branch, FTS_EVIDENCE_OBSERVATION) ||
+	    !branch_has_kind(branch, FTS_EVIDENCE_RESULT) ||
+	    !branch_has_kind(branch, FTS_EVIDENCE_VERIFICATION)) {
+		result = FTS_ERR_INCOMPLETE;
+		goto reject;
+	}
+	result = authority_kernel_check(service, branch, 1);
+	if (result != FTS_OK)
+		goto reject;
+	candidate = *branch;
+	candidate.state = FTS_BRANCH_COMMITTED;
+	candidate.committed_at_ns = now_ns;
+	result = append_branch(service, &candidate);
+	if (result == FTS_OK) {
+		candidate.causal_sequence = service->causal_sequence;
+		*branch = candidate;
+		*out = candidate;
+	}
+	goto out_unlock;
+ reject:
+	candidate = *branch;
+	candidate.state = FTS_BRANCH_REJECTED;
+	candidate.rejection_reason = (uint32_t)(-result);
+	if (append_branch(service, &candidate) == FTS_OK) {
+		candidate.causal_sequence = service->causal_sequence;
+		*branch = candidate;
+	}
+	goto out_unlock;
+out_unlock:
+	unlock_service(service);
+	return result;
+}
+
+int fts_branch_invalidate(struct fts_service *service, uint64_t branch_id,
+			      uint32_t reason, struct fts_branch *out)
+{
+	struct fts_branch *branch;
+	struct fts_branch candidate;
+	int result;
+
+	if (!service || !branch_id || !reason || !out)
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(service);
+	if (result != FTS_OK)
+		return result;
+	branch = find_branch(service, branch_id);
+	if (!branch) {
+		result = FTS_ERR_NOT_FOUND;
+		goto out_unlock;
+	}
+	if (branch->state == FTS_BRANCH_COMMITTED ||
+	    branch->state == FTS_BRANCH_INVALIDATED ||
+	    branch->state == FTS_BRANCH_REJECTED) {
+		result = FTS_ERR_STATE;
+		goto out_unlock;
+	}
+	candidate = *branch;
+	candidate.state = FTS_BRANCH_INVALIDATED;
+	candidate.rejection_reason = reason;
+	result = append_branch(service, &candidate);
+	if (result == FTS_OK) {
+		candidate.causal_sequence = service->causal_sequence;
+		*branch = candidate;
+		*out = candidate;
+	}
+out_unlock:
+	unlock_service(service);
+	return result;
+}
+
+int fts_branch_query(const struct fts_service *service, uint64_t branch_id,
+			struct fts_branch *out)
+{
+	struct fts_service *mutable_service = (struct fts_service *)service;
+	struct fts_branch *branch;
+	int result;
+
+	if (!service || !branch_id || !out)
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(mutable_service);
+	if (result != FTS_OK)
+		return result;
+	branch = find_branch(mutable_service, branch_id);
+	if (!branch)
+		result = FTS_ERR_NOT_FOUND;
+	else {
+		*out = *branch;
+		result = FTS_OK;
+	}
+	unlock_service(mutable_service);
+	return result;
+}
+
 int fts_recover_expired(struct fts_service *service, uint64_t now_ns,
 			uint32_t *recovered, uint32_t *dead_lettered)
 {
@@ -846,6 +1378,26 @@ int fts_test_corrupt_tail(const struct fts_service *service)
 		return result;
 	if (write_all(mutable_service->journal_fd, &corrupt, sizeof(corrupt)) ==
 	    FTS_OK && fdatasync(mutable_service->journal_fd) == 0)
+		result = FTS_OK;
+	else
+		result = FTS_ERR_IO;
+	unlock_service(mutable_service);
+	return result;
+}
+
+int fts_test_causal_corrupt_tail(const struct fts_service *service)
+{
+	struct fts_service *mutable_service = (struct fts_service *)service;
+	unsigned char corrupt = 0xff;
+	int result;
+
+	if (!service)
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(mutable_service);
+	if (result != FTS_OK)
+		return result;
+	if (write_all(mutable_service->causal_fd, &corrupt, sizeof(corrupt)) ==
+	    FTS_OK && fdatasync(mutable_service->causal_fd) == 0)
 		result = FTS_OK;
 	else
 		result = FTS_ERR_IO;

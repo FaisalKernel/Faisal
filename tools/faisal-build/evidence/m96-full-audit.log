@@ -1,0 +1,54 @@
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-dso_dlfcn.o): in function `dlfcn_globallookup':
+(.text+0x1f): warning: Using 'dlopen' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_addr.o): in function `BIO_lookup_ex':
+(.text+0xdbc): warning: Using 'getaddrinfo' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_sock.o): in function `BIO_gethostbyname':
+(.text+0x85): warning: Using 'gethostbyname' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-dso_dlfcn.o): in function `dlfcn_globallookup':
+(.text+0x1f): warning: Using 'dlopen' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_addr.o): in function `BIO_lookup_ex':
+(.text+0xdbc): warning: Using 'getaddrinfo' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_sock.o): in function `BIO_gethostbyname':
+(.text+0x85): warning: Using 'gethostbyname' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-dso_dlfcn.o): in function `dlfcn_globallookup':
+(.text+0x1f): warning: Using 'dlopen' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_addr.o): in function `BIO_lookup_ex':
+(.text+0xdbc): warning: Using 'getaddrinfo' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_sock.o): in function `BIO_gethostbyname':
+(.text+0x85): warning: Using 'gethostbyname' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-dso_dlfcn.o): in function `dlfcn_globallookup':
+(.text+0x1f): warning: Using 'dlopen' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_addr.o): in function `BIO_lookup_ex':
+(.text+0xdbc): warning: Using 'getaddrinfo' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_sock.o): in function `BIO_gethostbyname':
+(.text+0x85): warning: Using 'gethostbyname' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-dso_dlfcn.o): in function `dlfcn_globallookup':
+(.text+0x1f): warning: Using 'dlopen' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_addr.o): in function `BIO_lookup_ex':
+(.text+0xdbc): warning: Using 'getaddrinfo' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_sock.o): in function `BIO_gethostbyname':
+(.text+0x85): warning: Using 'gethostbyname' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+01 harness=tools/faisal-build/run_agent_security_m64_qemu.sh rc=0 elapsed_ms=17621
+02 harness=tools/faisal-build/run_transport_qemu.sh rc=0 elapsed_ms=5102
+03 harness=tools/faisal-build/run_execution_domain_qemu.sh rc=0 elapsed_ms=4125
+04 harness=tools/faisal-build/run_heterogeneous_context_qemu.sh rc=0 elapsed_ms=4044
+05 harness=tools/faisal-build/run_graph_telemetry_qemu.sh rc=0 elapsed_ms=4090
+06 harness=tools/faisal-build/run_power_policy_qemu.sh rc=0 elapsed_ms=3935
+07 harness=tools/faisal-build/run_persistent_memory_qemu.sh rc=0 elapsed_ms=5180
+08 harness=tools/faisal-build/run_experience_learning_qemu.sh rc=0 elapsed_ms=4939
+09 harness=tools/faisal-build/run_world_state_qemu.sh rc=0 elapsed_ms=5089
+10 harness=tools/faisal-build/run_model_orchestration_qemu.sh rc=0 elapsed_ms=5603
+11 harness=tools/faisal-build/run_browser_tool_qemu.sh rc=0 elapsed_ms=5046
+12 harness=tools/faisal-build/run_end_to_end_qemu.sh rc=0 elapsed_ms=5175
+13 harness=tools/faisal-build/run_verified_research_qemu.sh rc=0 elapsed_ms=5147
+14 harness=tools/faisal-build/run_deployment_supervisor_qemu.sh rc=0 elapsed_ms=5294
+15 harness=tools/faisal-build/run_accelerator_validation_qemu.sh rc=0 elapsed_ms=3849
+16 harness=tools/faisal-build/run_cross_subsystem_stress_qemu.sh rc=0 elapsed_ms=5426
+17 harness=tools/faisal-build/run_memory_orchestrator_qemu.sh rc=0 elapsed_ms=5188
+18 harness=tools/faisal-build/run_cog_kernel_qemu.sh rc=0 elapsed_ms=7260
+19 harness=tools/faisal-build/run_self_healing_qemu.sh rc=0 elapsed_ms=5311
+20 harness=tools/faisal-build/run_runtime_attestation_qemu.sh rc=0 elapsed_ms=5282
+21 harness=tools/faisal-build/run_concurrent_lifecycle_ipc_qemu.sh rc=0 elapsed_ms=4774
+22 harness=tools/faisal-build/run_memory_transaction_qemu.sh rc=0 elapsed_ms=6112
+23 harness=tools/faisal-build/run_runtime_verification_qemu.sh rc=0 elapsed_ms=6540
+FAISAL_FULL_AUDIT_COUNT=23

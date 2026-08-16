@@ -1,0 +1,9 @@
+CLEAR system(
+CLEAR popen(
+CLEAR execve(
+CLEAR setuid(
+CLEAR ptrace(
+CLEAR invokeLLM
+CLEAR model_output
+CLEAR livepatch
+CLEAR CAP_SYS_ADMIN

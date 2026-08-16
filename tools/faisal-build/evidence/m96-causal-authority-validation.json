@@ -1,0 +1,65 @@
+{
+  "milestone": "FAISAL-M96",
+  "feature": "Causal Authority Fabric",
+  "date": "2026-08-16",
+  "parent_milestone": "FAISAL-M95",
+  "abi": 38,
+  "kernel_authority": "AGI_LC_INTENT_LEASE",
+  "implementation": {
+    "causal_journal": "<journal_path>.causal",
+    "journal_magic": "0x46434131",
+    "journal_version": 1,
+    "max_branches": 64,
+    "max_evidence_per_branch": 8,
+    "required_verified_evidence": ["OBSERVATION", "RESULT", "VERIFICATION"],
+    "branch_states": ["PROPOSED", "PREPARED", "COMMITTED", "REJECTED", "INVALIDATED"],
+    "kernel_ioctl_added": false
+  },
+  "validation": {
+    "host_selftest": {"status": "pass", "marker": "M96_SELFTEST_EXIT=0", "log": "m96-asan-ubsan.log"},
+    "asan_ubsan": {"status": "pass", "exit_code": 0, "log": "m96-asan-ubsan.log"},
+    "tsan": {"status": "pass", "exit_code": 0, "log": "m96-tsan.log"},
+    "qemu_kernel_integrated": {
+      "status": "pass",
+      "require_kernel": true,
+      "exit_code": 0,
+      "markers": [
+        "FAISAL_M96_BOOT_OK",
+        "M96_CAUSAL_SERVICE_OPEN_OK kernel=1",
+        "M96_AUTHORITY_REFERENCE_OK lease=1",
+        "M96_CAUSAL_BRANCH_PROPOSE_OK",
+        "M96_CAUSAL_PREPARE_AUTHORIZED_OK",
+        "M96_INCOMPLETE_COMMIT_REJECTED_OK",
+        "M96_EVIDENCE_COMPLETE_COMMIT_OK",
+        "M96_BRANCH_INVALIDATION_OK",
+        "M96_CAUSAL_REPLAY_OK",
+        "M96_CAUSAL_CORRUPTION_FAIL_CLOSED_OK",
+        "M96_SELFTEST_EXIT=0",
+        "FAISAL_M96_TEST_RC=0"
+      ],
+      "log": "m96-qemu.log"
+    },
+    "qemu_smokes": {"status": "pass", "runs": 3, "times_ms": [6195, 6341, 6188], "min_ms": 6188, "mean_ms": 6241.33, "max_ms": 6341, "log": "m96-smoke-times.tsv"},
+    "m95_host_regression": {"status": "pass", "marker": "M95_SELFTEST_EXIT=0", "log": "m96-m95-regression-host.log"},
+    "m95_qemu_regression": {"status": "pass", "marker": "FAISAL_M95_DURABLE_TASK_QEMU_PASS", "log": "m96-m95-regression-qemu.log"},
+    "m90_regression": {"status": "pass", "marker": "M90_KEY_PROVIDER_QEMU_VALIDATION_OK", "log": "m96-m90-regression.log"},
+    "m91_regression": {"status": "pass", "marker": "M91_PROVIDER_GATE_QEMU_VALIDATION_OK", "log": "m96-m91-regression.log"},
+    "full_faisal_audit": {"status": "pass", "harness_count": 23, "log": "m96-full-audit.log"},
+    "security_scan": {"status": "pass", "patterns_clear": ["system(", "popen(", "execve(", "setuid(", "ptrace(", "invokeLLM", "model_output", "livepatch", "CAP_SYS_ADMIN"], "log": "m96-security-scan.log"},
+    "diff_check": {"status": "pass", "command": "git diff --check"}
+  },
+  "measured_claims": [
+    "The tested kernel path opened the service and acquired a real M94 intent lease.",
+    "The tested state machine rejected incomplete commit, accepted evidence-complete commit, invalidated a branch, replayed committed state, and failed closed on causal corruption.",
+    "Three independent QEMU smoke runs passed."
+  ],
+  "non_claims": [
+    "No claim of AGI or consciousness.",
+    "No claim that storing experience retrains a foundation model.",
+    "No claim of exactly-once semantics for arbitrary external side effects.",
+    "No unmeasured kernel or workflow speedup claim.",
+    "No new kernel ioctl or syscall was added by M96."
+  ],
+  "implementation_commit": "recorded by the FAISAL-M96 tag after commit",
+  "forbidden_files_excluded": ["M63-COMPUTE-CONTEXT-DESIGN.md", "M63-SECURITY-REVIEW.md"]
+}
