@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "21ceea9dc189a14fd4636db7ab62bd06e1edd1df",
-  "current_tag": "FAISAL-M89",
+  "current_head": "df7ead06e08ef562f04271ec2130158f1d24456d",
+  "current_tag": "FAISAL-M90",
   "current_abi": 37,
   "operating_loop": [
     "RESEARCH",
@@ -718,7 +718,7 @@
         "benchmark",
         "regression"
       ],
-      "next_action": "Retain M89 sanitizer, malformed-consumer, provenance, isolation, and corrected-finding regression coverage while M90 implements production key provisioning and rotation gates for signed repair bundles.",
+      "next_action": "Retain RV bridge sanitizer, malformed-consumer, provenance, and isolation regression coverage while M91 evaluates provider-gated hardware key and attestation integration.",
       "evidence": [
         "MILESTONE89.md",
         "M89-RV-BRIDGE-SANITIZER-DESIGN.md",
@@ -735,7 +735,7 @@
       "id": "M90-production-key-provisioning",
       "phase": 14,
       "name": "Production key provisioning, rotation, revocation, and signed-bundle verification contract",
-      "status": "next",
+      "status": "validated_bounded_userspace_key_provider_rotation_revocation_and_fail_closed_verification",
       "priority": 90,
       "depends_on": [
         "M87-runtime-verification-signal-integration",
@@ -754,7 +754,43 @@
         "benchmark",
         "regression"
       ],
-      "next_action": "Implement a bounded userspace key-provider and rotation/revocation contract for M87 signed repair bundles; never place private signing keys in the kernel or equate model output with authorization."
+      "next_action": "Retain bounded userspace provisioning, rotation, revocation, approval, and M87 regression coverage while M91 evaluates an identified hardware/provider key and attestation implementation.",
+      "evidence": [
+        "MILESTONE90.md",
+        "M90-KEY-PROVIDER-DESIGN.md",
+        "M90-SECURITY-REVIEW.md",
+        "M90-BENCHMARKS.md",
+        "tools/faisal-build/evidence/m90-key-provider-validation.json",
+        "tools/faisal-build/evidence/m90-key-provider-qemu.log",
+        "tools/faisal-build/evidence/m90-key-provider-smoke.tsv",
+        "tools/faisal-build/evidence/m87-after-m90-qemu.log",
+        "tools/faisal-build/evidence/m90-security-scan.txt"
+      ]
+    },
+    {
+      "id": "M91-provider-backed-key-attestation",
+      "phase": 8,
+      "name": "Provider-gated hardware key provisioning and attestation integration",
+      "status": "next",
+      "priority": 88,
+      "depends_on": [
+        "M90-production-key-provisioning",
+        "M79-accelerator-validation",
+        "M87-runtime-verification-signal-integration"
+      ],
+      "unlocks": [],
+      "evidence_required": [
+        "identified_provider_or_hardware",
+        "public_key_provisioning",
+        "hardware_attestation",
+        "key_rotation",
+        "revocation",
+        "secret_isolation",
+        "security_review",
+        "benchmark",
+        "regression"
+      ],
+      "next_action": "Inspect available real hardware or an explicitly identified provider; implement only provider-supported key and attestation paths, and report UNSUPPORTED when evidence is unavailable."
     }
   ],
   "completed_milestones": [
@@ -782,7 +818,8 @@
     "FAISAL-M86",
     "FAISAL-M87",
     "FAISAL-M88",
-    "FAISAL-M89"
+    "FAISAL-M89",
+    "FAISAL-M90"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
