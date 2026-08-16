@@ -1,0 +1,57 @@
+{
+  "milestone": "FAISAL-M89",
+  "dependency": "M88-kernel-rv-signal-bridge",
+  "status": "validated_bounded_sanitizer_environment",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 37,
+  "workload": {
+    "userspace_workers": 8,
+    "iterations_per_worker": 8,
+    "kernel_report_workers": 2,
+    "reports_per_kernel_worker": 32,
+    "minimum_valid_records": 8
+  },
+  "runs": {
+    "normal_smoke": {
+      "runs": 3,
+      "all_passed": true,
+      "wall_time_ms": [7246, 6160, 5609],
+      "records": [9, 8, 21],
+      "diagnostic_count": [0, 0, 0],
+      "evidence": "tools/faisal-build/evidence/m89-normal-smoke.tsv"
+    },
+    "kasan_lockdep": {
+      "passed": true,
+      "qemu_vcpus": 1,
+      "records": 12,
+      "diagnostic_count": 0,
+      "evidence": "tools/faisal-build/evidence/m89-kasan-qemu.log"
+    },
+    "kcsan_strict_lockdep": {
+      "passed": true,
+      "qemu_vcpus": 1,
+      "records": 11,
+      "diagnostic_count": 0,
+      "evidence": "tools/faisal-build/evidence/m89-kcsan-qemu.log"
+    }
+  },
+  "security_scan": {
+    "passed": true,
+    "new_lines_scanned": 314,
+    "high_risk_pattern_matches": 0,
+    "evidence": "tools/faisal-build/evidence/m89-security-scan.txt"
+  },
+  "corrected_finding": {
+    "description": "An arbitrary-kthread rv_react stimulus produced a valid lockdep invalid-wait-context warning; M89 was corrected to call the bridge report directly from process-context kernel workers.",
+    "evidence": "tools/faisal-build/evidence/m89-initial-lockdep-or-timeout-diagnostic.log",
+    "suppressed_diagnostic": false
+  },
+  "non_claims": [
+    "race freedom",
+    "production readiness",
+    "physical scheduler-stall generation",
+    "hardware-backed attestation",
+    "automatic repair authorization",
+    "upstream Linux performance improvement"
+  ]
+}

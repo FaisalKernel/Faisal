@@ -1,0 +1,59 @@
+make[1]: Entering directory '/home/ubuntu/agi-kernel/build/m89-rv-kcsan'
+  SYNC    include/config/auto.conf.cmd
+  DESCEND objtool
+  CC      kernel/trace/rv/rv_reactors.o
+  AR      kernel/trace/rv/built-in.a
+  AR      kernel/trace/built-in.a
+  AR      kernel/built-in.a
+  AR      built-in.a
+  AR      built-in-fixup.a
+  COPY    vmlinux.a
+  LD      vmlinux.o
+  MODPOST Module.symvers
+  CC      .vmlinux.export.o
+  UPD     include/generated/utsversion.h
+  CC      init/version-timestamp.o
+  KSYMS   .tmp_vmlinux0.kallsyms.S
+  AS      .tmp_vmlinux0.kallsyms.o
+  LD      .tmp_vmlinux1
+  NM      .tmp_vmlinux1.syms
+  KSYMS   .tmp_vmlinux1.kallsyms.S
+  AS      .tmp_vmlinux1.kallsyms.o
+  LD      .tmp_vmlinux2
+  NM      .tmp_vmlinux2.syms
+  KSYMS   .tmp_vmlinux2.kallsyms.S
+  AS      .tmp_vmlinux2.kallsyms.o
+  LD      vmlinux.unstripped
+  NM      System.map
+  SORTTAB vmlinux.unstripped
+  OBJCOPY vmlinux
+  GEN     modules.builtin.modinfo
+  GEN     modules.builtin
+  CC      arch/x86/boot/version.o
+  VOFFSET arch/x86/boot/compressed/../voffset.h
+  OBJCOPY arch/x86/boot/compressed/vmlinux.bin
+  RELOCS  arch/x86/boot/compressed/vmlinux.relocs
+  CC      arch/x86/boot/compressed/kaslr.o
+  CC      arch/x86/boot/compressed/misc.o
+  GZIP    arch/x86/boot/compressed/vmlinux.bin.gz
+  MKPIGGY arch/x86/boot/compressed/piggy.S
+  AS      arch/x86/boot/compressed/piggy.o
+  LD      arch/x86/boot/compressed/vmlinux
+  ZOFFSET arch/x86/boot/zoffset.h
+  OBJCOPY arch/x86/boot/vmlinux.bin
+  AS      arch/x86/boot/header.o
+  LD      arch/x86/boot/setup.elf
+  OBJCOPY arch/x86/boot/setup.bin
+  BUILD   arch/x86/boot/bzImage
+Kernel: arch/x86/boot/bzImage is ready  (#2)
+make[1]: Leaving directory '/home/ubuntu/agi-kernel/build/m89-rv-kcsan'
+make: Entering directory '/home/ubuntu/agi-kernel/build/m89-rv-kcsan'
+make[1]: Entering directory '/home/ubuntu/agi-kernel/linux/tools/faisal-rv'
+  MODPOST Module.symvers
+  CC [M]  faisal_rv_bridge_fixture.mod.o
+  CC [M]  .module-common.o
+  LD [M]  faisal_rv_bridge_fixture.ko
+  CC [M]  faisal_rv_bridge_stress_fixture.mod.o
+  LD [M]  faisal_rv_bridge_stress_fixture.ko
+make[1]: Leaving directory '/home/ubuntu/agi-kernel/linux/tools/faisal-rv'
+make: Leaving directory '/home/ubuntu/agi-kernel/build/m89-rv-kcsan'
