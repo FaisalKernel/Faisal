@@ -1,6 +1,6 @@
 # FAISAL M99 — Capability-Scoped Tool Registry and Execution Broker
 
-**Status:** Implementation and validation candidate; not yet committed
+**Status:** Validated and committed as `FAISAL-M99`
 
 **Date:** 2026-08-16
 

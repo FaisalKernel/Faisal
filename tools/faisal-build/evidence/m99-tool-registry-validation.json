@@ -2,7 +2,7 @@
   "project": "FAISAL",
   "milestone": "M99",
   "name": "Capability-Scoped Tool Registry and Execution Broker",
-  "status": "validated_pending_commit",
+  "status": "validated_and_committed",
   "date": "2026-08-16",
   "kernel_base": "Linux v7.2-rc7",
   "abi": 38,
@@ -87,8 +87,8 @@
     "No claim of arbitrary tool sandboxing, exactly-once remote effects, distributed consensus, or production readiness.",
     "No performance superiority claim from the single local benchmark."
   ],
-  "implementation_commit": "pending",
-  "tag": "pending",
+  "implementation_commit": "a5fd72040904281a43164f6752d5117f4567b599",
+  "tag": "FAISAL-M99",
   "forbidden_files_excluded": [
     "M63-COMPUTE-CONTEXT-DESIGN.md",
     "M63-SECURITY-REVIEW.md"

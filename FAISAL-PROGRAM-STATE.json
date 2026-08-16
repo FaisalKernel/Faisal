@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "08947b8f1ccac5d24b523baf29d7976b2627e66a",
-  "current_tag": "FAISAL-M98",
+  "current_head": "a5fd72040904281a43164f6752d5117f4567b599",
+  "current_tag": "FAISAL-M99",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1130,7 +1130,7 @@
       "id": "M99-tool-registry-execution-broker",
       "phase": 9,
       "name": "Capability-scoped tool registry and execution broker with risk, cost, provenance, verification, revocation, and independent approval",
-      "status": "next",
+      "status": "validated_bounded_userspace_tool_governance_contract",
       "priority": 99,
       "depends_on": [
         "M98-mission-autonomy-control-loop",
@@ -1139,7 +1139,9 @@
         "M74-model-orchestration",
         "M75-browser-tool-supervision"
       ],
-      "unlocks": [],
+      "unlocks": [
+        "M100-verified-tool-adapter-sandbox"
+      ],
       "evidence_required": [
         "tool_identity",
         "capability_scope",
@@ -1149,11 +1151,48 @@
         "verification",
         "revocation",
         "independent_approval",
+        "corruption_fail_closed",
+        "kernel_qemu",
+        "asan_ubsan",
+        "tsan",
+        "three_smokes",
+        "m95_m96_m90_m91_regressions",
         "security_review",
         "benchmark",
-        "regression"
+        "full_regression",
+        "commit_and_tag"
       ],
-      "next_action": "Implement the smallest userspace tool registry and execution broker; bind selection and invocation to capability, causal authority, continuity, risk/cost budgets, provenance, verification, revocation, and independent approval."
+      "next_action": "Retain registry, authority, policy, revocation, verification, sanitizer, QEMU, and full-regression coverage while M100 implements a sandboxed deterministic tool adapter."
+    },
+    {
+      "id": "M100-verified-tool-adapter-sandbox",
+      "phase": 13,
+      "name": "Verified deterministic tool-adapter sandbox with effect scoping, idempotency, output sanitization, and revocation",
+      "status": "next",
+      "priority": 100,
+      "depends_on": [
+        "M99-tool-registry-execution-broker",
+        "M78-deployment-supervisor",
+        "M80-stress-fuzz-hardening",
+        "M81-concurrent-sanitizer-validation"
+      ],
+      "unlocks": [],
+      "evidence_required": [
+        "adapter_identity",
+        "sandbox_isolation",
+        "effect_scope",
+        "input_sanitization",
+        "output_sanitization",
+        "idempotency",
+        "revocation",
+        "verification_receipt",
+        "independent_approval",
+        "fault_injection",
+        "security_review",
+        "benchmark",
+        "full_regression"
+      ],
+      "next_action": "Implement a non-network deterministic adapter first; do not expose irreversible filesystem, network, browser, payment, deployment, or device effects until adapter-specific isolation and receipt evidence exists."
     }
   ],
   "completed_milestones": [
@@ -1190,7 +1229,8 @@
     "FAISAL-M95",
     "FAISAL-M96",
     "FAISAL-M97",
-    "FAISAL-M98"
+    "FAISAL-M98",
+    "FAISAL-M99"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1201,5 +1241,5 @@
     "M63-SECURITY-REVIEW.md"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "M99-tool-registry-execution-broker"
+  "next_dependency": "M100-verified-tool-adapter-sandbox"
 }
