@@ -154,3 +154,9 @@ FAISAL remains an active pre-production research prototype, not a production rel
 Release blockers remain: stable/LTS forward-port and update policy, current-head KASAN/KCSAN/lockdep/KCOV/UBSAN evidence, trusted signatures and independent reproducible builds, staged checkpatch cleanup, CVE/upstream response operations, real accelerator/provider qualification, and production canary/rollback monitoring. The exact findings are in `FAISAL-INDUSTRY-READINESS-AUDIT.md` and `tools/faisal-build/evidence/industry-readiness-audit.json`.
 
 The next dependency remains M103 verified proxy-egress adapter, under the invariant that model output never equals kernel authority and production deployment requires both an independent trusted supervisor and explicit operator approval.
+
+## FAISAL-M103 — Future adaptive memory policy intent
+
+M103 adds an ABI-38 additive, capability-scoped adaptive memory policy contract informed by upstream DAMON/DAMOS, CXL memory tiering, and HMM. It records bounded access-sampling and tier-provider intent for a memory region, reports unavailable DAMON/CXL/HMM providers honestly as `OBSERVE_ONLY`, rejects provider-required requests with `-EOPNOTSUPP` when no provider is proven, and increments the memory generation on clear so downstream tensor transport cannot use stale policy state. SET/GET/CLEAR, provider denial, generation handoff, stale-capability denial, strict userspace build, kernel build, real-kernel QEMU, and final 26/26 aggregate regression evidence passed. M103 does not claim DAMON execution, CXL hardware, HMM migration, GPU/NPU coherence, memory migration, performance improvement, or production readiness.
+
+The next selected future dependency is **M104 DAMON provider bridge**, which remains blocked until the upstream subsystem is available in the selected kernel base and a provider-backed execution path can be tested without fabricating hardware support.
