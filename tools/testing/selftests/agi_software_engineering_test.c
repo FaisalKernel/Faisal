@@ -1,0 +1,11 @@
+#define _GNU_SOURCE
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include "../../faisal-engineering/faisal_engineering_service.h"
+static void fail(const char*m,int r){printf("M112_FAIL %s rc=%d\n",m,r);exit(1);}
+#define OK(x,m) do{int _r=(x);if(_r!=FEN_OK)fail(m,_r);}while(0)
+#define EQ(x,e,m) do{int _r=(x);if(_r!=(e))fail(m,_r);}while(0)
+int main(void){char p[]="/tmp/faisal-m112-eng-XXXXXX";struct fen_service s;struct fen_repo r;struct fen_change c;uint8_t z[FEN_DIGEST_SIZE]={1};uint32_t k;int fd=mkstemp(p);if(fd<0)fail("TMP",FEN_ERR_IO);close(fd);unlink(p);OK(fen_open(&s,p),"OPEN");printf("M112_ENGINEERING_SERVICE_OPEN_OK\n");OK(fen_register_repo(&s,1,"faisal",z,&r),"REPO");printf("M112_REPOSITORY_REGISTRATION_OK repo=%llu\n",(unsigned long long)r.repo_id);OK(fen_propose_change(&s,r.repo_id,10,"sandboxed security fix",z,z,1,&c),"PROPOSE");printf("M112_UNTRUSTED_CHANGE_PROPOSAL_OK change=%llu\n",(unsigned long long)c.change_id);EQ(fen_test_model_proposal_denial(&s,c.change_id),FEN_OK,"MODEL_AUTHORITY");printf("M112_MODEL_OUTPUT_NOT_AUTHORITY_OK\n");for(k=FEN_REPOSITORY;k<=FEN_REGRESSION;k++)OK(fen_record_check(&s,c.change_id,k,0,z,"pass",&c),"CHECK");printf("M112_REPOSITORY_DEPENDENCY_SECURITY_BUILD_TEST_DEBUG_PERF_REGRESSION_EVIDENCE_OK checks=%u\n",c.check_count);OK(fen_verify_change(&s,c.change_id,99,&c),"VERIFY");printf("M112_VERIFICATION_GATE_OK\n");OK(fen_canary(&s,c.change_id,1,&c),"CANARY");printf("M112_CANARY_OK\n");OK(fen_deploy(&s,c.change_id,1001,&c),"DEPLOY");printf("M112_DEPLOY_APPROVAL_GATE_OK\n");OK(fen_rollback(&s,c.change_id,7,&c),"ROLLBACK");if(c.state!=FEN_ROLLED_BACK)fail("ROLLBACK_STATE",FEN_ERR_STATE);printf("M112_ROLLBACK_OK reason=%u\n",c.rollback_reason);fsync(s.fd);fen_close(&s);OK(fen_open(&s,p),"REPLAY");OK(fen_query(&s,c.change_id,&c),"QUERY");if(c.state!=FEN_ROLLED_BACK)fail("REPLAY_STATE",FEN_ERR_CORRUPT);printf("M112_ENGINEERING_REPLAY_OK\n");fen_close(&s);fd=open(p,O_WRONLY|O_APPEND);if(fd<0||write(fd,"x",1)!=1)fail("CORRUPT_APPEND",FEN_ERR_IO);close(fd);EQ(fen_open(&s,p),FEN_ERR_CORRUPT,"CORRUPTION");printf("M112_ENGINEERING_REPLAY_FAIL_CLOSED_OK\n");unlink(p);printf("M112_SELFTEST_EXIT=0\n");return 0;}

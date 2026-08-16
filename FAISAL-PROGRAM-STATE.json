@@ -1338,7 +1338,8 @@
     "FAISAL-M108",
     "FAISAL-M109",
     "FAISAL-M110",
-    "FAISAL-M111"
+    "FAISAL-M111",
+    "FAISAL-M112"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1354,7 +1355,7 @@
     "tools/testing/selftests/agi_autonomy_orchestrator_test.c"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "M112-kernel-enforced-sandbox-identity-and-multitenant-worker-supervision",
+  "next_dependency": "M113-kernel-enforced-sandbox-identity-multitenant-worker-supervision-and-real-repository-adapters",
   "industry_readiness": {
     "status": "preproduction_prototype_not_production_ready",
     "audit_document": "FAISAL-INDUSTRY-READINESS-AUDIT.md",
@@ -1382,6 +1383,10 @@
     "m111_aggregate_qemu_harnesses": 32,
     "m111_sandbox_features": "separate_task_command_memory_browser_bug_finder_debugger_research_model_build_deploy_secret_recovery_classes_policy_capability_resource_network_filesystem_device_checkpoint_cancel_recovery_replay",
     "m111_sandbox_authority_boundary": "model_output_never_authorizes; verified_deployment_and_recovery_profiles_require_explicit_verification",
+    "m112_software_engineering_qemu": "pass",
+    "m112_aggregate_qemu_harnesses": 33,
+    "m112_software_engineering_features": "repository_registration_untrusted_changeset_dependency_vulnerability_build_test_debug_performance_regression_evidence_ci_verification_canary_deployment_rollback_replay",
+    "m112_model_authority_boundary": "model_proposals_require_independent_verification_and_explicit_deployment_approval",
     "m105_verified_autonomy_orchestrator_qemu": "pass",
     "m105_evidence_chain": "verified_observation_crosscheck_promotion_experience_and_kernel_evidence",
     "m105_model_authority_boundary": "pass_unverified_model_output_denied_promotion",
@@ -1405,7 +1410,8 @@
       "distributed_adapter_conformance",
       "worker_supervision_and_agent_migration",
       "deployment_governance_and_rollback",
-      "kernel_enforced_sandbox_identity_and_multitenant_worker_supervision"
+      "kernel_enforced_sandbox_identity_and_multitenant_worker_supervision",
+      "real_repository_analysis_and_change_application_adapters"
     ]
   }
 }
