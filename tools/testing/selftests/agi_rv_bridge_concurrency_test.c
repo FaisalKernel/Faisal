@@ -122,6 +122,15 @@ int main(void)
 	if (setup_session(subscribed, verify_mask) != 0 ||
 	    setup_session(isolated, 0) != 0)
 		return fail("session setup", -errno);
+	{
+		uint8_t short_record[sizeof(struct agi_lc_record) - 1];
+		ssize_t n = read(subscribed, short_record, sizeof(short_record));
+
+		if (n >= 0 || errno != EINVAL)
+			return fail("malformed consumer", n >= 0 ? -EINVAL : -errno);
+	}
+	printf("M89_MALFORMED_CONSUMER_OK errno=EINVAL\n");
+	fflush(stdout);
 	if (pthread_barrier_init(&start_barrier, NULL, M89_WORKERS + 1) != 0)
 		return fail("barrier init", -errno);
 	for (i = 0; i < M89_WORKERS; i++) {

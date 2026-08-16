@@ -75,6 +75,7 @@ qemu-system-x86_64 -M pc -accel tcg,thread=multi -cpu qemu64 -smp "$SMP" -m "$ME
   -append 'console=ttyS0 quiet' -nographic -no-reboot > "$LOG" 2>&1 || true
 grep -q 'M89_BOOT_OK' "$LOG"
 grep -q 'M89_CONCURRENT_SETUP_OK' "$LOG"
+grep -q 'M89_MALFORMED_CONSUMER_OK' "$LOG"
 grep -q 'M89_CONCURRENT_PROVENANCE_OK' "$LOG"
 grep -q 'M89_CAPABILITY_FILTER_OK' "$LOG"
 grep -q 'M89_SELFTEST_EXIT=0' "$LOG"

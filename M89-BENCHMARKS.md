@@ -12,13 +12,13 @@ The KASAN and KCSAN workloads use the same functional test. The only differences
 
 | Run | Kernel configuration | QEMU vCPUs | Result | Diagnostic findings |
 | --- | --- | ---: | --- | --- |
-| Normal smoke 1 | M88 RV kernel | 8 | Passed; 9 records | 0 |
-| Normal smoke 2 | M88 RV kernel | 8 | Passed; 8 records | 0 |
-| Normal smoke 3 | M88 RV kernel | 8 | Passed; 21 records | 0 |
-| KASAN final | RV + Generic KASAN + lockdep | 1 | Passed; 12 records | 0 KASAN/lockdep/kernel diagnostics; 0 RCU warnings |
-| KCSAN final | RV + strict KCSAN + lockdep | 1 | Passed; 11 records | 0 KCSAN/lockdep/kernel diagnostics; 0 RCU warnings |
+| Normal smoke 1 | M88 RV kernel | 8 | Passed; 33 records | 0 |
+| Normal smoke 2 | M88 RV kernel | 8 | Passed; 33 records | 0 |
+| Normal smoke 3 | M88 RV kernel | 8 | Passed; 33 records | 0 |
+| KASAN final | RV + Generic KASAN + lockdep | 1 | Passed; 8 records | 0 KASAN/lockdep/kernel diagnostics; 0 RCU warnings |
+| KCSAN final | RV + strict KCSAN + lockdep | 1 | Passed; 8 records | 0 KCSAN/lockdep/kernel diagnostics; 0 RCU warnings |
 
-The normal smoke host wall times were 7246 ms, 6160 ms, and 5609 ms. Their mean was 6338 ms. This is an end-to-end QEMU harness timing, not an isolated bridge latency measurement and not a comparison against upstream Linux.
+The final normal smoke host wall times were 8607 ms, 7136 ms, and 7030 ms. Their mean was 7591 ms. Each run also passed malformed-consumer rejection, provenance, capability isolation, and the zero-diagnostic gate. This is an end-to-end QEMU harness timing, not an isolated bridge latency measurement and not a comparison against upstream Linux.
 
 ## Corrected finding
 

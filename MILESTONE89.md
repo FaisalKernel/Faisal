@@ -31,8 +31,9 @@ The M89 test fixture is deliberately separate from the M88 `rv_react()` callback
 | Strict userspace selftest build | Passed | Harness compile with `-Wall -Wextra -Werror -static -pthread` |
 | M89 fixture module build | Passed | KASAN and KCSAN module build logs |
 | Normal functional smoke | Passed 3/3 | `m89-normal-smoke.tsv` |
-| Generic KASAN + lockdep | Passed | 2-vCPU QEMU run, 21 records, no diagnostics |
-| Strict KCSAN + lockdep | Passed | 1-vCPU QEMU run, 11 records, no diagnostics |
+| Generic KASAN + lockdep | Passed | 1-vCPU QEMU run, 8 records, no diagnostics |
+| Strict KCSAN + lockdep | Passed | 1-vCPU QEMU run, 8 records, no diagnostics |
+| Malformed event consumer | Passed in all final runs | `M89_MALFORMED_CONSUMER_OK errno=EINVAL` |
 | Capability isolation | Passed in all final runs | `M89_CAPABILITY_FILTER_OK unsubscribed=1` |
 | Provenance validation | Passed in all final runs | `M89_CONCURRENT_PROVENANCE_OK` |
 | Targeted source security scan | Passed | `m89-security-scan.txt` |

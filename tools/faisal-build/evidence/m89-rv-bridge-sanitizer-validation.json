@@ -15,25 +15,34 @@
     "normal_smoke": {
       "runs": 3,
       "all_passed": true,
-      "wall_time_ms": [7246, 6160, 5609],
-      "records": [9, 8, 21],
+      "wall_time_ms": [8607, 7136, 7030],
+      "records": [33, 33, 33],
       "diagnostic_count": [0, 0, 0],
       "evidence": "tools/faisal-build/evidence/m89-normal-smoke.tsv"
     },
     "kasan_lockdep": {
       "passed": true,
       "qemu_vcpus": 1,
-      "records": 12,
+      "records": 8,
       "diagnostic_count": 0,
       "evidence": "tools/faisal-build/evidence/m89-kasan-qemu.log"
     },
     "kcsan_strict_lockdep": {
       "passed": true,
       "qemu_vcpus": 1,
-      "records": 11,
+      "records": 8,
       "diagnostic_count": 0,
       "evidence": "tools/faisal-build/evidence/m89-kcsan-qemu.log"
     }
+  },
+  "malformed_consumer": {
+    "passed": true,
+    "expected_errno": "EINVAL",
+    "evidence_marker": "M89_MALFORMED_CONSUMER_OK errno=EINVAL"
+  },
+  "capability_isolation": {
+    "passed": true,
+    "evidence_marker": "M89_CAPABILITY_FILTER_OK unsubscribed=1"
   },
   "security_scan": {
     "passed": true,
