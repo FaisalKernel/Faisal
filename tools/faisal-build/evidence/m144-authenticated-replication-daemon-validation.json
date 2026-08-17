@@ -1,0 +1,34 @@
+{
+  "milestone": "M144",
+  "feature": "bounded authenticated gRPC/TLS replication daemon",
+  "status": "pass_bounded_host_validation",
+  "implementation": [
+    "tools/faisal-replication/faisal_replication_daemon.py",
+    "tools/testing/selftests/test_faisal_replication_daemon.py",
+    "tools/testing/selftests/test_faisal_replication_tls.py"
+  ],
+  "enforcement": {
+    "transport": "mutual TLS with required client authentication",
+    "identity": "replica-{id} certificate common-name binding to RPC identity",
+    "attestation": "mandatory externally supplied verifier; default daemon entrypoint denies",
+    "record_signatures": "mandatory externally supplied verifier; default daemon entrypoint denies",
+    "election": "monotonic term, one vote per term, journal freshness and chain-root checks",
+    "journal": "bounded records, bounded payloads, contiguous sequence, previous-digest and record-digest validation",
+    "persistence": "checksummed atomic JSON state, fsync, atomic replace, directory fsync, mode 0600",
+    "commit": "leader commit is capped at the durable follower match sequence"
+  },
+  "tests": {
+    "daemon_unit": "6 tests passed",
+    "generated_binding_smoke": "1 test passed",
+    "mutual_tls_grpc_round_trip": "vote and append passed with ephemeral CA and replica certificates",
+    "corruption": "checksum mismatch rejected",
+    "authority_boundary": "missing attestation verification rejected"
+  },
+  "limitations": [
+    "The daemon is not yet wired to the C election library; the Python runtime maintains its own bounded durable term/vote state and must be reconciled before production packaging.",
+    "The command-line entrypoint intentionally installs rejecting verifiers until a trusted attestation/signature provider is explicitly provisioned.",
+    "InstallSnapshot remains fail-closed and unimplemented pending a verified snapshot store.",
+    "No claim is made for live AWS KMS/Vault credentials, physical TPM/secure enclave, production certificate rotation, or multi-node deployment qualification.",
+    "The TLS test uses ephemeral local certificates and is not hardware or production PKI evidence."
+  ]
+}

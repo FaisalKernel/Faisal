@@ -4,7 +4,7 @@
 
 FAISAL replication transports journal state above the kernel. The transport must never turn model output into authority. Only a mutually authenticated replica identity, a monotonic term, a contiguous journal sequence, a valid hash-chain digest, and a quorum-approved commit may advance replicated state.
 
-The wire contract is `faisal_replication.proto`. Production deployments should generate gRPC bindings from that contract and run them over mutually authenticated TLS 1.3. The current repository includes a Python TLS socket harness because the available environment does not contain `protoc` or a gRPC runtime.
+The wire contract is `faisal_replication.proto`. The repository now includes generated Python bindings and a bounded Python gRPC/TLS runtime in `faisal_replication_daemon.py`. Production deployments must provide mutually authenticated TLS certificates, trusted attestation and record-signature verifiers, durable storage, and an operational quorum configuration. The runtime refuses authority when those verification callbacks are not provisioned.
 
 ## Leader election
 
@@ -33,4 +33,4 @@ The KMS client must enforce bounded request sizes, HTTPS, response key-identity 
 
 ## Explicit non-claims
 
-This protocol design is not a claim that a complete production gRPC server, leader-election implementation, distributed journal replication service, live AWS account, live Vault cluster, physical TPM, or secure enclave is present in the current QEMU environment. Those require generated bindings, deployment certificates, operational key policies, fault-injection at scale, and provider-specific qualification.
+The bounded runtime implementation is not a claim of complete production distributed deployment. Live AWS/Vault credentials, physical TPM or secure-enclave evidence, production certificate rotation, large-scale fault injection, and hardware/provider qualification remain pending. The runtime deliberately requires external trusted verifiers and does not treat model output as authority.
