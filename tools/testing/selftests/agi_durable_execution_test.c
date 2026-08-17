@@ -36,6 +36,7 @@ int main(int argc, char **argv)
 	struct fex_objective objective, replayed, quarantine_objective;
 	struct fex_node node_a, node_b, node_c, node_d, query_node;
 	struct fex_checkpoint checkpoint;
+	struct fex_journal_attestation attestation_before, attestation_after;
 	uint8_t working[FEX_DIGEST_SIZE], world[FEX_DIGEST_SIZE], resource[FEX_DIGEST_SIZE];
 	uint8_t consumed_handoff_token[FEX_HANDOFF_TOKEN_SIZE];
 	uint32_t dependency;
@@ -211,9 +212,28 @@ int main(int argc, char **argv)
 		fail("WORKER_QUARANTINE_STATE", FEX_ERR_STATE);
 	printf("M118_WORKER_QUARANTINE_OK restarts=%u dead_lettered=%u\n",
 	       worker.restart_count, supervised_dead);
+	CHECK_OK(fex_query_journal_attestation(&service, &attestation_before),
+		 "QUERY_JOURNAL_ATTESTATION_BEFORE_RESTART");
+	if (attestation_before.format_version != FEX_ENGINE_VERSION ||
+	    !attestation_before.record_count ||
+	    attestation_before.last_sequence != attestation_before.record_count ||
+	    !attestation_before.consumed_handoff_token_count)
+		fail("JOURNAL_ATTESTATION_BEFORE_RESTART", FEX_ERR_STATE);
 	fex_close(&service);
 
 	CHECK_OK(fex_open(&service, prefix, require_kernel), "REOPEN");
+	CHECK_OK(fex_query_journal_attestation(&service, &attestation_after),
+		 "QUERY_JOURNAL_ATTESTATION_AFTER_RESTART");
+	if (memcmp(attestation_before.chain_digest, attestation_after.chain_digest,
+		   FEX_DIGEST_SIZE) != 0 ||
+	    attestation_before.record_count != attestation_after.record_count ||
+	    attestation_before.last_sequence != attestation_after.last_sequence ||
+	    attestation_before.consumed_handoff_token_count !=
+	    attestation_after.consumed_handoff_token_count)
+		fail("JOURNAL_ATTESTATION_RESTART_MISMATCH", FEX_ERR_CORRUPT);
+	printf("M128_JOURNAL_ATTESTATION_RESTART_OK records=%llu sequence=%llu\n",
+	       (unsigned long long)attestation_after.record_count,
+	       (unsigned long long)attestation_after.last_sequence);
 	CHECK_OK(fex_recover(&service, 20, &recovered, &dead_lettered),
 		 "RECOVER");
 	if (recovered != 0 || dead_lettered != 0)

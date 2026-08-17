@@ -96,6 +96,7 @@ static int write_record(struct fex_service *service, uint16_t kind,
 	    fsync(service->engine_fd) < 0)
 		return FEX_ERR_IO;
 	memcpy(service->journal_chain_digest, next_digest, FEX_DIGEST_SIZE);
+	service->journal_record_count++;
 	return FEX_OK;
 }
 
@@ -160,6 +161,7 @@ int fex_replay(struct fex_service *service)
 	service->worker_count = 0;
 	service->consumed_handoff_token_count = 0;
 	memset(service->journal_chain_digest, 0, FEX_DIGEST_SIZE);
+	service->journal_record_count = 0;
 	service->next_event_sequence = 1;
 	for (;;) {
 		ssize_t got = read(service->engine_fd, &header, sizeof(header));
@@ -189,6 +191,7 @@ int fex_replay(struct fex_service *service)
 			return FEX_ERR_CORRUPT;
 		memcpy(service->journal_chain_digest, header.record_digest,
 		       FEX_DIGEST_SIZE);
+		service->journal_record_count++;
 		if (!((header.kind == FEX_RECORD_OBJECTIVE &&
 		       header.size == sizeof(struct fex_objective)) ||
 		      (header.kind == FEX_RECORD_NODE &&
@@ -250,6 +253,24 @@ int fex_replay(struct fex_service *service)
 	}
 	if (lseek(service->engine_fd, 0, SEEK_END) != offset)
 		return FEX_ERR_IO;
+	return FEX_OK;
+}
+
+int fex_query_journal_attestation(struct fex_service *service,
+				  struct fex_journal_attestation *out)
+{
+	if (!service || !out || !service->lock_initialized)
+		return FEX_ERR_ARGUMENT;
+	pthread_mutex_lock(&service->lock);
+	memset(out, 0, sizeof(*out));
+	out->format_version = FEX_ENGINE_VERSION;
+	out->consumed_handoff_token_count = service->consumed_handoff_token_count;
+	out->last_sequence = service->next_event_sequence ?
+		service->next_event_sequence - 1 : 0;
+	out->record_count = service->journal_record_count;
+	memcpy(out->chain_digest, service->journal_chain_digest,
+	       FEX_DIGEST_SIZE);
+	pthread_mutex_unlock(&service->lock);
 	return FEX_OK;
 }
 

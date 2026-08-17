@@ -134,6 +134,14 @@ struct fex_checkpoint {
 	uint8_t checkpoint_digest[FEX_DIGEST_SIZE];
 };
 
+struct fex_journal_attestation {
+	uint32_t format_version;
+	uint32_t consumed_handoff_token_count;
+	uint64_t last_sequence;
+	uint64_t record_count;
+	uint8_t chain_digest[FEX_DIGEST_SIZE];
+};
+
 struct fex_service {
 	struct fts_service tasks;
 	int engine_fd;
@@ -148,6 +156,7 @@ struct fex_service {
 	uint8_t consumed_handoff_tokens[FEX_MAX_CONSUMED_HANDOFF_TOKENS][FEX_HANDOFF_TOKEN_SIZE];
 	uint32_t consumed_handoff_token_count;
 	uint8_t journal_chain_digest[FEX_DIGEST_SIZE];
+	uint64_t journal_record_count;
 	size_t objective_count;
 	size_t node_count;
 	size_t worker_count;
@@ -158,6 +167,8 @@ int fex_open(struct fex_service *service, const char *journal_prefix,
 		     int require_kernel);
 void fex_close(struct fex_service *service);
 int fex_replay(struct fex_service *service);
+int fex_query_journal_attestation(struct fex_service *service,
+				  struct fex_journal_attestation *out);
 int fex_create_objective(struct fex_service *service, const char *intent,
 			 uint64_t deadline_ns, uint64_t cpu_budget_ns,
 			 uint64_t money_budget_micro, uint32_t max_workers,
