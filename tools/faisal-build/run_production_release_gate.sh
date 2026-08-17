@@ -40,6 +40,10 @@ fail() { echo "FAISAL_RELEASE_GATE_FAIL:$*" >&2; exit 1; }
 [ -r "$RELEASE_ATTESTATION.sig" ] || fail "release attestation signature is missing"
 [ -n "$SECURITY_MANIFEST" ] || fail "FAISAL_SECURITY_MANIFEST is required"
 [ -n "$ADVISORY_LEDGER" ] || fail "FAISAL_ADVISORY_LEDGER is required"
+case "$ADVISORY_LEDGER" in
+  *.json) : ;;
+  *) fail "structured JSON advisory ledger is required for production qualification" ;;
+esac
 [ -n "$ACCELERATOR_EVIDENCE" ] || fail "FAISAL_ACCELERATOR_EVIDENCE is required"
 [ -x "$LINUX/tools/faisal-build/verify_industry_artifacts.sh" ] || fail "artifact verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_accelerator_qualification.sh" ] || fail "accelerator verifier unavailable"

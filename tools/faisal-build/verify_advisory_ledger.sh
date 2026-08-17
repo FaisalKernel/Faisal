@@ -8,6 +8,15 @@ EXPECTED_REV=${FAISAL_EXPECTED_SOURCE_REV:-}
 MAX_AGE=${FAISAL_ADVISORY_MAX_AGE_SECONDS:-2592000}
 REPORT=${FAISAL_ADVISORY_VERIFY_REPORT:-${LEDGER:-/tmp}/FAISAL-advisory-verification.tsv}
 
+# Production qualification uses the structured JSON ledger. Legacy TSV remains
+# readable only for historical fixtures and is intentionally not promoted by
+# the new production evidence record.
+case "$LEDGER" in
+  *.json)
+    exec python3 "$(dirname "$0")/verify_advisory_ledger.py"
+    ;;
+esac
+
 fail() { echo "FAISAL_ADVISORY_GATE_FAIL:$*" >&2; exit 1; }
 [ -n "$LEDGER" ] || fail "FAISAL_ADVISORY_LEDGER is required"
 [ -r "$LEDGER" ] || fail "advisory ledger unreadable"

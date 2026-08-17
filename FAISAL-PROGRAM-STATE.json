@@ -6,7 +6,7 @@
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
   "current_head": "d715ba813de66e39bccd2c36b2a4a2ad6636a194",
-  "current_tag": "FAISAL-M168-BUILDER-QUALIFICATION-GATE",
+  "current_tag": "FAISAL-M169-CVE-RESPONSE-PROCESS",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1433,7 +1433,7 @@
     "tools/testing/selftests/agi_autonomy_orchestrator_test.c"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "external-independent-builder-or-attested-build-farm-execution",
+  "next_dependency": "operator-owned-production-advisory-ledger-and-live-source-refresh",
   "industry_readiness": {
     "status": "conditional_preproduction_release_blocked",
     "audit_document": "FAISAL-INDUSTRY-READINESS-AUDIT.md",
@@ -1563,7 +1563,8 @@
     "release_blocker_status": {
       "stable_or_lts_forward_port_and_upstream_patch_requalification": "partially_resolved_lts_6.18.44_forward_port_build_tenant_and_durable_qemu_pass_bounded_one_vcpu_soak_pass_representative_multivcpu_tcg_soak_pending",
       "production_release_gate": "blocked_fail_closed_operator_key_independent_builder_physical_accelerator_cve_process_external_security_review_and_operational_governance_remaining",
-      "independent_physical_builder_or_attested_build_farm_qualification": "open_same_sandbox_pair_byte_identical_but_verifier_rejects_local_container_identity_external_signed_measurement_required"
+      "independent_physical_builder_or_attested_build_farm_qualification": "open_same_sandbox_pair_byte_identical_but_verifier_rejects_local_container_identity_external_signed_measurement_required",
+      "cve_and_upstream_response_process_with_owned_advisory_ledger": "partially_resolved_m169_structured_signed_fail_closed_process_and_tests_pass_real_operator_owned_ledger_live_source_sync_and_external_security_review_pending"
     },
     "m154_accelerator_accounting_telemetry_loss": "pass_u64_overflow_admission_event_ring_backpressure_eagain_and_telemetry_lost_status_qemu",
     "m154_tenant_qemu": "pass_m154_telemetry_loss_marker_and_m115_m152_m153_regressions_return_0",
@@ -1669,6 +1670,12 @@
     "m168_builder_qualification": "blocked_external_physical_builder_or_attested_farm_evidence_required_verifier_returned_nonzero_as_designed",
     "m168_reproducibility_artifacts": "bzImage_sha256_294984e091cb9dca37686d80e26a1ef7b3944e59d9ec1e19238fb45b01fb4245_vmlinux_sha256_4254d28f55140a63856b60c0d54ee7706a7e2cc0ac8a695486faa4786adf571b",
     "m168_evidence": "tools/faisal-build/evidence/m168-independent-builder-qualification-validation.json",
-    "m168_release_scope": "production_release_still_blocked_same_host_reproducibility_strengthened_external_builder_or_attested_farm_pending"
+    "m168_release_scope": "production_release_still_blocked_same_host_reproducibility_strengthened_external_builder_or_attested_farm_pending",
+    "m169_cve_process": "pass_structured_json_ledger_schema_signed_source_bound_owner_confirmed_remediation_verification_disclosure_freshness_and_kev_nvd_fields",
+    "m169_cve_validator": "pass_fixed_not_affected_stale_owner_unresolved_model_authority_signature_tamper_and_cli_report_tests",
+    "m169_cve_legacy_gate": "pass_fail_closed_legacy_tsv_rejected_production_qualification_requires_structured_json",
+    "m169_cve_research": "tools/faisal-build/evidence/cve-research-2026-08-18.md",
+    "m169_cve_evidence": "tools/faisal-build/evidence/m169-cve-response-validation.json",
+    "m169_release_scope": "cve_process_implemented_bounded_validation_real_operator_owned_ledger_live_source_sync_and_external_security_review_pending"
   }
 }
