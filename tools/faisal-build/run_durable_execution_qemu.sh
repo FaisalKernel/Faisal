@@ -6,6 +6,7 @@ BUILD=${FAISAL_BUILD:-$ROOT/build/recovered}
 ROOTFS=${FAISAL_EXECUTION_ROOTFS:-$ROOT/build/qemu-faisal-durable-execution}
 LOG="$ROOTFS/qemu.log"
 TEST="$BUILD/agi_durable_execution_test"
+TRUST_TEST="$BUILD/faisal_journal_trust_test"
 
 cc -O2 -Wall -Wextra -Werror -Wno-cpp -Wno-deprecated-declarations -pthread -static \
   -I"$LINUX/tools/faisal-task" -I"$LINUX/tools/faisal-execution" \
@@ -14,6 +15,11 @@ cc -O2 -Wall -Wextra -Werror -Wno-cpp -Wno-deprecated-declarations -pthread -sta
   "$LINUX/tools/faisal-execution/faisal_execution_engine.c" \
   "$LINUX/tools/faisal-task/faisal_task_service.c" \
   -lcrypto -o "$TEST"
+cc -O2 -Wall -Wextra -Werror -Wno-deprecated-declarations -static \
+  -I"$LINUX/tools/faisal-journal-trust" \
+  "$LINUX/tools/testing/selftests/faisal_journal_trust_test.c" \
+  "$LINUX/tools/faisal-journal-trust/faisal_journal_trust.c" \
+  -lcrypto -o "$TRUST_TEST"
 
 rm -rf "$ROOTFS"
 mkdir -p "$ROOTFS/bin" "$ROOTFS/dev" "$ROOTFS/proc" "$ROOTFS/sys" "$ROOTFS/tmp"
@@ -21,6 +27,7 @@ cp "$(command -v busybox)" "$ROOTFS/bin/busybox"
 ln -sf busybox "$ROOTFS/bin/sh"
 ln -sf busybox "$ROOTFS/bin/mknod"
 cp "$TEST" "$ROOTFS/bin/agi_durable_execution_test"
+cp "$TRUST_TEST" "$ROOTFS/bin/faisal_journal_trust_test"
 cat > "$ROOTFS/init" <<'INIT'
 #!/bin/sh
 /bin/busybox --install -s /bin
@@ -41,6 +48,7 @@ printf 'FAISAL_M108_BOOT_OK\n'
 /bin/agi_durable_execution_test --require-kernel
 rc=$?
 printf 'M108_SELFTEST_RC=%s\n' "$rc"
+/bin/faisal_journal_trust_test
 poweroff -f
 INIT
 chmod +x "$ROOTFS/init"
@@ -71,6 +79,14 @@ for marker in \
   FAISAL_M108_BOOT_OK \
   M108_KERNEL_SESSION_BIND_OK \
   M108_DURABLE_ENGINE_OPEN_OK \
+  FJT_REMOTE_ATTESTATION_SIGN_VERIFY_OK \
+  FJT_TAMPERED_ATTESTATION_DENIED_OK \
+  FJT_TPM2_PROVIDER_QUOTE_OK \
+  FJT_HARDWARE_ROOT_GATE_FAIL_CLOSED_OK \
+  FJT_QUORUM_COMMIT_OK \
+  FJT_SPLIT_BRAIN_DENIED_OK \
+  FJT_FUTURE_TERM_DENIED_OK \
+  FJT_SELFTEST_OK \
   M108_INTENT_OBJECTIVE_CREATED_OK \
   M108_DAG_NODES_CREATED_OK \
   M108_INTENT_PLAN_DAG_EXECUTION_OK \

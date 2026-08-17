@@ -1,0 +1,29 @@
+{
+  "milestones": ["M129", "M130", "M131"],
+  "status": "validated_qemu",
+  "M129_remote_attestation": {
+    "algorithm": "Ed25519 provider-backed signing and verification",
+    "controls": ["format validation", "record-count/sequence validation", "key-generation binding", "tamper denial"],
+    "evidence": ["FJT_REMOTE_ATTESTATION_SIGN_VERIFY_OK", "FJT_TAMPERED_ATTESTATION_DENIED_OK"]
+  },
+  "M130_hardware_root": {
+    "providers": ["TPM2", "secure-enclave provider slot"],
+    "quote_binding": "nonce plus journal chain digest",
+    "policy": "software-only provider denied hardware quote admission",
+    "evidence": ["FJT_TPM2_PROVIDER_QUOTE_OK", "FJT_HARDWARE_ROOT_GATE_FAIL_CLOSED_OK"],
+    "qualification": "provider interface and fail-closed gate validated; physical TPM or enclave hardware not claimed"
+  },
+  "M131_quorum_protocol": {
+    "configuration": "three replicas, two-of-three commit, conservative three-of-three split-brain test",
+    "commit_key": "term plus last sequence plus chain digest",
+    "controls": ["duplicate replica denial", "future-term denial", "stale replica exclusion", "signature and health requirement", "digest divergence quorum rejection"],
+    "evidence": ["FJT_QUORUM_COMMIT_OK", "FJT_SPLIT_BRAIN_DENIED_OK", "FJT_FUTURE_TERM_DENIED_OK"]
+  },
+  "combined_qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+  "kernel_diagnostics": "none observed",
+  "limitations": [
+    "The quorum module is a deterministic commit/admission protocol, not a complete network transport or leader-election implementation.",
+    "The hardware-root path is provider-gated and uses a test TPM2-shaped quote callback in QEMU; physical TPM 2.0 or secure-enclave qualification remains open.",
+    "Remote signature verification requires a provisioned trusted public-key service and does not make model output authoritative."
+  ]
+}
