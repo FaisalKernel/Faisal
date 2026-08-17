@@ -5,9 +5,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 static int fail(const char *what)
@@ -48,6 +51,8 @@ int main(void)
 	const char *cgroup_root = "/sys/fs/cgroup";
 	const char *tenant_path = "/sys/fs/cgroup/faisal-tenant-115";
 	int cgroup_fd = -1;
+	int cgroup_procs_fd;
+	pid_t throttle_pid;
 	struct agi_lc_tenant_cgroup tenant_cgroup = {
 		.size = sizeof(tenant_cgroup),
 		.flags = AGI_LC_TENANT_CGROUP_FLAG_REQUIRE_SANDBOX,
@@ -194,6 +199,21 @@ int main(void)
 	    tenant_query.cgroup_id != tenant_cgroup.cgroup_id)
 		return fail("tenant cgroup query");
 	printf("M151_TENANT_CGROUP_QUERY_OK\n");
+	cgroup_procs_fd = open("/sys/fs/cgroup/faisal-tenant-115/cgroup.procs",
+				       O_WRONLY);
+	if (cgroup_procs_fd < 0)
+		return fail("tenant cgroup procs open");
+	{
+		char pid_buf[32];
+		int pid_len = snprintf(pid_buf, sizeof(pid_buf), "%ld\n",
+				       (long)getpid());
+		if (write(cgroup_procs_fd, pid_buf, pid_len) != pid_len) {
+			close(cgroup_procs_fd);
+			return fail("tenant cgroup procs move");
+		}
+	}
+	close(cgroup_procs_fd);
+	printf("M153_TENANT_CGROUP_TASK_MOVE_OK\n");
 	if (ioctl(fd, AGI_LC_ACCEL_REGISTER, &accel) < 0 ||
 	    !accel.device_id || accel.owner_session_id != create.session_id ||
 	    accel.owner_cgroup_id != tenant_cgroup.cgroup_id)
@@ -238,6 +258,39 @@ int main(void)
 	printf("M152_TENANT_CPU_THROTTLE_SET_OK generation=%llu quota=%lld\n",
 	       (unsigned long long)cpu_policy.generation,
 	       (long long)cpu_policy.quota_us);
+	throttle_pid = fork();
+	if (throttle_pid < 0)
+		return fail("tenant cpu throttle worker fork");
+	if (throttle_pid == 0) {
+		struct timespec start, now;
+		volatile uint64_t sink = 0;
+
+		clock_gettime(CLOCK_MONOTONIC, &start);
+		do {
+			sink += 1;
+			clock_gettime(CLOCK_MONOTONIC, &now);
+		} while ((now.tv_sec - start.tv_sec) * 1000000000LL +
+			 (now.tv_nsec - start.tv_nsec) < 600000000LL);
+		(void)sink;
+		_exit(0);
+	}
+	usleep(700000);
+	errno = 0;
+	if (ioctl(fd, AGI_LC_TENANT_CPU_POLICY, &cpu_query) < 0 ||
+	    cpu_query.status != AGI_LC_TENANT_CPU_STATUS_ACTIVE ||
+	    cpu_query.throttled_usec == 0) {
+		kill(throttle_pid, SIGKILL);
+		waitpid(throttle_pid, NULL, 0);
+		return fail("tenant cpu throttle observation");
+	}
+	if (waitpid(throttle_pid, NULL, 0) != throttle_pid)
+		return fail("tenant cpu throttle worker wait");
+	printf("M153_TENANT_CPU_THROTTLE_OBSERVED_OK throttled=%llu\n",
+	       (unsigned long long)cpu_query.throttled_usec);
+	memset(&cpu_query, 0, sizeof(cpu_query));
+	cpu_query.size = sizeof(cpu_query);
+	cpu_query.flags = AGI_LC_TENANT_CPU_FLAG_REQUIRE_CGROUP;
+	cpu_query.operation = AGI_LC_TENANT_CPU_OP_QUERY;
 	errno = 0;
 	if (ioctl(fd, AGI_LC_TENANT_CPU_POLICY, &cpu_stale) >= 0 ||
 	    errno != EAGAIN)
@@ -309,6 +362,20 @@ int main(void)
 	    clear.status != AGI_LC_TENANT_BUDGET_STATUS_CLEARED)
 		return fail("tenant budget clear");
 	printf("M115_TENANT_BUDGET_CLEAR_OK\n");
+	cgroup_procs_fd = open("/sys/fs/cgroup/cgroup.procs", O_WRONLY);
+	if (cgroup_procs_fd < 0)
+		return fail("tenant parent cgroup procs open");
+	{
+		char pid_buf[32];
+		int pid_len = snprintf(pid_buf, sizeof(pid_buf), "%ld\n",
+				       (long)getpid());
+		if (write(cgroup_procs_fd, pid_buf, pid_len) != pid_len) {
+			close(cgroup_procs_fd);
+			return fail("tenant parent cgroup procs move");
+		}
+	}
+	close(cgroup_procs_fd);
+	printf("M153_TENANT_PARENT_TASK_RESTORE_OK\n");
 	if (ioctl(fd, AGI_LC_TENANT_CGROUP, &tenant_release) < 0 ||
 	    tenant_release.status != AGI_LC_TENANT_CGROUP_STATUS_REVOKED)
 		return fail("tenant cgroup release");
