@@ -121,16 +121,26 @@ int main(int argc, char **argv)
 			 "QUERY_WORKER_HEALTHY");
 		if (worker.health != FEX_WORKER_HEALTHY || !worker.lease_generation)
 			fail("WORKER_HEALTHY_STATE", FEX_ERR_STATE);
-	{
+		{
 		uint64_t previous_generation = worker.lease_generation;
-		CHECK_OK(fex_handoff(&service, node_c.task_id, 9001, 12, 100),
-			 "WORKER_HANDOFF");
+		uint8_t untrusted_checkpoint[FEX_DIGEST_SIZE] = { 0 };
+		CHECK_EQ(fex_handoff_verified(&service, node_c.task_id, 9001, 12, 100,
+				untrusted_checkpoint), FEX_ERR_AUTHORITY,
+				"UNTRUSTED_HANDOFF_DIGEST");
+		printf("M120_UNTRUSTED_HANDOFF_DIGEST_DENIED_OK\n");
+		CHECK_OK(fex_handoff_verified(&service, node_c.task_id, 9001, 12, 100,
+				 checkpoint.checkpoint_digest), "WORKER_HANDOFF");
+
 		CHECK_OK(fex_query_worker(&service, node_c.task_id, &worker),
 			 "QUERY_WORKER_HANDOFF");
 		if (worker.worker_id != 9001 || worker.handoff_count != 1 ||
 		    worker.lease_generation <= previous_generation ||
 		    worker.health != FEX_WORKER_HEALTHY)
 			fail("WORKER_HANDOFF_STATE", FEX_ERR_STATE);
+					printf("M120_CHECKPOINT_BOUND_HANDOFF_OK worker=%llu generation=%llu\n",
+
+		       (unsigned long long)worker.worker_id,
+		       (unsigned long long)worker.lease_generation);
 		printf("M117_WORKER_HANDOFF_OK worker=%llu generation=%llu\n",
 		       (unsigned long long)worker.worker_id,
 		       (unsigned long long)worker.lease_generation);

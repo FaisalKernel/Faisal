@@ -165,7 +165,11 @@ int fex_dispatch(struct fex_service *service, uint64_t objective_id,
 int fex_heartbeat(struct fex_service *service, uint64_t task_id,
 					 uint64_t now_ns, uint64_t extend_ns);
 int fex_handoff(struct fex_service *service, uint64_t task_id,
-				 uint64_t new_worker_id, uint64_t now_ns, uint64_t lease_ns);
+					 uint64_t new_worker_id, uint64_t now_ns, uint64_t lease_ns);
+int fex_handoff_verified(struct fex_service *service, uint64_t task_id,
+					 uint64_t new_worker_id, uint64_t now_ns,
+					 uint64_t lease_ns,
+					 const uint8_t checkpoint_digest[FEX_DIGEST_SIZE]);
 
 int fex_supervise(struct fex_service *service, uint64_t now_ns,
 				 uint64_t timeout_ns, uint32_t *reassigned,

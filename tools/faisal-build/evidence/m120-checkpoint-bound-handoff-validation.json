@@ -1,0 +1,28 @@
+{
+  "milestone": "M120",
+  "feature": "checkpoint-bound worker handoff admission",
+  "status": "validated_qemu",
+  "security_model": {
+    "required_evidence": "exact persisted objective checkpoint digest",
+    "untrusted_digest": "denied with FEX_ERR_AUTHORITY",
+    "lease_fencing": true,
+    "generation_increment": true,
+    "model_output_is_authority": false,
+    "recovery_path": "explicit supervised handoff only"
+  },
+  "evidence": {
+    "untrusted_denial": "M120_UNTRUSTED_HANDOFF_DIGEST_DENIED_OK",
+    "checkpoint_bound_acceptance": "M120_CHECKPOINT_BOUND_HANDOFF_OK",
+    "legacy_handoff_compatibility": "M117_WORKER_HANDOFF_OK",
+    "timeout_reassignment": "M115_WORKER_TIMEOUT_REASSIGN_OK",
+    "quarantine": "M118_WORKER_QUARANTINE_OK",
+    "replay": "M117_WORKER_HANDOFF_REPLAY_OK",
+    "qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+    "kernel_diagnostics": "none observed"
+  },
+  "limitations": [
+    "This validates local durable migration admission in QEMU, not cross-host transport.",
+    "The checkpoint digest authenticates persisted state but does not itself authenticate a remote host; remote identity and transport attestation remain separate blockers.",
+    "No model output is accepted as migration authority."
+  ]
+}

@@ -479,6 +479,59 @@ int fex_handoff(struct fex_service *service, uint64_t task_id,
 	return rc == FTS_OK ? FEX_OK : FEX_ERR_STATE;
 }
 
+int fex_handoff_verified(struct fex_service *service, uint64_t task_id,
+				 uint64_t new_worker_id, uint64_t now_ns,
+				 uint64_t lease_ns,
+				 const uint8_t checkpoint_digest[FEX_DIGEST_SIZE])
+{
+	struct fex_node *node;
+	struct fex_worker *worker;
+	struct fex_objective *objective;
+	struct fts_task task;
+	int rc;
+
+	if (!service || !task_id || !new_worker_id || !now_ns || !lease_ns ||
+	    !checkpoint_digest)
+		return FEX_ERR_ARGUMENT;
+	pthread_mutex_lock(&service->lock);
+	node = find_node(service, task_id);
+	worker = find_worker(service, task_id);
+	objective = node ? find_objective(service, node->objective_id) : NULL;
+	if (!node || !worker || !objective) {
+		pthread_mutex_unlock(&service->lock);
+		return FEX_ERR_NOT_FOUND;
+	}
+	if (memcmp(objective->state_digest, checkpoint_digest,
+		   FEX_DIGEST_SIZE) != 0) {
+		pthread_mutex_unlock(&service->lock);
+		return FEX_ERR_AUTHORITY;
+	}
+	if (worker->worker_id == new_worker_id) {
+		pthread_mutex_unlock(&service->lock);
+		return FEX_ERR_CONFLICT;
+	}
+	rc = fts_handoff(&service->tasks, task_id, node->lease_generation,
+			 new_worker_id, now_ns, lease_ns, &task);
+	if (rc == FTS_OK) {
+		node->owner_agent_id = task.owner_agent_id;
+		node->lease_generation = task.lease_generation;
+		node->state = task.state;
+		worker->worker_id = new_worker_id;
+		worker->lease_generation = task.lease_generation;
+		worker->last_heartbeat_ns = now_ns;
+		worker->lease_deadline_ns = task.lease_until_ns;
+		worker->last_transition_ns = now_ns;
+		worker->health = FEX_WORKER_HEALTHY;
+		worker->handoff_count++;
+		if (persist_worker(service, worker) != FEX_OK)
+			rc = FTS_ERR_IO;
+		persist_node(service, node);
+	}
+	pthread_mutex_unlock(&service->lock);
+	return rc == FTS_OK ? FEX_OK :
+		rc == FTS_ERR_LEASE ? FEX_ERR_STATE : FEX_ERR_STATE;
+}
+
 int fex_supervise(struct fex_service *service, uint64_t now_ns,
 
 			  uint64_t timeout_ns, uint32_t *reassigned,
