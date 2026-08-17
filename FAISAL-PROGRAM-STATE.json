@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "cc773f099a570d5d1b3bf56bde4cdbfce7703d93",
-  "current_tag": "FAISAL-M152-TENANT-CPU-ACCELERATOR-ISOLATION",
+  "current_head": "6a8c7c8007e836b377cce40c0df500f8639954e3",
+  "current_tag": "FAISAL-M154-ACCELERATOR-TELEMETRY-HARDENING",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1406,7 +1406,8 @@
     "FAISAL-M150",
     "FAISAL-M151",
     "FAISAL-M152",
-    "FAISAL-M153"
+    "FAISAL-M153",
+    "FAISAL-M154"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1548,6 +1549,12 @@
       "replication_tls_fixture_generation_and_full_tls_fixture_pass",
       "deployment_governance_worker_migration_and_operational_rollback",
       "staged_checkpatch_cleanup_and_external_security_review"
-    ]
+    ],
+    "m154_accelerator_accounting_telemetry_loss": "pass_u64_overflow_admission_event_ring_backpressure_eagain_and_telemetry_lost_status_qemu",
+    "m154_tenant_qemu": "pass_m154_telemetry_loss_marker_and_m115_m152_m153_regressions_return_0",
+    "m154_durable_execution_regression": "pass_durable_execution_journal_trust_and_replication_election_qemu_return_0",
+    "m154_evidence": "tools/faisal-build/evidence/m154-accelerator-accounting-telemetry-loss-validation.json",
+    "m154_kernel_artifacts": "bzImage_sha256_28e69daa779c8f652316b00269769e6781d826604cda95c85489c055b474b34b_vmlinux_sha256_481316c268883596c1a34743c7bd853e49fa85bc82944a103e6e70051e00c218",
+    "m154_release_scope": "bounded_qemu_validation_only_physical_accelerator_and_operator_signed_release_pending"
   }
 }
