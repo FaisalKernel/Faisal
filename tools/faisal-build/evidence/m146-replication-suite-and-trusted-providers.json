@@ -1,0 +1,35 @@
+{
+  "milestone": "M146",
+  "status": "pass_bounded_host_validation",
+  "complete_suite": {
+    "election_selftest": "pass",
+    "generated_binding_smoke": "1 test passed",
+    "daemon_unit": "6 tests passed",
+    "trusted_provider_tests": "5 tests passed",
+    "provider_backed_tls_grpc": "pass",
+    "remote_kms_unit": "5 tests passed",
+    "vault_https_mock": "pass",
+    "live_partition": "TLS handshake, iptables DROP, traffic failure, and authenticated recovery passed"
+  },
+  "trusted_providers": {
+    "algorithm": "Ed25519",
+    "attestation_binding": "cluster, replica, term, last sequence, chain digest, key ID, and key generation",
+    "record_binding": "cluster, replica, term, key generation, key ID, sequence, previous digest, record digest, and payload",
+    "canonicalization": "versioned domain-separated binary encoding",
+    "trust_store": "explicit provisioned public keys keyed by cluster/replica/key ID/generation",
+    "fail_closed": "unknown keys, generation mismatch, malformed lengths, tampering, and invalid signatures reject"
+  },
+  "partition_evidence": [
+    "FJT_TLS_REPLICATION_HANDSHAKE_OK",
+    "FJT_LIVE_PARTITION_DROP_OBSERVED_OK",
+    "FJT_LIVE_PARTITION_RECOVERY_OK",
+    "FJT_LIVE_SOCKET_PARTITION_SELFTEST_OK",
+    "FJT_LIVE_SOCKET_PARTITION_QEMU_HOST_VALIDATION_OK"
+  ],
+  "limitations": [
+    "The partition test validates the local TCP/mTLS transport harness, not a production multi-node cluster or physical network fabric.",
+    "The providers use explicitly provisioned Ed25519 public keys; TPM/secure-enclave-backed key loading and live KMS rotation remain external integration work.",
+    "The daemon CLI now requires --trusted-key entries, but production certificate rotation, key revocation, and snapshot verification remain pending.",
+    "Vault dev container integration remains environment-gated when Docker is unavailable."
+  ]
+}

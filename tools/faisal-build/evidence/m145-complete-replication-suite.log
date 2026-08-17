@@ -1,0 +1,46 @@
+M145_COMPLETE_REPLICATION_SUITE_START
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-dso_dlfcn.o): in function `dlfcn_globallookup':
+(.text+0x1f): warning: Using 'dlopen' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_addr.o): in function `BIO_lookup_ex':
+(.text+0xdbc): warning: Using 'getaddrinfo' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libcrypto.a(libcrypto-lib-bio_sock.o): in function `BIO_gethostbyname':
+(.text+0x85): warning: Using 'gethostbyname' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+FJR_ELECTION_STATE_MACHINE_OK term=3 role=0
+FJR_AUTOMATIC_ELECTION_PERSISTENCE_OK term=1 generation=1
+FJR_PERSISTENT_TERM_VOTEDFOR_RESTORE_OK term=3 voted_for=1 generation=1
+FJR_CORRUPTED_ELECTION_METADATA_FAIL_CLOSED_OK
+FJR_CONSENSUS_TIMEOUT_POLICY_OK min=100 max=200 heartbeat=25
+FJR_ELECTION_SELFTEST_OK
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.006s
+
+OK
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.007s
+
+OK
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.052s
+
+OK
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.002s
+
+OK
+FJT_VAULT_HTTPS_INTEGRATION_OK
+FJT_VAULT_MOCK_INTEGRATION_SELFTEST_OK
+FJT_TLS_REPLICATION_HANDSHAKE_OK
+FJT_LIVE_PARTITION_DROP_OBSERVED_OK
+FJT_LIVE_PARTITION_RECOVERY_OK
+FJT_LIVE_SOCKET_PARTITION_SELFTEST_OK
+FJT_LIVE_SOCKET_PARTITION_QEMU_HOST_VALIDATION_OK
+M145_COMPLETE_REPLICATION_SUITE_OK

@@ -25,6 +25,12 @@ import grpc
 
 import faisal_replication_pb2 as pb
 import faisal_replication_pb2_grpc as pb_grpc
+from faisal_replication_providers import (
+    Ed25519AttestationVerifier,
+    Ed25519RecordSignatureVerifier,
+    Ed25519TrustStore,
+    load_public_key_bytes,
+)
 
 
 MAX_RECORDS_PER_APPEND = 1024
@@ -336,9 +342,29 @@ def main() -> int:
     parser.add_argument("--server-key", type=Path, required=True)
     parser.add_argument("--server-cert", type=Path, required=True)
     parser.add_argument("--client-ca", type=Path, required=True)
+    parser.add_argument(
+        "--trusted-key",
+        action="append",
+        required=True,
+        metavar="CLUSTER,REPLICA,KEY_ID,GENERATION,PUBLIC_KEY_FILE",
+        help="explicit Ed25519 trust entry; may be repeated",
+    )
     args = parser.parse_args()
     config = ReplicaConfig(args.cluster_id, args.replica_id, args.replica_count, args.quorum_size, args.state)
-    service = JournalReplicationService(config, DurableState(args.state, args.replica_count), lambda _identity: False, lambda _identity, _record: False)
+    trusted_keys = {}
+    for specification in args.trusted_key:
+        fields = specification.split(",", 4)
+        if len(fields) != 5:
+            raise SystemExit("trusted-key must be CLUSTER,REPLICA,KEY_ID,GENERATION,PUBLIC_KEY_FILE")
+        cluster_id, replica_id, key_id, generation, public_key_file = fields
+        trusted_keys[(int(cluster_id), int(replica_id), key_id, int(generation))] = load_public_key_bytes(public_key_file)
+    trust_store = Ed25519TrustStore(trusted_keys)
+    service = JournalReplicationService(
+        config,
+        DurableState(args.state, args.replica_count),
+        Ed25519AttestationVerifier(trust_store).verify,
+        Ed25519RecordSignatureVerifier(trust_store).verify,
+    )
     server, _bound_port = build_server(service, args.bind, args.server_key.read_bytes(), args.server_cert.read_bytes(), args.client_ca.read_bytes())
     server.start()
     server.wait_for_termination()
