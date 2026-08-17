@@ -1,0 +1,96 @@
+{
+  "schema": "org.faisal.evidence.m157-adaptive-backpressure-batcher-validation.v1",
+  "milestone": "M157",
+  "source_revision": "e48d30eadb9df5e158799da391c919821dd6e3de",
+  "source_parent": "ebc07281e1fa6090e1fc01c18cfc8075a9b60dde",
+  "recorded_at": "2026-08-17T16:35:00Z",
+  "status": "validated_bounded_qemu_and_deterministic_unit_test_not_production_release",
+  "implementation": {
+    "library": "tools/faisal-accelerator/faisal_accelerator_batcher.{c,h}",
+    "behavior": "A reusable userspace batcher queries M156 backpressure before flush, blocks on FULL or unacknowledged LOSS, shrinks once per pressure observation, preserves partially completed entries, and grows only after four consecutive low-pressure NORMAL observations.",
+    "loss_recovery": "LOSS remains fail-closed until the owning runtime explicitly acknowledges external drain/resynchronization through faisal_accel_batcher_acknowledge_loss().",
+    "bounds": "Initial and maximum batch sizes are bounded to 1..AGI_LC_ACCEL_ACCOUNT_BATCH_MAX (64); entries must match the expected ABI size and device identity.",
+    "partial_completion": "Completed entries are removed and unsent entries remain pending for retry; the library never silently discards an uncompleted entry.",
+    "security": "The library does not grant authority, bypass capability checks, or treat model output as authorization; it only packages already-authorized lifecycle ioctl calls and fails closed on pressure or loss."
+  },
+  "unit_validation": {
+    "source": "tools/testing/selftests/faisal_accelerator_batcher_test.c",
+    "compile": "pass_static_wall_wextra_werror",
+    "result": "pass",
+    "marker": "M157_ADAPTIVE_BATCHER_UNIT_OK flushes=4 queries=10 losses=3 target=1",
+    "coverage": [
+      "invalid maximum batch rejection",
+      "normal two-entry flush",
+      "FULL/LOSS admission blocking with EAGAIN",
+      "single-step target shrink",
+      "explicit loss acknowledgement after simulated drain",
+      "four-observation cautious growth",
+      "partial completion with retained pending entry",
+      "successful recovery flush"
+    ]
+  },
+  "runtime_validation": {
+    "tenant_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m157-tenant-qemu.log",
+    "tenant_qemu_return_code": 0,
+    "tenant_result": "pass",
+    "required_markers": [
+      "M156_TENANT_EVENT_BACKPRESSURE_QUERY_OK queued=64 dropped=1 state=3",
+      "M157_ADAPTIVE_BATCHER_UNIT_OK flushes=4 queries=10 losses=3 target=1",
+      "M157_BATCHER_SELFTEST_RC=0",
+      "M155_TENANT_ACCELERATOR_BATCH_ACCOUNTING_OK completed=4",
+      "M155_TENANT_ACCELERATOR_BATCH_MALFORMED_REJECT_OK",
+      "M155_TENANT_ACCELERATOR_BATCH_BENCH_OK single_ns=7573730 batch_ns=5504567 speedup_x100=137",
+      "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+    ],
+    "tenant_kernel_diagnostic_scan": "clean",
+    "durable_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m157-durable-qemu.log",
+    "durable_qemu_return_code": 0,
+    "durable_result": "pass",
+    "durable_markers": [
+      "M108_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+      "M108_EXECUTION_REPLAY_OK",
+      "M108_ENGINE_REPLAY_FAIL_CLOSED_OK",
+      "FJT_SPLIT_BRAIN_PARTITION_ATTACK_DENIED_OK",
+      "FJR_CONSENSUS_TIMEOUT_POLICY_OK",
+      "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+    ],
+    "durable_kernel_diagnostic_scan": "clean"
+  },
+  "productivity_interpretation": {
+    "benefit": "The runtime can avoid futile submissions while the event ring is full or loss state is unacknowledged, retain partial work safely, and cautiously return toward larger batches after healthy observations.",
+    "observed_adaptive_state": "The deterministic unit run moved through four flushes, ten pressure queries, three detected loss/backpressure events, and ended at target batch size one.",
+    "raw_throughput_scope": "The integrated gate also measured the inherited M155 batch workload at speedup_x100=137 in this QEMU run, but this single run does not isolate M157’s causal contribution and is not a physical accelerator claim."
+  },
+  "build_artifact": {
+    "kernel_source": "M156 kernel image reused; M157 is userspace runtime/test integration.",
+    "kernel_build_directory": "/home/ubuntu/agi-kernel/build/m156-backpressure",
+    "bzimage_sha256": "4098292a9ca43f521cb67617e970165aff17047db591a7827aea0c690cf7b88d",
+    "vmlinux_sha256": "60229862db8230c29d68b4c11587a511a3dcfcabc590a685462ad4382c403fb1",
+    "config_sha256": "003e03a277c47585b6c36c00810bf36e61dc91b487f1162e0ad51f514bdfa08b",
+    "config_required_check": "CONFIG_CFS_BANDWIDTH=y"
+  },
+  "source_quality": {
+    "git_diff_check": "pass",
+    "tenant_selftest_compile": "pass_static_wall_wextra_werror",
+    "adaptive_batcher_compile": "pass_static_wall_wextra_werror",
+    "shell_syntax_check": "pass",
+    "protected_files_staged": false,
+    "protected_files": [
+      "M63-COMPUTE-CONTEXT-DESIGN.md",
+      "M63-SECURITY-REVIEW.md"
+    ]
+  },
+  "release_gate": {
+    "status": "blocked",
+    "reason": "M157 is bounded userspace/QEMU validation. Physical accelerator qualification, independent reproducible production builders, signed artifacts, stable/LTS forward-port qualification, and external security governance remain required.",
+    "model_output_is_authority": false,
+    "hardware_claim": "No physical GPU, NPU, VRAM, IOMMU, DMA, vendor-driver, reset, or fleet qualification is claimed."
+  },
+  "known_limitations": [
+    "Adaptive control is implemented as a reusable userspace library; it does not autonomously drain the event ring or decide semantic resynchronization.",
+    "Loss acknowledgement is intentionally explicit because only the owning runtime can verify that its world-state or telemetry consumer has resynchronized.",
+    "The unit test uses an injected ioctl model for deterministic state-machine coverage; QEMU validates integration and packaging, not physical accelerator behavior.",
+    "No independent M157-only raw-throughput improvement is claimed; the M155 benchmark is retained as supporting context.",
+    "The kernel remains based on the Linux v7.2-rc7 development line and production release qualification remains incomplete."
+  ]
+}

@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "772cf43a05527aa5d16e4c4885d932fc16bf8f8f",
-  "current_tag": "FAISAL-M156-EVENT-BACKPRESSURE-QUERY",
+  "current_head": "e48d30eadb9df5e158799da391c919821dd6e3de",
+  "current_tag": "FAISAL-M157-ADAPTIVE-BACKPRESSURE-BATCHER",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1409,7 +1409,8 @@
     "FAISAL-M153",
     "FAISAL-M154",
     "FAISAL-M155",
-    "FAISAL-M156"
+    "FAISAL-M156",
+    "FAISAL-M157"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1571,6 +1572,13 @@
     "m156_evidence": "tools/faisal-build/evidence/m156-event-backpressure-query-validation.json",
     "m156_kernel_artifacts": "bzImage_sha256_4098292a9ca43f521cb67617e970165aff17047db591a7827aea0c690cf7b88d_vmlinux_sha256_60229862db8230c29d68b4c11587a511a3dcfcabc590a685462ad4382c403fb1",
     "m156_productivity_scope": "adaptive_backpressure_telemetry_enables_user_space_batch_and_drain_control_no_independent_raw_throughput_claim",
-    "m156_release_scope": "bounded_qemu_software_validation_only_physical_accelerator_and_operator_signed_release_pending"
+    "m156_release_scope": "bounded_qemu_software_validation_only_physical_accelerator_and_operator_signed_release_pending",
+    "m157_adaptive_backpressure_batcher": "pass_userspace_bounded_batcher_pressure_query_shrink_loss_ack_partial_completion_and_cautious_growth",
+    "m157_adaptive_batcher_unit": "pass_injected_ioctl_state_machine_invalid_bounds_loss_recovery_partial_completion_and_growth",
+    "m157_tenant_qemu": "pass_m156_kernel_with_m157_batcher_compilation_unit_marker_and_m115_m154_m155_m156_regressions_return_0",
+    "m157_durable_execution_regression": "pass_final_kernel_durable_execution_journal_trust_replication_election_and_split_brain_denial_return_0",
+    "m157_evidence": "tools/faisal-build/evidence/m157-adaptive-backpressure-batcher-validation.json",
+    "m157_productivity_scope": "adaptive_userspace_control_avoids_futile_full_ring_submissions_preserves_partial_work_and_requires_explicit_resync_ack_no_isolated_raw_throughput_claim",
+    "m157_release_scope": "bounded_qemu_and_unit_validation_only_physical_accelerator_and_operator_signed_release_pending"
   }
 }
