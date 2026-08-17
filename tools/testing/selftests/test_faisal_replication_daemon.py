@@ -36,6 +36,7 @@ class ReplicationDaemonTest(unittest.TestCase):
             state,
             lambda _identity: verify_attestation,
             lambda _identity, _record: verify_record,
+            quorum_verifier=lambda _leader, _certificate: True,
         )
         return service
 
@@ -88,6 +89,14 @@ class ReplicationDaemonTest(unittest.TestCase):
                 leader=self.identity(),
                 records=[self.record(1, b"\x00" * 32, b"journal-event")],
                 leader_commit=1,
+                quorum_certificate=pb.QuorumCertificate(
+                    cluster_id=7,
+                    leader_replica_id=2,
+                    term=1,
+                    commit_sequence=1,
+                    commit_digest=self.record(1, b"\x00" * 32, b"journal-event").record_digest,
+                    votes=[pb.QuorumVote(voter_replica_id=1, key_id="test-key", key_generation=1, signature=b"fixture")],
+                ),
             )
             response = service.AppendEntries(request, Context(2))
             self.assertTrue(response.accepted)
@@ -113,6 +122,18 @@ class ReplicationDaemonTest(unittest.TestCase):
             self.assertFalse(response.accepted)
             self.assertEqual(response.denial_reason, "previous-digest-mismatch")
             self.assertEqual(service.state.last_sequence, 0)
+
+    def test_missing_quorum_certificate_denied_without_mutation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            service = self.make_service(Path(directory))
+            record = self.record(1, b"\x00" * 32, b"journal-event")
+            response = service.AppendEntries(
+                pb.AppendRequest(leader=self.identity(), records=[record], leader_commit=1), Context(2)
+            )
+            self.assertFalse(response.accepted)
+            self.assertEqual(response.denial_reason, "quorum-certificate-sequence-mismatch")
+            self.assertEqual(service.state.last_sequence, 0)
+            self.assertEqual(service.state.commit_sequence, 0)
 
     def test_corrupt_state_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:

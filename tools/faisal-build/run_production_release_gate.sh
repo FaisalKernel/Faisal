@@ -16,6 +16,7 @@ RELEASE_AUTHORITY_REPORT=${FAISAL_RELEASE_AUTHORITY_REPORT:-${ARTIFACT_OUT:-/tmp
 SECURITY_MANIFEST=${FAISAL_SECURITY_MANIFEST:-}
 ADVISORY_LEDGER=${FAISAL_ADVISORY_LEDGER:-}
 ACCELERATOR_EVIDENCE=${FAISAL_ACCELERATOR_EVIDENCE:-}
+REPLICATION_EVIDENCE=${FAISAL_REPLICATION_EVIDENCE:-}
 REQUIRE_PRODUCTION_LINE=${FAISAL_REQUIRE_PRODUCTION_LINE:-1}
 KERNEL_SOURCE=${FAISAL_KERNEL_SOURCE:-$LINUX}
 REQUIRED_KERNEL_LINE=${FAISAL_REQUIRED_KERNEL_LINE:-}
@@ -49,8 +50,14 @@ case "$ACCELERATOR_EVIDENCE" in
   *.json) : ;;
   *) fail "structured JSON accelerator qualification evidence is required for production qualification" ;;
 esac
+[ -n "$REPLICATION_EVIDENCE" ] || fail "FAISAL_REPLICATION_EVIDENCE is required"
+case "$REPLICATION_EVIDENCE" in
+  *.json) : ;;
+  *) fail "structured JSON replication qualification evidence is required for production qualification" ;;
+esac
 [ -x "$LINUX/tools/faisal-build/verify_industry_artifacts.sh" ] || fail "artifact verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_accelerator_qualification.sh" ] || fail "accelerator verifier unavailable"
+[ -x "$LINUX/tools/faisal-build/verify_replication_qualification.py" ] || fail "replication verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_advisory_ledger.sh" ] || fail "advisory ledger verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_security_release_evidence.sh" ] || fail "security evidence verifier unavailable"
@@ -132,6 +139,15 @@ FAISAL_ACCELERATOR_VERIFY_REPORT="${REPORT}.accelerator.tsv" \
   fail "accelerator qualification verification"
 }
 printf 'accelerator_qualification\tpass\t%s\n' "$ACCELERATOR_EVIDENCE" >> "$REPORT"
+FAISAL_REPLICATION_EVIDENCE="$REPLICATION_EVIDENCE" \
+FAISAL_PUBLIC_KEY="$PUBLIC_KEY" \
+FAISAL_EXPECTED_SOURCE_REV="$expected_source_revision" \
+FAISAL_REPLICATION_VERIFY_REPORT="${REPORT}.replication.tsv" \
+  python3 "$LINUX/tools/faisal-build/verify_replication_qualification.py" >/tmp/faisal-release-replication-gate.log 2>&1 || {
+  cat /tmp/faisal-release-replication-gate.log >&2
+  fail "full TLS replication qualification verification"
+}
+printf 'replication_qualification\tpass\t%s\n' "$REPLICATION_EVIDENCE" >> "$REPORT"
 if [ "$RUN_ADAPTER_CONFORMANCE" = 1 ]; then
   FAISAL_BUILD="$BUILD_A" \
   FAISAL_ADAPTER_CONFORMANCE_REPORT="${REPORT}.adapter.tsv" \

@@ -44,6 +44,23 @@ message AppendRequest {
   JournalIdentity leader = 1;
   repeated JournalRecord records = 2;
   uint64 leader_commit = 3;
+  QuorumCertificate quorum_certificate = 4;
+}
+
+message QuorumCertificate {
+  uint64 cluster_id = 1;
+  uint64 leader_replica_id = 2;
+  uint64 term = 3;
+  uint64 commit_sequence = 4;
+  bytes commit_digest = 5;
+  repeated QuorumVote votes = 6;
+}
+
+message QuorumVote {
+  uint64 voter_replica_id = 1;
+  string key_id = 2;
+  uint64 key_generation = 3;
+  bytes signature = 4;
 }
 
 message AppendResponse {

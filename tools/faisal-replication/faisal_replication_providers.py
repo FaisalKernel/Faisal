@@ -29,6 +29,7 @@ import faisal_replication_pb2 as pb
 ATTESTATION_DOMAIN = b"FAISAL-REPLICATION-ATTESTATION-v1\x00"
 RECORD_DOMAIN = b"FAISAL-REPLICATION-RECORD-v1\x00"
 ROTATION_DOMAIN = b"FAISAL-REPLICATION-KEY-ROTATION-v1\x00"
+QUORUM_DOMAIN = b"FAISAL-REPLICATION-QUORUM-V1\x00"
 ED25519_SIGNATURE_BYTES = 64
 ED25519_PUBLIC_KEY_BYTES = 32
 MAX_KEY_ID_BYTES = 256
@@ -261,6 +262,28 @@ def _record_message(identity: pb.JournalIdentity, record: pb.JournalRecord) -> b
     return b"".join((RECORD_DOMAIN, _u64(identity.cluster_id), _u64(identity.replica_id), _u64(identity.term), _u64(identity.key_generation), _u64(len(key_id)), key_id, _u64(record.sequence), record.previous_digest, record.record_digest, _u64(len(record.payload)), bytes(record.payload)))
 
 
+def _quorum_vote_message(certificate: pb.QuorumCertificate, vote: pb.QuorumVote) -> bytes:
+    key_id = vote.key_id.encode()
+    if certificate.cluster_id <= 0 or certificate.leader_replica_id <= 0 or certificate.term <= 0:
+        raise ProviderConfigurationError("quorum identity values must be positive")
+    if len(certificate.commit_digest) != 32:
+        raise ProviderConfigurationError("quorum commit digest must be 32 bytes")
+    if vote.voter_replica_id <= 0 or not key_id or len(key_id) > MAX_KEY_ID_BYTES:
+        raise ProviderConfigurationError("quorum voter identity outside bounds")
+    return b"".join((
+        QUORUM_DOMAIN,
+        _u64(certificate.cluster_id),
+        _u64(certificate.leader_replica_id),
+        _u64(certificate.term),
+        _u64(certificate.commit_sequence),
+        certificate.commit_digest,
+        _u64(vote.voter_replica_id),
+        _u64(len(key_id)),
+        key_id,
+        _u64(vote.key_generation),
+    ))
+
+
 def _rotation_message(proposal: RotationProposal) -> bytes:
     old_id = proposal.previous_key_id.encode()
     new_id = proposal.key_id.encode()
@@ -281,6 +304,43 @@ class Ed25519AttestationVerifier:
                 return False
             key.public_key.verify(bytes(identity.attestation_signature), _identity_message(identity))
             return True
+        except (InvalidSignature, ProviderConfigurationError, TypeError, ValueError):
+            return False
+
+
+class Ed25519QuorumCertificateVerifier:
+    def __init__(self, trust_store: Ed25519TrustStore, quorum_size: int, replica_count: int):
+        if quorum_size <= replica_count // 2 or quorum_size > replica_count:
+            raise ProviderConfigurationError("invalid quorum size")
+        self.trust_store = trust_store
+        self.quorum_size = quorum_size
+        self.replica_count = replica_count
+
+    def verify(self, leader: pb.JournalIdentity, certificate: pb.QuorumCertificate) -> bool:
+        try:
+            if certificate.cluster_id != leader.cluster_id:
+                return False
+            if certificate.leader_replica_id != leader.replica_id or certificate.term != leader.term:
+                return False
+            if certificate.commit_sequence > leader.last_sequence or len(certificate.commit_digest) != 32:
+                return False
+            seen: set[int] = set()
+            valid = 0
+            for vote in certificate.votes:
+                if vote.voter_replica_id in seen or not 1 <= vote.voter_replica_id <= self.replica_count:
+                    return False
+                seen.add(vote.voter_replica_id)
+                key = self.trust_store.resolve(
+                    certificate.cluster_id,
+                    vote.voter_replica_id,
+                    vote.key_id,
+                    vote.key_generation,
+                )
+                if key is None or len(vote.signature) != ED25519_SIGNATURE_BYTES:
+                    return False
+                key.public_key.verify(bytes(vote.signature), _quorum_vote_message(certificate, vote))
+                valid += 1
+            return valid >= self.quorum_size
         except (InvalidSignature, ProviderConfigurationError, TypeError, ValueError):
             return False
 
@@ -371,6 +431,26 @@ class Ed25519Signer:
 
     def sign_record(self, identity: pb.JournalIdentity, record: pb.JournalRecord) -> bytes:
         return self.private_key.sign(_record_message(identity, record))
+
+    def sign_quorum_vote(self, leader_replica_id: int, term: int, commit_sequence: int, commit_digest: bytes) -> pb.QuorumVote:
+        certificate = pb.QuorumCertificate(
+            cluster_id=self.cluster_id,
+            leader_replica_id=leader_replica_id,
+            term=term,
+            commit_sequence=commit_sequence,
+            commit_digest=commit_digest,
+        )
+        vote = pb.QuorumVote(
+            voter_replica_id=self.replica_id,
+            key_id=self.key_id,
+            key_generation=self.key_generation,
+        )
+        return pb.QuorumVote(
+            voter_replica_id=vote.voter_replica_id,
+            key_id=vote.key_id,
+            key_generation=vote.key_generation,
+            signature=self.private_key.sign(_quorum_vote_message(certificate, vote)),
+        )
 
     def sign_rotation(self, new_key: "Ed25519Signer") -> RotationProposal:
         proposal = RotationProposal(self.cluster_id, self.replica_id, self.key_id, self.key_generation, new_key.key_id, new_key.key_generation, new_key.public_key_bytes(), b"")

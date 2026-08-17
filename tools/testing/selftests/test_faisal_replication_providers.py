@@ -11,6 +11,7 @@ import faisal_replication_pb2 as pb
 import faisal_replication_daemon as daemon
 from faisal_replication_providers import (
     Ed25519AttestationVerifier,
+    Ed25519QuorumCertificateVerifier,
     Ed25519RecordSignatureVerifier,
     Ed25519Signer,
     Ed25519TrustStore,
@@ -36,8 +37,10 @@ class Context:
 class ProviderTest(unittest.TestCase):
     def setUp(self):
         self.signer = Ed25519Signer.generate(7, 2, "replica-2-key", 4)
+        self.voter = Ed25519Signer.generate(7, 1, "replica-1-key", 4)
         self.store = Ed25519TrustStore({
             (7, 2, "replica-2-key", 4): self.signer.public_key_bytes(),
+            (7, 1, "replica-1-key", 4): self.voter.public_key_bytes(),
         })
         self.attestation = Ed25519AttestationVerifier(self.store)
         self.records = Ed25519RecordSignatureVerifier(self.store)
@@ -95,11 +98,25 @@ class ProviderTest(unittest.TestCase):
                 daemon.DurableState(config.state_path, 3),
                 self.attestation.verify,
                 self.records.verify,
+                quorum_verifier=Ed25519QuorumCertificateVerifier(self.store, 2, 3).verify,
             )
             vote = service.RequestVote(pb.VoteRequest(candidate=identity), Context(2))
             self.assertTrue(vote.granted)
+            append_identity = self.signer.identity(3, 1, record.record_digest)
+            certificate = pb.QuorumCertificate(
+                cluster_id=7,
+                leader_replica_id=2,
+                term=3,
+                commit_sequence=1,
+                commit_digest=record.record_digest,
+                votes=[],
+            )
+            certificate.votes.extend([
+                self.signer.sign_quorum_vote(2, 3, 1, record.record_digest),
+                self.voter.sign_quorum_vote(2, 3, 1, record.record_digest),
+            ])
             response = service.AppendEntries(
-                pb.AppendRequest(leader=identity, records=[record], leader_commit=1),
+                pb.AppendRequest(leader=append_identity, records=[record], leader_commit=1, quorum_certificate=certificate),
                 Context(2),
             )
             self.assertTrue(response.accepted)

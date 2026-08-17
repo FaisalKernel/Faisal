@@ -27,6 +27,7 @@ import faisal_replication_pb2 as pb
 import faisal_replication_pb2_grpc as pb_grpc
 from faisal_replication_providers import (
     Ed25519AttestationVerifier,
+    Ed25519QuorumCertificateVerifier,
     Ed25519RecordSignatureVerifier,
     Ed25519TrustStore,
     KmsTrustKeyRotationController,
@@ -170,6 +171,7 @@ class JournalReplicationService(pb_grpc.JournalReplicationServicer):
         attestation_verifier: Callable[[pb.JournalIdentity], bool],
         record_verifier: Callable[[pb.JournalIdentity, pb.JournalRecord], bool],
         certificate_identity_verifier: Optional[Callable[[object, int], bool]] = None,
+        quorum_verifier: Optional[Callable[[pb.JournalIdentity, pb.QuorumCertificate], bool]] = None,
         rotation_controller: Optional[KmsTrustKeyRotationController] = None,
     ):
         config.validate()
@@ -178,6 +180,7 @@ class JournalReplicationService(pb_grpc.JournalReplicationServicer):
         self.attestation_verifier = attestation_verifier
         self.record_verifier = record_verifier
         self.certificate_identity_verifier = certificate_identity_verifier or self._verify_certificate_identity
+        self.quorum_verifier = quorum_verifier or (lambda _leader, _certificate: False)
         self.rotation_controller = rotation_controller
         self.peer_votes: dict[int, int] = {}
         self.state.load()
@@ -294,14 +297,27 @@ class JournalReplicationService(pb_grpc.JournalReplicationServicer):
                     "record_signature": base64.b64encode(bytes(record.record_signature)).decode(),
                 })
                 expected_sequence += 1
-            self.state.records.extend(staged)
+            proposed_sequence = self.state.last_sequence
+            proposed_digest = self.state.chain_digest
             if staged:
-                self.state.last_sequence = int(staged[-1]["sequence"])
-                self.state.chain_digest = bytes.fromhex(str(staged[-1]["record_digest"]))
+                proposed_sequence = int(staged[-1]["sequence"])
+                proposed_digest = bytes.fromhex(str(staged[-1]["record_digest"]))
+            if request.quorum_certificate.votes and not request.leader_commit:
+                return self._deny_append(context, "quorum-certificate-without-commit-sequence")
+            if request.leader_commit:
+                certificate = request.quorum_certificate
+                if certificate.commit_sequence != request.leader_commit:
+                    return self._deny_append(context, "quorum-certificate-sequence-mismatch")
+                if certificate.commit_sequence != proposed_sequence or certificate.commit_digest != proposed_digest:
+                    return self._deny_append(context, "quorum-certificate-digest-mismatch")
+                if not self.quorum_verifier(leader, certificate):
+                    return self._deny_append(context, "quorum-certificate-verification-failed")
+            self.state.records.extend(staged)
+            self.state.last_sequence = proposed_sequence
+            self.state.chain_digest = proposed_digest
             if request.leader_commit > self.state.commit_sequence:
-                self.state.commit_sequence = min(request.leader_commit, self.state.last_sequence)
-                if self.state.commit_sequence == self.state.last_sequence:
-                    self.state.commit_digest = self.state.chain_digest
+                self.state.commit_sequence = request.leader_commit
+                self.state.commit_digest = self.state.chain_digest
             self.state.generation += 1
             self.state.persist()
             return pb.AppendResponse(follower=self._identity(), accepted=True, match_sequence=self.state.last_sequence)
@@ -375,6 +391,7 @@ def main() -> int:
         DurableState(args.state, args.replica_count),
         Ed25519AttestationVerifier(trust_store).verify,
         Ed25519RecordSignatureVerifier(trust_store).verify,
+        quorum_verifier=Ed25519QuorumCertificateVerifier(trust_store, config.quorum_size, config.replica_count).verify,
     )
     server, _bound_port = build_server(service, args.bind, args.server_key.read_bytes(), args.server_cert.read_bytes(), args.client_ca.read_bytes())
     service.start_live_rotation()

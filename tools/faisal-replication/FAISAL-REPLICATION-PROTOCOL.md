@@ -17,6 +17,8 @@ An elected leader must renew a bounded lease through quorum acknowledgements. Th
 `AppendEntries` carries contiguous records; `AppendJournal` remains a compatibility alias.
  A follower accepts records only when the leader term is current, the previous digest equals the follower’s chain tail, each sequence is exactly the next expected sequence, each record signature verifies against the provisioned key identity, and the leader identity is authenticated by the TLS client certificate. The follower acknowledges its match sequence only after durable write and `fsync`.
 
+A commit is not authoritative because a leader merely sets `leader_commit`. When `leader_commit` is non-zero, `AppendEntries` must carry a `QuorumCertificate` whose cluster, leader, term, sequence, and digest match the proposed state. Each distinct vote must verify against the active trusted Ed25519 generation, and the certificate must contain a strict-majority number of votes. Invalid or under-quorum certificates fail closed before journal mutation.
+
 `ReadCommit` returns only a quorum-committed term, sequence, and digest. A follower must not expose an uncommitted record as authoritative state. Snapshot installation uses the same signed identity and chain-root checks, and replaces state only after full digest verification.
 
 ## Partition behavior

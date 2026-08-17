@@ -37,6 +37,7 @@ class ReplicationTlsIntegrationTest(unittest.TestCase):
                 state,
                 Ed25519AttestationVerifier(trust_store).verify,
                 Ed25519RecordSignatureVerifier(trust_store).verify,
+                quorum_verifier=lambda _leader, _certificate: True,
             )
             server, port = daemon.build_server(
                 service,
@@ -81,6 +82,14 @@ class ReplicationTlsIntegrationTest(unittest.TestCase):
                         leader=identity,
                         records=[signed_record],
                         leader_commit=1,
+                        quorum_certificate=pb.QuorumCertificate(
+                            cluster_id=7,
+                            leader_replica_id=2,
+                            term=1,
+                            commit_sequence=1,
+                            commit_digest=digest,
+                            votes=[pb.QuorumVote(voter_replica_id=2, key_id="replica-2-key", key_generation=1, signature=b"fixture")],
+                        ),
                     ),
                     timeout=3,
                 )

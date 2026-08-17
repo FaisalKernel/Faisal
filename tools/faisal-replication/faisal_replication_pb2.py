@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18\x66\x61isal_replication.proto\x12\x15\x66\x61isal.replication.v1\"\xbb\x01\n\x0fJournalIdentity\x12\x12\n\ncluster_id\x18\x01 \x01(\x04\x12\x12\n\nreplica_id\x18\x02 \x01(\x04\x12\x0c\n\x04term\x18\x03 \x01(\x04\x12\x15\n\rlast_sequence\x18\x04 \x01(\x04\x12\x14\n\x0c\x63hain_digest\x18\x05 \x01(\x0c\x12\x1d\n\x15\x61ttestation_signature\x18\x06 \x01(\x0c\x12\x0e\n\x06key_id\x18\x07 \x01(\t\x12\x16\n\x0ekey_generation\x18\x08 \x01(\x04\"f\n\x0bVoteRequest\x12\x39\n\tcandidate\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x1c\n\x14\x65lection_deadline_ns\x18\x02 \x01(\x04\"m\n\x0cVoteResponse\x12\x35\n\x05voter\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x0f\n\x07granted\x18\x02 \x01(\x08\x12\x15\n\rdenial_reason\x18\x03 \x01(\t\"|\n\rJournalRecord\x12\x10\n\x08sequence\x18\x01 \x01(\x04\x12\x17\n\x0fprevious_digest\x18\x02 \x01(\x0c\x12\x15\n\rrecord_digest\x18\x03 \x01(\x0c\x12\x0f\n\x07payload\x18\x04 \x01(\x0c\x12\x18\n\x10record_signature\x18\x05 \x01(\x0c\"\x95\x01\n\rAppendRequest\x12\x36\n\x06leader\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x35\n\x07records\x18\x02 \x03(\x0b\x32$.faisal.replication.v1.JournalRecord\x12\x15\n\rleader_commit\x18\x03 \x01(\x04\"\x8b\x01\n\x0e\x41ppendResponse\x12\x38\n\x08\x66ollower\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x10\n\x08\x61\x63\x63\x65pted\x18\x02 \x01(\x08\x12\x16\n\x0ematch_sequence\x18\x03 \x01(\x04\x12\x15\n\rdenial_reason\x18\x04 \x01(\t\"\x96\x01\n\x0fSnapshotRequest\x12\x36\n\x06leader\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x19\n\x11snapshot_sequence\x18\x02 \x01(\x04\x12\x17\n\x0fsnapshot_digest\x18\x03 \x01(\x0c\x12\x17\n\x0fsigned_snapshot\x18\x04 \x01(\x0c\"u\n\x10SnapshotResponse\x12\x38\n\x08\x66ollower\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x10\n\x08\x61\x63\x63\x65pted\x18\x02 \x01(\x08\x12\x15\n\rdenial_reason\x18\x03 \x01(\t\"N\n\x11ReadCommitRequest\x12\x39\n\trequester\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\"\x85\x01\n\x12ReadCommitResponse\x12\x39\n\tauthority\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x1a\n\x12\x63ommitted_sequence\x18\x02 \x01(\x04\x12\x18\n\x10\x63ommitted_digest\x18\x03 \x01(\x0c\x32\xef\x03\n\x12JournalReplication\x12V\n\x0bRequestVote\x12\".faisal.replication.v1.VoteRequest\x1a#.faisal.replication.v1.VoteResponse\x12\\\n\rAppendEntries\x12$.faisal.replication.v1.AppendRequest\x1a%.faisal.replication.v1.AppendResponse\x12\\\n\rAppendJournal\x12$.faisal.replication.v1.AppendRequest\x1a%.faisal.replication.v1.AppendResponse\x12\x62\n\x0fInstallSnapshot\x12&.faisal.replication.v1.SnapshotRequest\x1a\'.faisal.replication.v1.SnapshotResponse\x12\x61\n\nReadCommit\x12(.faisal.replication.v1.ReadCommitRequest\x1a).faisal.replication.v1.ReadCommitResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18\x66\x61isal_replication.proto\x12\x15\x66\x61isal.replication.v1\"\xbb\x01\n\x0fJournalIdentity\x12\x12\n\ncluster_id\x18\x01 \x01(\x04\x12\x12\n\nreplica_id\x18\x02 \x01(\x04\x12\x0c\n\x04term\x18\x03 \x01(\x04\x12\x15\n\rlast_sequence\x18\x04 \x01(\x04\x12\x14\n\x0c\x63hain_digest\x18\x05 \x01(\x0c\x12\x1d\n\x15\x61ttestation_signature\x18\x06 \x01(\x0c\x12\x0e\n\x06key_id\x18\x07 \x01(\t\x12\x16\n\x0ekey_generation\x18\x08 \x01(\x04\"f\n\x0bVoteRequest\x12\x39\n\tcandidate\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x1c\n\x14\x65lection_deadline_ns\x18\x02 \x01(\x04\"m\n\x0cVoteResponse\x12\x35\n\x05voter\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x0f\n\x07granted\x18\x02 \x01(\x08\x12\x15\n\rdenial_reason\x18\x03 \x01(\t\"|\n\rJournalRecord\x12\x10\n\x08sequence\x18\x01 \x01(\x04\x12\x17\n\x0fprevious_digest\x18\x02 \x01(\x0c\x12\x15\n\rrecord_digest\x18\x03 \x01(\x0c\x12\x0f\n\x07payload\x18\x04 \x01(\x0c\x12\x18\n\x10record_signature\x18\x05 \x01(\x0c\"\xdb\x01\n\rAppendRequest\x12\x36\n\x06leader\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x35\n\x07records\x18\x02 \x03(\x0b\x32$.faisal.replication.v1.JournalRecord\x12\x15\n\rleader_commit\x18\x03 \x01(\x04\x12\x44\n\x12quorum_certificate\x18\x04 \x01(\x0b\x32(.faisal.replication.v1.QuorumCertificate\"\xb2\x01\n\x11QuorumCertificate\x12\x12\n\ncluster_id\x18\x01 \x01(\x04\x12\x19\n\x11leader_replica_id\x18\x02 \x01(\x04\x12\x0c\n\x04term\x18\x03 \x01(\x04\x12\x17\n\x0f\x63ommit_sequence\x18\x04 \x01(\x04\x12\x15\n\rcommit_digest\x18\x05 \x01(\x0c\x12\x30\n\x05votes\x18\x06 \x03(\x0b\x32!.faisal.replication.v1.QuorumVote\"a\n\nQuorumVote\x12\x18\n\x10voter_replica_id\x18\x01 \x01(\x04\x12\x0e\n\x06key_id\x18\x02 \x01(\t\x12\x16\n\x0ekey_generation\x18\x03 \x01(\x04\x12\x11\n\tsignature\x18\x04 \x01(\x0c\"\x8b\x01\n\x0e\x41ppendResponse\x12\x38\n\x08\x66ollower\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x10\n\x08\x61\x63\x63\x65pted\x18\x02 \x01(\x08\x12\x16\n\x0ematch_sequence\x18\x03 \x01(\x04\x12\x15\n\rdenial_reason\x18\x04 \x01(\t\"\x96\x01\n\x0fSnapshotRequest\x12\x36\n\x06leader\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x19\n\x11snapshot_sequence\x18\x02 \x01(\x04\x12\x17\n\x0fsnapshot_digest\x18\x03 \x01(\x0c\x12\x17\n\x0fsigned_snapshot\x18\x04 \x01(\x0c\"u\n\x10SnapshotResponse\x12\x38\n\x08\x66ollower\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x10\n\x08\x61\x63\x63\x65pted\x18\x02 \x01(\x08\x12\x15\n\rdenial_reason\x18\x03 \x01(\t\"N\n\x11ReadCommitRequest\x12\x39\n\trequester\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\"\x85\x01\n\x12ReadCommitResponse\x12\x39\n\tauthority\x18\x01 \x01(\x0b\x32&.faisal.replication.v1.JournalIdentity\x12\x1a\n\x12\x63ommitted_sequence\x18\x02 \x01(\x04\x12\x18\n\x10\x63ommitted_digest\x18\x03 \x01(\x0c\x32\xef\x03\n\x12JournalReplication\x12V\n\x0bRequestVote\x12\".faisal.replication.v1.VoteRequest\x1a#.faisal.replication.v1.VoteResponse\x12\\\n\rAppendEntries\x12$.faisal.replication.v1.AppendRequest\x1a%.faisal.replication.v1.AppendResponse\x12\\\n\rAppendJournal\x12$.faisal.replication.v1.AppendRequest\x1a%.faisal.replication.v1.AppendResponse\x12\x62\n\x0fInstallSnapshot\x12&.faisal.replication.v1.SnapshotRequest\x1a\'.faisal.replication.v1.SnapshotResponse\x12\x61\n\nReadCommit\x12(.faisal.replication.v1.ReadCommitRequest\x1a).faisal.replication.v1.ReadCommitResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -40,17 +40,21 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_JOURNALRECORD']._serialized_start=456
   _globals['_JOURNALRECORD']._serialized_end=580
   _globals['_APPENDREQUEST']._serialized_start=583
-  _globals['_APPENDREQUEST']._serialized_end=732
-  _globals['_APPENDRESPONSE']._serialized_start=735
-  _globals['_APPENDRESPONSE']._serialized_end=874
-  _globals['_SNAPSHOTREQUEST']._serialized_start=877
-  _globals['_SNAPSHOTREQUEST']._serialized_end=1027
-  _globals['_SNAPSHOTRESPONSE']._serialized_start=1029
-  _globals['_SNAPSHOTRESPONSE']._serialized_end=1146
-  _globals['_READCOMMITREQUEST']._serialized_start=1148
-  _globals['_READCOMMITREQUEST']._serialized_end=1226
-  _globals['_READCOMMITRESPONSE']._serialized_start=1229
-  _globals['_READCOMMITRESPONSE']._serialized_end=1362
-  _globals['_JOURNALREPLICATION']._serialized_start=1365
-  _globals['_JOURNALREPLICATION']._serialized_end=1860
+  _globals['_APPENDREQUEST']._serialized_end=802
+  _globals['_QUORUMCERTIFICATE']._serialized_start=805
+  _globals['_QUORUMCERTIFICATE']._serialized_end=983
+  _globals['_QUORUMVOTE']._serialized_start=985
+  _globals['_QUORUMVOTE']._serialized_end=1082
+  _globals['_APPENDRESPONSE']._serialized_start=1085
+  _globals['_APPENDRESPONSE']._serialized_end=1224
+  _globals['_SNAPSHOTREQUEST']._serialized_start=1227
+  _globals['_SNAPSHOTREQUEST']._serialized_end=1377
+  _globals['_SNAPSHOTRESPONSE']._serialized_start=1379
+  _globals['_SNAPSHOTRESPONSE']._serialized_end=1496
+  _globals['_READCOMMITREQUEST']._serialized_start=1498
+  _globals['_READCOMMITREQUEST']._serialized_end=1576
+  _globals['_READCOMMITRESPONSE']._serialized_start=1579
+  _globals['_READCOMMITRESPONSE']._serialized_end=1712
+  _globals['_JOURNALREPLICATION']._serialized_start=1715
+  _globals['_JOURNALREPLICATION']._serialized_end=2210
 # @@protoc_insertion_point(module_scope)
