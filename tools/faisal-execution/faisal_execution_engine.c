@@ -566,6 +566,31 @@ int fex_make_handoff_token(const struct fex_service *service, uint64_t task_id,
 	return FEX_OK;
 }
 
+static int consume_handoff_token(struct fex_service *service,
+				 const uint8_t token[FEX_HANDOFF_TOKEN_SIZE])
+{
+	uint32_t i;
+
+	pthread_mutex_lock(&service->lock);
+	for (i = 0; i < service->consumed_handoff_token_count; i++) {
+		if (memcmp(service->consumed_handoff_tokens[i], token,
+			   FEX_HANDOFF_TOKEN_SIZE) == 0) {
+			pthread_mutex_unlock(&service->lock);
+			return FEX_ERR_CONFLICT;
+		}
+	}
+	if (service->consumed_handoff_token_count >=
+	    FEX_MAX_CONSUMED_HANDOFF_TOKENS) {
+		pthread_mutex_unlock(&service->lock);
+		return FEX_ERR_FULL;
+	}
+	memcpy(service->consumed_handoff_tokens[
+		service->consumed_handoff_token_count++], token,
+	       FEX_HANDOFF_TOKEN_SIZE);
+	pthread_mutex_unlock(&service->lock);
+	return FEX_OK;
+}
+
 int fex_handoff_token_verified(struct fex_service *service, uint64_t task_id,
 				       uint64_t new_worker_id, uint64_t now_ns,
 				       uint64_t lease_ns,
@@ -591,6 +616,9 @@ int fex_handoff_token_verified(struct fex_service *service, uint64_t task_id,
 		return rc;
 	if (memcmp(expected, token, FEX_HANDOFF_TOKEN_SIZE) != 0)
 		return FEX_ERR_AUTHORITY;
+	rc = consume_handoff_token(service, token);
+	if (rc != FEX_OK)
+		return rc;
 	rc = fex_query_node(service, task_id, &node);
 	if (rc != FEX_OK)
 		return rc;

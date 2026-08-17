@@ -1,0 +1,26 @@
+{
+  "milestone": "M124",
+  "feature": "one-time authenticated handoff-token consumption",
+  "status": "validated_qemu",
+  "policy": {
+    "maximum_consumed_tokens_in_memory": 128,
+    "replay_behavior": "conflict or authority denial before a second state transition",
+    "lease_generation_fencing": true,
+    "model_output_authority": false
+  },
+  "evidence": {
+    "replayed_token_denial": "M124_REPLAYED_HANDOFF_TOKEN_DENIED_OK",
+    "overlong_lease_denial": "M123_OVERLONG_HANDOFF_LEASE_DENIED_OK",
+    "stale_token_denial": "M122_STALE_HANDOFF_TOKEN_DENIED_OK",
+    "tamper_denial": "M121_TAMPERED_HANDOFF_TOKEN_DENIED_OK",
+    "valid_handoff": "M120_CHECKPOINT_BOUND_HANDOFF_OK",
+    "replay_engine": "M117_WORKER_HANDOFF_REPLAY_OK",
+    "qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+    "kernel_diagnostics": "none observed"
+  },
+  "limitations": [
+    "Consumed-token state is currently bounded to the execution-service lifetime and is not yet persisted as a dedicated journal record across process restart.",
+    "The lease-generation fence still protects replay after a successful handoff when the generation changes.",
+    "Distributed key provisioning and remote host attestation remain separate production gates."
+  ]
+}

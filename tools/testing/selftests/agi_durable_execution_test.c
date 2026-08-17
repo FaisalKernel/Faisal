@@ -148,6 +148,14 @@ int main(int argc, char **argv)
 		printf("M123_OVERLONG_HANDOFF_LEASE_DENIED_OK\n");
 		CHECK_OK(fex_handoff_token_verified(&service, node_c.task_id, 9001, 12,
 				100, handoff_token), "WORKER_HANDOFF");
+		{
+			int replay_rc = fex_handoff_token_verified(&service, node_c.task_id,
+					9001, 12, 100, handoff_token);
+			if (replay_rc != FEX_ERR_CONFLICT &&
+			    replay_rc != FEX_ERR_AUTHORITY)
+				fail("REPLAYED_HANDOFF_TOKEN", replay_rc);
+		}
+		printf("M124_REPLAYED_HANDOFF_TOKEN_DENIED_OK\n");
 
 		CHECK_OK(fex_query_worker(&service, node_c.task_id, &worker),
 			 "QUERY_WORKER_HANDOFF");

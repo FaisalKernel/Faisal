@@ -18,6 +18,7 @@
 #define FEX_HANDOFF_TOKEN_MAX_AGE_NS 1000000000ULL
 #define FEX_MAX_HANDOFF_LEASE_NS (60ULL * 1000000000ULL)
 #define FEX_HANDOFF_TOKEN_SIZE (sizeof(uint64_t) + FEX_DIGEST_SIZE)
+#define FEX_MAX_CONSUMED_HANDOFF_TOKENS 128U
 
 /* Persisted objective state is a replay contract, not a model claim. */
 enum fex_objective_state {
@@ -144,6 +145,8 @@ struct fex_service {
 	struct fex_objective objectives[FEX_MAX_OBJECTIVES];
 	struct fex_node nodes[FEX_MAX_NODES];
 	struct fex_worker workers[FEX_MAX_WORKERS];
+	uint8_t consumed_handoff_tokens[FEX_MAX_CONSUMED_HANDOFF_TOKENS][FEX_HANDOFF_TOKEN_SIZE];
+	uint32_t consumed_handoff_token_count;
 	size_t objective_count;
 	size_t node_count;
 	size_t worker_count;
