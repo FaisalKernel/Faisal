@@ -29,6 +29,39 @@ static void reset_retry_backoff(struct faisal_accel_batcher *batcher)
 	batcher->retry_backoff_ns = FAISAL_ACCEL_BATCHER_DEFAULT_RETRY_NS;
 }
 
+static void invalidate_pressure_cache(struct faisal_accel_batcher *batcher)
+{
+	batcher->pressure_cache_valid = 0;
+	batcher->pressure_cache_timestamp_ns = 0;
+}
+
+static int pressure_cache_fresh(struct faisal_accel_batcher *batcher,
+				struct agi_lc_event_backpressure *out)
+{
+	uint64_t now;
+
+	if (!batcher->pressure_cache_valid || !batcher->pressure_cache_ns)
+		return 0;
+	now = monotonic_ns();
+	if (!now || now < batcher->pressure_cache_timestamp_ns ||
+	    now - batcher->pressure_cache_timestamp_ns >
+		batcher->pressure_cache_ns) {
+		invalidate_pressure_cache(batcher);
+		return 0;
+	}
+	*out = batcher->cached_pressure;
+	batcher->pressure_cache_hits++;
+	return 1;
+}
+
+static int pressure_for_flush(struct faisal_accel_batcher *batcher,
+			       struct agi_lc_event_backpressure *out)
+{
+	if (pressure_cache_fresh(batcher, out))
+		return 0;
+	return faisal_accel_batcher_query(batcher, out);
+}
+
 static void arm_retry_backoff(struct faisal_accel_batcher *batcher)
 {
 	uint64_t now = monotonic_ns();
@@ -89,6 +122,8 @@ int faisal_accel_batcher_init(struct faisal_accel_batcher *batcher,
 	batcher->max_batch = max_batch;
 	batcher->target_batch = clamp_batch(initial_batch, max_batch);
 	batcher->retry_max_ns = FAISAL_ACCEL_BATCHER_MAX_RETRY_NS;
+	batcher->pressure_cache_ns =
+		FAISAL_ACCEL_BATCHER_DEFAULT_PRESSURE_CACHE_NS;
 	reset_retry_backoff(batcher);
 	batcher->ioctl_fn = default_ioctl;
 	return 0;
@@ -113,6 +148,16 @@ int faisal_accel_batcher_set_retry_backoff(struct faisal_accel_batcher *batcher,
 	batcher->retry_backoff_ns = initial_ns;
 	batcher->retry_max_ns = max_ns;
 	batcher->retry_until_ns = 0;
+	return 0;
+}
+
+int faisal_accel_batcher_set_pressure_cache(struct faisal_accel_batcher *batcher,
+						   uint64_t cache_ns)
+{
+	if (!batcher || cache_ns > FAISAL_ACCEL_BATCHER_MAX_PRESSURE_CACHE_NS)
+		return -1;
+	batcher->pressure_cache_ns = cache_ns;
+	invalidate_pressure_cache(batcher);
 	return 0;
 }
 
@@ -171,6 +216,15 @@ int faisal_accel_batcher_query(struct faisal_accel_batcher *batcher,
 		if (batcher->loss_acknowledged)
 			reset_retry_backoff(batcher);
 	}
+	if (!pressured && state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_NORMAL &&
+	    state.queued < state.capacity / 2 && batcher->pressure_cache_ns) {
+		batcher->cached_pressure = state;
+		batcher->pressure_cache_timestamp_ns = monotonic_ns();
+		batcher->pressure_cache_valid =
+			batcher->pressure_cache_timestamp_ns != 0;
+	} else {
+		invalidate_pressure_cache(batcher);
+	}
 	if (out)
 		*out = state;
 	return 0;
@@ -195,20 +249,24 @@ int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
 			return -1;
 		}
 	}
-	if (faisal_accel_batcher_query(batcher, &state) < 0)
+	if (pressure_for_flush(batcher, &state) < 0)
 		return -1;
 	if (state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS &&
-	    batcher->loss_acknowledged &&
-	    faisal_accel_batcher_query(batcher, &state) < 0)
-		return -1;
+	    batcher->loss_acknowledged) {
+		invalidate_pressure_cache(batcher);
+		if (faisal_accel_batcher_query(batcher, &state) < 0)
+			return -1;
+	}
 	if ((state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS &&
 	     !batcher->loss_acknowledged) ||
 	    state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_FULL ||
 	    state.queued + batcher->pending > state.capacity) {
 		errno = EAGAIN;
+		invalidate_pressure_cache(batcher);
 		arm_retry_backoff(batcher);
 		return -1;
 	}
+
 	memset(&batch, 0, sizeof(batch));
 	batch.size = sizeof(batch);
 	batch.entries_ptr = (uint64_t)(uintptr_t)batcher->entries;
@@ -229,6 +287,7 @@ int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
 	if (ret < 0) {
 		if (ret == -EAGAIN || errno == EAGAIN) {
 			batcher->telemetry_losses++;
+			invalidate_pressure_cache(batcher);
 			shrink_batch(batcher);
 			arm_retry_backoff(batcher);
 		}
@@ -236,6 +295,7 @@ int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
 	}
 	if (batcher->pending)
 		return -1;
+	invalidate_pressure_cache(batcher);
 	reset_retry_backoff(batcher);
 	return 0;
 }
@@ -246,6 +306,7 @@ int faisal_accel_batcher_acknowledge_loss(struct faisal_accel_batcher *batcher)
 		return -1;
 	batcher->loss_acknowledged = 1;
 	batcher->healthy_queries = 0;
+	invalidate_pressure_cache(batcher);
 	reset_retry_backoff(batcher);
 	return 0;
 }

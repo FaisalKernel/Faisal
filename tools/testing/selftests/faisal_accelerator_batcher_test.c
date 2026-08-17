@@ -75,6 +75,8 @@ int main(void)
 	assert(faisal_accel_batcher_set_ioctl(&batcher, fake_ioctl) == 0);
 	assert(faisal_accel_batcher_set_resync(&batcher, fake_resync, &fake) == 0);
 	assert(faisal_accel_batcher_set_retry_backoff(&batcher, 1000, 8000) == 0);
+	assert(faisal_accel_batcher_set_pressure_cache(&batcher, 100000000) == 0);
+	assert(faisal_accel_batcher_set_pressure_cache(&batcher, 100000001) < 0);
 	memset(&fake, 0, sizeof(fake));
 	fake.resync_result = 0;
 	fake.pressure.size = sizeof(fake.pressure);
@@ -86,7 +88,10 @@ int main(void)
 	account = entry(7, 2);
 	assert(faisal_accel_batcher_submit(&batcher, &account) == 0);
 	assert(faisal_accel_batcher_pending(&batcher) == 2);
+	queries_before = batcher.backpressure_queries;
 	assert(faisal_accel_batcher_flush(&batcher) == 0);
+	assert(batcher.pressure_cache_hits >= 1);
+	assert(batcher.backpressure_queries == queries_before);
 	assert(faisal_accel_batcher_pending(&batcher) == 0);
 	assert(fake.batch_calls == 1 && fake.last_entry_count == 2);
 
@@ -143,9 +148,10 @@ int main(void)
 	assert(faisal_accel_batcher_flush(&batcher) == 0);
 	assert(faisal_accel_batcher_pending(&batcher) == 0);
 	assert(batcher.submitted_entries >= 5);
-	printf("M159_ADAPTIVE_BATCHER_BACKOFF_OK flushes=%llu queries=%llu losses=%llu resync=%llu failures=%llu fast=%llu target=%u\n",
+	printf("M160_ADAPTIVE_PRESSURE_CACHE_OK flushes=%llu queries=%llu cache_hits=%llu losses=%llu resync=%llu failures=%llu fast=%llu target=%u\n",
 	       (unsigned long long)batcher.flushes,
 	       (unsigned long long)batcher.backpressure_queries,
+	       (unsigned long long)batcher.pressure_cache_hits,
 	       (unsigned long long)batcher.telemetry_losses,
 	       (unsigned long long)batcher.resync_attempts,
 	       (unsigned long long)batcher.resync_failures,

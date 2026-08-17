@@ -9,6 +9,8 @@
 #define FAISAL_ACCEL_BATCHER_MAX_BATCH AGI_LC_ACCEL_ACCOUNT_BATCH_MAX
 #define FAISAL_ACCEL_BATCHER_DEFAULT_RETRY_NS 1000000ULL
 #define FAISAL_ACCEL_BATCHER_MAX_RETRY_NS 100000000ULL
+#define FAISAL_ACCEL_BATCHER_DEFAULT_PRESSURE_CACHE_NS 1000000ULL
+#define FAISAL_ACCEL_BATCHER_MAX_PRESSURE_CACHE_NS 100000000ULL
 
 typedef int (*faisal_accel_ioctl_fn)(int fd, unsigned long request,
 					 void *arg);
@@ -37,6 +39,11 @@ struct faisal_accel_batcher {
 	uint64_t retry_backoff_ns;
 	uint64_t retry_max_ns;
 	uint64_t fast_rejects;
+	uint64_t pressure_cache_hits;
+	uint64_t pressure_cache_ns;
+	uint64_t pressure_cache_timestamp_ns;
+	struct agi_lc_event_backpressure cached_pressure;
+	uint32_t pressure_cache_valid;
 	struct agi_lc_accel_device_account entries[FAISAL_ACCEL_BATCHER_MAX_BATCH];
 };
 
@@ -51,6 +58,8 @@ int faisal_accel_batcher_set_resync(struct faisal_accel_batcher *batcher,
 int faisal_accel_batcher_set_retry_backoff(struct faisal_accel_batcher *batcher,
 					      uint64_t initial_ns,
 					      uint64_t max_ns);
+int faisal_accel_batcher_set_pressure_cache(struct faisal_accel_batcher *batcher,
+						   uint64_t cache_ns);
 int faisal_accel_batcher_submit(struct faisal_accel_batcher *batcher,
 				const struct agi_lc_accel_device_account *entry);
 int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher);
