@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package faisal.replication.v1;
+
+service JournalReplication {
+  rpc RequestVote(VoteRequest) returns (VoteResponse);
+  rpc AppendJournal(AppendRequest) returns (AppendResponse);
+  rpc InstallSnapshot(SnapshotRequest) returns (SnapshotResponse);
+  rpc ReadCommit(ReadCommitRequest) returns (ReadCommitResponse);
+}
+
+message JournalIdentity {
+  uint64 cluster_id = 1;
+  uint64 replica_id = 2;
+  uint64 term = 3;
+  uint64 last_sequence = 4;
+  bytes chain_digest = 5;
+  bytes attestation_signature = 6;
+  string key_id = 7;
+  uint64 key_generation = 8;
+}
+
+message VoteRequest {
+  JournalIdentity candidate = 1;
+  uint64 election_deadline_ns = 2;
+}
+
+message VoteResponse {
+  JournalIdentity voter = 1;
+  bool granted = 2;
+  string denial_reason = 3;
+}
+
+message JournalRecord {
+  uint64 sequence = 1;
+  bytes previous_digest = 2;
+  bytes record_digest = 3;
+  bytes payload = 4;
+  bytes record_signature = 5;
+}
+
+message AppendRequest {
+  JournalIdentity leader = 1;
+  repeated JournalRecord records = 2;
+  uint64 leader_commit = 3;
+}
+
+message AppendResponse {
+  JournalIdentity follower = 1;
+  bool accepted = 2;
+  uint64 match_sequence = 3;
+  string denial_reason = 4;
+}
+
+message SnapshotRequest {
+  JournalIdentity leader = 1;
+  uint64 snapshot_sequence = 2;
+  bytes snapshot_digest = 3;
+  bytes signed_snapshot = 4;
+}
+
+message SnapshotResponse {
+  JournalIdentity follower = 1;
+  bool accepted = 2;
+  string denial_reason = 3;
+}
+
+message ReadCommitRequest { JournalIdentity requester = 1; }
+message ReadCommitResponse {
+  JournalIdentity authority = 1;
+  uint64 committed_sequence = 2;
+  bytes committed_digest = 3;
+}

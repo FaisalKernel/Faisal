@@ -1,0 +1,28 @@
+{
+  "milestones": ["M134", "M135", "M136"],
+  "status": "validated_host_and_contract",
+  "M134_live_socket_partition": {
+    "transport": "real TCP sockets with mutual TLS on loopback",
+    "fault_injection": "iptables bidirectional DROP rules applied after established TLS sessions",
+    "evidence": ["FJT_TLS_REPLICATION_HANDSHAKE_OK", "FJT_LIVE_PARTITION_DROP_OBSERVED_OK", "FJT_LIVE_PARTITION_RECOVERY_OK", "FJT_LIVE_SOCKET_PARTITION_SELFTEST_OK", "FJT_LIVE_SOCKET_PARTITION_QEMU_HOST_VALIDATION_OK"]
+  },
+  "M135_remote_kms_clients": {
+    "aws": "SigV4 AWS KMS Sign client with key identity and algorithm response checks",
+    "vault": "HTTPS-only Vault Transit sign client with versioned signature and key-generation parsing",
+    "credential_policy": "credentials are external; TLS verification is mandatory; no live credentials used",
+    "validation": "Python syntax validation passed; provider callback remains the tested FAISAL integration boundary"
+  },
+  "M136_grpc_tls_replication_design": {
+    "contract": "tools/faisal-replication/faisal_replication.proto",
+    "methods": ["RequestVote", "AppendJournal", "InstallSnapshot", "ReadCommit"],
+    "fencing": ["cluster and replica identity", "term", "contiguous sequence", "previous chain digest", "attestation signature", "key generation"],
+    "design_doc": "tools/faisal-replication/FAISAL-REPLICATION-PROTOCOL.md",
+    "qualification": "protobuf contract and TLS socket harness validated; generated gRPC bindings and production deployment remain pending"
+  },
+  "kernel_diagnostics": "none observed",
+  "limitations": [
+    "The live fault injection uses iptables on loopback because tc netem is unavailable in the current kernel; production NIC/netns fault injection remains required.",
+    "AWS KMS and Vault clients were not pointed at live services because credentials and endpoints were not available.",
+    "The repository contains the gRPC/TLS contract and security design, not a generated production gRPC server or leader-election daemon."
+  ]
+}
