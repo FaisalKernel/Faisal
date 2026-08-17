@@ -44,7 +44,15 @@
     "replication_python_log": "/home/ubuntu/agi-kernel/build/faisal-final2-replication-python.log",
     "replication_result": "23_passed_one_tls_fixture_skipped",
     "sanitizer_summary": "/home/ubuntu/agi-kernel/build/m153-sanitizers/m106-sanitizer-matrix.tsv",
-    "sanitizer_result": "kasan_and_kcsan_compile_qemu_clean; sanitizer source parent 6bcb59f7d; current commit adds only test-harness changes"
+    "sanitizer_result": "kasan_and_kcsan_compile_qemu_clean; sanitizer source parent 6bcb59f7d; current commit adds only test-harness changes",
+    "industry_soak_summary": "/home/ubuntu/agi-kernel/build/industry-soak/summary.tsv",
+    "industry_soak_log": "/home/ubuntu/agi-kernel/build/faisal-industry-soak-final2.log",
+    "industry_soak_result": "pass_three_rounds_16384_iterations_each_no_kernel_diagnostic_markers_return_code_0",
+    "industry_soak_rounds": [
+      {"round": 1, "iterations": 16384, "elapsed_seconds": 23, "status": "passed"},
+      {"round": 2, "iterations": 16384, "elapsed_seconds": 17, "status": "passed"},
+      {"round": 3, "iterations": 16384, "elapsed_seconds": 18, "status": "passed"}
+    ]
   },
   "artifact_integrity": {
     "artifact_directory": "/home/ubuntu/agi-kernel/build/industry-artifacts-final2",

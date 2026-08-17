@@ -1453,6 +1453,7 @@
     "m153_accelerator_release_reconciliation": "pass_bounded_release_underflow_erange_task_counter_reconciliation_qemu",
     "m153_reproducible_build": "pass_final2_two_builder_ids_byte_identical_bzimage_and_vmlinux_same_sandbox_host",
     "m153_sanitizer_matrix": "pass_kasan_kcsan_compile_qemu_clean_cfs_bandwidth_preserved",
+    "m153_industry_soak": "pass_three_rounds_16384_iterations_each_no_kernel_diagnostic_markers_qemu_return_0",
     "m153_final_artifact_integrity": "pass_manifest_spdx_checksums_source_bound_unsigned",
     "m153_release_gate": "blocked_fail_closed_missing_operator_controlled_faisal_public_key",
     "m116_knowledge_precision_qemu": "pass_kernel_freshness_provenance_confidence_fail_closed",
