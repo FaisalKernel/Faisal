@@ -10,6 +10,7 @@ BUILD_B=${FAISAL_BUILD_B:-}
 ARTIFACT_OUT=${FAISAL_ARTIFACT_OUT:-}
 PUBLIC_KEY=${FAISAL_PUBLIC_KEY:-}
 SECURITY_MANIFEST=${FAISAL_SECURITY_MANIFEST:-}
+ADVISORY_LEDGER=${FAISAL_ADVISORY_LEDGER:-}
 REQUIRE_PRODUCTION_LINE=${FAISAL_REQUIRE_PRODUCTION_LINE:-1}
 KERNEL_SOURCE=${FAISAL_KERNEL_SOURCE:-$LINUX}
 REQUIRED_KERNEL_LINE=${FAISAL_REQUIRED_KERNEL_LINE:-}
@@ -24,7 +25,9 @@ fail() { echo "FAISAL_RELEASE_GATE_FAIL:$*" >&2; exit 1; }
 [ -n "$PUBLIC_KEY" ] || fail "FAISAL_PUBLIC_KEY is required"
 [ -r "$PUBLIC_KEY" ] || fail "public key is unreadable"
 [ -n "$SECURITY_MANIFEST" ] || fail "FAISAL_SECURITY_MANIFEST is required"
+[ -n "$ADVISORY_LEDGER" ] || fail "FAISAL_ADVISORY_LEDGER is required"
 [ -x "$LINUX/tools/faisal-build/verify_industry_artifacts.sh" ] || fail "artifact verifier unavailable"
+[ -x "$LINUX/tools/faisal-build/verify_advisory_ledger.sh" ] || fail "advisory ledger verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_security_release_evidence.sh" ] || fail "security evidence verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/compare_reproducible_builds.sh" ] || fail "reproducibility comparator unavailable"
@@ -70,6 +73,15 @@ FAISAL_SECURITY_VERIFY_REPORT="${REPORT}.security.tsv" \
   fail "security evidence verification"
 }
 printf 'security_evidence\tpass\t%s\n' "$SECURITY_MANIFEST" >> "$REPORT"
+FAISAL_ADVISORY_LEDGER="$ADVISORY_LEDGER" \
+FAISAL_PUBLIC_KEY="$PUBLIC_KEY" \
+FAISAL_EXPECTED_SOURCE_REV="$expected_source_revision" \
+FAISAL_ADVISORY_VERIFY_REPORT="${REPORT}.advisory.tsv" \
+  "$LINUX/tools/faisal-build/verify_advisory_ledger.sh" >/tmp/faisal-release-advisory-gate.log 2>&1 || {
+  cat /tmp/faisal-release-advisory-gate.log >&2
+  fail "advisory ledger verification"
+}
+printf 'advisory_ledger\tpass\t%s\n' "$ADVISORY_LEDGER" >> "$REPORT"
 
 FAISAL_BUILD_A="$BUILD_A" \
 FAISAL_BUILD_B="$BUILD_B" \
