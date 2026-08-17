@@ -1,0 +1,104 @@
+{
+  "schema": "org.faisal.evidence.m159-adaptive-retry-backoff-validation.v1",
+  "milestone": "M159",
+  "source_revision": "09094e8a9a52a520b9299eb19c59933b2ea495c9",
+  "source_parent": "a20cfc6e3fb2c5ad7742d56f2ea7c8379a7f068a",
+  "recorded_at": "2026-08-17T17:35:00Z",
+  "status": "validated_bounded_userspace_qemu_and_deterministic_unit_test_not_production_release",
+  "implementation": {
+    "library": "tools/faisal-accelerator/faisal_accelerator_batcher.{c,h}",
+    "improvement": "Added monotonic saturating exponential retry backoff after known FULL/LOSS/EAGAIN pressure. Repeated flush attempts during an active retry window now return local EAGAIN without issuing another pressure query or batch ioctl.",
+    "bounds": "Backoff defaults to 1 ms, doubles up to a 100 ms cap, and uses overflow-safe monotonic deadline arithmetic. The configuration setter rejects zero, inverted, and over-cap values.",
+    "recovery": "Successful submission and explicit loss acknowledgement reset the retry window. Pressure state remains authoritative after the backoff expires.",
+    "security": "The optimization only suppresses redundant userspace retries; it does not bypass the kernel ioctl, capability checks, lineage checks, tenant accounting, or telemetry-loss handling."
+  },
+  "unit_validation": {
+    "source": "tools/testing/selftests/faisal_accelerator_batcher_test.c",
+    "compile": "pass_static_wall_wextra_werror",
+    "result": "pass",
+    "marker": "M159_ADAPTIVE_BATCHER_BACKOFF_OK flushes=5 queries=16 losses=4 resync=2 failures=1 fast=1 target=1",
+    "coverage": [
+      "custom retry-backoff bounds",
+      "pressure-triggered backoff arming",
+      "immediate local EAGAIN fast rejection",
+      "zero additional pressure queries during the retry window",
+      "zero additional batch ioctl flushes during the retry window",
+      "reset after explicit recovery",
+      "existing resynchronization and partial-completion behavior"
+    ],
+    "measured_control_path": {
+      "flushes": 5,
+      "backpressure_queries": 16,
+      "telemetry_losses": 4,
+      "resync_attempts": 2,
+      "resync_failures": 1,
+      "fast_rejects": 1,
+      "final_target_batch": 1
+    }
+  },
+  "runtime_validation": {
+    "tenant_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m159-tenant-qemu.log",
+    "tenant_qemu_return_code": 0,
+    "tenant_result": "pass",
+    "required_markers": [
+      "M154_TENANT_ACCELERATOR_TELEMETRY_LOSS_OK",
+      "M156_TENANT_EVENT_BACKPRESSURE_QUERY_OK queued=64 dropped=1 state=3",
+      "M159_ADAPTIVE_BATCHER_BACKOFF_OK flushes=5 queries=16 losses=4 resync=2 failures=1 fast=1 target=1",
+      "M159_BATCHER_SELFTEST_RC=0",
+      "M155_TENANT_ACCELERATOR_BATCH_ACCOUNTING_OK completed=4",
+      "M155_TENANT_ACCELERATOR_BATCH_MALFORMED_REJECT_OK",
+      "M155_TENANT_ACCELERATOR_BATCH_BENCH_OK single_ns=6938468 batch_ns=4151651 speedup_x100=167",
+      "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+    ],
+    "tenant_kernel_diagnostic_scan": "clean",
+    "durable_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m159-durable-qemu.log",
+    "durable_qemu_return_code": 0,
+    "durable_result": "pass",
+    "durable_markers": [
+      "M108_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+      "M108_EXECUTION_REPLAY_OK",
+      "M108_ENGINE_REPLAY_FAIL_CLOSED_OK",
+      "FJT_SPLIT_BRAIN_PARTITION_ATTACK_DENIED_OK",
+      "FJR_CONSENSUS_TIMEOUT_POLICY_OK",
+      "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+    ],
+    "durable_kernel_diagnostic_scan": "clean"
+  },
+  "productivity_interpretation": {
+    "benefit": "Under known pressure, repeated flush attempts no longer consume a pressure query and kernel batch ioctl per retry. The unit test directly verifies one local fast rejection with unchanged query and flush counters.",
+    "raw_throughput_scope": "The integrated gate retained the inherited M155 synthetic QEMU accounting benchmark at speedup_x100=167 in this run; M159 does not claim an isolated raw-throughput gain because its measured benefit is retry-control overhead reduction.",
+    "hardware_scope": "No physical accelerator throughput, latency, or power claim is made."
+  },
+  "build_artifact": {
+    "kernel_source": "M156 kernel image reused; M159 is userspace runtime/test integration.",
+    "kernel_build_directory": "/home/ubuntu/agi-kernel/build/m156-backpressure",
+    "bzimage_sha256": "4098292a9ca43f521cb67617e970165aff17047db591a7827aea0c690cf7b88d",
+    "vmlinux_sha256": "60229862db8230c29d68b4c11587a511a3dcfcabc590a685462ad4382c403fb1",
+    "config_sha256": "003e03a277c47585b6c36c00810bf36e61dc91b487f1162e0ad51f514bdfa08b",
+    "config_required_check": "CONFIG_CFS_BANDWIDTH=y"
+  },
+  "source_quality": {
+    "git_diff_check": "pass",
+    "tenant_selftest_compile": "pass_static_wall_wextra_werror",
+    "adaptive_batcher_compile": "pass_static_wall_wextra_werror",
+    "shell_syntax_check": "pass",
+    "protected_files_staged": false,
+    "protected_files": [
+      "M63-COMPUTE-CONTEXT-DESIGN.md",
+      "M63-SECURITY-REVIEW.md"
+    ]
+  },
+  "release_gate": {
+    "status": "blocked",
+    "reason": "M159 is bounded userspace/QEMU validation. Physical accelerator qualification, independent reproducible production builders, signed artifacts, stable/LTS forward-port qualification, and external security governance remain required.",
+    "model_output_is_authority": false,
+    "hardware_claim": "No physical GPU, NPU, VRAM, IOMMU, DMA, vendor-driver, reset, or fleet qualification is claimed."
+  },
+  "known_limitations": [
+    "Backoff timing is a userspace optimization and does not replace kernel-side backpressure enforcement.",
+    "A monotonic clock failure disables the fast path for that call rather than guessing a deadline; correctness remains fail-closed through the normal pressure query.",
+    "The unit test deterministically validates counters and behavior; QEMU validates integration and packaging, not physical accelerator behavior.",
+    "No isolated M159 raw-throughput improvement is claimed; the M155 benchmark remains supporting context only.",
+    "The kernel remains based on the Linux v7.2-rc7 development line and production release qualification remains incomplete."
+  ]
+}
