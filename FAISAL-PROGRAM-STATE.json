@@ -1454,6 +1454,8 @@
     "m129_remote_journal_attestation_signing": "pass_ed25519_provider_backed_sign_verify_tamper_denial_qemu",
     "m130_hardware_root_provider_gate": "pass_tpm2_secure_enclave_provider_slot_software_denial_qemu_physical_hardware_pending",
     "m131_distributed_quorum_protocol": "pass_bounded_term_sequence_digest_quorum_split_brain_future_term_denial_qemu_transport_pending",
+    "m132_split_brain_partition_attack": "pass_four_replica_two_two_divergent_partition_no_quorum_three_replica_heal_commit_qemu",
+    "m133_external_kms_key_provisioning": "pass_provider_callback_key_id_generation_binding_attestation_qemu_credentials_external_pending",
     "adapter_conformance_gate": "pass_four_qemu_adapters_sandbox_network_repository_scanner_fail_closed_rollback_replay",
     "m108_durable_execution_qemu": "pass",
     "m108_aggregate_qemu_harnesses": 29,

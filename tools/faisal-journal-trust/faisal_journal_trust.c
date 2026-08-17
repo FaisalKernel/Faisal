@@ -20,6 +20,10 @@ int fjt_sign_attestation(const struct fjt_journal_attestation *report,
 	memset(out, 0, sizeof(*out));
 	out->report = *report;
 	out->key_generation = provider->key_generation;
+	out->key_id_size = provider->key_id_size;
+	if (out->key_id_size > FJT_MAX_KEY_ID)
+		return FJT_ERR_POLICY;
+	memcpy(out->key_id, provider->key_id, out->key_id_size);
 	if (provider->sign(provider->ctx, (const uint8_t *)&out->report,
 			  sizeof(out->report), out->signature) != 0)
 		return FJT_ERR_CRYPTO;
@@ -35,12 +39,42 @@ int fjt_verify_attestation(const struct fjt_signed_attestation *signed_report,
 	if (signed_report->report.format_version != FJT_FORMAT_VERSION ||
 	    !signed_report->report.record_count ||
 	    signed_report->report.last_sequence != signed_report->report.record_count ||
-	    signed_report->key_generation != provider->key_generation)
+	    signed_report->key_generation != provider->key_generation ||
+	    signed_report->key_id_size != provider->key_id_size ||
+	    signed_report->key_id_size > FJT_MAX_KEY_ID ||
+	    memcmp(signed_report->key_id, provider->key_id,
+		   provider->key_id_size) != 0)
 		return FJT_ERR_ATTESTATION;
 	if (provider->verify(provider->ctx,
 			    (const uint8_t *)&signed_report->report,
 			    sizeof(signed_report->report), signed_report->signature) != 0)
 		return FJT_ERR_CRYPTO;
+	return FJT_OK;
+}
+
+int fjt_provision_remote_key(struct fjt_provider *provider,
+			     const uint8_t *requested_key_id,
+			     size_t requested_key_id_size,
+			     uint64_t minimum_generation)
+{
+	size_t provisioned_size = FJT_MAX_KEY_ID;
+	uint64_t generation = 0;
+	uint8_t provisioned_id[FJT_MAX_KEY_ID];
+
+	if (!provider || !provider->provision_key || !requested_key_id ||
+	    !requested_key_id_size || requested_key_id_size > FJT_MAX_KEY_ID ||
+	    !(provider->provider_mask & FJT_PROVIDER_EXTERNAL_KMS))
+		return FJT_ERR_ARGUMENT;
+	if (provider->provision_key(provider->ctx, requested_key_id,
+				    requested_key_id_size, provisioned_id,
+				    &provisioned_size, &generation) != 0)
+		return FJT_ERR_PROVIDER;
+	if (!provisioned_size || provisioned_size > FJT_MAX_KEY_ID ||
+	    generation < minimum_generation)
+		return FJT_ERR_POLICY;
+	memcpy(provider->key_id, provisioned_id, provisioned_size);
+	provider->key_id_size = (uint32_t)provisioned_size;
+	provider->key_generation = generation;
 	return FJT_OK;
 }
 

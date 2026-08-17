@@ -1,0 +1,25 @@
+{
+  "milestones": ["M132", "M133"],
+  "status": "validated_qemu",
+  "M132_split_brain_partition_attack": {
+    "topology": "four replicas with three-replica quorum",
+    "attack": "two replicas retained digest A and two replicas presented divergent digest B during simulated partition",
+    "result": "commit denied because neither side reached quorum",
+    "healing": "one divergent replica restored to digest A; three matching replicas committed successfully",
+    "evidence": ["FJT_SPLIT_BRAIN_PARTITION_ATTACK_DENIED_OK", "FJT_PARTITION_HEAL_QUORUM_RESTORED_OK"]
+  },
+  "M133_external_kms_key_provisioning": {
+    "provider_gate": "FJT_PROVIDER_EXTERNAL_KMS",
+    "binding": "provisioned key ID and monotonically sufficient key generation are required",
+    "result": "provider callback returned key generation 42 and key identity binding was used for attestation",
+    "evidence": ["FJT_KMS_KEY_PROVISION_OK", "FJT_REMOTE_ATTESTATION_SIGN_VERIFY_OK"],
+    "credential_boundary": "KMS credentials remain inside the provider callback; model output cannot request authority directly"
+  },
+  "combined_qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+  "kernel_diagnostics": "none observed",
+  "limitations": [
+    "The partition is a deterministic in-process simulation; real socket loss, packet delay, retransmission, and process crash testing remain required.",
+    "The KMS integration is a provider ABI and test callback; no production KMS credentials or live external KMS endpoint were used.",
+    "Leader election, replicated journal transport, quorum persistence, and physical TPM or enclave qualification remain open."
+  ]
+}

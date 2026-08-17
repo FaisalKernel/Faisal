@@ -40,6 +40,23 @@ static int verify_message(void *opaque, const uint8_t *message, size_t size,
 	return rc;
 }
 
+static int provision_kms_key(void *opaque, const uint8_t *requested_key_id,
+			      size_t requested_key_id_size,
+			      uint8_t provisioned_key_id[FJT_MAX_KEY_ID],
+			      size_t *provisioned_key_id_size,
+			      uint64_t *key_generation)
+{
+	static const uint8_t expected[] = "faisal-journal-key-v1";
+	(void)opaque;
+	if (requested_key_id_size != sizeof(expected) - 1 ||
+	    memcmp(requested_key_id, expected, sizeof(expected) - 1) != 0)
+		return -1;
+	memcpy(provisioned_key_id, expected, sizeof(expected) - 1);
+	*provisioned_key_id_size = sizeof(expected) - 1;
+	*key_generation = 42;
+	return 0;
+}
+
 static int quote_message(void *opaque, const uint8_t nonce[FJT_NONCE_SIZE],
 			 const uint8_t digest[FJT_DIGEST_SIZE],
 			 uint8_t quote[FJT_DIGEST_SIZE])
@@ -72,7 +89,9 @@ int main(void)
 	struct fjt_journal_attestation report = { 0 };
 	struct fjt_signed_attestation signed_report = { 0 };
 	struct fjt_replica_observation replicas[3] = { 0 };
+	struct fjt_replica_observation partition_replicas[4] = { 0 };
 	struct fjt_quorum_config config = { 3, 2, 7 };
+	struct fjt_quorum_config partition_config = { 4, 3, 7 };
 	uint64_t term, sequence;
 	uint8_t digest[FJT_DIGEST_SIZE];
 	size_t public_key_size = sizeof(digest);
@@ -88,8 +107,15 @@ int main(void)
 							 digest, public_key_size);
 	if (!crypto.public_key)
 		fail("PUBLIC_KEY_SETUP", FJT_ERR_CRYPTO);
-	provider.provider_mask = FJT_PROVIDER_TPM2 | FJT_PROVIDER_REMOTE_VERIFIER;
+	provider.provider_mask = FJT_PROVIDER_TPM2 | FJT_PROVIDER_REMOTE_VERIFIER |
+		FJT_PROVIDER_EXTERNAL_KMS;
 	provider.key_generation = 11;
+	provider.provision_key = provision_kms_key;
+	if (fjt_provision_remote_key(&provider,
+			(const uint8_t *)"faisal-journal-key-v1", 21, 40) != FJT_OK)
+		fail("KMS_PROVISION", FJT_ERR_PROVIDER);
+	printf("FJT_KMS_KEY_PROVISION_OK generation=%llu\n",
+	       (unsigned long long)provider.key_generation);
 	provider.ctx = &crypto;
 	provider.sign = sign_message;
 	provider.verify = verify_message;
@@ -150,6 +176,27 @@ int main(void)
 	if (fjt_quorum_commit(&config, replicas, 3, &term, &sequence, digest) != FJT_ERR_STALE)
 		fail("FUTURE_TERM_DENIAL", FJT_ERR_STALE);
 	printf("FJT_FUTURE_TERM_DENIED_OK\n");
+	for (i = 0; i < 4; i++) {
+		partition_replicas[i].replica_id = i + 10;
+		partition_replicas[i].term = 7;
+		partition_replicas[i].last_sequence = 72;
+		partition_replicas[i].healthy = 1;
+		partition_replicas[i].signature_valid = 1;
+		memcpy(partition_replicas[i].chain_digest, report.chain_digest,
+		       FJT_DIGEST_SIZE);
+	}
+	partition_replicas[2].chain_digest[0] ^= 0x55;
+	partition_replicas[3].chain_digest[0] ^= 0x55;
+	if (fjt_quorum_commit(&partition_config, partition_replicas, 4,
+			      &term, &sequence, digest) != FJT_ERR_QUORUM)
+		fail("PARTITION_ATTACK", FJT_ERR_QUORUM);
+	printf("FJT_SPLIT_BRAIN_PARTITION_ATTACK_DENIED_OK\n");
+	memcpy(partition_replicas[2].chain_digest, report.chain_digest,
+	       FJT_DIGEST_SIZE);
+	if (fjt_quorum_commit(&partition_config, partition_replicas, 4,
+			      &term, &sequence, digest) != FJT_OK)
+		fail("PARTITION_HEAL_COMMIT", FJT_ERR_QUORUM);
+	printf("FJT_PARTITION_HEAL_QUORUM_RESTORED_OK\n");
 	EVP_PKEY_free(crypto.public_key);
 	EVP_PKEY_free(crypto.private_key);
 	printf("FJT_SELFTEST_OK\n");

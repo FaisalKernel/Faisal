@@ -9,12 +9,14 @@
 #define FJT_SIGNATURE_SIZE 64U
 #define FJT_NONCE_SIZE 32U
 #define FJT_MAX_REPLICAS 16U
+#define FJT_MAX_KEY_ID 64U
 #define FJT_FORMAT_VERSION 1U
 
 #define FJT_PROVIDER_SOFTWARE 0U
 #define FJT_PROVIDER_TPM2 (1U << 0)
 #define FJT_PROVIDER_SECURE_ENCLAVE (1U << 1)
 #define FJT_PROVIDER_REMOTE_VERIFIER (1U << 2)
+#define FJT_PROVIDER_EXTERNAL_KMS (1U << 3)
 
 #define FJT_OK 0
 #define FJT_ERR_ARGUMENT -1
@@ -48,12 +50,21 @@ struct fjt_provider {
 	int (*quote)(void *ctx, const uint8_t nonce[FJT_NONCE_SIZE],
 		     const uint8_t journal_digest[FJT_DIGEST_SIZE],
 		     uint8_t quote_digest[FJT_DIGEST_SIZE]);
+	int (*provision_key)(void *ctx, const uint8_t *requested_key_id,
+			    size_t requested_key_id_size,
+			    uint8_t provisioned_key_id[FJT_MAX_KEY_ID],
+			    size_t *provisioned_key_id_size,
+			    uint64_t *key_generation);
+	uint8_t key_id[FJT_MAX_KEY_ID];
+	uint32_t key_id_size;
 };
 
 struct fjt_signed_attestation {
 	struct fjt_journal_attestation report;
 	uint8_t quote_digest[FJT_DIGEST_SIZE];
 	uint8_t signature[FJT_SIGNATURE_SIZE];
+	uint8_t key_id[FJT_MAX_KEY_ID];
+	uint32_t key_id_size;
 	uint64_t key_generation;
 };
 
@@ -79,6 +90,10 @@ int fjt_verify_attestation(const struct fjt_signed_attestation *signed_report,
 			   const struct fjt_provider *provider);
 int fjt_bind_hardware_quote(struct fjt_signed_attestation *signed_report,
 			    const struct fjt_provider *provider);
+int fjt_provision_remote_key(struct fjt_provider *provider,
+			     const uint8_t *requested_key_id,
+			     size_t requested_key_id_size,
+			     uint64_t minimum_generation);
 int fjt_quorum_validate_config(const struct fjt_quorum_config *config);
 int fjt_quorum_commit(const struct fjt_quorum_config *config,
 			 const struct fjt_replica_observation *observations,
