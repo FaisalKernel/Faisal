@@ -119,9 +119,24 @@ int main(int argc, char **argv)
 			 "DISPATCH_C");
 	CHECK_OK(fex_query_worker(&service, node_c.task_id, &worker),
 			 "QUERY_WORKER_HEALTHY");
-	if (worker.health != FEX_WORKER_HEALTHY || !worker.lease_generation)
-		fail("WORKER_HEALTHY_STATE", FEX_ERR_STATE);
+		if (worker.health != FEX_WORKER_HEALTHY || !worker.lease_generation)
+			fail("WORKER_HEALTHY_STATE", FEX_ERR_STATE);
+	{
+		uint64_t previous_generation = worker.lease_generation;
+		CHECK_OK(fex_handoff(&service, node_c.task_id, 9001, 12, 5),
+			 "WORKER_HANDOFF");
+		CHECK_OK(fex_query_worker(&service, node_c.task_id, &worker),
+			 "QUERY_WORKER_HANDOFF");
+		if (worker.worker_id != 9001 || worker.handoff_count != 1 ||
+		    worker.lease_generation <= previous_generation ||
+		    worker.health != FEX_WORKER_HEALTHY)
+			fail("WORKER_HANDOFF_STATE", FEX_ERR_STATE);
+		printf("M117_WORKER_HANDOFF_OK worker=%llu generation=%llu\n",
+		       (unsigned long long)worker.worker_id,
+		       (unsigned long long)worker.lease_generation);
+	}
 	CHECK_OK(fex_supervise(&service, 20, 5, &reassigned, &supervised_dead),
+
 			 "SUPERVISE_TIMEOUT");
 	if (reassigned != 1 || supervised_dead != 0)
 		fail("WORKER_TIMEOUT_REASSIGN", FEX_ERR_STATE);
@@ -144,12 +159,16 @@ int main(int argc, char **argv)
 		fail("WORKER_RESCHEDULE_STATE", FEX_ERR_STATE);
 	CHECK_OK(fex_query_worker(&service, node_c.task_id, &worker),
 			 "QUERY_WORKER_REPLAY");
-	if (worker.health != FEX_WORKER_REASSIGNED ||
-		worker.reassignment_count != 1)
-		fail("WORKER_REPLAY_STATE", FEX_ERR_CORRUPT);
+		if (worker.health != FEX_WORKER_REASSIGNED ||
+			worker.reassignment_count != 1 || worker.handoff_count != 1 ||
+			worker.worker_id != 9001)
+			fail("WORKER_REPLAY_STATE", FEX_ERR_CORRUPT);
+
 	printf("M115_POST_SUPERVISION_RECOVERY_IDEMPOTENT_OK recovered=%u\\n", recovered);
 	printf("M115_WORKER_REPLAY_STATE_OK reassigned=%u\n",
 	       worker.reassignment_count);
+	printf("M117_WORKER_HANDOFF_REPLAY_OK worker=%llu handoffs=%u\n",
+	       (unsigned long long)worker.worker_id, worker.handoff_count);
 
 	CHECK_OK(fex_query_objective(&service, objective.objective_id, &replayed),
 		 "REPLAY_OBJECTIVE");

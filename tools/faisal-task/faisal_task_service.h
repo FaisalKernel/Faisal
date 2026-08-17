@@ -255,8 +255,12 @@ int fts_submit(struct fts_service *service, uint64_t goal_id,
 int fts_claim(struct fts_service *service, uint64_t task_id,
 	      uint64_t now_ns, uint64_t lease_ns, struct fts_task *out);
 int fts_heartbeat(struct fts_service *service, uint64_t task_id,
-		  uint64_t lease_generation, uint64_t now_ns,
-		  uint64_t extend_ns, struct fts_task *out);
+			  uint64_t lease_generation, uint64_t now_ns,
+			  uint64_t extend_ns, struct fts_task *out);
+int fts_handoff(struct fts_service *service, uint64_t task_id,
+			uint64_t lease_generation, uint64_t new_owner_agent_id,
+			uint64_t now_ns, uint64_t lease_ns, struct fts_task *out);
+
 int fts_complete(struct fts_service *service, uint64_t task_id,
 		 uint64_t lease_generation, uint64_t now_ns,
 		 const char *result, uint64_t cpu_used_ns,

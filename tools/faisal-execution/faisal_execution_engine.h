@@ -111,6 +111,7 @@ struct fex_worker {
 	uint32_t health;
 	uint32_t restart_count;
 	uint32_t reassignment_count;
+	uint32_t handoff_count;
 	uint32_t failure_class;
 };
 
@@ -160,7 +161,10 @@ int fex_add_node(struct fex_service *service, uint64_t objective_id,
 int fex_dispatch(struct fex_service *service, uint64_t objective_id,
 			 uint64_t now_ns, uint32_t lease_ns, uint32_t *claimed);
 int fex_heartbeat(struct fex_service *service, uint64_t task_id,
-				 uint64_t now_ns, uint64_t extend_ns);
+					 uint64_t now_ns, uint64_t extend_ns);
+int fex_handoff(struct fex_service *service, uint64_t task_id,
+				 uint64_t new_worker_id, uint64_t now_ns, uint64_t lease_ns);
+
 int fex_supervise(struct fex_service *service, uint64_t now_ns,
 				 uint64_t timeout_ns, uint32_t *reassigned,
 				 uint32_t *dead_lettered);

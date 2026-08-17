@@ -915,6 +915,50 @@ out_unlock:
 	return result;
 }
 
+int fts_handoff(struct fts_service *service, uint64_t task_id,
+			uint64_t lease_generation, uint64_t new_owner_agent_id,
+			uint64_t now_ns, uint64_t lease_ns, struct fts_task *out)
+{
+	struct fts_task *task;
+	struct fts_task candidate;
+	int result;
+
+	if (!service || !out || !task_id || !lease_generation ||
+	    !new_owner_agent_id || !now_ns || !lease_ns ||
+	    lease_ns > FTS_MAX_LEASE_NS)
+		return FTS_ERR_ARGUMENT;
+	result = lock_service(service);
+	if (result != FTS_OK)
+		return result;
+	task = find_task(service, task_id);
+	if (!task) {
+		result = FTS_ERR_NOT_FOUND;
+		goto out_unlock;
+	}
+	if ((task->state != FTS_TASK_LEASED && task->state != FTS_TASK_RUNNING) ||
+	    task->lease_generation != lease_generation ||
+	    task->lease_until_ns <= now_ns ||
+	    task->owner_agent_id == new_owner_agent_id) {
+		result = FTS_ERR_LEASE;
+		goto out_unlock;
+	}
+	candidate = *task;
+	candidate.owner_agent_id = new_owner_agent_id;
+	candidate.lease_generation++;
+	candidate.lease_until_ns = now_ns + lease_ns;
+	candidate.state = FTS_TASK_RUNNING;
+	candidate.updated_at_ns = now_ns;
+	result = append_task(service, &candidate);
+	if (result == FTS_OK) {
+		candidate.sequence = service->journal_sequence;
+		*task = candidate;
+		*out = candidate;
+	}
+out_unlock:
+	unlock_service(service);
+	return result;
+}
+
 int fts_complete(struct fts_service *service, uint64_t task_id,
 		 uint64_t lease_generation, uint64_t now_ns,
 		 const char *result_text, uint64_t cpu_used_ns,
