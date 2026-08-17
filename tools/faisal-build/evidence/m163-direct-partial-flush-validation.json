@@ -1,0 +1,115 @@
+{
+  "schema": "org.faisal.evidence.m163-direct-partial-flush-validation.v1",
+  "milestone": "M163",
+  "source_revision": "d243d6421671ff3f4914133691131f15595d0d2e",
+  "source_parent": "635faa74692a59fad74a8428968da0c36bedb2b5",
+  "recorded_at": "2026-08-17T16:06:57Z",
+  "status": "validated_bounded_userspace_qemu_and_deterministic_unit_test_not_production_release",
+  "implementation": {
+    "library": "tools/faisal-accelerator/faisal_accelerator_batcher.{c,h}",
+    "improvement": "Extended submit_many() zero-copy direct submission to the final partial chunk when flush_after=1 and no buffered entries exist. The synchronous batch ioctl receives the caller's validated array pointer directly instead of copying the final partial chunk into the internal retry buffer.",
+    "condition": "The direct path is selected only when the batcher has no pending entries and the chunk either fills max_batch or is the final input chunk under flush_after=1.",
+    "partial_safety": "Non-final partial chunks, partial completions, ioctl failures, and any path with pending buffered entries continue to use the internal retry buffer and remain retryable.",
+    "bounds": "Direct chunks remain limited to the configured 1..64 kernel batch size. submit_many() retains its 4096-entry input bound and validates every entry before submission.",
+    "security": "The change only selects a userspace pointer for a synchronous ioctl. Kernel authorization, lineage, tenant isolation, overflow checks, telemetry-loss handling, admission checks, and model-output-is-not-authority boundaries remain authoritative."
+  },
+  "unit_validation": {
+    "source": "tools/testing/selftests/faisal_accelerator_batcher_test.c",
+    "compile": "pass_static_wall_wextra_werror",
+    "result": "pass",
+    "markers": [
+      "M162_ZERO_COPY_COALESCED_OK direct_submissions=1 direct_pointer=1 accepted=8",
+      "M163_DIRECT_PARTIAL_OK direct_submissions=1 direct_pointer=1 accepted=3",
+      "M161_COALESCED_SUBMIT_OK regular_ioctls=2 coalesced_ioctls=1 accepted=8",
+      "M160_ADAPTIVE_PRESSURE_CACHE_OK flushes=5 queries=14 cache_hits=2 losses=4 resync=2 failures=1 fast=1 target=1"
+    ],
+    "coverage": [
+      "three-entry final partial submit_many() with flush_after=1",
+      "direct pointer equals caller array pointer for the final partial chunk",
+      "direct submission counter increments once",
+      "accepted-entry count is three and no entries remain pending",
+      "full eight-entry zero-copy coalesced path remains covered",
+      "regular two-ioctl versus coalesced one-ioctl comparison remains covered",
+      "M160 pressure cache, M159 retry backoff, telemetry-loss resync, and partial completion coverage retained"
+    ],
+    "measured_control_path": {
+      "workload_entries": 3,
+      "max_batch": 8,
+      "flush_after": true,
+      "direct_submissions": 1,
+      "direct_pointer_verified": true,
+      "accepted_entries": 3,
+      "pending_entries": 0,
+      "relative_copy_path": "final partial chunk bypasses internal userspace copy"
+    }
+  },
+  "runtime_validation": {
+    "tenant_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m163-tenant-qemu.log",
+    "tenant_qemu_return_code": 0,
+    "tenant_result": "pass",
+    "required_markers": [
+      "M154_TENANT_ACCELERATOR_TELEMETRY_LOSS_OK",
+      "M156_TENANT_EVENT_BACKPRESSURE_QUERY_OK queued=64 dropped=1 state=3",
+      "M155_TENANT_ACCELERATOR_BATCH_ACCOUNTING_OK completed=4",
+      "M155_TENANT_ACCELERATOR_BATCH_MALFORMED_REJECT_OK",
+      "M155_TENANT_ACCELERATOR_BATCH_BENCH_OK single_ns=6217690 batch_ns=5179280 speedup_x100=120",
+      "M160_ADAPTIVE_PRESSURE_CACHE_OK flushes=5 queries=14 cache_hits=2 losses=4 resync=2 failures=1 fast=1 target=1",
+      "M161_COALESCED_SUBMIT_OK regular_ioctls=2 coalesced_ioctls=1 accepted=8",
+      "M162_ZERO_COPY_COALESCED_OK direct_submissions=1 direct_pointer=1 accepted=8",
+      "M163_DIRECT_PARTIAL_OK direct_submissions=1 direct_pointer=1 accepted=3",
+      "M163_BATCHER_SELFTEST_RC=0",
+      "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+    ],
+    "tenant_kernel_diagnostic_scan": "clean",
+    "durable_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m163-durable-qemu.log",
+    "durable_qemu_return_code": 0,
+    "durable_result": "pass",
+    "durable_markers": [
+      "M108_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+      "M108_EXECUTION_REPLAY_OK generation=1",
+      "M108_ENGINE_REPLAY_FAIL_CLOSED_OK",
+      "FJT_SPLIT_BRAIN_PARTITION_ATTACK_DENIED_OK",
+      "FJR_CONSENSUS_TIMEOUT_POLICY_OK min=100 max=200 heartbeat=25",
+      "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+    ],
+    "durable_kernel_diagnostic_scan": "clean"
+  },
+  "productivity_interpretation": {
+    "benefit": "A final three-entry flush chunk reaches the batch ioctl through the original caller array, avoiding one userspace copy in the no-pending synchronous path while preserving accepted-entry accounting and retry safety. The integrated gate also retains M161's two-to-one ioctl reduction for the full coalesced workload.",
+    "scope": "This proves pointer-path and submission-control behavior in a controlled unit test and QEMU integration environment, not end-to-end latency or memory-bandwidth improvement on physical accelerators.",
+    "raw_throughput_scope": "The integrated gate retained the inherited M155 synthetic QEMU accounting benchmark at speedup_x100=120 in this run; M163 does not claim an isolated raw-throughput gain."
+  },
+  "build_artifact": {
+    "kernel_source": "M156 kernel image reused; M163 is userspace runtime/test/gate integration.",
+    "kernel_build_directory": "/home/ubuntu/agi-kernel/build/m156-backpressure",
+    "bzimage_sha256": "4098292a9ca43f521cb67617e970165aff17047db591a7827aea0c690cf7b88d",
+    "vmlinux_sha256": "60229862db8230c29d68b4c11587a511a3dcfcabc590a685462ad4382c403fb1",
+    "config_sha256": "003e03a277c47585b6c36c00810bf36e61dc91b487f1162e0ad51f514bdfa08b",
+    "config_required_check": "CONFIG_CFS_BANDWIDTH=y"
+  },
+  "source_quality": {
+    "git_diff_check": "pass",
+    "tenant_selftest_compile": "pass_static_wall_wextra_werror",
+    "adaptive_batcher_compile": "pass_static_wall_wextra_werror",
+    "shell_syntax_check": "pass",
+    "diagnostic_scan": "tenant_and_durable_logs_clean",
+    "protected_files_staged": false,
+    "protected_files": [
+      "M63-COMPUTE-CONTEXT-DESIGN.md",
+      "M63-SECURITY-REVIEW.md"
+    ]
+  },
+  "release_gate": {
+    "status": "blocked",
+    "reason": "M163 is bounded userspace/QEMU validation. Physical accelerator qualification, independent reproducible production builders, signed artifacts, stable/LTS forward-port qualification, and external security governance remain required.",
+    "model_output_is_authority": false,
+    "hardware_claim": "No physical GPU, NPU, VRAM, IOMMU, DMA, vendor-driver, reset, or fleet qualification is claimed."
+  },
+  "known_limitations": [
+    "Direct pointer use is safe only for the duration of the synchronous ioctl; this API does not support asynchronous retention by the kernel.",
+    "The measured copy avoidance is a controlled three-entry final-partial unit path, not a hardware memory-bandwidth benchmark.",
+    "The unit test uses an injected ioctl model; QEMU validates integration and packaging, not physical accelerator behavior.",
+    "No isolated M163 raw-throughput improvement is claimed; the M155 benchmark remains supporting context only.",
+    "The kernel remains based on the Linux v7.2-rc7 development line and production release qualification remains incomplete."
+  ]
+}
