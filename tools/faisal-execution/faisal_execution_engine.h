@@ -12,7 +12,7 @@
 #define FEX_MAX_REASON 160U
 #define FEX_MAX_RESULT FTS_MAX_RESULT
 #define FEX_ENGINE_MAGIC 0x46455831U
-#define FEX_ENGINE_VERSION 1U
+#define FEX_ENGINE_VERSION 2U
 #define FEX_DIGEST_SIZE FTS_DIGEST_SIZE
 #define FEX_MAX_WORKER_RESTARTS 3U
 #define FEX_HANDOFF_TOKEN_MAX_AGE_NS 1000000000ULL
@@ -147,6 +147,7 @@ struct fex_service {
 	struct fex_worker workers[FEX_MAX_WORKERS];
 	uint8_t consumed_handoff_tokens[FEX_MAX_CONSUMED_HANDOFF_TOKENS][FEX_HANDOFF_TOKEN_SIZE];
 	uint32_t consumed_handoff_token_count;
+	uint8_t journal_chain_digest[FEX_DIGEST_SIZE];
 	size_t objective_count;
 	size_t node_count;
 	size_t worker_count;

@@ -1,0 +1,25 @@
+{
+  "milestone": "M126",
+  "feature": "tamper-evident execution journal hash chain",
+  "status": "validated_qemu",
+  "journal_policy": {
+    "format_version": 2,
+    "record_integrity": "SHA-256 chain over previous digest, record header, and payload",
+    "restart_verification": true,
+    "sequence_continuity": true,
+    "corruption_behavior": "fail closed"
+  },
+  "evidence": {
+    "chain_replay": "M126_JOURNAL_CHAIN_REPLAY_OK",
+    "durable_token_replay": "M125_RESTART_REPLAYED_HANDOFF_TOKEN_DENIED_OK",
+    "execution_replay": "M108_EXECUTION_REPLAY_OK",
+    "corruption_fail_closed": "M108_ENGINE_REPLAY_FAIL_CLOSED_OK",
+    "qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+    "kernel_diagnostics": "none observed"
+  },
+  "limitations": [
+    "The hash chain provides integrity detection, not authenticity by itself; signed external journal roots and remote replication remain separate requirements.",
+    "Version 2 intentionally rejects older unsigned execution journals rather than silently accepting them.",
+    "Distributed journal quorum and remote host attestation remain open production blockers."
+  ]
+}

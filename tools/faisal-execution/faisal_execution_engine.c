@@ -15,6 +15,8 @@ struct fex_record_header {
 	uint16_t kind;
 	uint32_t size;
 	uint64_t sequence;
+	uint8_t previous_digest[FEX_DIGEST_SIZE];
+	uint8_t record_digest[FEX_DIGEST_SIZE];
 };
 
 enum fex_record_kind {
@@ -27,6 +29,8 @@ enum fex_record_kind {
 
 static int write_record(struct fex_service *service, uint16_t kind,
 			const void *payload, uint32_t size);
+static void digest_bytes(const void *data, size_t size,
+			 uint8_t digest[FEX_DIGEST_SIZE]);
 
 static struct fex_worker *find_worker(struct fex_service *service, uint64_t task_id)
 {
@@ -68,11 +72,30 @@ static int write_record(struct fex_service *service, uint16_t kind,
 		.size = size,
 		.sequence = service->next_event_sequence++
 	};
+	uint8_t material[4096];
+	uint8_t next_digest[FEX_DIGEST_SIZE];
+	struct fex_record_header digest_header;
+	size_t material_size;
 
+	if (!service || (!payload && size))
+		return FEX_ERR_ARGUMENT;
+	if (size > sizeof(material) - FEX_DIGEST_SIZE - sizeof(header))
+		return FEX_ERR_FULL;
+	memcpy(header.previous_digest, service->journal_chain_digest,
+	       FEX_DIGEST_SIZE);
+	digest_header = header;
+	memset(digest_header.record_digest, 0, FEX_DIGEST_SIZE);
+	memcpy(material, service->journal_chain_digest, FEX_DIGEST_SIZE);
+	memcpy(material + FEX_DIGEST_SIZE, &digest_header, sizeof(digest_header));
+	memcpy(material + FEX_DIGEST_SIZE + sizeof(digest_header), payload, size);
+	material_size = FEX_DIGEST_SIZE + sizeof(digest_header) + size;
+	digest_bytes(material, material_size, next_digest);
+	memcpy(header.record_digest, next_digest, FEX_DIGEST_SIZE);
 	if (write(service->engine_fd, &header, sizeof(header)) != sizeof(header) ||
 	    write(service->engine_fd, payload, size) != (ssize_t)size ||
 	    fsync(service->engine_fd) < 0)
 		return FEX_ERR_IO;
+	memcpy(service->journal_chain_digest, next_digest, FEX_DIGEST_SIZE);
 	return FEX_OK;
 }
 
@@ -123,6 +146,9 @@ int fex_replay(struct fex_service *service)
 	struct fex_record_header header;
 	uint8_t payload[sizeof(struct fex_objective) > sizeof(struct fex_node) ?
 			 sizeof(struct fex_objective) : sizeof(struct fex_node)];
+	uint8_t material[4096];
+	uint8_t computed_digest[FEX_DIGEST_SIZE];
+	struct fex_record_header digest_header;
 
 	if (!service || service->engine_fd < 0)
 		return FEX_ERR_ARGUMENT;
@@ -132,6 +158,7 @@ int fex_replay(struct fex_service *service)
 	service->node_count = 0;
 	service->worker_count = 0;
 	service->consumed_handoff_token_count = 0;
+	memset(service->journal_chain_digest, 0, FEX_DIGEST_SIZE);
 	service->next_event_sequence = 1;
 	for (;;) {
 		ssize_t got = read(service->engine_fd, &header, sizeof(header));
@@ -140,10 +167,28 @@ int fex_replay(struct fex_service *service)
 		if (got != sizeof(header) || header.magic != FEX_ENGINE_MAGIC ||
 		    header.version != FEX_ENGINE_VERSION || header.size > sizeof(payload))
 			return FEX_ERR_CORRUPT;
-		if (read(service->engine_fd, payload, header.size) !=
-		    (ssize_t)header.size)
+				if (read(service->engine_fd, payload, header.size) !=
+			    (ssize_t)header.size)
 			return FEX_ERR_CORRUPT;
+		if (memcmp(header.previous_digest, service->journal_chain_digest,
+			   FEX_DIGEST_SIZE) != 0 ||
+		    header.size > sizeof(material) - FEX_DIGEST_SIZE - sizeof(header))
+			return FEX_ERR_CORRUPT;
+		digest_header = header;
+		memset(digest_header.record_digest, 0, FEX_DIGEST_SIZE);
+		memcpy(material, service->journal_chain_digest, FEX_DIGEST_SIZE);
+		memcpy(material + FEX_DIGEST_SIZE, &digest_header,
+		       sizeof(digest_header));
+		memcpy(material + FEX_DIGEST_SIZE + sizeof(digest_header), payload,
+		       header.size);
+		digest_bytes(material, FEX_DIGEST_SIZE + sizeof(digest_header) +
+			     header.size, computed_digest);
+		if (memcmp(computed_digest, header.record_digest, FEX_DIGEST_SIZE) != 0)
+			return FEX_ERR_CORRUPT;
+		memcpy(service->journal_chain_digest, header.record_digest,
+		       FEX_DIGEST_SIZE);
 		if (header.kind == FEX_RECORD_OBJECTIVE &&
+
 		    header.size == sizeof(struct fex_objective)) {
 			struct fex_objective *item = (struct fex_objective *)payload;
 			struct fex_objective *existing = find_objective(service,
