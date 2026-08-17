@@ -67,6 +67,12 @@ int main(void)
 	struct faisal_accel_batcher batcher;
 	struct agi_lc_event_backpressure state;
 	struct agi_lc_accel_device_account account;
+	struct agi_lc_accel_device_account many[8];
+	struct faisal_accel_batcher regular;
+	struct faisal_accel_batcher coalesced;
+	uint32_t accepted;
+	uint32_t regular_ioctls;
+	uint32_t coalesced_ioctls;
 	uint64_t queries_before;
 	uint64_t flushes_before;
 
@@ -148,6 +154,29 @@ int main(void)
 	assert(faisal_accel_batcher_flush(&batcher) == 0);
 	assert(faisal_accel_batcher_pending(&batcher) == 0);
 	assert(batcher.submitted_entries >= 5);
+	memset(&fake, 0, sizeof(fake));
+	fake.pressure.size = sizeof(fake.pressure);
+	fake.pressure.capacity = 64;
+	fake.pressure.state = AGI_LC_EVENT_BACKPRESSURE_STATE_NORMAL;
+	for (int i = 0; i < 8; i++)
+		many[i] = entry(7, 200 + (uint64_t)i);
+	assert(faisal_accel_batcher_init(&regular, 3, 7, 4, 8) == 0);
+	assert(faisal_accel_batcher_set_ioctl(&regular, fake_ioctl) == 0);
+	for (int i = 0; i < 8; i++)
+		assert(faisal_accel_batcher_submit(&regular, &many[i]) == 0);
+	regular_ioctls = fake.batch_calls;
+	assert(regular_ioctls == 2 && !faisal_accel_batcher_pending(&regular));
+	fake.batch_calls = 0;
+	assert(faisal_accel_batcher_init(&coalesced, 3, 7, 4, 8) == 0);
+	assert(faisal_accel_batcher_set_ioctl(&coalesced, fake_ioctl) == 0);
+	assert(faisal_accel_batcher_submit_many(&coalesced, many, 8, 1,
+						&accepted) == 0);
+	coalesced_ioctls = fake.batch_calls;
+	assert(accepted == 8 && coalesced_ioctls == 1 &&
+	       !faisal_accel_batcher_pending(&coalesced));
+	assert(coalesced_ioctls < regular_ioctls);
+	printf("M161_COALESCED_SUBMIT_OK regular_ioctls=%u coalesced_ioctls=%u accepted=%u\n",
+	       regular_ioctls, coalesced_ioctls, accepted);
 	printf("M160_ADAPTIVE_PRESSURE_CACHE_OK flushes=%llu queries=%llu cache_hits=%llu losses=%llu resync=%llu failures=%llu fast=%llu target=%u\n",
 	       (unsigned long long)batcher.flushes,
 	       (unsigned long long)batcher.backpressure_queries,

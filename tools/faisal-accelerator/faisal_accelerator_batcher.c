@@ -327,6 +327,40 @@ int faisal_accel_batcher_submit(struct faisal_accel_batcher *batcher,
 	return 0;
 }
 
+int faisal_accel_batcher_submit_many(struct faisal_accel_batcher *batcher,
+				     const struct agi_lc_accel_device_account *entries,
+				     uint32_t count, int flush_after,
+				     uint32_t *accepted_count)
+{
+	uint32_t i;
+
+	if (accepted_count)
+		*accepted_count = 0;
+	if (!batcher || !entries || !count ||
+	    count > FAISAL_ACCEL_BATCHER_MAX_MANY_ENTRIES)
+		return -1;
+	for (i = 0; i < count; i++) {
+		const struct agi_lc_accel_device_account *entry = &entries[i];
+
+		if (entry->size != sizeof(*entry) ||
+		    entry->device_id != batcher->device_id)
+			return -1;
+		if (batcher->pending >= batcher->max_batch &&
+		    faisal_accel_batcher_flush(batcher) < 0)
+			return -1;
+		batcher->entries[batcher->pending++] = *entry;
+		if (accepted_count)
+			(*accepted_count)++;
+		if (batcher->pending == batcher->max_batch && i + 1 < count &&
+		    faisal_accel_batcher_flush(batcher) < 0)
+			return -1;
+	}
+	if (flush_after && batcher->pending &&
+	    faisal_accel_batcher_flush(batcher) < 0)
+		return -1;
+	return 0;
+}
+
 uint32_t faisal_accel_batcher_pending(const struct faisal_accel_batcher *batcher)
 {
 	return batcher ? batcher->pending : 0;

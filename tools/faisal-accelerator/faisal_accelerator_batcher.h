@@ -11,6 +11,7 @@
 #define FAISAL_ACCEL_BATCHER_MAX_RETRY_NS 100000000ULL
 #define FAISAL_ACCEL_BATCHER_DEFAULT_PRESSURE_CACHE_NS 1000000ULL
 #define FAISAL_ACCEL_BATCHER_MAX_PRESSURE_CACHE_NS 100000000ULL
+#define FAISAL_ACCEL_BATCHER_MAX_MANY_ENTRIES 4096U
 
 typedef int (*faisal_accel_ioctl_fn)(int fd, unsigned long request,
 					 void *arg);
@@ -62,6 +63,10 @@ int faisal_accel_batcher_set_pressure_cache(struct faisal_accel_batcher *batcher
 						   uint64_t cache_ns);
 int faisal_accel_batcher_submit(struct faisal_accel_batcher *batcher,
 				const struct agi_lc_accel_device_account *entry);
+int faisal_accel_batcher_submit_many(struct faisal_accel_batcher *batcher,
+				     const struct agi_lc_accel_device_account *entries,
+				     uint32_t count, int flush_after,
+				     uint32_t *accepted_count);
 int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher);
 int faisal_accel_batcher_query(struct faisal_accel_batcher *batcher,
 			       struct agi_lc_event_backpressure *out);
