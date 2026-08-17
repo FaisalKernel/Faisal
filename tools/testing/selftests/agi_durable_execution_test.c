@@ -38,7 +38,8 @@ int main(int argc, char **argv)
 	struct fex_checkpoint checkpoint;
 	uint8_t working[FEX_DIGEST_SIZE], world[FEX_DIGEST_SIZE], resource[FEX_DIGEST_SIZE];
 	uint32_t dependency;
-	uint32_t claimed, recovered, dead_lettered;
+	uint32_t claimed, recovered, dead_lettered, reassigned, supervised_dead;
+	struct fex_worker worker;
 	int fd;
 	int require_kernel = argc > 1 && strcmp(argv[1], "--require-kernel") == 0;
 
@@ -114,18 +115,41 @@ int main(int argc, char **argv)
 	CHECK_OK(fex_add_node(&service, objective.objective_id, "m108-node-c",
 				"long running worker", 400, 100, 1, NULL, 0, 1, 0,
 				&node_c), "ADD_C");
-	CHECK_OK(fex_dispatch(&service, objective.objective_id, 10, 5, &claimed),
-		 "DISPATCH_C");
+		CHECK_OK(fex_dispatch(&service, objective.objective_id, 10, 5, &claimed),
+			 "DISPATCH_C");
+	CHECK_OK(fex_query_worker(&service, node_c.task_id, &worker),
+			 "QUERY_WORKER_HEALTHY");
+	if (worker.health != FEX_WORKER_HEALTHY || !worker.lease_generation)
+		fail("WORKER_HEALTHY_STATE", FEX_ERR_STATE);
+	CHECK_OK(fex_supervise(&service, 20, 5, &reassigned, &supervised_dead),
+			 "SUPERVISE_TIMEOUT");
+	if (reassigned != 1 || supervised_dead != 0)
+		fail("WORKER_TIMEOUT_REASSIGN", FEX_ERR_STATE);
+	CHECK_OK(fex_query_worker(&service, node_c.task_id, &worker),
+			 "QUERY_WORKER_REASSIGNED");
+	if (worker.health != FEX_WORKER_REASSIGNED ||
+		worker.reassignment_count != 1 || worker.restart_count != 1)
+		fail("WORKER_REASSIGNED_STATE", FEX_ERR_STATE);
+	printf("M115_WORKER_TIMEOUT_REASSIGN_OK reassigned=%u restart_count=%u\n",
+	       reassigned, worker.restart_count);
 	fex_close(&service);
+
 	CHECK_OK(fex_open(&service, prefix, require_kernel), "REOPEN");
 	CHECK_OK(fex_recover(&service, 20, &recovered, &dead_lettered),
 		 "RECOVER");
-	if (recovered != 1 || dead_lettered != 0)
+	if (recovered != 0 || dead_lettered != 0)
 		fail("RECOVER_COUNTS", FEX_ERR_STATE);
 	CHECK_OK(fex_query_node(&service, node_c.task_id, &query_node), "QUERY_C_RECOVERED");
 	if (query_node.state != FTS_TASK_READY)
 		fail("WORKER_RESCHEDULE_STATE", FEX_ERR_STATE);
-	printf("M108_RESTART_WORKER_RECOVERY_OK recovered=%u\n", recovered);
+	CHECK_OK(fex_query_worker(&service, node_c.task_id, &worker),
+			 "QUERY_WORKER_REPLAY");
+	if (worker.health != FEX_WORKER_REASSIGNED ||
+		worker.reassignment_count != 1)
+		fail("WORKER_REPLAY_STATE", FEX_ERR_CORRUPT);
+	printf("M115_POST_SUPERVISION_RECOVERY_IDEMPOTENT_OK recovered=%u\\n", recovered);
+	printf("M115_WORKER_REPLAY_STATE_OK reassigned=%u\n",
+	       worker.reassignment_count);
 
 	CHECK_OK(fex_query_objective(&service, objective.objective_id, &replayed),
 		 "REPLAY_OBJECTIVE");

@@ -6,7 +6,7 @@ BUILD=${FAISAL_BUILD:-$ROOT/build/m114-sandbox}
 ROOTFS=${FAISAL_SANDBOX_BINDING_ROOTFS:-$ROOT/build/qemu-faisal-m114-binding}
 LOG="$ROOTFS/qemu.log"
 TEST="$BUILD/agi_sandbox_binding_test"
-cc -O2 -Wall -Wextra -Werror -Wno-cpp -static -I"$LINUX/tools/faisal-sandbox" -I"$LINUX/include/uapi" \
+cc -O2 -Wall -Wextra -Werror -Wno-cpp -Wno-deprecated-declarations -static -I"$LINUX/tools/faisal-sandbox" -I"$LINUX/include/uapi" \
   "$LINUX/tools/testing/selftests/agi_sandbox_binding_test.c" -o "$TEST"
 rm -rf "$ROOTFS"
 mkdir -p "$ROOTFS/bin" "$ROOTFS/proc" "$ROOTFS/sys" "$ROOTFS/dev" "$ROOTFS/tmp"
@@ -41,7 +41,7 @@ cat "$LOG"
 cat /tmp/faisal-m114-binding-qemu-stderr.log 2>/dev/null || true
 printf 'M114_QEMU_RC=%s\n' "$qemu_rc"
 [ "$qemu_rc" -ne 124 ]
-for marker in FAISAL_M114_BOOT_OK M114_SANDBOX_BIND_ATTESTED_OK M114_SANDBOX_QUERY_OK M114_SANDBOX_TGID_DRIFT_DENIED_OK M114_SANDBOX_RELEASE_OK M114_SELFTEST_EXIT=0 M114_SELFTEST_RC=0; do
+for marker in FAISAL_M114_BOOT_OK M114_SANDBOX_BIND_ATTESTED_OK M115_SANDBOX_HIERARCHY_OWNER_ATTESTED_OK M114_SANDBOX_QUERY_OK M114_SANDBOX_TGID_DRIFT_DENIED_OK M114_SANDBOX_RELEASE_OK M114_SELFTEST_EXIT=0 M114_SELFTEST_RC=0; do
   grep -q "$marker" "$LOG"
 done
 if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|possible circular locking dependency|data-race|use-after-free|kernel BUG|rcu: .*stall' "$LOG"; then

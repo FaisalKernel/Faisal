@@ -38,6 +38,15 @@ enum fex_event_kind {
 	FEX_EVENT_ADAPTATION = 6
 };
 
+enum fex_worker_health {
+	FEX_WORKER_UNKNOWN = 0,
+	FEX_WORKER_HEALTHY = 1,
+	FEX_WORKER_TIMED_OUT = 2,
+	FEX_WORKER_REASSIGNED = 3,
+	FEX_WORKER_COMPLETED = 4,
+	FEX_WORKER_DEAD_LETTER = 5
+};
+
 enum fex_status {
 	FEX_OK = 0,
 	FEX_ERR_ARGUMENT = -1,
@@ -91,6 +100,20 @@ struct fex_node {
 	char result[FEX_MAX_RESULT];
 };
 
+struct fex_worker {
+	uint64_t task_id;
+	uint64_t objective_id;
+	uint64_t worker_id;
+	uint64_t lease_generation;
+	uint64_t last_heartbeat_ns;
+	uint64_t lease_deadline_ns;
+	uint64_t last_transition_ns;
+	uint32_t health;
+	uint32_t restart_count;
+	uint32_t reassignment_count;
+	uint32_t failure_class;
+};
+
 struct fex_checkpoint {
 	uint64_t objective_id;
 	uint64_t sequence;
@@ -113,8 +136,10 @@ struct fex_service {
 	char engine_path[FTS_MAX_JOURNAL_PATH];
 	struct fex_objective objectives[FEX_MAX_OBJECTIVES];
 	struct fex_node nodes[FEX_MAX_NODES];
+	struct fex_worker workers[FEX_MAX_WORKERS];
 	size_t objective_count;
 	size_t node_count;
+	size_t worker_count;
 	pthread_mutex_t lock;
 };
 
@@ -135,7 +160,13 @@ int fex_add_node(struct fex_service *service, uint64_t objective_id,
 int fex_dispatch(struct fex_service *service, uint64_t objective_id,
 			 uint64_t now_ns, uint32_t lease_ns, uint32_t *claimed);
 int fex_heartbeat(struct fex_service *service, uint64_t task_id,
-			 uint64_t now_ns, uint64_t extend_ns);
+				 uint64_t now_ns, uint64_t extend_ns);
+int fex_supervise(struct fex_service *service, uint64_t now_ns,
+				 uint64_t timeout_ns, uint32_t *reassigned,
+				 uint32_t *dead_lettered);
+int fex_query_worker(const struct fex_service *service, uint64_t task_id,
+				 struct fex_worker *out);
+
 int fex_complete(struct fex_service *service, uint64_t task_id,
 			 uint64_t now_ns, const char *result,
 			 const uint8_t evidence_digest[FEX_DIGEST_SIZE]);

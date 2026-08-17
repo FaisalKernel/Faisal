@@ -7,7 +7,7 @@ ROOTFS=${FAISAL_EXECUTION_ROOTFS:-$ROOT/build/qemu-faisal-durable-execution}
 LOG="$ROOTFS/qemu.log"
 TEST="$BUILD/agi_durable_execution_test"
 
-cc -O2 -Wall -Wextra -Werror -Wno-cpp -pthread -static \
+cc -O2 -Wall -Wextra -Werror -Wno-cpp -Wno-deprecated-declarations -pthread -static \
   -I"$LINUX/tools/faisal-task" -I"$LINUX/tools/faisal-execution" \
   -I"$LINUX/include/uapi" \
   "$LINUX/tools/testing/selftests/agi_durable_execution_test.c" \
@@ -77,7 +77,9 @@ for marker in \
   M108_RETRY_BACKOFF_REROUTE_OK \
   M108_CHECKPOINT_SEALED_OK \
   M108_MODEL_OUTPUT_NOT_AUTHORITY_OK \
-  M108_RESTART_WORKER_RECOVERY_OK \
+  M115_WORKER_TIMEOUT_REASSIGN_OK \
+  M115_POST_SUPERVISION_RECOVERY_IDEMPOTENT_OK \
+  M115_WORKER_REPLAY_STATE_OK \
   M108_EXECUTION_REPLAY_OK \
   M108_CANCELLATION_COMPENSATION_BOUNDARY_OK \
   M108_ENGINE_REPLAY_FAIL_CLOSED_OK \

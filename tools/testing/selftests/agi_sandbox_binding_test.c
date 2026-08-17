@@ -63,8 +63,11 @@ int main(void)
 
 	if (ioctl(fd, AGI_LC_SANDBOX, &query) < 0)
 		fail("M114_QUERY");
-	if (query.state != AGI_LC_SANDBOX_STATE_BOUND || query.status != 0)
+	if (query.state != AGI_LC_SANDBOX_STATE_BOUND || query.status != 0 ||
+	    query.reserved[0] != bind.reserved[0])
 		return 1;
+	printf("M115_SANDBOX_HIERARCHY_OWNER_ATTESTED_OK parent_cgroup=%llu\n",
+	       (unsigned long long)query.reserved[0]);
 	printf("M114_SANDBOX_QUERY_OK generation=%llu\n",
 	       (unsigned long long)query.generation);
 

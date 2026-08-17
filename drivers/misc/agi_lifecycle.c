@@ -499,6 +499,8 @@ static int agi_lc_push_record(struct agi_lc_session *session, u16 type,
 static void agi_lc_sandbox_capture(struct agi_lc_sandbox_binding *binding)
 {
 	struct nsproxy *ns = current->nsproxy;
+	struct cgroup *cgrp = task_dfl_cgroup(current);
+	struct cgroup *parent = cgroup_parent(cgrp);
 
 	binding->owner_pid = task_pid_nr(current);
 	binding->owner_tgid = task_tgid_nr(current);
@@ -508,7 +510,9 @@ static void agi_lc_sandbox_capture(struct agi_lc_sandbox_binding *binding)
 	binding->ipc_namespace = ns->ipc_ns ? ns->ipc_ns->ns.inum : 0;
 	binding->uts_namespace = ns->uts_ns ? ns->uts_ns->ns.inum : 0;
 	binding->user_namespace = current_user_ns()->ns.inum;
-	binding->cgroup_id = cgroup_id(task_dfl_cgroup(current));
+	binding->cgroup_id = cgroup_id(cgrp);
+	/* reserved[0] is the ABI-stable hierarchy-owner attestation slot. */
+	binding->reserved[0] = parent ? cgroup_id(parent) : 0;
 }
 
 static bool agi_lc_sandbox_matches_current(
@@ -523,8 +527,10 @@ static bool agi_lc_sandbox_matches_current(
 		observed.net_namespace == expected->net_namespace &&
 		observed.ipc_namespace == expected->ipc_namespace &&
 		observed.uts_namespace == expected->uts_namespace &&
-		observed.user_namespace == expected->user_namespace &&
-		observed.cgroup_id == expected->cgroup_id;
+					observed.user_namespace == expected->user_namespace &&
+			observed.cgroup_id == expected->cgroup_id &&
+			observed.reserved[0] == expected->reserved[0];
+
 }
 
 static int agi_lc_sandbox_validate_requirements(u32 flags,
