@@ -9587,6 +9587,10 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 	    (!(account.flags & AGI_LC_ACCEL_ACCOUNT_COMPUTE) && account.compute_ns) ||
 	    (!(account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) && account.memory_bytes) ||
 	    (!(account.flags & AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS) && account.submissions) ||
+	    ((account.flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
+	     (!(account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) ||
+		      (account.flags & (AGI_LC_ACCEL_ACCOUNT_COMPUTE |
+					AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS)))) ||
 	    account.agent_id || account.tenant_cgroup_id ||
 	    account.tenant_cgroup_generation || account.device_memory_limit_bytes ||
 	    account.status || account.reserved32 ||
@@ -9617,6 +9621,16 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 			return -EPERM;
 		}
 		if ((account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) &&
+		    (account.flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
+		    account.memory_bytes > device->accounted_memory_bytes) {
+			account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_RELEASE_DENIED;
+			mutex_unlock(&agi_lc_accel_lock);
+			if (copy_to_user((void __user *)arg, &account, sizeof(account)))
+				return -EFAULT;
+			return -ERANGE;
+		}
+		if ((account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) &&
+		    !(account.flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
 		    (account.memory_bytes > device->device.total_memory_bytes ||
 		     device->accounted_memory_bytes >
 			 device->device.total_memory_bytes - account.memory_bytes)) {
@@ -9636,9 +9650,15 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 		faisal_task_accel_account(current, account.compute_ns, 0, 0);
 	}
 	if (account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) {
-		device->device.memory_bytes += account.memory_bytes;
-		device->accounted_memory_bytes += account.memory_bytes;
-		faisal_task_accel_account(current, 0, account.memory_bytes, 0);
+		if (account.flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) {
+			device->device.memory_bytes -= account.memory_bytes;
+			device->accounted_memory_bytes -= account.memory_bytes;
+			faisal_task_accel_release(current, 0, account.memory_bytes, 0);
+		} else {
+			device->device.memory_bytes += account.memory_bytes;
+			device->accounted_memory_bytes += account.memory_bytes;
+			faisal_task_accel_account(current, 0, account.memory_bytes, 0);
+		}
 	}
 	if (account.flags & AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS) {
 		device->device.submissions += account.submissions;
@@ -9650,7 +9670,7 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 	if (copy_to_user((void __user *)arg, &account, sizeof(account)))
 		return -EFAULT;
 	return agi_lc_push_record(session, AGI_LC_EVENT_ACCEL, 0,
-					 account.correlation, account.device_id);
+						 account.correlation, account.device_id);
 }
 
 #ifdef CONFIG_UCLAMP_TASK

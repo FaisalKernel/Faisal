@@ -89,6 +89,20 @@ int main(void)
 		.memory_bytes = 9ULL * 1024 * 1024,
 		.correlation = 11509,
 	};
+	struct agi_lc_accel_device_account accel_release_over = {
+		.size = sizeof(accel_release_over),
+		.flags = AGI_LC_ACCEL_ACCOUNT_MEMORY |
+			AGI_LC_ACCEL_ACCOUNT_RELEASE,
+		.memory_bytes = 9ULL * 1024 * 1024,
+		.correlation = 11512,
+	};
+	struct agi_lc_accel_device_account accel_release = {
+		.size = sizeof(accel_release),
+		.flags = AGI_LC_ACCEL_ACCOUNT_MEMORY |
+			AGI_LC_ACCEL_ACCOUNT_RELEASE,
+		.memory_bytes = 8ULL * 1024 * 1024,
+		.correlation = 11513,
+	};
 	struct agi_lc_accel_device accel_remove = {
 		.size = sizeof(accel_remove),
 		.correlation = 11510,
@@ -199,7 +213,20 @@ int main(void)
 	    errno != EDQUOT ||
 	    accel_over.status != AGI_LC_ACCEL_ACCOUNT_STATUS_MEMORY_DENIED)
 		return fail("tenant accelerator memory isolation");
-	printf("M152_TENANT_ACCELERATOR_MEMORY_DENY_OK\n");
+	printf("M152_TENANT_ACCELERATOR_MEMORY_DENY_OK\\n");
+	accel_release_over.device_id = accel.device_id;
+	if (ioctl(fd, AGI_LC_ACCEL_DEVICE_ACCOUNT, &accel_release_over) >= 0 ||
+	    errno != ERANGE ||
+	    accel_release_over.status !=
+		AGI_LC_ACCEL_ACCOUNT_STATUS_RELEASE_DENIED)
+		return fail("tenant accelerator release underflow");
+	printf("M153_TENANT_ACCELERATOR_RELEASE_UNDERFLOW_DENY_OK\\n");
+	accel_release.device_id = accel.device_id;
+	if (ioctl(fd, AGI_LC_ACCEL_DEVICE_ACCOUNT, &accel_release) < 0 ||
+	    accel_release.status != AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED ||
+	    accel_release.tenant_cgroup_id != tenant_cgroup.cgroup_id)
+		return fail("tenant accelerator release");
+	printf("M153_TENANT_ACCELERATOR_MEMORY_RELEASE_OK\\n");
 	accel_remove.device_id = accel.device_id;
 	if (ioctl(fd, AGI_LC_ACCEL_UNREGISTER, &accel_remove) < 0)
 		return fail("tenant accelerator unregister");

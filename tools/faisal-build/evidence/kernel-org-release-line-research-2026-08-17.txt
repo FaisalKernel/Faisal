@@ -1,0 +1,11 @@
+Authoritative source: https://www.kernel.org/
+Retrieved: 2026-08-17
+Search result reported by kernel.org: mainline 7.2 dated 2026-08-16; stable 7.1.8 dated 2026-08-09; longterm 6.18.44 dated 2026-08-09; longterm 6.12.103 dated 2026-08-09. The FAISAL tree is based on Linux v7.2-rc7 and has no configured upstream remote in the local checkout, so it is not yet a stable/LTS production foundation.
+
+Authoritative source: https://www.kernel.org/category/releases.html
+Retrieved: 2026-08-17
+Relevant policy summary: mainline kernels are released approximately every 9-10 weeks; after a mainline release, it becomes a stable release line; longterm kernels are maintained release lines. Production qualification must therefore select and forward-port to a verified stable or longterm line rather than treating an rc development snapshot as production-ready.
+
+Authoritative source: https://docs.kernel.org/process/stable-kernel-rules.html
+Retrieved: 2026-08-17
+Relevant policy summary: stable-kernel fixes follow upstream/mainline fixes and bounded stable-backport rules. This supports treating a stable/LTS forward-port and upstream response process as release blockers.

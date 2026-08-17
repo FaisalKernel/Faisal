@@ -50,6 +50,8 @@ void faisal_task_net_usage_get(struct task_struct *task, u64 *tx_bytes,
 
 void faisal_task_accel_account(struct task_struct *task, u64 compute_ns,
 				       u64 memory_bytes, u64 submissions);
+void faisal_task_accel_release(struct task_struct *task, u64 compute_ns,
+				       u64 memory_bytes, u64 submissions);
 void faisal_task_accel_get(struct task_struct *task, u64 *compute_ns,
 				   u64 *memory_bytes, u64 *submissions);
 

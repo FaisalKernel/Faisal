@@ -8,6 +8,9 @@ BASE_BUILD=${FAISAL_BASE_BUILD:-$ROOT/build/recovered}
 OUT=${FAISAL_REPRO_BUILD:-$ROOT/build/industry-repro}
 BUILDER_ID=${FAISAL_BUILDER_ID:-local-builder}
 BUILDER_HOST=${FAISAL_BUILDER_HOST:-local-build-host}
+JOBS=${FAISAL_BUILD_JOBS:-2}
+case "$JOBS" in ''|*[!0-9]*) echo 'FAISAL_BUILD_JOBS must be numeric' >&2; exit 2;; esac
+[ "$JOBS" -gt 0 ] || { echo 'FAISAL_BUILD_JOBS must be positive' >&2; exit 2; }
 
 [ -r "$BASE_BUILD/.config" ] || { echo "missing base config: $BASE_BUILD/.config" >&2; exit 2; }
 commit_epoch=$(git -C "$LINUX" show -s --format=%ct HEAD)
@@ -24,7 +27,7 @@ export KBUILD_BUILD_VERSION=1
 export KBUILD_BUILD_TIMESTAMP="$build_timestamp"
 export KBUILD_BUILD_USER=faisal-builder
 export KBUILD_BUILD_HOST=faisal-reproducible
-make -C "$LINUX" O="$OUT" -j2 bzImage
+make -C "$LINUX" O="$OUT" -j"$JOBS" bzImage
 
 cat > "$OUT/reproducible-build.env" <<EOF
 SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH
@@ -36,5 +39,6 @@ source_revision=$(git -C "$LINUX" rev-parse HEAD)
 config_sha256=$(sha256sum "$OUT/.config" | awk '{print $1}')
 builder_id=$BUILDER_ID
 builder_host=$BUILDER_HOST
+build_jobs=$JOBS
 EOF
 printf 'FAISAL_REPRODUCIBLE_KERNEL_BUILD_OK\noutput=%s\nsource_epoch=%s\n' "$OUT" "$SOURCE_DATE_EPOCH"

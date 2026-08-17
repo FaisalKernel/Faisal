@@ -367,6 +367,26 @@ void faisal_task_accel_account(struct task_struct *task, u64 compute_ns,
 }
 EXPORT_SYMBOL_GPL(faisal_task_accel_account);
 
+void faisal_task_accel_release(struct task_struct *task, u64 compute_ns,
+				       u64 memory_bytes, u64 submissions)
+{
+	unsigned long flags;
+	struct faisal_task_state *state;
+
+	spin_lock_irqsave(&faisal_state_lock, flags);
+	state = faisal_find_locked(task, false);
+	if (state) {
+		state->accel_compute_ns = compute_ns > state->accel_compute_ns ?
+			0 : state->accel_compute_ns - compute_ns;
+		state->accel_memory_bytes = memory_bytes > state->accel_memory_bytes ?
+			0 : state->accel_memory_bytes - memory_bytes;
+		state->accel_submissions = submissions > state->accel_submissions ?
+			0 : state->accel_submissions - submissions;
+	}
+	spin_unlock_irqrestore(&faisal_state_lock, flags);
+}
+EXPORT_SYMBOL_GPL(faisal_task_accel_release);
+
 void faisal_task_accel_get(struct task_struct *task, u64 *compute_ns,
 				   u64 *memory_bytes, u64 *submissions)
 {
