@@ -65,6 +65,17 @@ int faisal_accel_batcher_set_ioctl(struct faisal_accel_batcher *batcher,
 	return 0;
 }
 
+int faisal_accel_batcher_set_resync(struct faisal_accel_batcher *batcher,
+				    faisal_accel_resync_fn resync_fn,
+				    void *context)
+{
+	if (!batcher)
+		return -1;
+	batcher->resync_fn = resync_fn;
+	batcher->resync_context = context;
+	return 0;
+}
+
 int faisal_accel_batcher_query(struct faisal_accel_batcher *batcher,
 			       struct agi_lc_event_backpressure *out)
 {
@@ -90,9 +101,17 @@ int faisal_accel_batcher_query(struct faisal_accel_batcher *batcher,
 	    (state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS &&
 	     !batcher->loss_acknowledged))
 		pressured = true;
-	if (pressured)
+	if (pressured) {
+		if (state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS &&
+		    !batcher->loss_acknowledged && batcher->resync_fn) {
+			batcher->resync_attempts++;
+			if (batcher->resync_fn(batcher->resync_context, &state) == 0)
+				batcher->loss_acknowledged = 1;
+			else
+				batcher->resync_failures++;
+		}
 		shrink_batch(batcher);
-	else if (state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_NORMAL &&
+	} else if (state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_NORMAL &&
 		 state.queued < state.capacity / 2) {
 		if (++batcher->healthy_queries >= 4)
 			grow_batch(batcher);
@@ -116,6 +135,10 @@ int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
 	if (!batcher->pending)
 		return 0;
 	if (faisal_accel_batcher_query(batcher, &state) < 0)
+		return -1;
+	if (state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS &&
+	    batcher->loss_acknowledged &&
+	    faisal_accel_batcher_query(batcher, &state) < 0)
 		return -1;
 	if ((state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS &&
 	     !batcher->loss_acknowledged) ||
