@@ -10,6 +10,10 @@ BUILD_B=${FAISAL_BUILD_B:-}
 ARTIFACT_OUT=${FAISAL_ARTIFACT_OUT:-}
 PUBLIC_KEY=${FAISAL_PUBLIC_KEY:-}
 SECURITY_MANIFEST=${FAISAL_SECURITY_MANIFEST:-}
+REQUIRE_PRODUCTION_LINE=${FAISAL_REQUIRE_PRODUCTION_LINE:-1}
+KERNEL_SOURCE=${FAISAL_KERNEL_SOURCE:-$LINUX}
+REQUIRED_KERNEL_LINE=${FAISAL_REQUIRED_KERNEL_LINE:-}
+EXPECTED_KERNEL_VERSION=${FAISAL_EXPECTED_KERNEL_VERSION:-}
 RUN_ROLLBACK_QEMU=${FAISAL_RUN_ROLLBACK_QEMU:-0}
 REPORT=${FAISAL_RELEASE_GATE_REPORT:-${ARTIFACT_OUT:-/tmp}/FAISAL-production-release-gate.tsv}
 
@@ -21,6 +25,7 @@ fail() { echo "FAISAL_RELEASE_GATE_FAIL:$*" >&2; exit 1; }
 [ -r "$PUBLIC_KEY" ] || fail "public key is unreadable"
 [ -n "$SECURITY_MANIFEST" ] || fail "FAISAL_SECURITY_MANIFEST is required"
 [ -x "$LINUX/tools/faisal-build/verify_industry_artifacts.sh" ] || fail "artifact verifier unavailable"
+[ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_security_release_evidence.sh" ] || fail "security evidence verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/compare_reproducible_builds.sh" ] || fail "reproducibility comparator unavailable"
 
@@ -37,6 +42,22 @@ FAISAL_VERIFY_REPORT="${REPORT}.artifacts.tsv" \
   fail "signed artifact verification"
 }
 printf 'signed_artifacts\tpass\t%s\n' "$ARTIFACT_OUT" >> "$REPORT"
+
+if [ "$REQUIRE_PRODUCTION_LINE" = 1 ]; then
+  [ -n "$REQUIRED_KERNEL_LINE" ] || fail "FAISAL_REQUIRED_KERNEL_LINE is required for production release"
+  [ -n "$EXPECTED_KERNEL_VERSION" ] || fail "FAISAL_EXPECTED_KERNEL_VERSION is required for production release"
+  FAISAL_KERNEL_SOURCE="$KERNEL_SOURCE" \
+  FAISAL_REQUIRED_KERNEL_LINE="$REQUIRED_KERNEL_LINE" \
+  FAISAL_EXPECTED_KERNEL_VERSION="$EXPECTED_KERNEL_VERSION" \
+  FAISAL_KERNEL_LINE_REPORT="${REPORT}.kernel-line.tsv" \
+    "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" >/tmp/faisal-release-kernel-line.log 2>&1 || {
+    cat /tmp/faisal-release-kernel-line.log >&2
+    fail "stable/LTS kernel release-line policy"
+  }
+  printf 'kernel_release_line\tpass\t%s:%s\n' "$REQUIRED_KERNEL_LINE" "$EXPECTED_KERNEL_VERSION" >> "$REPORT"
+else
+  printf 'kernel_release_line\tnot-enforced\tFAISAL_REQUIRE_PRODUCTION_LINE=0\n' >> "$REPORT"
+fi
 
 expected_source_revision=$(sed -n 's/^source_revision=//p' "$BUILD_A/reproducible-build.env" | head -1)
 [ -n "$expected_source_revision" ] || fail "build A source revision missing"

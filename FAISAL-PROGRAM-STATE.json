@@ -1434,6 +1434,7 @@
     "m104_rollback_qemu": "pass_approval_canary_rollback_replay",
     "production_release_gate": "pass_signed_artifacts_reproducibility_comparison_and_rollback_qemu",
     "security_release_evidence_gate": "pass_signed_fresh_source_bound_scanner_sanitizer_advisory_schema",
+    "production_kernel_line_gate": "pass_fail_closed_current_7.2.0_rc7_development_line_blocked",
     "m108_durable_execution_qemu": "pass",
     "m108_aggregate_qemu_harnesses": 29,
     "m108_execution_features": "intent_dag_dispatch_retry_backoff_checkpoint_restart_recovery_replay_cancellation_and_authority_denial",
