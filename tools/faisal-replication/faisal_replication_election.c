@@ -83,6 +83,17 @@ int fjr_election_persist(struct fjr_election *election,
 	return FJR_OK;
 }
 
+static int persist_transition(struct fjr_election *election)
+{
+	int rc;
+	if (!election->persistence_required)
+		return FJR_OK;
+	rc = fjr_election_persist(election, election->metadata_path);
+	if (rc != FJR_OK)
+		election->role = FJR_STOPPED;
+	return rc;
+}
+
 int fjr_election_restore(struct fjr_election *election,
 			 const char *metadata_path)
 {
@@ -173,10 +184,22 @@ int fjr_election_init(struct fjr_election *election,
 	election->min_election_timeout_ns = config->min_election_timeout_ns;
 	election->max_election_timeout_ns = config->max_election_timeout_ns;
 	election->heartbeat_interval_ns = config->heartbeat_interval_ns;
+	election->persistence_required = config->persistence_required;
+	if (config->metadata_path[0]) {
+		if (snprintf(election->metadata_path, sizeof(election->metadata_path),
+			     "%s", config->metadata_path) >=
+		    (int)sizeof(election->metadata_path))
+			return FJR_ERR_POLICY;
+	}
 	election->rng_state = config->random_seed ? config->random_seed :
 		(config->replica_id * 0x9e3779b97f4a7c15ULL);
 	election->role = FJR_FOLLOWER;
 	election->deadline_ns = now_ns + election_timeout(election);
+	if (election->persistence_required && election->metadata_path[0]) {
+		int restore_rc = fjr_election_restore(election, election->metadata_path);
+		if (restore_rc != FJR_OK && restore_rc != FJR_ERR_IO)
+			return restore_rc;
+	}
 	return FJR_OK;
 }
 
@@ -200,6 +223,8 @@ int fjr_election_tick(struct fjr_election *election, uint64_t now_ns,
 	election->votes_bitmap = 1ULL << (election->replica_id - 1);
 	election->votes_granted = 1;
 	election->deadline_ns = now_ns + election_timeout(election);
+	if (persist_transition(election) != FJR_OK)
+		return FJR_ERR_IO;
 	*action = election->votes_granted >= election->quorum_size ?
 		FJR_ACTION_BECOME_LEADER : FJR_ACTION_START_ELECTION;
 	if (*action == FJR_ACTION_BECOME_LEADER)
@@ -228,6 +253,8 @@ int fjr_receive_vote_request(struct fjr_election *election,
 	    (election->voted_for && election->voted_for != candidate_id))
 		return FJR_OK;
 	election->voted_for = candidate_id;
+	if (persist_transition(election) != FJR_OK)
+		return FJR_ERR_IO;
 	election->deadline_ns = election->deadline_ns + election_timeout(election);
 	*granted = 1;
 	return FJR_OK;
@@ -273,6 +300,8 @@ int fjr_receive_append(struct fjr_election *election, uint64_t term,
 		election->current_term = term;
 		election->voted_for = 0;
 		election->role = FJR_FOLLOWER;
+		if (persist_transition(election) != FJR_OK)
+			return FJR_ERR_IO;
 	}
 	if (election->role == FJR_LEADER && leader_id != election->replica_id)
 		return FJR_ERR_CONFLICT;

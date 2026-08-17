@@ -14,6 +14,7 @@
 #define FJR_ERR_CORRUPT -7
 #define FJR_ELECTION_META_MAGIC 0x46524d31U
 #define FJR_ELECTION_META_VERSION 1U
+#define FJR_MAX_METADATA_PATH 256U
 
 enum fjr_role {
 	FJR_FOLLOWER = 0,
@@ -38,6 +39,8 @@ struct fjr_election_config {
 	uint64_t max_election_timeout_ns;
 	uint64_t heartbeat_interval_ns;
 	uint64_t random_seed;
+	uint32_t persistence_required;
+	char metadata_path[FJR_MAX_METADATA_PATH];
 };
 
 struct fjr_election_metadata {
@@ -61,6 +64,8 @@ struct fjr_election {
 	uint64_t voted_for;
 	uint64_t leader_id;
 	uint64_t metadata_generation;
+	uint32_t persistence_required;
+	char metadata_path[FJR_MAX_METADATA_PATH];
 	uint64_t deadline_ns;
 	uint64_t votes_bitmap;
 	uint32_t votes_granted;

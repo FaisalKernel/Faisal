@@ -1,0 +1,25 @@
+{
+  "milestone": "M142",
+  "feature": "automatic durable term and votedFor persistence",
+  "status": "validated_qemu",
+  "behavior": {
+    "startup": "configured replicas restore metadata automatically when present",
+    "term_transition": "election timeout persists incremented term and self-vote before action emission",
+    "vote_transition": "vote grants persist votedFor before grant is returned",
+    "failure": "required persistence failure moves the state machine to STOPPED and returns an error",
+    "storage": "0600 temporary file, fsync, atomic rename, SHA-256 checksum"
+  },
+  "evidence": [
+    "FJR_AUTOMATIC_ELECTION_PERSISTENCE_OK",
+    "FJR_PERSISTENT_TERM_VOTEDFOR_RESTORE_OK",
+    "FJR_CORRUPTED_ELECTION_METADATA_FAIL_CLOSED_OK",
+    "FJR_ELECTION_SELFTEST_OK",
+    "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+  ],
+  "kernel_diagnostics": "none observed",
+  "limitations": [
+    "The metadata file is local; replicated term/vote persistence over the gRPC transport remains pending.",
+    "The test validates reboot-equivalent process restoration, not sudden power-loss behavior on every filesystem or storage device.",
+    "Production deployments must place metadata on a durable, access-controlled filesystem and include it in backup and recovery policy."
+  ]
+}

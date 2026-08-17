@@ -24,9 +24,11 @@ int main(void)
 		.heartbeat_interval_ns = 25,
 		.random_seed = 19,
 	};
-	struct fjr_election election, rebooted;
+	struct fjr_election election, rebooted, durable, durable_rebooted;
+	struct fjr_election_config durable_config;
 	enum fjr_action action;
 	char metadata_path[] = "/tmp/faisal-election-meta-XXXXXX";
+	char auto_metadata_path[] = "/tmp/faisal-election-auto-meta";
 	int metadata_fd;
 	uint32_t granted;
 	int rc;
@@ -75,8 +77,26 @@ int main(void)
 	      fjr_election_restore(&rebooted, metadata_path) == FJR_ERR_CORRUPT,
 	      "CORRUPTED_METADATA_REJECTED", rc);
 	unlink(metadata_path);
+	durable_config = config;
+	durable_config.persistence_required = 1;
+	snprintf(durable_config.metadata_path, sizeof(durable_config.metadata_path),
+		 "%s", auto_metadata_path);
+	unlink(auto_metadata_path);
+	check(fjr_election_init(&durable, &durable_config, 1000) == FJR_OK &&
+	      fjr_election_tick(&durable, durable.deadline_ns, &action) == FJR_OK &&
+	      durable.metadata_generation == 1,
+	      "AUTOMATIC_METADATA_PERSISTED", rc);
+	check(fjr_election_init(&durable_rebooted, &durable_config, 2000) == FJR_OK &&
+	      durable_rebooted.current_term == durable.current_term &&
+	      durable_rebooted.voted_for == durable.voted_for &&
+	      durable_rebooted.metadata_generation == 1,
+	      "AUTOMATIC_METADATA_RESTORED", rc);
+	unlink(auto_metadata_path);
 	printf("FJR_ELECTION_STATE_MACHINE_OK term=%llu role=%u\n",
 	       (unsigned long long)election.current_term, election.role);
+	printf("FJR_AUTOMATIC_ELECTION_PERSISTENCE_OK term=%llu generation=%llu\n",
+	       (unsigned long long)durable_rebooted.current_term,
+	       (unsigned long long)durable_rebooted.metadata_generation);
 	printf("FJR_PERSISTENT_TERM_VOTEDFOR_RESTORE_OK term=%llu voted_for=%llu generation=%llu\n",
 	       (unsigned long long)election.current_term,
 	       (unsigned long long)election.voted_for,
