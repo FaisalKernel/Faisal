@@ -7,6 +7,7 @@ ROOTFS=${FAISAL_EXECUTION_ROOTFS:-$ROOT/build/qemu-faisal-durable-execution}
 LOG="$ROOTFS/qemu.log"
 TEST="$BUILD/agi_durable_execution_test"
 TRUST_TEST="$BUILD/faisal_journal_trust_test"
+ELECTION_TEST="$BUILD/faisal_replication_election_test"
 
 cc -O2 -Wall -Wextra -Werror -Wno-cpp -Wno-deprecated-declarations -pthread -static \
   -I"$LINUX/tools/faisal-task" -I"$LINUX/tools/faisal-execution" \
@@ -20,6 +21,11 @@ cc -O2 -Wall -Wextra -Werror -Wno-deprecated-declarations -static \
   "$LINUX/tools/testing/selftests/faisal_journal_trust_test.c" \
   "$LINUX/tools/faisal-journal-trust/faisal_journal_trust.c" \
   -lcrypto -o "$TRUST_TEST"
+cc -O2 -Wall -Wextra -Werror -static \
+  -I"$LINUX/tools/faisal-replication" \
+  "$LINUX/tools/testing/selftests/faisal_replication_election_test.c" \
+  "$LINUX/tools/faisal-replication/faisal_replication_election.c" \
+  -o "$ELECTION_TEST"
 
 rm -rf "$ROOTFS"
 mkdir -p "$ROOTFS/bin" "$ROOTFS/dev" "$ROOTFS/proc" "$ROOTFS/sys" "$ROOTFS/tmp"
@@ -28,6 +34,7 @@ ln -sf busybox "$ROOTFS/bin/sh"
 ln -sf busybox "$ROOTFS/bin/mknod"
 cp "$TEST" "$ROOTFS/bin/agi_durable_execution_test"
 cp "$TRUST_TEST" "$ROOTFS/bin/faisal_journal_trust_test"
+cp "$ELECTION_TEST" "$ROOTFS/bin/faisal_replication_election_test"
 cat > "$ROOTFS/init" <<'INIT'
 #!/bin/sh
 /bin/busybox --install -s /bin
@@ -49,6 +56,7 @@ printf 'FAISAL_M108_BOOT_OK\n'
 rc=$?
 printf 'M108_SELFTEST_RC=%s\n' "$rc"
 /bin/faisal_journal_trust_test
+/bin/faisal_replication_election_test
 poweroff -f
 INIT
 chmod +x "$ROOTFS/init"
@@ -90,6 +98,9 @@ for marker in \
   FJT_PARTITION_HEAL_QUORUM_RESTORED_OK \
   FJT_FUTURE_TERM_DENIED_OK \
   FJT_SELFTEST_OK \
+  FJR_ELECTION_STATE_MACHINE_OK \
+  FJR_CONSENSUS_TIMEOUT_POLICY_OK \
+  FJR_ELECTION_SELFTEST_OK \
   M108_INTENT_OBJECTIVE_CREATED_OK \
   M108_DAG_NODES_CREATED_OK \
   M108_INTENT_PLAN_DAG_EXECUTION_OK \

@@ -1459,6 +1459,8 @@
     "m134_live_socket_partition_fault_injection": "pass_mtls_tcp_loopback_iptables_drop_observed_recovery_host_validation_tc_netem_unavailable",
     "m135_remote_kms_clients": "pass_aws_sigv4_and_vault_transit_https_clients_syntax_provider_boundary_live_credentials_pending",
     "m136_grpc_tls_replication_contract": "pass_proto_request_vote_append_snapshot_read_commit_term_digest_fencing_generated_server_pending",
+    "m137_leader_election_state_machine": "pass_follower_candidate_leader_term_fencing_randomized_timeout_quorum_heartbeat_qemu",
+    "m138_mock_remote_kms_tests": "pass_aws_kms_and_vault_transit_payload_response_error_unit_tests_5_cases",
     "adapter_conformance_gate": "pass_four_qemu_adapters_sandbox_network_repository_scanner_fail_closed_rollback_replay",
     "m108_durable_execution_qemu": "pass",
     "m108_aggregate_qemu_harnesses": 29,

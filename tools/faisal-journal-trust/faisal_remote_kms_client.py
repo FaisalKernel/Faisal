@@ -73,7 +73,7 @@ class VaultTransitSigner:
             raise RemoteKmsError("Vault response lacks versioned signature")
         version_text, encoded = raw.rsplit(":", 1)
         try:
-            version = int(version_text[6:])
+            version = int(version_text[len("vault:v"):])
             signature = base64.b64decode(encoded, validate=True)
         except (ValueError, base64.binascii.Error) as exc:
             raise RemoteKmsError("invalid Vault signature encoding") from exc

@@ -1,0 +1,28 @@
+{
+  "milestones": ["M137", "M138"],
+  "status": "validated_qemu_and_host_unit",
+  "M137_leader_election": {
+    "roles": ["follower", "candidate", "leader", "stopped"],
+    "controls": ["term fencing", "bounded randomized election timeout", "heartbeat deadline", "one vote per term", "quorum promotion", "same-term split conflict denial", "higher-term step-down", "stale append denial"],
+    "policy": {
+      "min_election_timeout_ns": 100,
+      "max_election_timeout_ns": 200,
+      "heartbeat_interval_ns": 25,
+      "quorum": "strict majority"
+    },
+    "evidence": ["FJR_ELECTION_STATE_MACHINE_OK", "FJR_CONSENSUS_TIMEOUT_POLICY_OK", "FJR_ELECTION_SELFTEST_OK"]
+  },
+  "M138_mock_remote_kms_tests": {
+    "tests": 5,
+    "aws": ["SigV4 payload fields", "authorization scope", "key mismatch denial", "missing credential denial", "message-size bound"],
+    "vault": ["base64 input payload", "token header", "versioned signature parsing", "insecure URL denial", "malformed response denial"],
+    "result": "python unittest discovery passed"
+  },
+  "combined_qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+  "kernel_diagnostics": "none observed",
+  "limitations": [
+    "The election state machine is library-level; generated gRPC server integration and durable term/vote journal records remain pending.",
+    "KMS tests use mocks and do not claim live AWS or Vault qualification.",
+    "Timeout values are policy inputs and require deployment-specific calibration and clock-monotonic integration."
+  ]
+}
