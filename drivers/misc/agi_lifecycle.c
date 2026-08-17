@@ -3301,20 +3301,19 @@ static int agi_lc_push_record_ex(struct agi_lc_session *session, u16 type,
 				session->world_resync_required = true;
 				agi_lc_remove_record_locked(session, drop_index);
 			} else {
-								session->dropped_records++;
+					session->dropped_records++;
 					if (observability_sampled_event)
 						session->observability_dropped++;
 					if (world_event) {
-
-					session->world_dropped++;
-					session->world_last_loss_sequence = event_sequence;
-					session->world_resync_required = true;
-				}
-				if (sequence_out) {
-					*sequence_out = event_sequence;
+						session->world_dropped++;
+						session->world_last_loss_sequence = event_sequence;
+						session->world_resync_required = true;
+					}
+					if (sequence_out)
+						*sequence_out = event_sequence;
 					ret = -EAGAIN;
-				}
-				goto out_unlock;
+					goto out_unlock;
+
 			}
 		}
 		record = &session->records[session->tail];
@@ -9578,6 +9577,7 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 	struct agi_lc_accel_device_account account;
 	struct agi_lc_accel_record *device;
 	u64 agent_id;
+	int ret;
 
 	if (copy_from_user(&account, (void __user *)arg, sizeof(account)))
 		return -EFAULT;
@@ -9645,6 +9645,32 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 			session->tenant_cgroup_generation;
 		account.device_memory_limit_bytes = device->device.total_memory_bytes;
 	}
+	if ((account.flags & AGI_LC_ACCEL_ACCOUNT_COMPUTE) &&
+	    account.compute_ns > U64_MAX - device->device.compute_ns) {
+		account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_UNSUPPORTED;
+		mutex_unlock(&agi_lc_accel_lock);
+		if (copy_to_user((void __user *)arg, &account, sizeof(account)))
+			return -EFAULT;
+		return -EOVERFLOW;
+	}
+	if ((account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) &&
+	    (!(account.flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
+	     (account.memory_bytes > U64_MAX - device->device.memory_bytes ||
+	      account.memory_bytes > U64_MAX - device->accounted_memory_bytes))) {
+		account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_UNSUPPORTED;
+		mutex_unlock(&agi_lc_accel_lock);
+		if (copy_to_user((void __user *)arg, &account, sizeof(account)))
+			return -EFAULT;
+		return -EOVERFLOW;
+	}
+	if ((account.flags & AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS) &&
+	    account.submissions > U64_MAX - device->device.submissions) {
+		account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_UNSUPPORTED;
+		mutex_unlock(&agi_lc_accel_lock);
+		if (copy_to_user((void __user *)arg, &account, sizeof(account)))
+			return -EFAULT;
+		return -EOVERFLOW;
+	}
 	if (account.flags & AGI_LC_ACCEL_ACCOUNT_COMPUTE) {
 		device->device.compute_ns += account.compute_ns;
 		faisal_task_accel_account(current, account.compute_ns, 0, 0);
@@ -9666,11 +9692,14 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 	}
 	account.agent_id = agent_id;
 	account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED;
+	ret = agi_lc_push_record(session, AGI_LC_EVENT_ACCEL, 0,
+				 account.correlation, account.device_id);
+	if (ret)
+		account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_TELEMETRY_LOST;
 	mutex_unlock(&agi_lc_accel_lock);
 	if (copy_to_user((void __user *)arg, &account, sizeof(account)))
 		return -EFAULT;
-	return agi_lc_push_record(session, AGI_LC_EVENT_ACCEL, 0,
-						 account.correlation, account.device_id);
+	return ret;
 }
 
 #ifdef CONFIG_UCLAMP_TASK

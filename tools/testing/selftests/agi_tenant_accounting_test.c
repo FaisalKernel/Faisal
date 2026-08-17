@@ -19,6 +19,29 @@ static int fail(const char *what)
 	return 1;
 }
 
+static int drain_records(int fd)
+{
+	struct agi_lc_record record;
+	int original_flags = fcntl(fd, F_GETFL, 0);
+	ssize_t n;
+
+	if (original_flags < 0 || fcntl(fd, F_SETFL, original_flags | O_NONBLOCK) < 0)
+		return -1;
+	for (;;) {
+		n = read(fd, &record, sizeof(record));
+		if (n == (ssize_t)sizeof(record))
+			continue;
+		if (n < 0 && (errno == EAGAIN || errno == EINTR)) {
+			if (errno == EINTR)
+				continue;
+			break;
+		}
+		(void)fcntl(fd, F_SETFL, original_flags);
+		return -1;
+	}
+	return fcntl(fd, F_SETFL, original_flags);
+}
+
 int main(void)
 {
 	int fd;
@@ -107,6 +130,19 @@ int main(void)
 			AGI_LC_ACCEL_ACCOUNT_RELEASE,
 		.memory_bytes = 8ULL * 1024 * 1024,
 		.correlation = 11513,
+	};
+	struct agi_lc_accel_device_account accel_event_fill = {
+		.size = sizeof(accel_event_fill),
+		.flags = AGI_LC_ACCEL_ACCOUNT_MEMORY,
+	};
+	struct agi_lc_subscribe accel_subscribe = {
+		.size = sizeof(accel_subscribe),
+		.event_mask = 1ULL << (AGI_LC_EVENT_ACCEL - 1),
+		.correlation = 11514,
+	};
+	struct agi_lc_subscribe accel_unsubscribe = {
+		.size = sizeof(accel_unsubscribe),
+		.correlation = 11515,
 	};
 	struct agi_lc_accel_device accel_remove = {
 		.size = sizeof(accel_remove),
@@ -246,8 +282,38 @@ int main(void)
 	    accel_release.status != AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED ||
 	    accel_release.tenant_cgroup_id != tenant_cgroup.cgroup_id)
 		return fail("tenant accelerator release");
-	printf("M153_TENANT_ACCELERATOR_MEMORY_RELEASE_OK\\n");
+	printf("M153_TENANT_ACCELERATOR_MEMORY_RELEASE_OK\n");
+	if (ioctl(fd, AGI_LC_SUBSCRIBE, &accel_subscribe) < 0)
+		return fail("accelerator event subscribe");
+	if (drain_records(fd) < 0)
+		return fail("accelerator event drain");
+	accel_event_fill.device_id = accel.device_id;
+	for (int i = 0; i < 65; i++) {
+		accel_event_fill.correlation = 11516 + (uint64_t)i;
+		accel_event_fill.agent_id = 0;
+		accel_event_fill.tenant_cgroup_id = 0;
+		accel_event_fill.tenant_cgroup_generation = 0;
+		accel_event_fill.device_memory_limit_bytes = 0;
+		accel_event_fill.status = 0;
+		if (i < 64) {
+			if (ioctl(fd, AGI_LC_ACCEL_DEVICE_ACCOUNT,
+				  &accel_event_fill) < 0 ||
+			    accel_event_fill.status !=
+				AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED)
+				return fail("accelerator event fill");
+		} else if (ioctl(fd, AGI_LC_ACCEL_DEVICE_ACCOUNT,
+					&accel_event_fill) >= 0 ||
+				   errno != EAGAIN ||
+				   accel_event_fill.status !=
+					AGI_LC_ACCEL_ACCOUNT_STATUS_TELEMETRY_LOST) {
+				return fail("accelerator telemetry loss");
+		}
+	}
+	printf("M154_TENANT_ACCELERATOR_TELEMETRY_LOSS_OK\n");
+	if (ioctl(fd, AGI_LC_SUBSCRIBE, &accel_unsubscribe) < 0)
+		return fail("accelerator event unsubscribe");
 	accel_remove.device_id = accel.device_id;
+
 	if (ioctl(fd, AGI_LC_ACCEL_UNREGISTER, &accel_remove) < 0)
 		return fail("tenant accelerator unregister");
 	printf("M152_TENANT_ACCELERATOR_RELEASE_OK\n");
