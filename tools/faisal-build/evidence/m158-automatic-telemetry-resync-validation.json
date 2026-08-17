@@ -1,0 +1,94 @@
+{
+  "schema": "org.faisal.evidence.m158-automatic-telemetry-resync-validation.v1",
+  "milestone": "M158",
+  "source_revision": "46925ad19e31bfc2660591da2db8db541ec15c2a",
+  "source_parent": "8976442e1034d210db0c535a2ef8dff73003d0dd",
+  "recorded_at": "2026-08-17T17:05:00Z",
+  "status": "validated_bounded_userspace_qemu_and_deterministic_unit_test_not_production_release",
+  "implementation": {
+    "library": "tools/faisal-accelerator/faisal_accelerator_batcher.{c,h}",
+    "improvement": "Added an optional verified resynchronization callback. When M156 reports LOSS, the batcher invokes the runtime-owned callback, re-queries occupancy after successful recovery, and resumes only if the new watermarks permit submission.",
+    "fail_closed_behavior": "Absent callbacks and callback failures preserve LOSS blocking and EAGAIN behavior. No model output, callback, or userspace result grants kernel authority; the kernel ioctl remains the authorization boundary.",
+    "state_accounting": "Tracks resync attempts and failures separately from telemetry-loss observations.",
+    "partial_completion": "Existing M157 retained-entry behavior remains unchanged for partial batch completion and retry."
+  },
+  "unit_validation": {
+    "source": "tools/testing/selftests/faisal_accelerator_batcher_test.c",
+    "compile": "pass_static_wall_wextra_werror",
+    "result": "pass",
+    "marker": "M158_ADAPTIVE_BATCHER_RESYNC_OK flushes=5 queries=16 losses=4 resync=2 failures=1 target=1",
+    "coverage": [
+      "successful callback-driven drain and re-query",
+      "callback failure preserves fail-closed EAGAIN behavior",
+      "explicit acknowledgement recovery remains available",
+      "cautious growth after healthy observations",
+      "partial completion and retained pending entries",
+      "resync attempt and failure counters"
+    ]
+  },
+  "runtime_validation": {
+    "tenant_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m158-tenant-qemu.log",
+    "tenant_qemu_return_code": 0,
+    "tenant_result": "pass",
+    "required_markers": [
+      "M154_TENANT_ACCELERATOR_TELEMETRY_LOSS_OK",
+      "M156_TENANT_EVENT_BACKPRESSURE_QUERY_OK queued=64 dropped=1 state=3",
+      "M158_ADAPTIVE_BATCHER_RESYNC_OK flushes=5 queries=16 losses=4 resync=2 failures=1 target=1",
+      "M158_BATCHER_SELFTEST_RC=0",
+      "M155_TENANT_ACCELERATOR_BATCH_ACCOUNTING_OK completed=4",
+      "M155_TENANT_ACCELERATOR_BATCH_MALFORMED_REJECT_OK",
+      "M155_TENANT_ACCELERATOR_BATCH_BENCH_OK single_ns=5623870 batch_ns=4899830 speedup_x100=114",
+      "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+    ],
+    "tenant_kernel_diagnostic_scan": "clean",
+    "durable_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m158-durable-qemu.log",
+    "durable_qemu_return_code": 0,
+    "durable_result": "pass",
+    "durable_markers": [
+      "M108_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+      "M108_EXECUTION_REPLAY_OK",
+      "M108_ENGINE_REPLAY_FAIL_CLOSED_OK",
+      "FJT_SPLIT_BRAIN_PARTITION_ATTACK_DENIED_OK",
+      "FJR_CONSENSUS_TIMEOUT_POLICY_OK",
+      "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+    ],
+    "durable_kernel_diagnostic_scan": "clean"
+  },
+  "productivity_interpretation": {
+    "benefit": "A runtime with a verified drain/resynchronization procedure can recover automatically from telemetry loss instead of requiring a separate manual acknowledgement path, while still avoiding unsafe submissions when recovery fails.",
+    "observed_state": "The deterministic test exercised two resynchronization attempts, one successful and one failed, while retaining fail-closed behavior and ending at target batch size one.",
+    "raw_throughput_scope": "The integrated gate retained the inherited M155 synthetic QEMU accounting benchmark at speedup_x100=114 in this run; M158 does not claim an isolated raw-throughput gain because its change is recovery/control behavior."
+  },
+  "build_artifact": {
+    "kernel_source": "M156 kernel image reused; M158 is userspace runtime/test integration.",
+    "kernel_build_directory": "/home/ubuntu/agi-kernel/build/m156-backpressure",
+    "bzimage_sha256": "4098292a9ca43f521cb67617e970165aff17047db591a7827aea0c690cf7b88d",
+    "vmlinux_sha256": "60229862db8230c29d68b4c11587a511a3dcfcabc590a685462ad4382c403fb1",
+    "config_sha256": "003e03a277c47585b6c36c00810bf36e61dc91b487f1162e0ad51f514bdfa08b",
+    "config_required_check": "CONFIG_CFS_BANDWIDTH=y"
+  },
+  "source_quality": {
+    "git_diff_check": "pass",
+    "tenant_selftest_compile": "pass_static_wall_wextra_werror",
+    "adaptive_batcher_compile": "pass_static_wall_wextra_werror",
+    "shell_syntax_check": "pass",
+    "protected_files_staged": false,
+    "protected_files": [
+      "M63-COMPUTE-CONTEXT-DESIGN.md",
+      "M63-SECURITY-REVIEW.md"
+    ]
+  },
+  "release_gate": {
+    "status": "blocked",
+    "reason": "M158 is bounded userspace/QEMU validation. Physical accelerator qualification, independent reproducible production builders, signed artifacts, stable/LTS forward-port qualification, and external security governance remain required.",
+    "model_output_is_authority": false,
+    "hardware_claim": "No physical GPU, NPU, VRAM, IOMMU, DMA, vendor-driver, reset, or fleet qualification is claimed."
+  },
+  "known_limitations": [
+    "The callback is runtime-owned and must implement a real, verified world-state or telemetry drain; the batcher cannot prove semantic resynchronization by itself.",
+    "Callback success only permits a re-query; submission remains blocked if the refreshed occupancy/loss state is still unsafe.",
+    "The unit test uses an injected ioctl and resync model for deterministic state-machine validation; QEMU validates packaging and integration, not physical accelerator behavior.",
+    "No isolated M158 raw-throughput improvement is claimed; the M155 benchmark remains supporting context only.",
+    "The kernel remains based on the Linux v7.2-rc7 development line and production release qualification remains incomplete."
+  ]
+}
