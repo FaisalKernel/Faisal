@@ -1313,6 +1313,44 @@
         "tenant_accounting_qemu",
         "sanitizer_matrix"
       ]
+    },
+    {
+      "id": "M115-tenant-resource-accounting",
+      "phase": 14,
+      "name": "Kernel tenant aggregate resource accounting with sandbox-bound read-only telemetry",
+      "status": "validated_bounded_cpu_ram_qemu_accounting",
+      "priority": 115,
+      "depends_on": [
+        "M114-kernel-enforced-sandbox-identity-multitenant-worker-supervision-and-real-build-scanner-adapters"
+      ],
+      "unlocks": [
+        "M115-worker-supervision-and-sanitizer-validation"
+      ],
+      "evidence_required": [
+        "additive_uapi",
+        "lineage_authorization",
+        "sandbox_requirement",
+        "cpu_ram_enforcement",
+        "saturating_aggregate",
+        "malformed_input_denial",
+        "kernel_qemu",
+        "kernel_diagnostics_clean",
+        "sanitizer_matrix",
+        "worker_failure_recovery",
+        "commit_and_tag"
+      ],
+      "evidence": [
+        "tools/faisal-build/evidence/m115-tenant-accounting-validation.json"
+      ],
+      "next_action": "Retain tenant aggregate and malformed-input QEMU coverage; implement worker heartbeat, timeout, restart/reassignment, namespace/cgroup ownership, and current-head sanitizer validation.",
+      "remaining_gates": [
+        "worker_heartbeat_and_health_state",
+        "worker_timeout_and_restart",
+        "worker_reassignment_or_rollback",
+        "namespace_creation_and_ownership",
+        "cgroup_hierarchy_resource_accounting",
+        "current_head_kasan_kcsan_lockdep_ubsan"
+      ]
     }
   ],
   "completed_milestones": [
@@ -1380,7 +1418,7 @@
     "tools/testing/selftests/agi_autonomy_orchestrator_test.c"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "M115-multitenant-resource-accounting-worker-supervision-and-sanitizer-validation",
+  "next_dependency": "M115-worker-supervision-namespace-cgroup-ownership-and-sanitizer-validation",
   "industry_readiness": {
     "status": "preproduction_prototype_not_production_ready",
     "audit_document": "FAISAL-INDUSTRY-READINESS-AUDIT.md",
@@ -1414,6 +1452,8 @@
     "m112_model_authority_boundary": "model_proposals_require_independent_verification_and_explicit_deployment_approval",
     "m113_repository_adapter_qemu": "pass",
     "m113_aggregate_qemu_harnesses": 34,
+    "m115_tenant_accounting_qemu": "pass_cpu_ram_enforced_aggregate_saturating_malformed_denied",
+    "m115_tenant_accounting_kernel_config": "AGI_LIFECYCLE_UCLAMP_TASK_SECURITY_LANDLOCK_DEVTMPFS_BUILT_IN",
     "m114_followup_aggregate_qemu_harnesses": 36,
     "m114_followup_scanner_adapters": "pass_real_build_dependency_and_fail_closed_vulnerability",
     "m114_followup_trusted_launcher": "pass_qemu_landlock_seccomp_and_cgroup_fail_closed",
@@ -1447,6 +1487,9 @@
       "kernel_enforced_sandbox_identity_and_multitenant_worker_supervision",
       "real_build_dependency_vulnerability_and_ci_scanner_adapters",
       "tenant_resource_accounting_and_worker_supervision",
+      "worker_heartbeat_timeout_restart_and_reassignment",
+      "namespace_creation_and_cgroup_hierarchy_ownership",
+      "current_head_sanitizer_validation_for_m115",
       "current_head_sanitizer_validation_for_new_launcher_and_scanner_paths"
     ]
   }
