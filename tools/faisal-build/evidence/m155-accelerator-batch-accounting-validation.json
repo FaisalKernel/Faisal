@@ -1,0 +1,87 @@
+{
+  "schema": "org.faisal.evidence.m155-accelerator-batch-accounting-validation.v1",
+  "milestone": "M155",
+  "source_revision": "8ff9047bfd740ad8330587361b2b693a4aea4795",
+  "source_parent": "06554336733beac47aa022a4ca06a3ff42e25951",
+  "recorded_at": "2026-08-17T15:10:00Z",
+  "status": "validated_bounded_qemu_not_production_release",
+  "implementation": {
+    "uapi": "Added AGI_LC_ACCEL_ACCOUNT_BATCH_MAX=64, struct agi_lc_accel_device_account_batch, and additive AGI_LC_ACCEL_DEVICE_ACCOUNT_BATCH ioctl 0x6b; the existing single-entry ABI remains unchanged.",
+    "batch_semantics": "The kernel copies at most 64 account entries, processes them in order, returns completed count and last-entry status, copies updated entries back, and stops on the first error.",
+    "security": "The batch path reuses the validated single-entry authorization, tenant ownership, overflow, memory-limit, release-underflow, event-publication, and telemetry-loss checks; malformed zero-count input is rejected with EINVAL.",
+    "productivity_path": "The batch path amortizes the accelerator mutex across the entire batch and uses u64_to_user_ptr for portable UAPI pointer conversion.",
+    "selftest": "Tenant QEMU selftest verifies four-entry completion, malformed-input rejection, and a 256-single versus 64-batch throughput comparison with event delivery disabled for the benchmark.",
+    "commit": "FAISAL accelerator: add batched accounting fast path"
+  },
+  "build": {
+    "command": "make O=/home/ubuntu/agi-kernel/build/m155-batch -j4 bzImage",
+    "result": "pass",
+    "build_directory": "/home/ubuntu/agi-kernel/build/m155-batch",
+    "bzimage_sha256": "25c5b516b5be09dc55ddd8a978cf4e291891bcbf1969f0c4de7b3b3bfae00c37",
+    "vmlinux_sha256": "4a079d2e80394b9d2bbf799b67454b57dc5967341a9919b7571e9dcfe48cf8ca",
+    "config_sha256": "003e03a277c47585b6c36c00810bf36e61dc91b487f1162e0ad51f514bdfa08b",
+    "config_required_check": "CONFIG_CFS_BANDWIDTH=y"
+  },
+  "benchmark": {
+    "comparison": "256 single-entry ioctl operations versus 64 four-entry batch ioctl operations, equal total entries, event delivery disabled during timing",
+    "metric": "speedup_x100 = single_total_ns * 100 / batch_total_ns; values above 100 indicate lower measured batch total time in that run",
+    "repeat_log": "/home/ubuntu/agi-kernel/build/faisal-m155-benchmark-repeat.tsv",
+    "runs": [
+      {"run": 1, "single_ns": 5652180, "batch_ns": 5037270, "speedup_x100": 112, "gate_return_code": 0},
+      {"run": 2, "single_ns": 4605402, "batch_ns": 4033381, "speedup_x100": 114, "gate_return_code": 0},
+      {"run": 3, "single_ns": 8830360, "batch_ns": 5950670, "speedup_x100": 148, "gate_return_code": 0}
+    ],
+    "median_speedup_x100": 114,
+    "range_speedup_x100": [112, 148],
+    "interpretation": "Three QEMU runs measured a median 1.14x batch-over-single total-time ratio for this bounded workload. This is not a claim of universal accelerator performance improvement; physical devices and production workloads remain unmeasured."
+  },
+  "runtime_validation": {
+    "tenant_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m155-tenant-qemu-portable-final.log",
+    "tenant_qemu_return_code": 0,
+    "tenant_result": "pass",
+    "tenant_markers": [
+      "M154_TENANT_ACCELERATOR_TELEMETRY_LOSS_OK",
+      "M155_TENANT_ACCELERATOR_BATCH_ACCOUNTING_OK completed=4",
+      "M155_TENANT_ACCELERATOR_BATCH_MALFORMED_REJECT_OK",
+      "M155_TENANT_ACCELERATOR_BATCH_BENCH_OK single_ns=5300562 batch_ns=4882969 speedup_x100=108",
+      "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+    ],
+    "tenant_kernel_diagnostic_scan": "clean",
+    "durable_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m155-durable-qemu-final.log",
+    "durable_qemu_return_code": 0,
+    "durable_result": "pass",
+    "durable_markers": [
+      "M108_EXECUTION_REPLAY_OK",
+      "M108_CANCELLATION_COMPENSATION_BOUNDARY_OK",
+      "M108_ENGINE_REPLAY_FAIL_CLOSED_OK",
+      "FJT_SPLIT_BRAIN_PARTITION_ATTACK_DENIED_OK",
+      "FJR_CONSENSUS_TIMEOUT_POLICY_OK",
+      "M108_SELFTEST_RC=0",
+      "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+    ],
+    "durable_kernel_diagnostic_scan": "clean"
+  },
+  "source_quality": {
+    "git_diff_check": "pass",
+    "selftest_compile": "pass_static_wall_wextra_werror",
+    "shell_syntax_check": "pass",
+    "protected_files_staged": false,
+    "protected_files": [
+      "M63-COMPUTE-CONTEXT-DESIGN.md",
+      "M63-SECURITY-REVIEW.md"
+    ]
+  },
+  "release_gate": {
+    "status": "blocked",
+    "reason": "M155 is bounded QEMU/software validation. Operator-controlled signing, stable/LTS forward-port qualification, independent build-farm qualification, physical accelerator qualification, and external security governance remain required.",
+    "model_output_is_authority": false,
+    "hardware_claim": "No physical GPU, NPU, VRAM, IOMMU, DMA, vendor-driver, reset, or fleet qualification is claimed."
+  },
+  "known_limitations": [
+    "Benchmark results are from QEMU TCG and a small synthetic account payload; they do not establish production performance on physical accelerators.",
+    "The batch path still emits one event per entry and stops on the first error; it is not a transactional all-or-nothing accounting operation.",
+    "The kernel remains based on the Linux v7.2-rc7 development line and has not completed stable or LTS forward-port requalification.",
+    "The recorded build is not independently reproduced on separate physical builders and artifacts are unsigned.",
+    "Durable execution regression passed, but M155 does not claim new durable-execution functionality."
+  ]
+}
