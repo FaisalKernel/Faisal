@@ -29,6 +29,7 @@ from faisal_replication_providers import (
     Ed25519AttestationVerifier,
     Ed25519RecordSignatureVerifier,
     Ed25519TrustStore,
+    KmsTrustKeyRotationController,
     load_public_key_bytes,
 )
 
@@ -169,6 +170,7 @@ class JournalReplicationService(pb_grpc.JournalReplicationServicer):
         attestation_verifier: Callable[[pb.JournalIdentity], bool],
         record_verifier: Callable[[pb.JournalIdentity, pb.JournalRecord], bool],
         certificate_identity_verifier: Optional[Callable[[object, int], bool]] = None,
+        rotation_controller: Optional[KmsTrustKeyRotationController] = None,
     ):
         config.validate()
         self.config = config
@@ -176,8 +178,17 @@ class JournalReplicationService(pb_grpc.JournalReplicationServicer):
         self.attestation_verifier = attestation_verifier
         self.record_verifier = record_verifier
         self.certificate_identity_verifier = certificate_identity_verifier or self._verify_certificate_identity
+        self.rotation_controller = rotation_controller
         self.peer_votes: dict[int, int] = {}
         self.state.load()
+
+    def start_live_rotation(self) -> None:
+        if self.rotation_controller is not None:
+            self.rotation_controller.start()
+
+    def stop_live_rotation(self) -> None:
+        if self.rotation_controller is not None:
+            self.rotation_controller.stop()
 
     @staticmethod
     def _verify_certificate_identity(context: object, replica_id: int) -> bool:
@@ -366,8 +377,12 @@ def main() -> int:
         Ed25519RecordSignatureVerifier(trust_store).verify,
     )
     server, _bound_port = build_server(service, args.bind, args.server_key.read_bytes(), args.server_cert.read_bytes(), args.client_ca.read_bytes())
+    service.start_live_rotation()
     server.start()
-    server.wait_for_termination()
+    try:
+        server.wait_for_termination()
+    finally:
+        service.stop_live_rotation()
     return 0
 
 

@@ -1,0 +1,33 @@
+{
+  "milestones": ["M147", "M148", "M149"],
+  "status": "pass_bounded_host_validation",
+  "benchmark": {
+    "artifact": "tools/faisal-build/evidence/m147-ed25519-overhead-benchmark.json",
+    "records": 10000,
+    "payload_bytes": 256,
+    "baseline_median_records_per_second": 812636.9598016125,
+    "signed_median_records_per_second": 7568.962700047363,
+    "overhead_ns_per_record": 130887.9384,
+    "overhead_percent": 10636.437633607675,
+    "accepted_records": 10000,
+    "interpretation": "Python host microbenchmark only; no production cluster performance claim"
+  },
+  "hardware_key_loading": {
+    "tpm2": "provider invokes tpm2_readpublic, validates Ed25519 output and expected SHA-256, missing/failing provider rejects",
+    "secure_enclave": "explicit vendor/TEE command boundary, validates Ed25519 output and expected SHA-256, missing/malformed provider rejects",
+    "physical_hardware_qualification": false
+  },
+  "live_rotation": {
+    "controller": "KmsTrustKeyRotationController",
+    "activation": "exactly next generation, current-key authorization signature, atomic active-map update",
+    "revocation": "previous generation no longer resolves after activation",
+    "failure_behavior": "invalid/stale/unavailable proposal leaves active generation unchanged and records last_error",
+    "daemon_restart_required": false,
+    "tests": "5 hardware/rotation tests passed"
+  },
+  "limitations": [
+    "No physical TPM, secure enclave, live AWS KMS, or live Vault production qualification was possible in the current environment.",
+    "KMS rotation source remains deployment-supplied; provider-specific public-key retrieval and key revocation APIs require external credentials and policy.",
+    "The measured signature path is Python Ed25519 verification and excludes network, protobuf, TLS, disk, batching, and native acceleration effects."
+  ]
+}

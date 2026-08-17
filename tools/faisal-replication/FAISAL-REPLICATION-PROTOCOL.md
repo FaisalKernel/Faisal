@@ -31,6 +31,18 @@ The remote provider interface supports AWS KMS asymmetric signing and HashiCorp 
 
 The KMS client must enforce bounded request sizes, HTTPS, response key-identity matching, algorithm recording, and failure-closed behavior. AWS KMS requests use SigV4 and `kms:Sign`; Vault Transit responses must contain a versioned signature and key version.
 
+## Hardware-backed key loading
+
+`TPM2PublicKeyProvider` invokes `tpm2_readpublic` against an operator-provisioned object context and verifies the returned Ed25519 public-key SHA-256 digest. `SecureEnclavePublicKeyProvider` is an explicit vendor/TEE command boundary because Linux has no universal Secure Enclave API. Both providers fail closed when the executable, hardware, output format, or expected digest is unavailable or mismatched. A local software fixture is not physical hardware qualification.
+
+## Live trust-key rotation
+
+`KmsTrustKeyRotationController` polls a deployment-supplied KMS-backed proposal source and atomically activates exactly the next key generation after verifying authorization with the currently active Ed25519 key. Verification remains lock-protected during rotation; the previous generation is revoked immediately after activation, and malformed, stale, unauthorized, or unavailable proposals leave the active generation unchanged. The controller can run in the daemon lifecycle without restart and records the last rotation error for supervisory monitoring.
+
+## Performance evidence
+
+The controlled 10,000-record host benchmark at 256-byte payloads measured a median baseline chain-validation rate of approximately 812,637 records/second and a median Ed25519-verified rate of approximately 7,569 records/second, an observed incremental cost of approximately 130,888 ns per record in this Python implementation. This is a host microbenchmark, not a claim about network, KMS, TPM, secure-enclave, or production-cluster performance.
+
 ## Explicit non-claims
 
 The bounded runtime implementation is not a claim of complete production distributed deployment. Live AWS/Vault credentials, physical TPM or secure-enclave evidence, production certificate rotation, large-scale fault injection, and hardware/provider qualification remain pending. The runtime deliberately requires external trusted verifiers and does not treat model output as authority.

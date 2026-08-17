@@ -1,0 +1,36 @@
+{
+  "benchmark": "faisal-replication-ed25519-overhead",
+  "records": 10000,
+  "payload_bytes": 256,
+  "repeats": 5,
+  "accepted": {
+    "baseline": 10000,
+    "signed": 10000
+  },
+  "baseline_median_ns": 12305618,
+  "signed_median_ns": 1321185002,
+  "baseline_records_per_second": 812636.9598016125,
+  "signed_records_per_second": 7568.962700047363,
+  "verification_overhead_ns_per_record": 130887.9384,
+  "verification_overhead_percent": 10636.437633607675,
+  "baseline_samples_ns": [
+    12835598,
+    13612521,
+    12305618,
+    12207465,
+    11723791
+  ],
+  "signed_samples_ns": [
+    1321185002,
+    1369676788,
+    1297045331,
+    1299195839,
+    1337806048
+  ],
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.18.38+-x86_64-with-glibc2.39",
+    "cpu_count": 6
+  },
+  "interpretation": "Controlled host microbenchmark; not a claim of network, disk, KMS, TPM, secure-enclave, or production-cluster performance."
+}
