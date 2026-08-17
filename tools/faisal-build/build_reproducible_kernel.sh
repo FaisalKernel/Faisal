@@ -6,6 +6,8 @@ ROOT=${FAISAL_ROOT:-/home/ubuntu/agi-kernel}
 LINUX=${FAISAL_LINUX:-$ROOT/linux}
 BASE_BUILD=${FAISAL_BASE_BUILD:-$ROOT/build/recovered}
 OUT=${FAISAL_REPRO_BUILD:-$ROOT/build/industry-repro}
+BUILDER_ID=${FAISAL_BUILDER_ID:-local-builder}
+BUILDER_HOST=${FAISAL_BUILDER_HOST:-local-build-host}
 
 [ -r "$BASE_BUILD/.config" ] || { echo "missing base config: $BASE_BUILD/.config" >&2; exit 2; }
 commit_epoch=$(git -C "$LINUX" show -s --format=%ct HEAD)
@@ -32,5 +34,7 @@ KBUILD_BUILD_USER=$KBUILD_BUILD_USER
 KBUILD_BUILD_HOST=$KBUILD_BUILD_HOST
 source_revision=$(git -C "$LINUX" rev-parse HEAD)
 config_sha256=$(sha256sum "$OUT/.config" | awk '{print $1}')
+builder_id=$BUILDER_ID
+builder_host=$BUILDER_HOST
 EOF
 printf 'FAISAL_REPRODUCIBLE_KERNEL_BUILD_OK\noutput=%s\nsource_epoch=%s\n' "$OUT" "$SOURCE_DATE_EPOCH"

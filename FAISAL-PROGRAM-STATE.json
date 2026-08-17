@@ -1436,6 +1436,8 @@
     "security_release_evidence_gate": "pass_signed_fresh_source_bound_scanner_sanitizer_advisory_schema",
     "production_kernel_line_gate": "pass_fail_closed_current_7.2.0_rc7_development_line_blocked",
     "advisory_ledger_gate": "pass_signed_source_bound_fresh_resolved_records",
+    "independent_builder_comparison": "pass_two_complete_outputs_distinct_builder_ids_equal_artifacts_same_host_environment",
+    "attested_release_gate_v3": "pass_signed_artifacts_security_advisory_reproducibility_rollback",
     "m108_durable_execution_qemu": "pass",
     "m108_aggregate_qemu_harnesses": 29,
     "m108_execution_features": "intent_dag_dispatch_retry_backoff_checkpoint_restart_recovery_replay_cancellation_and_authority_denial",

@@ -24,7 +24,14 @@ epoch_a=$(read_env SOURCE_DATE_EPOCH "$A/reproducible-build.env")
 epoch_b=$(read_env SOURCE_DATE_EPOCH "$B/reproducible-build.env")
 config_a=$(read_env config_sha256 "$A/reproducible-build.env")
 config_b=$(read_env config_sha256 "$B/reproducible-build.env")
+builder_a=$(read_env builder_id "$A/reproducible-build.env")
+builder_b=$(read_env builder_id "$B/reproducible-build.env")
+host_a=$(read_env builder_host "$A/reproducible-build.env")
+host_b=$(read_env builder_host "$B/reproducible-build.env")
 [ -n "$source_a" ] && [ "$source_a" = "$source_b" ] || fail "source revision mismatch"
+[ -n "$builder_a" ] && [ -n "$builder_b" ] || fail "builder identity missing"
+[ "$builder_a" != "$builder_b" ] || fail "builder identities are not independent"
+[ "$host_a" != "$host_b" ] || fail "builder hosts are not independent"
 [ -n "$epoch_a" ] && [ "$epoch_a" = "$epoch_b" ] || fail "SOURCE_DATE_EPOCH mismatch"
 [ -n "$config_a" ] && [ "$config_a" = "$config_b" ] || fail "configuration digest mismatch"
 
@@ -34,6 +41,8 @@ mkdir -p "$(dirname "$REPORT")"
   printf 'source_revision\tpass\t%s\t%s\n' "$source_a" "$source_b"
   printf 'SOURCE_DATE_EPOCH\tpass\t%s\t%s\n' "$epoch_a" "$epoch_b"
   printf 'config_sha256\tpass\t%s\t%s\n' "$config_a" "$config_b"
+  printf 'builder_id\tpass\t%s\t%s\n' "$builder_a" "$builder_b"
+  printf 'builder_host\tpass\t%s\t%s\n' "$host_a" "$host_b"
 } > "$REPORT"
 
 for relative in arch/x86/boot/bzImage vmlinux modules.builtin .config; do
