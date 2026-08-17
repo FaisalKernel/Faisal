@@ -1,0 +1,36 @@
+{
+  "milestone": "M114-followup",
+  "date_accessed": "2026-08-17",
+  "validated": {
+    "scanner_adapters": {
+      "build": "strict cc -O2 -Wall -Wextra -Werror; trusted command executed in bounded child; exit status and SHA-256 evidence captured",
+      "dependency": "recursive bounded manifest analysis for supported build/package manifests; content digest and file/byte counts captured",
+      "vulnerability": "external grype/osv-scanner/trivy adapter selection; unavailable tool returns FAS_UNAVAILABLE and cannot pass the evidence gate",
+      "host_selftest": "/home/ubuntu/agi-kernel/build/m114-followup/scanner-gate-test.log",
+      "qemu_selftest": "/home/ubuntu/agi-kernel/build/m114-followup/scanner-qemu-gate.log",
+      "aggregate": "/home/ubuntu/agi-kernel/build/m114-followup/full-audit-scanner-only.log",
+      "aggregate_count": 35,
+      "aggregate_failures": 0,
+      "markers": [
+        "M114_REAL_BUILD_ADAPTER_OK",
+        "M114_REAL_DEPENDENCY_ADAPTER_OK",
+        "M114_VULNERABILITY_ADAPTER_FAIL_CLOSED_OK",
+        "M114_EVIDENCE_GATE_BLOCKS_UNAVAILABLE_SCANNER_OK",
+        "M114_SCANNER_ADAPTER_QEMU_VALIDATION_OK"
+      ]
+    }
+  },
+  "experimental_not_accepted": {
+    "trusted_launcher": {
+      "implemented": ["namespace attempt", "cgroup v2 resource setup", "Landlock", "seccomp", "fail-closed required cgroup behavior"],
+      "host_selftest": "/home/ubuntu/agi-kernel/build/m114-followup/launcher-control-test.log",
+      "qemu_status": "Landlock-only passes; required seccomp path still terminates the guest child with SIGSYS; not added to aggregate and not claimed production-ready",
+      "next_debug_dependency": "capture guest seccomp audit architecture/syscall identity and reconcile with the filter before acceptance"
+    }
+  },
+  "non_claims": [
+    "No claim of AGI, consciousness, self-awareness, retraining, or unlimited capability",
+    "No claim that vulnerability analysis passes when no supported scanner is installed",
+    "No claim that the trusted launcher is production-ready until required seccomp passes in QEMU"
+  ]
+}
