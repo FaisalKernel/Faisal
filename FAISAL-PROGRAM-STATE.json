@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "8cf2b111641e9b219f84209f08f16f973140d70c",
-  "current_tag": "FAISAL-M160-ADAPTIVE-PRESSURE-CACHE",
+  "current_head": "ede46da6d69d510beb626310047d0b7e64e16637",
+  "current_tag": "FAISAL-M161-COALESCED-SUBMISSIONS",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1413,7 +1413,8 @@
     "FAISAL-M157",
     "FAISAL-M158",
     "FAISAL-M159",
-    "FAISAL-M160"
+    "FAISAL-M160",
+    "FAISAL-M161"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1603,6 +1604,13 @@
     "m160_durable_execution_regression": "pass_final_kernel_durable_execution_journal_trust_replication_election_and_split_brain_denial_return_0",
     "m160_evidence": "tools/faisal-build/evidence/m160-pressure-cache-validation.json",
     "m160_productivity_scope": "controlled_unit_scenario_reduced_pressure_queries_16_to_14_with_two_cache_hits_no_isolated_raw_throughput_claim",
-    "m160_release_scope": "bounded_qemu_and_unit_validation_only_physical_accelerator_and_operator_signed_release_pending"
+    "m160_release_scope": "bounded_qemu_and_unit_validation_only_physical_accelerator_and_operator_signed_release_pending",
+    "m161_coalesced_submission": "pass_bounded_submit_many_eight_entry_scenario_reduced_batch_ioctls_two_to_one_preserved_entry_validation_and_pending_safety",
+    "m161_coalesced_unit": "pass_regular_two_ioctls_coalesced_one_ioctl_accepted_eight_pending_zero",
+    "m161_tenant_qemu": "pass_m156_kernel_with_m161_coalesced_marker_and_m115_m154_m155_m156_m160_regressions_return_0",
+    "m161_durable_execution_regression": "pass_final_kernel_durable_execution_journal_trust_replication_election_and_split_brain_denial_return_0",
+    "m161_evidence": "tools/faisal-build/evidence/m161-coalesced-submission-validation.json",
+    "m161_productivity_scope": "controlled_eight_entry_scenario_reduced_batch_submission_ioctls_50_percent_no_isolated_raw_throughput_claim",
+    "m161_release_scope": "bounded_qemu_and_unit_validation_only_physical_accelerator_and_operator_signed_release_pending"
   }
 }

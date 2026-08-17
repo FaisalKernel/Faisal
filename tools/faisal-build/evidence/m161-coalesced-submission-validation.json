@@ -1,0 +1,103 @@
+{
+  "schema": "org.faisal.evidence.m161-coalesced-submission-validation.v1",
+  "milestone": "M161",
+  "source_revision": "ede46da6d69d510beb626310047d0b7e64e16637",
+  "source_parent": "ddf057f9e6accb261dd4571f5516f36ed0a6004b",
+  "recorded_at": "2026-08-17T18:35:00Z",
+  "status": "validated_bounded_userspace_qemu_and_deterministic_unit_test_not_production_release",
+  "implementation": {
+    "library": "tools/faisal-accelerator/faisal_accelerator_batcher.{c,h}",
+    "improvement": "Added submit_many() for bounded multi-entry workloads. It validates each entry, fills the configured maximum batch size, flushes complete chunks, optionally flushes the final partial chunk, and reports accepted entries without discarding pending work on failure.",
+    "bounds": "submit_many() accepts at most 4096 input entries per call and still limits every kernel batch to the configured maximum of 1..64 entries.",
+    "safety": "Each entry retains ABI-size and device-identity validation. Existing backpressure cache, retry backoff, resynchronization, partial completion, telemetry-loss, and kernel admission paths remain in force.",
+    "security": "The API does not grant authority or bypass kernel checks; it only coalesces already-authorized accelerator-accounting requests."
+  },
+  "unit_validation": {
+    "source": "tools/testing/selftests/faisal_accelerator_batcher_test.c",
+    "compile": "pass_static_wall_wextra_werror",
+    "result": "pass",
+    "marker": "M161_COALESCED_SUBMIT_OK regular_ioctls=2 coalesced_ioctls=1 accepted=8",
+    "coverage": [
+      "eight-entry regular adaptive submission",
+      "eight-entry coalesced submission",
+      "two-to-one batch ioctl reduction in the controlled scenario",
+      "accepted-entry count validation",
+      "zero pending entries after successful coalesced flush",
+      "M160 pressure cache and M159 retry backoff retained"
+    ],
+    "measured_control_path": {
+      "workload_entries": 8,
+      "regular_ioctls": 2,
+      "coalesced_ioctls": 1,
+      "ioctl_reduction": 1,
+      "accepted_entries": 8,
+      "relative_ioctl_count": 0.5
+    }
+  },
+  "runtime_validation": {
+    "tenant_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m161-tenant-qemu.log",
+    "tenant_qemu_return_code": 0,
+    "tenant_result": "pass",
+    "required_markers": [
+      "M154_TENANT_ACCELERATOR_TELEMETRY_LOSS_OK",
+      "M156_TENANT_EVENT_BACKPRESSURE_QUERY_OK queued=64 dropped=1 state=3",
+      "M160_ADAPTIVE_PRESSURE_CACHE_OK flushes=5 queries=14 cache_hits=2 losses=4 resync=2 failures=1 fast=1 target=1",
+      "M161_COALESCED_SUBMIT_OK regular_ioctls=2 coalesced_ioctls=1 accepted=8",
+      "M161_BATCHER_SELFTEST_RC=0",
+      "M155_TENANT_ACCELERATOR_BATCH_ACCOUNTING_OK completed=4",
+      "M155_TENANT_ACCELERATOR_BATCH_MALFORMED_REJECT_OK",
+      "M155_TENANT_ACCELERATOR_BATCH_BENCH_OK single_ns=5182637 batch_ns=4341409 speedup_x100=119",
+      "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+    ],
+    "tenant_kernel_diagnostic_scan": "clean",
+    "durable_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m161-durable-qemu.log",
+    "durable_qemu_return_code": 0,
+    "durable_result": "pass",
+    "durable_markers": [
+      "M108_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+      "M108_EXECUTION_REPLAY_OK",
+      "M108_ENGINE_REPLAY_FAIL_CLOSED_OK",
+      "FJT_SPLIT_BRAIN_PARTITION_ATTACK_DENIED_OK",
+      "FJR_CONSENSUS_TIMEOUT_POLICY_OK",
+      "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+    ],
+    "durable_kernel_diagnostic_scan": "clean"
+  },
+  "productivity_interpretation": {
+    "benefit": "For an eight-entry workload, the coalesced API reduced batch ioctls from two to one in the controlled unit scenario, cutting the measured kernel submission count by 50 percent for that path.",
+    "scope": "This measures submission-count reduction, not total end-to-end latency or universal workload speedup. The actual result depends on entry preparation, pressure state, kernel processing, and hardware behavior.",
+    "raw_throughput_scope": "The integrated gate retained the inherited M155 synthetic QEMU accounting benchmark at speedup_x100=119 in this run; M161 does not claim an isolated raw-throughput gain."
+  },
+  "build_artifact": {
+    "kernel_source": "M156 kernel image reused; M161 is userspace runtime/test integration.",
+    "kernel_build_directory": "/home/ubuntu/agi-kernel/build/m156-backpressure",
+    "bzimage_sha256": "4098292a9ca43f521cb67617e970165aff17047db591a7827aea0c690cf7b88d",
+    "vmlinux_sha256": "60229862db8230c29d68b4c11587a511a3dcfcabc590a685462ad4382c403fb1",
+    "config_sha256": "003e03a277c47585b6c36c00810bf36e61dc91b487f1162e0ad51f514bdfa08b",
+    "config_required_check": "CONFIG_CFS_BANDWIDTH=y"
+  },
+  "source_quality": {
+    "git_diff_check": "pass",
+    "tenant_selftest_compile": "pass_static_wall_wextra_werror",
+    "adaptive_batcher_compile": "pass_static_wall_wextra_werror",
+    "shell_syntax_check": "pass",
+    "protected_files_staged": false,
+    "protected_files": [
+      "M63-COMPUTE-CONTEXT-DESIGN.md",
+      "M63-SECURITY-REVIEW.md"
+    ]
+  },
+  "release_gate": {
+    "status": "blocked",
+    "reason": "M161 is bounded userspace/QEMU validation. Physical accelerator qualification, independent reproducible production builders, signed artifacts, stable/LTS forward-port qualification, and external security governance remain required.",
+    "model_output_is_authority": false,
+    "hardware_claim": "No physical GPU, NPU, VRAM, IOMMU, DMA, vendor-driver, reset, or fleet qualification is claimed."
+  },
+  "known_limitations": [
+    "Coalescing is an API-level optimization and does not reduce per-entry kernel validation or accounting work inside the batch ioctl.",
+    "The two-to-one ioctl result is a controlled eight-entry unit scenario, not a fleet-wide benchmark.",
+    "The unit test uses an injected ioctl model; QEMU validates integration and packaging, not physical accelerator behavior.",
+    "No isolated M161 raw-throughput improvement is claimed; the M155 benchmark remains supporting context only.",
+    "The kernel remains based on the Linux v7.2-rc7 development line and production release qualification remains incomplete."
+  ]
+}
