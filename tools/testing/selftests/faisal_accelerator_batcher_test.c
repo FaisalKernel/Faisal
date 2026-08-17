@@ -9,6 +9,7 @@ struct fake_kernel {
 	struct agi_lc_event_backpressure pressure;
 	uint32_t batch_calls;
 	uint32_t last_entry_count;
+	uint64_t last_entries_ptr;
 	uint32_t complete_count;
 	int batch_result;
 	int resync_result;
@@ -45,6 +46,7 @@ static int fake_ioctl(int fd, unsigned long request, void *arg)
 	batch = arg;
 	fake.batch_calls++;
 	fake.last_entry_count = batch->entry_count;
+	fake.last_entries_ptr = batch->entries_ptr;
 	batch->completed = fake.complete_count ? fake.complete_count : batch->entry_count;
 	batch->status = AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED;
 	return fake.batch_result;
@@ -175,6 +177,9 @@ int main(void)
 	assert(accepted == 8 && coalesced_ioctls == 1 &&
 	       !faisal_accel_batcher_pending(&coalesced));
 	assert(coalesced_ioctls < regular_ioctls);
+	assert(fake.last_entries_ptr == (uint64_t)(uintptr_t)many);
+	printf("M162_ZERO_COPY_COALESCED_OK direct_submissions=%llu direct_pointer=1 accepted=%u\n",
+	       (unsigned long long)coalesced.direct_submissions, accepted);
 	printf("M161_COALESCED_SUBMIT_OK regular_ioctls=%u coalesced_ioctls=%u accepted=%u\n",
 	       regular_ioctls, coalesced_ioctls, accepted);
 	printf("M160_ADAPTIVE_PRESSURE_CACHE_OK flushes=%llu queries=%llu cache_hits=%llu losses=%llu resync=%llu failures=%llu fast=%llu target=%u\n",

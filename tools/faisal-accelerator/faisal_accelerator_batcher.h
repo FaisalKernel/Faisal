@@ -41,6 +41,7 @@ struct faisal_accel_batcher {
 	uint64_t retry_max_ns;
 	uint64_t fast_rejects;
 	uint64_t pressure_cache_hits;
+	uint64_t direct_submissions;
 	uint64_t pressure_cache_ns;
 	uint64_t pressure_cache_timestamp_ns;
 	struct agi_lc_event_backpressure cached_pressure;

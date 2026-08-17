@@ -230,17 +230,19 @@ int faisal_accel_batcher_query(struct faisal_accel_batcher *batcher,
 	return 0;
 }
 
-int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
+static int flush_entries(struct faisal_accel_batcher *batcher,
+			  const struct agi_lc_accel_device_account *entries,
+			  uint32_t count, int direct, uint32_t *completed_out)
 {
 	struct agi_lc_event_backpressure state;
 	struct agi_lc_accel_device_account_batch batch;
 	uint32_t completed;
 	int ret;
 
-	if (!batcher)
+	if (completed_out)
+		*completed_out = 0;
+	if (!batcher || !entries || !count)
 		return -1;
-	if (!batcher->pending)
-		return 0;
 	{
 		uint64_t now = monotonic_ns();
 		if (now && batcher->retry_until_ns > now) {
@@ -260,7 +262,7 @@ int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
 	if ((state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS &&
 	     !batcher->loss_acknowledged) ||
 	    state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_FULL ||
-	    state.queued + batcher->pending > state.capacity) {
+	    state.queued + count > state.capacity) {
 		errno = EAGAIN;
 		invalidate_pressure_cache(batcher);
 		arm_retry_backoff(batcher);
@@ -269,20 +271,31 @@ int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
 
 	memset(&batch, 0, sizeof(batch));
 	batch.size = sizeof(batch);
-	batch.entries_ptr = (uint64_t)(uintptr_t)batcher->entries;
-	batch.entry_count = batcher->pending;
+	batch.entries_ptr = (uint64_t)(uintptr_t)(direct ? entries : batcher->entries);
+	batch.entry_count = count;
 	ret = batcher->ioctl_fn(batcher->fd,
 				AGI_LC_ACCEL_DEVICE_ACCOUNT_BATCH, &batch);
 	batcher->flushes++;
+	if (direct)
+		batcher->direct_submissions++;
 	completed = batch.completed;
-	if (completed > batcher->pending)
-		completed = batcher->pending;
+	if (completed > count)
+		completed = count;
+	if (completed_out)
+		*completed_out = completed;
 	if (completed) {
 		batcher->submitted_entries += completed;
-		batcher->pending -= completed;
-		if (batcher->pending)
-			memmove(batcher->entries, batcher->entries + completed,
-				batcher->pending * sizeof(batcher->entries[0]));
+		if (direct) {
+			batcher->pending = count - completed;
+			if (batcher->pending)
+				memcpy(batcher->entries, entries + completed,
+				       batcher->pending * sizeof(batcher->entries[0]));
+		} else {
+			batcher->pending -= completed;
+			if (batcher->pending)
+				memmove(batcher->entries, batcher->entries + completed,
+					batcher->pending * sizeof(batcher->entries[0]));
+		}
 	}
 	if (ret < 0) {
 		if (ret == -EAGAIN || errno == EAGAIN) {
@@ -298,6 +311,14 @@ int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
 	invalidate_pressure_cache(batcher);
 	reset_retry_backoff(batcher);
 	return 0;
+}
+
+int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
+{
+	if (!batcher || !batcher->pending)
+		return 0;
+	return flush_entries(batcher, batcher->entries, batcher->pending,
+				     0, NULL);
 }
 
 int faisal_accel_batcher_acknowledge_loss(struct faisal_accel_batcher *batcher)
@@ -333,6 +354,7 @@ int faisal_accel_batcher_submit_many(struct faisal_accel_batcher *batcher,
 				     uint32_t *accepted_count)
 {
 	uint32_t i;
+	uint32_t position = 0;
 
 	if (accepted_count)
 		*accepted_count = 0;
@@ -340,19 +362,40 @@ int faisal_accel_batcher_submit_many(struct faisal_accel_batcher *batcher,
 	    count > FAISAL_ACCEL_BATCHER_MAX_MANY_ENTRIES)
 		return -1;
 	for (i = 0; i < count; i++) {
-		const struct agi_lc_accel_device_account *entry = &entries[i];
+		if (entries[i].size != sizeof(entries[i]) ||
+		    entries[i].device_id != batcher->device_id)
+			return -1;
+	}
+	while (position < count) {
+		uint32_t room;
+		uint32_t chunk;
+		uint32_t completed = 0;
+		int ret;
 
-		if (entry->size != sizeof(*entry) ||
-		    entry->device_id != batcher->device_id)
-			return -1;
-		if (batcher->pending >= batcher->max_batch &&
+		if (batcher->pending == batcher->max_batch &&
 		    faisal_accel_batcher_flush(batcher) < 0)
 			return -1;
-		batcher->entries[batcher->pending++] = *entry;
+		room = batcher->max_batch - batcher->pending;
+		chunk = count - position < room ? count - position : room;
+		if (!batcher->pending && chunk == batcher->max_batch) {
+			ret = flush_entries(batcher, entries + position, chunk, 1,
+					    &completed);
+			if (accepted_count)
+				*accepted_count += chunk;
+			position += chunk;
+			if (ret < 0)
+				return -1;
+			continue;
+		}
+		memcpy(batcher->entries + batcher->pending,
+		       entries + position,
+		       chunk * sizeof(batcher->entries[0]));
+		batcher->pending += chunk;
+		position += chunk;
 		if (accepted_count)
-			(*accepted_count)++;
-		if (batcher->pending == batcher->max_batch && i + 1 < count &&
-		    faisal_accel_batcher_flush(batcher) < 0)
+			*accepted_count += chunk;
+		if (batcher->pending == batcher->max_batch &&
+		    position < count && faisal_accel_batcher_flush(batcher) < 0)
 			return -1;
 	}
 	if (flush_after && batcher->pending &&
