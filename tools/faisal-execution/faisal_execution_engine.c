@@ -560,7 +560,8 @@ int fex_make_handoff_token(const struct fex_service *service, uint64_t task_id,
 	       sizeof(now_ns));
 	memcpy(material + FEX_DIGEST_SIZE + 3 * sizeof(task_id),
 	       &worker->lease_generation, sizeof(worker->lease_generation));
-	digest_bytes(material, sizeof(material), token);
+	memcpy(token, &now_ns, sizeof(now_ns));
+	digest_bytes(material, sizeof(material), token + sizeof(now_ns));
 	pthread_mutex_unlock(&mutable_service->lock);
 	return FEX_OK;
 }
@@ -573,11 +574,16 @@ int fex_handoff_token_verified(struct fex_service *service, uint64_t task_id,
 	uint8_t expected[FEX_HANDOFF_TOKEN_SIZE];
 	struct fex_node node;
 	struct fex_objective objective;
+	uint64_t issued_at_ns;
 	int rc;
 
-	if (!token)
+	if (!token || !service || !now_ns)
 		return FEX_ERR_ARGUMENT;
-	rc = fex_make_handoff_token(service, task_id, new_worker_id, now_ns,
+	memcpy(&issued_at_ns, token, sizeof(issued_at_ns));
+	if (now_ns < issued_at_ns ||
+	    now_ns - issued_at_ns > FEX_HANDOFF_TOKEN_MAX_AGE_NS)
+		return FEX_ERR_AUTHORITY;
+	rc = fex_make_handoff_token(service, task_id, new_worker_id, issued_at_ns,
 				    expected);
 	if (rc != FEX_OK)
 		return rc;

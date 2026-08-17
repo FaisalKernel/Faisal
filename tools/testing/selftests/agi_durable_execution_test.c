@@ -138,6 +138,10 @@ int main(int argc, char **argv)
 				100, tampered_token), FEX_ERR_AUTHORITY,
 				"TAMPERED_HANDOFF_TOKEN");
 		printf("M121_TAMPERED_HANDOFF_TOKEN_DENIED_OK\n");
+		CHECK_EQ(fex_handoff_token_verified(&service, node_c.task_id, 9001, 12 +
+				FEX_HANDOFF_TOKEN_MAX_AGE_NS + 1, 100, handoff_token),
+				FEX_ERR_AUTHORITY, "STALE_HANDOFF_TOKEN");
+		printf("M122_STALE_HANDOFF_TOKEN_DENIED_OK\n");
 		CHECK_OK(fex_handoff_token_verified(&service, node_c.task_id, 9001, 12,
 				100, handoff_token), "WORKER_HANDOFF");
 

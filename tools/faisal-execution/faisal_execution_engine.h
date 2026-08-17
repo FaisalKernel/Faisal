@@ -15,7 +15,8 @@
 #define FEX_ENGINE_VERSION 1U
 #define FEX_DIGEST_SIZE FTS_DIGEST_SIZE
 #define FEX_MAX_WORKER_RESTARTS 3U
-#define FEX_HANDOFF_TOKEN_SIZE FEX_DIGEST_SIZE
+#define FEX_HANDOFF_TOKEN_MAX_AGE_NS 1000000000ULL
+#define FEX_HANDOFF_TOKEN_SIZE (sizeof(uint64_t) + FEX_DIGEST_SIZE)
 
 /* Persisted objective state is a replay contract, not a model claim. */
 enum fex_objective_state {

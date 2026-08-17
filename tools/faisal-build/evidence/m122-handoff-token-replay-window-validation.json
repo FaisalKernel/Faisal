@@ -1,0 +1,25 @@
+{
+  "milestone": "M122",
+  "feature": "bounded replay window for authenticated handoff tokens",
+  "status": "validated_qemu",
+  "policy": {
+    "max_token_age_ns": 1000000000,
+    "future_issued_tokens": "denied",
+    "stale_tokens": "denied with FEX_ERR_AUTHORITY",
+    "valid_tokens": "accepted only with checkpoint and lease-generation validation"
+  },
+  "evidence": {
+    "stale_token_denial": "M122_STALE_HANDOFF_TOKEN_DENIED_OK",
+    "tamper_denial": "M121_TAMPERED_HANDOFF_TOKEN_DENIED_OK",
+    "checkpoint_bound_handoff": "M120_CHECKPOINT_BOUND_HANDOFF_OK",
+    "worker_handoff": "M117_WORKER_HANDOFF_OK",
+    "replay": "M117_WORKER_HANDOFF_REPLAY_OK",
+    "qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+    "kernel_diagnostics": "none observed"
+  },
+  "limitations": [
+    "The one-second window is a conservative local policy fixture and requires operational tuning for distributed production latency.",
+    "Clock synchronization, remote key provisioning, and network partition behavior remain separate distributed-release requirements.",
+    "The replay window does not grant authority to model output."
+  ]
+}
