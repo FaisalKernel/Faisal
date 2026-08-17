@@ -1,0 +1,213 @@
+{
+  "project": "FAISAL",
+  "milestone": "M167-lts-6.18.44-forward-port",
+  "recorded_at": "2026-08-17T18:44:19Z",
+  "code_commit": "d715ba813de66e39bccd2c36b2a4a2ad6636a194",
+  "parent_commit": "11de0531c7a71f89c11d78bdc3c5c7700dee01b5",
+  "lts_worktree": {
+    "path": "/home/ubuntu/agi-kernel/upstream/6.18.44/linux-6.18.44",
+    "head": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+    "head_subject": "FAISAL LTS: fix cgroup_e_css() API migration for 6.18.44",
+    "series": "/home/ubuntu/agi-kernel/upstream/faisal-patches-7.2rc7-to-m166",
+    "patch_count": 183,
+    "all_faisal_patches_applied": true,
+    "working_tree_clean_after_fix_commit": true
+  },
+  "source_authenticity": {
+    "kernel_version": "Linux 6.18.44",
+    "source_archive": "/home/ubuntu/agi-kernel/upstream/6.18.44/linux-6.18.44.tar.xz",
+    "detached_signature": "/home/ubuntu/agi-kernel/upstream/6.18.44/linux-6.18.44.tar.sign",
+    "checksum_record": "/home/ubuntu/agi-kernel/upstream/6.18.44/linux-6.18.44.tar.xz.sha256.local",
+    "verification_record": "/home/ubuntu/agi-kernel/upstream/6.18.44/lts-signature-verification.txt",
+    "pgp_result": "good_signature",
+    "signer": "Greg Kroah-Hartman <gregkh@kernel.org>",
+    "signer_key_fingerprint": "647F28654894E3BD457199BE38DBBDC86092693E",
+    "trust_boundary": "GPG reported the signature as good but the local key was not certified by a trusted signature; this is source-authenticity evidence, not a claim of an independently governed production trust root.",
+    "source_tar_xz_sha256": "0f72d938f06828e82c90405174fe572287db7bfe089e2fc46572a99a7f240d43"
+  },
+  "forward_port": {
+    "base": "Linux v7.2-rc7 FAISAL M166 ancestor",
+    "target": "Linux 6.18.44 LTS",
+    "target_projected_eol": "2028-12",
+    "target_maintainers": [
+      "Greg Kroah-Hartman",
+      "Sasha Levin"
+    ],
+    "resolved_conflicts": [
+      {
+        "area": "M88 RV bridge",
+        "resolution": "Adapted the observation bridge to maintained 6.18.44 rv_cond_react() and cond_react_##name() callbacks through agi_lc_rv_observe_da(); the removed rv_react() API was not reintroduced."
+      },
+      {
+        "area": "M152 cgroup API",
+        "resolution": "Inserted the FAISAL scheduler-group bandwidth bridge and migrated the lifecycle lookup from internal cgroup_css() to exported cgroup_e_css()."
+      },
+      {
+        "area": "M152 scheduler API",
+        "resolution": "Retained CONFIG_CFS_BANDWIDTH=y and inserted faisal_sched_group_set_cpu_bandwidth() and faisal_sched_group_get_cpu_bandwidth() against the maintained scheduler helpers."
+      },
+      {
+        "area": "M152 accelerator accounting",
+        "resolution": "Restored accounted_memory_bytes, accelerator status constants, release-denied status, tenant selftest, and QEMU gate coverage after conflict resolution."
+      },
+      {
+        "area": "M153 accelerator release reconciliation",
+        "resolution": "Applied the release reconciliation changes and retained bounded underflow denial and task-counter reconciliation coverage."
+      }
+    ]
+  },
+  "kernel_artifact": {
+    "build_directory": "/home/ubuntu/agi-kernel/build/faisal-lts-6.18.44",
+    "config_sha256": "2c282274f1f716e2b1135b0a1fb819f99525dbe099ea0d31f1b3a2676f980e06",
+    "required_config": {
+      "CONFIG_CFS_BANDWIDTH": "y"
+    },
+    "build_result": "pass",
+    "bzImage": "/home/ubuntu/agi-kernel/build/faisal-lts-6.18.44/arch/x86/boot/bzImage",
+    "bzImage_sha256": "8766f1019d80598c7982d91d89d7df27385a91ca7ea17d114d8869267204870b",
+    "build_scope": "software build in the sandbox; no physical-device or independent-builder claim"
+  },
+  "regressions": {
+    "tenant_accounting_qemu": {
+      "result": "pass",
+      "return_code": 0,
+      "log": "/home/ubuntu/agi-kernel/upstream/faisal-lts-tenant-qemu.log",
+      "log_sha256": "be41f2620930f87bc6f58b5d51ac6c021bcdd33ee5b07575b5f5b2731ade7d26",
+      "markers": [
+        "M154_TENANT_ACCELERATOR_TELEMETRY_LOSS_OK",
+        "M156_TENANT_EVENT_BACKPRESSURE_QUERY_OK",
+        "M155_TENANT_ACCELERATOR_BATCH_ACCOUNTING_OK",
+        "M163_DIRECT_PARTIAL_OK",
+        "M164_SUBMIT_MANY_PRESSURE_CACHE_OK",
+        "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+      ]
+    },
+    "durable_execution_qemu": {
+      "result": "pass",
+      "return_code": 0,
+      "log": "/home/ubuntu/agi-kernel/upstream/faisal-lts-durable-qemu.log",
+      "log_sha256": "edfc7a572b597304b59293c724f6b382848da4aec95a3ffcaafbe3e6142e0d5c",
+      "markers": [
+        "M128_JOURNAL_ATTESTATION_RESTART_OK",
+        "M126_JOURNAL_CHAIN_REPLAY_OK",
+        "M108_EXECUTION_REPLAY_OK",
+        "FJT_SPLIT_BRAIN_DENIED_OK",
+        "FJT_PARTITION_HEAL_QUORUM_RESTORED_OK",
+        "FJR_PERSISTENT_TERM_VOTEDFOR_RESTORE_OK",
+        "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+      ]
+    },
+    "bounded_industry_soak_qemu_tcg": {
+      "result": "pass_bounded_profile",
+      "return_code": 0,
+      "profile": {
+        "qemu_acceleration": "tcg",
+        "qemu_smp": 1,
+        "qemu_timeout_seconds": 300,
+        "rounds": 2,
+        "iterations_per_round": 64,
+        "total_ioctl_calls": 256
+      },
+      "summary": "/home/ubuntu/agi-kernel/build/faisal-lts-industry-soak-bounded/summary.tsv",
+      "summary_sha256": "a41f2e506443673e20f4c00ab2916983419735fcbe484630480f2917bb6f33d7",
+      "runner_log": "/home/ubuntu/agi-kernel/upstream/faisal-lts-industry-soak-bounded.log",
+      "runner_log_sha256": "cea0559ab9fb4d85a59e89e646d80f50de8d1205466077b07f871e2974cd5e0e",
+      "rounds": [
+        {
+          "round": 1,
+          "iterations": 64,
+          "elapsed_seconds": 6,
+          "result": "passed",
+          "qemu_log": "/home/ubuntu/agi-kernel/build/faisal-lts-industry-soak-bounded/qemu-1.log",
+          "qemu_log_sha256": "0ca3fc4aba1370eb8034725b92772f013adf40bd1cc232607fa3c3f8e0f92920"
+        },
+        {
+          "round": 2,
+          "iterations": 64,
+          "elapsed_seconds": 5,
+          "result": "passed",
+          "qemu_log": "/home/ubuntu/agi-kernel/build/faisal-lts-industry-soak-bounded/qemu-2.log",
+          "qemu_log_sha256": "adb0ed826c2ecd0539aef0b2e952fa563bdb3846ff3b4e216fd7a0a45d02fe9e"
+        }
+      ]
+    },
+    "full_two_vcpu_tcg_uapi_fuzz": {
+      "result": "failed_rcu_stall_limitation",
+      "return_code": 124,
+      "profile": {
+        "qemu_acceleration": "tcg",
+        "qemu_smp": 2,
+        "iterations": 512,
+        "total_ioctl_calls": 1024,
+        "timeout_seconds": 180
+      },
+      "log": "/home/ubuntu/agi-kernel/upstream/faisal-lts-fuzz-diagnostic.log",
+      "log_sha256": "de088ae993016a5278c3053b8c76a7a615235b4048fc0ff79bc11e85d64efc0f",
+      "observed_markers": [
+        "FAISAL_UAPI_FUZZ_BOOT_OK",
+        "FAISAL_UAPI_FUZZ_OK calls=1024 accepted=0 rejected=1024 unexpected_errno=0 iterations=512",
+        "FAISAL_UAPI_FUZZ_RC=0"
+      ],
+      "diagnostic": "The guest reached and completed the fuzz workload but QEMU/TCG virtual time advanced extremely slowly and emitted repeated rcu_preempt stall diagnostics before shutdown. The harness correctly rejected this run; the diagnostic was not suppressed and no pass claim is made."
+    },
+    "one_vcpu_tcg_fuzz_comparison": {
+      "result": "pass",
+      "return_code": 0,
+      "profile": {
+        "qemu_acceleration": "tcg",
+        "qemu_smp": 1,
+        "iterations": 16,
+        "total_ioctl_calls": 32,
+        "timeout_seconds": 300
+      },
+      "log": "/home/ubuntu/agi-kernel/build/faisal-lts-fuzz-smp1/qemu.log",
+      "log_sha256": "6556cb86b81947b62fb2a05adad151e9ef5316ecfe413c66e1b7ad219846d7d2",
+      "runner_log": "/home/ubuntu/agi-kernel/upstream/faisal-lts-fuzz-smp1.log",
+      "runner_log_sha256": "24637dd5cee594fdbf4d94aed3509ee4eca23eec94084e1cbb9014d20ab8a981",
+      "markers": [
+        "FAISAL_UAPI_FUZZ_BOOT_OK",
+        "FAISAL_UAPI_FUZZ_OK calls=32 accepted=0 rejected=32 unexpected_errno=0 iterations=16",
+        "FAISAL_UAPI_FUZZ_RC=0",
+        "FAISAL_UAPI_FUZZ_QEMU_RC=0",
+        "FAISAL_UAPI_FUZZ_QEMU_VALIDATION_OK"
+      ]
+    }
+  },
+  "security_properties": {
+    "model_output_is_not_authority": true,
+    "malformed_uapi_is_rejected": true,
+    "unexpected_errno_count": 0,
+    "release_claims_require_operator_authority": true,
+    "no_production_private_key_in_evidence": true,
+    "no_hardware_root_claim": true,
+    "no_physical_accelerator_claim": true,
+    "no_independent_builder_claim": true,
+    "rcu_diagnostic_was_not_suppressed": true
+  },
+  "evidence_integrity": {
+    "measurement_method": "SHA-256 over source, configuration, kernel artifact, and regression logs",
+    "repository_binding": "M167 evidence is intended to be committed to the original FAISAL repository at code_commit; it is not itself an operator production-release attestation.",
+    "production_signature_status": "not_claimed_pending_operator-controlled_release_key_and_trusted_distribution",
+    "claims_not_made": [
+      "No production release approval is claimed.",
+      "No physical GPU, NPU, VRAM, IOMMU, DMA, or vendor-driver qualification is claimed.",
+      "No independent builder or attested build-farm qualification is claimed.",
+      "No hardware-backed TPM, secure-enclave, HSM, or live KMS operation is claimed.",
+      "No full two-vCPU TCG industry-soak pass is claimed."
+    ]
+  },
+  "production_boundary": {
+    "lts_forward_port_status": "port_and_build_complete_bounded_requalification_pending",
+    "release_blocker_status": "partially_resolved",
+    "remaining_blockers": [
+      "operator-controlled release signing key and independently governed trusted public-key distribution",
+      "independent physical builder or attested build-farm qualification",
+      "CVE and upstream response process with owned advisory ledger",
+      "physical GPU/NPU/VRAM/IOMMU/DMA and vendor-driver qualification",
+      "replication TLS fixture generation and full TLS fixture pass",
+      "deployment governance, worker migration, and operational rollback",
+      "staged checkpatch cleanup and external security review",
+      "representative multi-vCPU LTS fuzz/soak requalification outside the observed TCG scheduling limitation"
+    ]
+  }
+}

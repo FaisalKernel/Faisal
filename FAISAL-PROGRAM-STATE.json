@@ -4,9 +4,9 @@
   "updated": "2026-08-17",
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
-  "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "aa765734c3bc0f4997a7f3387ed5b50b306a3bc4",
-  "current_tag": "FAISAL-M166-OPERATOR-RELEASE-AUTHORITY",
+  "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
+  "current_head": "d715ba813de66e39bccd2c36b2a4a2ad6636a194",
+  "current_tag": "FAISAL-M167-LTS-6.18.44-FORWARD-PORT",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1433,7 +1433,7 @@
     "tools/testing/selftests/agi_autonomy_orchestrator_test.c"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "operator-controlled-release-signing-and-stable-lts-forward-port",
+  "next_dependency": "representative-lts-requalification-and-remaining-production-release-blockers",
   "industry_readiness": {
     "status": "conditional_preproduction_release_blocked",
     "audit_document": "FAISAL-INDUSTRY-READINESS-AUDIT.md",
@@ -1552,7 +1552,7 @@
     "reproducibility_status": "pass_two_complete_outputs_byte_identical_same_sandbox_host_scope_limited",
     "release_blockers": [
       "operator_controlled_release_signing_key_and_trusted_public_key_distribution",
-      "stable_or_lts_forward_port_and_upstream_patch_requalification",
+      "stable_or_lts_forward_port_and_upstream_patch_requalification_remaining_representative_multivcpu_lts_soak",
       "independent_physical_builder_or_attested_build_farm_qualification",
       "cve_and_upstream_response_process_with_owned_advisory_ledger",
       "physical_gpu_npu_vram_iommu_dma_and_vendor_driver_qualification",
@@ -1560,6 +1560,10 @@
       "deployment_governance_worker_migration_and_operational_rollback",
       "staged_checkpatch_cleanup_and_external_security_review"
     ],
+    "release_blocker_status": {
+      "stable_or_lts_forward_port_and_upstream_patch_requalification": "partially_resolved_lts_6.18.44_forward_port_build_tenant_and_durable_qemu_pass_bounded_one_vcpu_soak_pass_representative_multivcpu_tcg_soak_pending",
+      "production_release_gate": "blocked_fail_closed_operator_key_independent_builder_physical_accelerator_cve_process_external_security_review_and_operational_governance_remaining"
+    },
     "m154_accelerator_accounting_telemetry_loss": "pass_u64_overflow_admission_event_ring_backpressure_eagain_and_telemetry_lost_status_qemu",
     "m154_tenant_qemu": "pass_m154_telemetry_loss_marker_and_m115_m152_m153_regressions_return_0",
     "m154_durable_execution_regression": "pass_durable_execution_journal_trust_and_replication_election_qemu_return_0",
@@ -1650,6 +1654,14 @@
     "m166_durable_qemu": "pass_model_output_not_authority_replay_split_brain_and_durable_execution_return_0",
     "m166_evidence": "tools/faisal-build/evidence/m166-operator-release-authority-validation.json",
     "m166_productivity_scope": "repository_level_operator_controlled_release_authority_gap_closed_bounded_software_validation_no_real_production_key_or_hardware_claim",
-    "m166_release_scope": "production_release_still_blocked_until_real_operator_hsm_kms_key_ceremony_root_distribution_independent_builder_and_remaining_release_blockers"
+    "m166_release_scope": "production_release_still_blocked_until_real_operator_hsm_kms_key_ceremony_root_distribution_independent_builder_and_remaining_release_blockers",
+    "m167_lts_forward_port": "pass_183_patch_forward_port_to_linux_6.18.44_lts_build_and_lts_head_commit_105f2b85e4c26305a79f5e584df6ebb705858d33",
+    "m167_lts_source_authenticity": "pass_greg_kroah_hartman_good_pgp_signature_key_647F28654894E3BD457199BE38DBBDC86092693E3_source_sha256_0f72d938f06828e82c90405174fe572287db7bfe089e2fc46572a99a7f240d43",
+    "m167_lts_bzimage": "pass_sha256_8766f1019d80598c7982d91d89d7df27385a91ca7ea17d114d8869267204870b_config_cfs_bandwidth_preserved",
+    "m167_lts_tenant_qemu": "pass_return_0_m154_m155_m156_m163_m164_and_m115_markers",
+    "m167_lts_durable_qemu": "pass_return_0_m108_fjt_fjr_markers",
+    "m167_lts_industry_soak": "pass_bounded_one_vcpu_tcg_two_rounds_64_iterations_return_0;full_two_vcpu_tcg_uapi_fuzz_rcu_stall_limitation_not_suppressed",
+    "m167_lts_evidence": "tools/faisal-build/evidence/m167-lts-6.18.44-forward-port-validation.json",
+    "m167_release_scope": "production_release_still_blocked;bounded_software_qemu_requalification_only_no_physical_hardware_independent_builder_or_operator_signed_release_claim"
   }
 }
