@@ -377,7 +377,9 @@ int faisal_accel_batcher_submit_many(struct faisal_accel_batcher *batcher,
 			return -1;
 		room = batcher->max_batch - batcher->pending;
 		chunk = count - position < room ? count - position : room;
-		if (!batcher->pending && chunk == batcher->max_batch) {
+		if (!batcher->pending &&
+		    (chunk == batcher->max_batch ||
+		     (flush_after && chunk == count - position))) {
 			ret = flush_entries(batcher, entries + position, chunk, 1,
 					    &completed);
 			if (accepted_count)

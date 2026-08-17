@@ -72,7 +72,9 @@ int main(void)
 	struct agi_lc_accel_device_account many[8];
 	struct faisal_accel_batcher regular;
 	struct faisal_accel_batcher coalesced;
+	struct faisal_accel_batcher partial_direct;
 	uint32_t accepted;
+	uint32_t accepted_full;
 	uint32_t regular_ioctls;
 	uint32_t coalesced_ioctls;
 	uint64_t queries_before;
@@ -176,12 +178,25 @@ int main(void)
 	coalesced_ioctls = fake.batch_calls;
 	assert(accepted == 8 && coalesced_ioctls == 1 &&
 	       !faisal_accel_batcher_pending(&coalesced));
+	accepted_full = accepted;
 	assert(coalesced_ioctls < regular_ioctls);
 	assert(fake.last_entries_ptr == (uint64_t)(uintptr_t)many);
 	printf("M162_ZERO_COPY_COALESCED_OK direct_submissions=%llu direct_pointer=1 accepted=%u\n",
 	       (unsigned long long)coalesced.direct_submissions, accepted);
+	fake.batch_calls = 0;
+	fake.last_entries_ptr = 0;
+	assert(faisal_accel_batcher_init(&partial_direct, 3, 7, 4, 8) == 0);
+	assert(faisal_accel_batcher_set_ioctl(&partial_direct, fake_ioctl) == 0);
+	assert(faisal_accel_batcher_submit_many(&partial_direct, many, 3, 1,
+						&accepted) == 0);
+	assert(accepted == 3 && fake.batch_calls == 1 &&
+	       fake.last_entries_ptr == (uint64_t)(uintptr_t)many &&
+	       partial_direct.direct_submissions == 1 &&
+	       !faisal_accel_batcher_pending(&partial_direct));
+	printf("M163_DIRECT_PARTIAL_OK direct_submissions=%llu direct_pointer=1 accepted=%u\n",
+	       (unsigned long long)partial_direct.direct_submissions, accepted);
 	printf("M161_COALESCED_SUBMIT_OK regular_ioctls=%u coalesced_ioctls=%u accepted=%u\n",
-	       regular_ioctls, coalesced_ioctls, accepted);
+	       regular_ioctls, coalesced_ioctls, accepted_full);
 	printf("M160_ADAPTIVE_PRESSURE_CACHE_OK flushes=%llu queries=%llu cache_hits=%llu losses=%llu resync=%llu failures=%llu fast=%llu target=%u\n",
 	       (unsigned long long)batcher.flushes,
 	       (unsigned long long)batcher.backpressure_queries,
