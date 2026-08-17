@@ -17,6 +17,7 @@ KERNEL_SOURCE=${FAISAL_KERNEL_SOURCE:-$LINUX}
 REQUIRED_KERNEL_LINE=${FAISAL_REQUIRED_KERNEL_LINE:-}
 EXPECTED_KERNEL_VERSION=${FAISAL_EXPECTED_KERNEL_VERSION:-}
 RUN_ROLLBACK_QEMU=${FAISAL_RUN_ROLLBACK_QEMU:-0}
+RUN_ADAPTER_CONFORMANCE=${FAISAL_RUN_ADAPTER_CONFORMANCE:-1}
 REPORT=${FAISAL_RELEASE_GATE_REPORT:-${ARTIFACT_OUT:-/tmp}/FAISAL-production-release-gate.tsv}
 
 fail() { echo "FAISAL_RELEASE_GATE_FAIL:$*" >&2; exit 1; }
@@ -34,6 +35,8 @@ fail() { echo "FAISAL_RELEASE_GATE_FAIL:$*" >&2; exit 1; }
 [ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_security_release_evidence.sh" ] || fail "security evidence verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/compare_reproducible_builds.sh" ] || fail "reproducibility comparator unavailable"
+[ "$RUN_ADAPTER_CONFORMANCE" = 0 ] || [ "$RUN_ADAPTER_CONFORMANCE" = 1 ] || fail "invalid adapter conformance mode"
+[ "$RUN_ADAPTER_CONFORMANCE" = 0 ] || [ -x "$LINUX/tools/faisal-build/run_adapter_conformance_gate.sh" ] || fail "adapter conformance gate unavailable"
 
 mkdir -p "$(dirname "$REPORT")"
 printf 'check\tstatus\tdetail\n' > "$REPORT"
@@ -95,6 +98,17 @@ FAISAL_ACCELERATOR_VERIFY_REPORT="${REPORT}.accelerator.tsv" \
   fail "accelerator qualification verification"
 }
 printf 'accelerator_qualification\tpass\t%s\n' "$ACCELERATOR_EVIDENCE" >> "$REPORT"
+if [ "$RUN_ADAPTER_CONFORMANCE" = 1 ]; then
+  FAISAL_BUILD="$BUILD_A" \
+  FAISAL_ADAPTER_CONFORMANCE_REPORT="${REPORT}.adapter.tsv" \
+    "$LINUX/tools/faisal-build/run_adapter_conformance_gate.sh" >/tmp/faisal-release-adapter-gate.log 2>&1 || {
+    cat /tmp/faisal-release-adapter-gate.log >&2
+    fail "adapter conformance verification"
+  }
+  printf 'adapter_conformance\tpass\t%s\n' "${REPORT}.adapter.tsv" >> "$REPORT"
+else
+  printf 'adapter_conformance\tnot-enforced\tFAISAL_RUN_ADAPTER_CONFORMANCE=0\n' >> "$REPORT"
+fi
 
 FAISAL_BUILD_A="$BUILD_A" \
 FAISAL_BUILD_B="$BUILD_B" \

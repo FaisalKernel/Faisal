@@ -1440,6 +1440,7 @@
     "attested_release_gate_v3": "pass_signed_artifacts_security_advisory_reproducibility_rollback",
     "accelerator_qualification_gate": "pass_signed_qemu_isolation_accounting_sanitizer_physical_hardware_pending",
     "m117_worker_handoff": "pass_atomic_lease_fenced_owner_transfer_generation_increment_replay_qemu",
+    "adapter_conformance_gate": "pass_four_qemu_adapters_sandbox_network_repository_scanner_fail_closed_rollback_replay",
     "m108_durable_execution_qemu": "pass",
     "m108_aggregate_qemu_harnesses": 29,
     "m108_execution_features": "intent_dag_dispatch_retry_backoff_checkpoint_restart_recovery_replay_cancellation_and_authority_denial",
