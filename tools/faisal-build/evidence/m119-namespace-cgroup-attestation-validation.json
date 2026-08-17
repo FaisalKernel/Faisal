@@ -1,0 +1,38 @@
+{
+  "milestone": "M119",
+  "feature": "sandbox cgroup-namespace identity attestation",
+  "status": "validated_clean_build_qemu",
+  "design": {
+    "abi_change": false,
+    "identity_fields": [
+      "pid namespace",
+      "mount namespace",
+      "network namespace",
+      "IPC namespace",
+      "UTS namespace",
+      "user namespace",
+      "cgroup ID",
+      "cgroup hierarchy owner",
+      "cgroup namespace identity"
+    ],
+    "authority_boundary": "model output cannot create, alter, or authorize a sandbox binding",
+    "mismatch_behavior": "fail closed with namespace/cgroup mismatch denial"
+  },
+  "evidence": {
+    "kernel_build": "make O=build/recovered -j2 bzImage passed",
+    "qemu_harness": "tools/faisal-build/run_sandbox_binding_qemu.sh",
+    "bind": "M114_SANDBOX_BIND_ATTESTED_OK",
+    "hierarchy_owner": "M115_SANDBOX_HIERARCHY_OWNER_ATTESTED_OK",
+    "cgroup_namespace": "M118_CGROUP_NAMESPACE_ATTESTED_OK",
+    "query_replay": "M114_SANDBOX_QUERY_OK",
+    "identity_drift_denial": "M114_SANDBOX_TGID_DRIFT_DENIED_OK",
+    "release": "M114_SANDBOX_RELEASE_OK",
+    "qemu_result": "M114_SANDBOX_BINDING_QEMU_VALIDATION_OK",
+    "kernel_diagnostics": "none observed"
+  },
+  "limitations": [
+    "Validation is in QEMU and does not constitute production multi-tenant deployment qualification.",
+    "The feature attests identity and denies mismatch; it does not create namespaces or cgroups on behalf of an agent.",
+    "Provider-specific hardware isolation and distributed worker identity remain separate gates."
+  ]
+}

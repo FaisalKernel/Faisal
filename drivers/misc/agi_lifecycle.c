@@ -14,6 +14,7 @@
 #include <linux/atomic.h>
 #include <linux/capability.h>
 #include <linux/cgroup.h>
+#include <linux/cgroup_namespace.h>
 #include <linux/cpu.h>
 #include <linux/cpumask.h>
 #include <linux/sched/isolation.h>
@@ -513,6 +514,8 @@ static void agi_lc_sandbox_capture(struct agi_lc_sandbox_binding *binding)
 	binding->cgroup_id = cgroup_id(cgrp);
 	/* reserved[0] is the ABI-stable hierarchy-owner attestation slot. */
 	binding->reserved[0] = parent ? cgroup_id(parent) : 0;
+	/* reserved[1] pins the cgroup namespace, preventing ID confusion across namespaces. */
+	binding->reserved[1] = ns->cgroup_ns ? ns->cgroup_ns->ns.inum : 0;
 }
 
 static bool agi_lc_sandbox_matches_current(
@@ -528,8 +531,9 @@ static bool agi_lc_sandbox_matches_current(
 		observed.ipc_namespace == expected->ipc_namespace &&
 		observed.uts_namespace == expected->uts_namespace &&
 					observed.user_namespace == expected->user_namespace &&
-			observed.cgroup_id == expected->cgroup_id &&
-			observed.reserved[0] == expected->reserved[0];
+					observed.cgroup_id == expected->cgroup_id &&
+					observed.reserved[0] == expected->reserved[0] &&
+					observed.reserved[1] == expected->reserved[1];
 
 }
 

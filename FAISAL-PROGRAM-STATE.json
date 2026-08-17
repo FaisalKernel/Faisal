@@ -1441,6 +1441,7 @@
     "accelerator_qualification_gate": "pass_signed_qemu_isolation_accounting_sanitizer_physical_hardware_pending",
     "m117_worker_handoff": "pass_atomic_lease_fenced_owner_transfer_generation_increment_replay_qemu",
     "m118_worker_supervision": "pass_bounded_heartbeat_timeout_reassignment_quarantine_after_three_restarts_qemu",
+    "m119_namespace_cgroup_attestation": "pass_cgroup_namespace_identity_hierarchy_owner_binding_qemu",
     "adapter_conformance_gate": "pass_four_qemu_adapters_sandbox_network_repository_scanner_fail_closed_rollback_replay",
     "m108_durable_execution_qemu": "pass",
     "m108_aggregate_qemu_harnesses": 29,
@@ -1498,7 +1499,6 @@
       "kernel_enforced_sandbox_identity_and_multitenant_worker_supervision",
       "real_build_dependency_vulnerability_and_ci_scanner_adapters",
       "tenant_resource_accounting_and_worker_supervision",
-      "namespace_creation_and_cgroup_hierarchy_ownership",
       "current_head_sanitizer_validation_for_new_launcher_and_scanner_paths"
     ]
   }

@@ -41,7 +41,7 @@ cat "$LOG"
 cat /tmp/faisal-m114-binding-qemu-stderr.log 2>/dev/null || true
 printf 'M114_QEMU_RC=%s\n' "$qemu_rc"
 [ "$qemu_rc" -ne 124 ]
-for marker in FAISAL_M114_BOOT_OK M114_SANDBOX_BIND_ATTESTED_OK M115_SANDBOX_HIERARCHY_OWNER_ATTESTED_OK M114_SANDBOX_QUERY_OK M114_SANDBOX_TGID_DRIFT_DENIED_OK M114_SANDBOX_RELEASE_OK M114_SELFTEST_EXIT=0 M114_SELFTEST_RC=0; do
+for marker in FAISAL_M114_BOOT_OK M114_SANDBOX_BIND_ATTESTED_OK M115_SANDBOX_HIERARCHY_OWNER_ATTESTED_OK M118_CGROUP_NAMESPACE_ATTESTED_OK M114_SANDBOX_QUERY_OK M114_SANDBOX_TGID_DRIFT_DENIED_OK M114_SANDBOX_RELEASE_OK M114_SELFTEST_EXIT=0 M114_SELFTEST_RC=0; do
   grep -q "$marker" "$LOG"
 done
 if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|possible circular locking dependency|data-race|use-after-free|kernel BUG|rcu: .*stall' "$LOG"; then

@@ -53,7 +53,7 @@ int main(void)
 	    !bind.generation || !bind.owner_tgid || !bind.pid_namespace ||
 	    !bind.mount_namespace || !bind.net_namespace ||
 	    !bind.ipc_namespace || !bind.uts_namespace ||
-	    !bind.user_namespace || !bind.cgroup_id) {
+	    !bind.user_namespace || !bind.cgroup_id || !bind.reserved[1]) {
 		fprintf(stderr, "M114_BIND_ATTESTATION_INVALID\n");
 		return 1;
 	}
@@ -64,10 +64,13 @@ int main(void)
 	if (ioctl(fd, AGI_LC_SANDBOX, &query) < 0)
 		fail("M114_QUERY");
 	if (query.state != AGI_LC_SANDBOX_STATE_BOUND || query.status != 0 ||
-	    query.reserved[0] != bind.reserved[0])
+	    query.reserved[0] != bind.reserved[0] ||
+	    query.reserved[1] != bind.reserved[1])
 		return 1;
 	printf("M115_SANDBOX_HIERARCHY_OWNER_ATTESTED_OK parent_cgroup=%llu\n",
 	       (unsigned long long)query.reserved[0]);
+	printf("M118_CGROUP_NAMESPACE_ATTESTED_OK cgroup_ns=%llu\n",
+	       (unsigned long long)query.reserved[1]);
 	printf("M114_SANDBOX_QUERY_OK generation=%llu\n",
 	       (unsigned long long)query.generation);
 
