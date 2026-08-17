@@ -50,6 +50,11 @@
 #define AGI_LC_EVENT_POWER_POLICY 40
 #define AGI_LC_EVENT_INTENT_LEASE 41
 
+#define AGI_LC_EVENT_BACKPRESSURE_STATE_NORMAL 0U
+#define AGI_LC_EVENT_BACKPRESSURE_STATE_NEAR_FULL 1U
+#define AGI_LC_EVENT_BACKPRESSURE_STATE_FULL 2U
+#define AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS 3U
+
 /* ABI 37: verification records emitted from upstream Runtime Verification. */
 #define AGI_LC_VERIFY_FLAG_RV_OBSERVATION (1U << 0)
 #define AGI_LC_RV_METADATA_TAG 0x5256000000000000ULL
@@ -929,6 +934,21 @@ struct agi_lc_subscribe {
 	__u32 size;
 	__u32 flags;
 	__u64 event_mask;
+	__u64 correlation;
+	__u64 reserved[2];
+};
+
+struct agi_lc_event_backpressure {
+	__u32 size;
+	__u32 flags;
+	__u32 state;
+	__u32 capacity;
+	__u32 queued;
+	__u32 reserved32;
+	__u64 dropped_records;
+	__u64 oldest_sequence;
+	__u64 newest_sequence;
+	__u64 next_sequence;
 	__u64 correlation;
 	__u64 reserved[2];
 };
@@ -2530,6 +2550,7 @@ struct agi_lc_record {
 #define AGI_LC_ACCEL_ACCOUNT _IOW(AGI_LC_IOC_MAGIC, 0x12, struct agi_lc_accel)
 #define AGI_LC_ACCEL_GET _IOR(AGI_LC_IOC_MAGIC, 0x13, struct agi_lc_accel)
 #define AGI_LC_SUBSCRIBE _IOW(AGI_LC_IOC_MAGIC, 0x14, struct agi_lc_subscribe)
+#define AGI_LC_EVENT_BACKPRESSURE _IOWR(AGI_LC_IOC_MAGIC, 0x6c, struct agi_lc_event_backpressure)
 #define AGI_LC_CHECKPOINT _IOWR(AGI_LC_IOC_MAGIC, 0x15, struct agi_lc_checkpoint)
 #define AGI_LC_SET_BUDGET _IOW(AGI_LC_IOC_MAGIC, 0x16, struct agi_lc_budget)
 #define AGI_LC_GET_BUDGET _IOR(AGI_LC_IOC_MAGIC, 0x17, struct agi_lc_budget)

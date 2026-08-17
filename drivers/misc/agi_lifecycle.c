@@ -4449,6 +4449,54 @@ static int agi_lc_subscribe(struct agi_lc_session *session,
 	return 0;
 }
 
+static int agi_lc_event_backpressure(struct agi_lc_session *session,
+					unsigned long arg)
+{
+	struct agi_lc_event_backpressure backpressure;
+	unsigned long flags;
+	u32 newest_index;
+
+	if (copy_from_user(&backpressure, (void __user *)arg,
+			   sizeof(backpressure)))
+		return -EFAULT;
+	if (backpressure.size != sizeof(backpressure) || backpressure.flags ||
+	    backpressure.state || backpressure.capacity || backpressure.queued ||
+	    backpressure.reserved32 || backpressure.dropped_records ||
+	    backpressure.oldest_sequence || backpressure.newest_sequence ||
+	    backpressure.next_sequence || backpressure.reserved[0] ||
+	    backpressure.reserved[1])
+		return -EINVAL;
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != session->session_id)
+		return -EPERM;
+
+	spin_lock_irqsave(&session->queue_lock, flags);
+	backpressure.capacity = AGI_LC_RING_SIZE;
+	backpressure.queued = session->count;
+	backpressure.dropped_records = session->dropped_records;
+	backpressure.next_sequence = session->next_sequence;
+	if (session->count) {
+		newest_index = (session->tail + AGI_LC_RING_SIZE - 1) %
+			AGI_LC_RING_SIZE;
+		backpressure.oldest_sequence = session->records[session->head].sequence;
+		backpressure.newest_sequence = session->records[newest_index].sequence;
+	}
+	if (session->dropped_records)
+		backpressure.state = AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS;
+	else if (session->count == AGI_LC_RING_SIZE)
+		backpressure.state = AGI_LC_EVENT_BACKPRESSURE_STATE_FULL;
+	else if (session->count >= (AGI_LC_RING_SIZE * 3) / 4)
+		backpressure.state = AGI_LC_EVENT_BACKPRESSURE_STATE_NEAR_FULL;
+	else
+		backpressure.state = AGI_LC_EVENT_BACKPRESSURE_STATE_NORMAL;
+	spin_unlock_irqrestore(&session->queue_lock, flags);
+	if (copy_to_user((void __user *)arg, &backpressure,
+			 sizeof(backpressure)))
+		return -EFAULT;
+	return 0;
+}
+
 static int agi_lc_accel_account(struct agi_lc_session *session,
 					 unsigned long arg)
 {
@@ -10559,6 +10607,9 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 		break;
 	case AGI_LC_SUBSCRIBE:
 		ret = agi_lc_subscribe(session, arg);
+		break;
+	case AGI_LC_EVENT_BACKPRESSURE:
+		ret = agi_lc_event_backpressure(session, arg);
 		break;
 	case AGI_LC_SET_WORLD_SUBSCRIPTION:
 		ret = agi_lc_set_world_subscription(session, arg);

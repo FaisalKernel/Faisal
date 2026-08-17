@@ -157,6 +157,10 @@ int main(void)
 		.size = sizeof(accel_unsubscribe),
 		.correlation = 11515,
 	};
+	struct agi_lc_event_backpressure event_backpressure = {
+		.size = sizeof(event_backpressure),
+		.correlation = 11519,
+	};
 	struct agi_lc_accel_device_account batch_accounts[4];
 	struct agi_lc_accel_device_account_batch accel_batch = {
 		.size = sizeof(accel_batch),
@@ -331,6 +335,18 @@ int main(void)
 		}
 	}
 	printf("M154_TENANT_ACCELERATOR_TELEMETRY_LOSS_OK\n");
+	if (ioctl(fd, AGI_LC_EVENT_BACKPRESSURE, &event_backpressure) < 0 ||
+	    event_backpressure.state != AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS ||
+	    event_backpressure.capacity != 64 ||
+	    event_backpressure.queued != 64 ||
+	    !event_backpressure.dropped_records ||
+	    event_backpressure.oldest_sequence >= event_backpressure.newest_sequence ||
+	    event_backpressure.newest_sequence >= event_backpressure.next_sequence)
+		return fail("event backpressure query");
+	printf("M156_TENANT_EVENT_BACKPRESSURE_QUERY_OK queued=%u dropped=%llu state=%u\n",
+	       event_backpressure.queued,
+	       (unsigned long long)event_backpressure.dropped_records,
+	       event_backpressure.state);
 	if (drain_records(fd) < 0)
 		return fail("accelerator batch pre-drain");
 	memset(batch_accounts, 0, sizeof(batch_accounts));
