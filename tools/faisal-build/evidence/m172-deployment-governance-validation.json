@@ -1,0 +1,112 @@
+{
+  "project": "FAISAL",
+  "milestone": "M172-deployment-governance-migration-rollback",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "0b6851cec45191e1cabdae7c37983e34264194c7",
+  "prior_milestone": "caf305320a58afe899d6565a6c1559a616eb211c",
+  "lts_source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+  "production_status": "bounded_software_governance_qualified_external_operation_pending",
+  "objective": "Qualify fail-closed deployment admission, migration fencing, canary promotion, operational rollback, and recovery evidence without granting model output authority.",
+  "authoritative_research": {
+    "record": "tools/faisal-build/evidence/deployment-governance-research-2026-08-18.md",
+    "record_sha256": "d3f3f2d7f89f390a836faa37f1c8ed2b5e44f7735d131e60b340cc3fcb78a64e",
+    "sources": [
+      {
+        "url": "https://slsa.dev/spec/draft/build-provenance",
+        "conclusion": "Deployment consumers should verify provenance describing where, when, and how an artifact was produced, including builder identity, inputs, and output subjects."
+      },
+      {
+        "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
+        "conclusion": "Controlled rollout, revision history, rollout status, canary behavior, and rollback to a previous revision are explicit deployment safety mechanisms."
+      }
+    ]
+  },
+  "implementation": {
+    "validator": "tools/faisal-build/verify_deployment_governance.py",
+    "validator_sha256": "b2309a883e70b5663f4efba483c0128e7aa72d7586f22c3ca8702e3f64c2e17f",
+    "test": "tools/faisal-build/test_verify_deployment_governance.py",
+    "test_sha256": "472ce6e68152204c65128ab7e2528ad998f76e25c178b1efcac7fba4cf4fffd4",
+    "release_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "release_gate_sha256": "06c7afd0a0748db26e893a130bbf2f00593a04e920f6fe55b37b0a378fde9544",
+    "runbook": "FAISAL-DEPLOYMENT-GOVERNANCE.md",
+    "runbook_sha256": "d6fa61a3dcf80748a45f128fba0005d7e55364c15047d9ba6517d0d267f3fbdf",
+    "signature_scope": "existing local validation key only; not an operator production key or HSM/KMS attestation root"
+  },
+  "governance_controls": {
+    "immutable_candidate_revision": true,
+    "artifact_and_state_digest_binding": true,
+    "candidate_binding_digest": true,
+    "distinct_previous_active_revision": true,
+    "supervisor_operator_integrity_approvals": true,
+    "approval_binding_to_candidate": true,
+    "abi_and_state_schema_compatibility": true,
+    "migration_from_to_binding": true,
+    "handoff_token_digest": true,
+    "worker_fence_epoch_must_advance": true,
+    "bounded_handoff_deadline": true,
+    "required_canary_health": true,
+    "canary_failure_rollback_test": true,
+    "rollback_target_previous_active_digest": true,
+    "checkpoint_and_state_recovery_verification": true,
+    "idempotent_rollback_replay": true,
+    "stale_worker_fencing": true,
+    "model_output_is_authority": false
+  },
+  "tests": {
+    "governance_unit_and_cli": {
+      "result": "pass_positive_approval_binding_migration_fence_canary_rollback_and_negative_stale_tampered_incompatible_paths",
+      "log": "/home/ubuntu/agi-kernel/build/m172-deployment/deployment-governance-unit-final.log",
+      "log_sha256": "8613c740907bc68c4ed2d750c7e44a76524fc45c281ace3fe1370644385d8da2"
+    },
+    "signed_deployment_fixture": {
+      "result": "pass_production_style_validator",
+      "report": "/home/ubuntu/agi-kernel/build/m172-deployment/deployment-governance.json",
+      "report_sha256": "81cbdcbbe359e643dfaa68c87141cf4546404df2c65409dcc5159c9d73ebcbc2",
+      "signature": "/home/ubuntu/agi-kernel/build/m172-deployment/deployment-governance.json.sig",
+      "signature_sha256": "8e4ebcd395845e9c32cd85bc03c87f7f8f1e059fd0108929239d911bc0f71a08",
+      "verification_report": "/home/ubuntu/agi-kernel/build/m172-deployment/deployment-governance.verification.tsv",
+      "verification_report_sha256": "247ef32a7c7cb0de80a2c47e3e77c0246f93849ffb10b1a199603fbb33fb1cdf",
+      "verifier_log_sha256": "0997c737d75a7f457df6ac98200a008bd2c04d10fea79067e9357052fd24d514",
+      "validation_public_key_sha256": "af20b51fcca0c8c91f1ffd98151b8f0d67b05aa37628bbc507257c82a35633b4",
+      "signature_scope": "existing local validation key only; not a production signing root"
+    },
+    "existing_m78_deployment_supervisor_qemu": {
+      "result": "pass",
+      "marker": "M78_QEMU_VALIDATION_OK",
+      "log": "/home/ubuntu/agi-kernel/build/m172-deployment/m78-deployment-supervisor-qemu.log",
+      "log_sha256": "052190f3c7eaecf2ca5a9a265dbd33c500ecd2b4d4840d117fe386edc2153cc1",
+      "scope": "existing bounded QEMU supervisor artifact; not independent multi-host deployment qualification"
+    }
+  },
+  "release_gate_change": {
+    "requires": "signed structured deployment-governance JSON in addition to artifact, advisory, accelerator, and replication evidence",
+    "failure_modes": [
+      "missing or unsigned deployment evidence",
+      "stale evidence",
+      "approval not bound to candidate",
+      "incompatible ABI or state schema",
+      "unchanged worker fence",
+      "unhealthy or untested canary",
+      "wrong rollback target",
+      "unverified recovery or non-idempotent replay"
+    ]
+  },
+  "production_boundary": {
+    "deployment_governance": "bounded_software_qualification_pass",
+    "external_operation": "pending",
+    "limitations": [
+      "No external independent deployment controller or operator separation was available in the sandbox.",
+      "No live multi-host worker migration or networked service orchestration was exercised.",
+      "No production HSM, KMS, Vault, or hardware-rooted deployment approval was exercised.",
+      "The M78 QEMU regression uses the existing recovered build profile and is recorded as bounded historical supervisor validation, not current production deployment proof.",
+      "Irreversible external side effects and compensation workflows require an operational environment and remain unqualified.",
+      "The overall production release gate remains blocked by operator key ceremony, independent builder, physical accelerator, CVE operations, external security review, and deployment governance inputs."
+    ],
+    "claims_not_made": [
+      "No claim of production deployment readiness.",
+      "No claim of live cluster migration safety.",
+      "No claim of real-world rollback of irreversible external actions.",
+      "No claim that model output can authorize deployment."
+    ]
+  }
+}
