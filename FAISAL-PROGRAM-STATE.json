@@ -1447,6 +1447,7 @@
     "m122_handoff_token_replay_window": "pass_issued_at_bounded_age_future_token_and_stale_token_denial_qemu",
     "m123_handoff_lease_policy": "pass_overlong_authenticated_handoff_lease_denied_bounded_60s_policy_qemu",
     "m124_handoff_token_one_time_consumption": "pass_replayed_token_denied_bounded_128_entry_service_lifetime_table_qemu",
+    "m125_durable_handoff_token_replay": "pass_consumed_token_journal_record_fsync_replay_restart_denial_qemu",
     "adapter_conformance_gate": "pass_four_qemu_adapters_sandbox_network_repository_scanner_fail_closed_rollback_replay",
     "m108_durable_execution_qemu": "pass",
     "m108_aggregate_qemu_harnesses": 29,

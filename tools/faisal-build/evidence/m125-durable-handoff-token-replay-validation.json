@@ -1,0 +1,25 @@
+{
+  "milestone": "M125",
+  "feature": "durable one-time migration-token consumption",
+  "status": "validated_qemu",
+  "journal": {
+    "record_kind": "FEX_RECORD_CONSUMED_HANDOFF_TOKEN",
+    "fsync_before_admission_returns": true,
+    "replay_restores_consumed_tokens": true,
+    "corrupt_record_behavior": "journal replay fails closed"
+  },
+  "evidence": {
+    "pre_restart_replay_denial": "M124_REPLAYED_HANDOFF_TOKEN_DENIED_OK",
+    "post_restart_replay_denial": "M125_RESTART_REPLAYED_HANDOFF_TOKEN_DENIED_OK",
+    "handoff_replay": "M117_WORKER_HANDOFF_REPLAY_OK",
+    "engine_replay": "M108_EXECUTION_REPLAY_OK",
+    "corruption_fail_closed": "M108_ENGINE_REPLAY_FAIL_CLOSED_OK",
+    "qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+    "kernel_diagnostics": "none observed"
+  },
+  "limitations": [
+    "The journal is local to the execution service and does not replace authenticated remote transport or host attestation.",
+    "The bounded consumed-token table has a maximum of 128 entries; exhaustion fails closed and requires service-level lifecycle management.",
+    "Model output remains non-authoritative."
+  ]
+}

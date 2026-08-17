@@ -37,6 +37,7 @@ int main(int argc, char **argv)
 	struct fex_node node_a, node_b, node_c, node_d, query_node;
 	struct fex_checkpoint checkpoint;
 	uint8_t working[FEX_DIGEST_SIZE], world[FEX_DIGEST_SIZE], resource[FEX_DIGEST_SIZE];
+	uint8_t consumed_handoff_token[FEX_HANDOFF_TOKEN_SIZE];
 	uint32_t dependency;
 	uint32_t claimed, recovered, dead_lettered, reassigned, supervised_dead;
 	struct fex_worker worker;
@@ -124,33 +125,33 @@ int main(int argc, char **argv)
 		{
 		uint64_t previous_generation = worker.lease_generation;
 		uint8_t untrusted_checkpoint[FEX_DIGEST_SIZE] = { 0 };
-		uint8_t handoff_token[FEX_HANDOFF_TOKEN_SIZE];
 		uint8_t tampered_token[FEX_HANDOFF_TOKEN_SIZE];
 		CHECK_EQ(fex_handoff_verified(&service, node_c.task_id, 9001, 12, 100,
 				untrusted_checkpoint), FEX_ERR_AUTHORITY,
 				"UNTRUSTED_HANDOFF_DIGEST");
 		printf("M120_UNTRUSTED_HANDOFF_DIGEST_DENIED_OK\n");
 		CHECK_OK(fex_make_handoff_token(&service, node_c.task_id, 9001, 12,
-				 handoff_token), "MAKE_HANDOFF_TOKEN");
-		memcpy(tampered_token, handoff_token, sizeof(tampered_token));
+				 consumed_handoff_token), "MAKE_HANDOFF_TOKEN");
+		memcpy(tampered_token, consumed_handoff_token, sizeof(tampered_token));
 		tampered_token[0] ^= 0x01;
 		CHECK_EQ(fex_handoff_token_verified(&service, node_c.task_id, 9001, 12,
 				100, tampered_token), FEX_ERR_AUTHORITY,
 				"TAMPERED_HANDOFF_TOKEN");
 		printf("M121_TAMPERED_HANDOFF_TOKEN_DENIED_OK\n");
-		CHECK_EQ(fex_handoff_token_verified(&service, node_c.task_id, 9001, 12 +
-				FEX_HANDOFF_TOKEN_MAX_AGE_NS + 1, 100, handoff_token),
-				FEX_ERR_AUTHORITY, "STALE_HANDOFF_TOKEN");
+		CHECK_EQ(fex_handoff_token_verified(&service, node_c.task_id,
+				9001, 12 + FEX_HANDOFF_TOKEN_MAX_AGE_NS + 1,
+				100, consumed_handoff_token), FEX_ERR_AUTHORITY,
+				"STALE_HANDOFF_TOKEN");
 		printf("M122_STALE_HANDOFF_TOKEN_DENIED_OK\n");
 		CHECK_EQ(fex_handoff_token_verified(&service, node_c.task_id, 9001, 12,
-				FEX_MAX_HANDOFF_LEASE_NS + 1, handoff_token),
+				FEX_MAX_HANDOFF_LEASE_NS + 1, consumed_handoff_token),
 				FEX_ERR_POLICY, "OVERLONG_HANDOFF_LEASE");
 		printf("M123_OVERLONG_HANDOFF_LEASE_DENIED_OK\n");
 		CHECK_OK(fex_handoff_token_verified(&service, node_c.task_id, 9001, 12,
-				100, handoff_token), "WORKER_HANDOFF");
+				100, consumed_handoff_token), "WORKER_HANDOFF");
 		{
 			int replay_rc = fex_handoff_token_verified(&service, node_c.task_id,
-					9001, 12, 100, handoff_token);
+					9001, 12, 100, consumed_handoff_token);
 			if (replay_rc != FEX_ERR_CONFLICT &&
 			    replay_rc != FEX_ERR_AUTHORITY)
 				fail("REPLAYED_HANDOFF_TOKEN", replay_rc);
@@ -230,8 +231,17 @@ int main(int argc, char **argv)
 	printf("M115_POST_SUPERVISION_RECOVERY_IDEMPOTENT_OK recovered=%u\\n", recovered);
 	printf("M115_WORKER_REPLAY_STATE_OK reassigned=%u\n",
 	       worker.reassignment_count);
-	printf("M117_WORKER_HANDOFF_REPLAY_OK worker=%llu handoffs=%u\n",
-	       (unsigned long long)worker.worker_id, worker.handoff_count);
+					printf("M117_WORKER_HANDOFF_REPLAY_OK worker=%llu handoffs=%u\n",
+		       (unsigned long long)worker.worker_id, worker.handoff_count);
+
+		{
+			int restart_replay_rc = fex_handoff_token_verified(&service,
+					node_c.task_id, 9001, 12, 100, consumed_handoff_token);
+			if (restart_replay_rc != FEX_ERR_CONFLICT &&
+			    restart_replay_rc != FEX_ERR_AUTHORITY)
+				fail("RESTART_REPLAYED_HANDOFF_TOKEN", restart_replay_rc);
+		}
+		printf("M125_RESTART_REPLAYED_HANDOFF_TOKEN_DENIED_OK\n");
 
 	CHECK_OK(fex_query_objective(&service, objective.objective_id, &replayed),
 		 "REPLAY_OBJECTIVE");

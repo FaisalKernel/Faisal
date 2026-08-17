@@ -21,7 +21,8 @@ enum fex_record_kind {
 	FEX_RECORD_OBJECTIVE = 1,
 	FEX_RECORD_NODE = 2,
 	FEX_RECORD_CHECKPOINT = 3,
-	FEX_RECORD_WORKER = 4
+	FEX_RECORD_WORKER = 4,
+	FEX_RECORD_CONSUMED_HANDOFF_TOKEN = 5
 };
 
 static int write_record(struct fex_service *service, uint16_t kind,
@@ -129,6 +130,8 @@ int fex_replay(struct fex_service *service)
 		return FEX_ERR_IO;
 	service->objective_count = 0;
 	service->node_count = 0;
+	service->worker_count = 0;
+	service->consumed_handoff_token_count = 0;
 	service->next_event_sequence = 1;
 	for (;;) {
 		ssize_t got = read(service->engine_fd, &header, sizeof(header));
@@ -162,18 +165,27 @@ int fex_replay(struct fex_service *service)
 				service->nodes[service->node_count++] = *item;
 							else
 					return FEX_ERR_FULL;
-			} else if (header.kind == FEX_RECORD_WORKER &&
-				   header.size == sizeof(struct fex_worker)) {
+							} else if (header.kind == FEX_RECORD_WORKER &&
+					   header.size == sizeof(struct fex_worker)) {
+
 				struct fex_worker *item = (struct fex_worker *)payload;
 				struct fex_worker *existing = find_worker(service, item->task_id);
 				if (existing)
 					*existing = *item;
 				else if (service->worker_count < FEX_MAX_WORKERS)
 					service->workers[service->worker_count++] = *item;
-				else
-					return FEX_ERR_FULL;
-			}
-			service->next_event_sequence = header.sequence + 1;
+					else
+						return FEX_ERR_FULL;
+				} else if (header.kind == FEX_RECORD_CONSUMED_HANDOFF_TOKEN &&
+					   header.size == FEX_HANDOFF_TOKEN_SIZE) {
+					if (service->consumed_handoff_token_count >=
+					    FEX_MAX_CONSUMED_HANDOFF_TOKENS)
+						return FEX_ERR_FULL;
+					memcpy(service->consumed_handoff_tokens[
+						service->consumed_handoff_token_count++], payload,
+					       FEX_HANDOFF_TOKEN_SIZE);
+				}
+				service->next_event_sequence = header.sequence + 1;
 
 		offset += sizeof(header) + header.size;
 	}
@@ -587,6 +599,15 @@ static int consume_handoff_token(struct fex_service *service,
 	memcpy(service->consumed_handoff_tokens[
 		service->consumed_handoff_token_count++], token,
 	       FEX_HANDOFF_TOKEN_SIZE);
+	if (write_record(service, FEX_RECORD_CONSUMED_HANDOFF_TOKEN, token,
+			 FEX_HANDOFF_TOKEN_SIZE) != FEX_OK) {
+		memset(service->consumed_handoff_tokens[
+			service->consumed_handoff_token_count - 1], 0,
+		       FEX_HANDOFF_TOKEN_SIZE);
+		service->consumed_handoff_token_count--;
+		pthread_mutex_unlock(&service->lock);
+		return FEX_ERR_IO;
+	}
 	pthread_mutex_unlock(&service->lock);
 	return FEX_OK;
 }
