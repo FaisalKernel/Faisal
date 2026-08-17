@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "64bc2c11a5be045bea94c3924a0196c0c9ecd807",
+  "current_head": "cc773f099a570d5d1b3bf56bde4cdbfce7703d93",
   "current_tag": "FAISAL-M152-TENANT-CPU-ACCELERATOR-ISOLATION",
   "current_abi": 38,
   "operating_loop": [
