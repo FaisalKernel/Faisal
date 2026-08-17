@@ -41,7 +41,7 @@ cat "$LOG"
 cat /tmp/faisal-m115-tenant-qemu-stderr.log 2>/dev/null || true
 printf 'M115_QEMU_RC=%s\n' "$qemu_rc"
 [ "$qemu_rc" -ne 124 ]
-for marker in FAISAL_M115_BOOT_OK M115_TENANT_AGGREGATE_OK M115_TENANT_MALFORMED_REJECT_OK M115_SELFTEST_EXIT=0 M115_SELFTEST_RC=0; do
+for marker in FAISAL_M115_BOOT_OK M115_TENANT_BUDGET_SET_OK M115_TENANT_BUDGET_ADMISSION_DENY_OK M115_TENANT_BUDGET_QUERY_OK M115_TENANT_AGGREGATE_OK M115_TENANT_MALFORMED_REJECT_OK M115_TENANT_BUDGET_CLEAR_OK M115_SELFTEST_EXIT=0 M115_SELFTEST_RC=0; do
   grep -q "$marker" "$LOG"
 done
 if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|possible circular locking dependency|data-race|use-after-free|kernel BUG|rcu: .*stall' "$LOG"; then

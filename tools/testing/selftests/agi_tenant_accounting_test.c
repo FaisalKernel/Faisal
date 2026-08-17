@@ -43,6 +43,24 @@ int main(void)
 			 AGI_LC_TENANT_FLAG_INCLUDE_LIGHT_AGENTS,
 	};
 	struct agi_lc_tenant_snapshot malformed = snapshot;
+	struct agi_lc_tenant_budget budget = {
+		.size = sizeof(budget),
+		.flags = AGI_LC_TENANT_BUDGET_FLAG_REQUIRE_SANDBOX,
+		.operation = AGI_LC_TENANT_BUDGET_OP_SET,
+		.resource_mask = AGI_LC_RESOURCE_CPU | AGI_LC_RESOURCE_RAM,
+		.cpu_budget_ns = 60ULL * 1000 * 1000 * 1000,
+		.memory_limit_bytes = 32ULL * 1024 * 1024,
+		.correlation = 11504,
+	};
+	struct agi_lc_resource_demand over_limit = demand;
+	struct agi_lc_tenant_budget query = {
+		.size = sizeof(query),
+		.operation = AGI_LC_TENANT_BUDGET_OP_QUERY,
+	};
+	struct agi_lc_tenant_budget clear = {
+		.size = sizeof(clear),
+		.operation = AGI_LC_TENANT_BUDGET_OP_CLEAR,
+	};
 
 	fd = open("/dev/agi_lifecycle", O_RDWR);
 	if (fd < 0)
@@ -68,6 +86,24 @@ int main(void)
 	    (demand.enforced_mask & (AGI_LC_RESOURCE_CPU | AGI_LC_RESOURCE_RAM)) !=
 		    (AGI_LC_RESOURCE_CPU | AGI_LC_RESOURCE_RAM))
 		return fail("resource demand");
+	if (ioctl(fd, AGI_LC_TENANT_BUDGET, &budget) < 0 ||
+	    budget.status != AGI_LC_TENANT_BUDGET_STATUS_ACTIVE ||
+	    budget.enforced_mask != (AGI_LC_RESOURCE_CPU | AGI_LC_RESOURCE_RAM))
+		return fail("tenant budget set");
+	printf("M115_TENANT_BUDGET_SET_OK generation=%llu memory_limit=%llu\n",
+	       (unsigned long long)budget.generation,
+	       (unsigned long long)budget.memory_limit_bytes);
+	over_limit.memory_max_bytes = 64ULL * 1024 * 1024;
+	errno = 0;
+	if (ioctl(fd, AGI_LC_SET_RESOURCE_DEMAND, &over_limit) >= 0 ||
+	    errno != EDQUOT)
+		return fail("tenant over-limit demand accepted");
+	printf("M115_TENANT_BUDGET_ADMISSION_DENY_OK\n");
+	if (ioctl(fd, AGI_LC_TENANT_BUDGET, &query) < 0 ||
+	    query.status != AGI_LC_TENANT_BUDGET_STATUS_ACTIVE ||
+	    query.memory_limit_bytes != budget.memory_limit_bytes)
+		return fail("tenant budget query");
+	printf("M115_TENANT_BUDGET_QUERY_OK\n");
 	if (ioctl(fd, AGI_LC_GET_TENANT_SNAPSHOT, &snapshot) < 0)
 		return fail("tenant snapshot");
 	if (snapshot.session_id != create.session_id ||
@@ -78,7 +114,8 @@ int main(void)
 		    (AGI_LC_RESOURCE_CPU | AGI_LC_RESOURCE_RAM) ||
 	    (snapshot.measured_mask & (AGI_LC_RESOURCE_CPU | AGI_LC_RESOURCE_RAM)) !=
 		    (AGI_LC_RESOURCE_CPU | AGI_LC_RESOURCE_RAM) ||
-	    snapshot.memory_limit_bytes < demand.memory_max_bytes)
+		    snapshot.memory_limit_bytes != budget.memory_limit_bytes ||
+		    snapshot.cpu_budget_ns != budget.cpu_budget_ns)
 		return fail("tenant values");
 	printf("M115_TENANT_AGGREGATE_OK agents=%u active=%u light=%u memory_limit=%llu\n",
 	       snapshot.agent_count, snapshot.active_agent_count,
@@ -89,7 +126,11 @@ int main(void)
 	if (ioctl(fd, AGI_LC_GET_TENANT_SNAPSHOT, &malformed) >= 0 ||
 	    errno != EINVAL)
 		return fail("malformed tenant request accepted");
-	printf("M115_TENANT_MALFORMED_REJECT_OK\nM115_SELFTEST_EXIT=0\n");
+	printf("M115_TENANT_MALFORMED_REJECT_OK\\n");
+	if (ioctl(fd, AGI_LC_TENANT_BUDGET, &clear) < 0 ||
+	    clear.status != AGI_LC_TENANT_BUDGET_STATUS_CLEARED)
+		return fail("tenant budget clear");
+	printf("M115_TENANT_BUDGET_CLEAR_OK\nM115_SELFTEST_EXIT=0\n");
 	close(fd);
 	return 0;
 }

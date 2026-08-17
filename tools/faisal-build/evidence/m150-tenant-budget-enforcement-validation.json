@@ -1,0 +1,46 @@
+{
+  "milestone": "M150",
+  "feature": "kernel-enforced tenant CPU/RAM budget admission and accounting",
+  "status": "pass_qemu_kernel_build_and_durable_regression",
+  "kernel": {
+    "base": "Linux v7.2-rc7",
+    "build_output": "/home/ubuntu/agi-kernel/build/m150-tenant-budget",
+    "bzimage": "arch/x86/boot/bzImage",
+    "driver_compile": "pass",
+    "uapi_ioctl": "AGI_LC_TENANT_BUDGET 0x68"
+  },
+  "policy": {
+    "scope": "session-lineage-bound tenant budget",
+    "resources_enforced": "CPU budget metadata and RAM admission",
+    "sandbox_policy": "optional require-sandbox flag fail-closed",
+    "admission": "RAM demand above active tenant limit returns EDQUOT",
+    "current_usage": "budget reduction below observed aggregate returns EDQUOT",
+    "snapshot": "tenant budget and over-budget state exposed with generation",
+    "lifecycle": "set, query, and clear operations; clear revokes active budget"
+  },
+  "qemu": {
+    "harness": "tools/faisal-build/run_tenant_accounting_qemu.sh",
+    "markers": [
+      "M115_TENANT_BUDGET_SET_OK",
+      "M115_TENANT_BUDGET_ADMISSION_DENY_OK",
+      "M115_TENANT_BUDGET_QUERY_OK",
+      "M115_TENANT_AGGREGATE_OK",
+      "M115_TENANT_MALFORMED_REJECT_OK",
+      "M115_TENANT_BUDGET_CLEAR_OK",
+      "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+    ],
+    "result": "pass",
+    "kernel_diagnostics": "none observed"
+  },
+  "regression": {
+    "durable_execution_qemu": "pass all existing M108-M149 markers",
+    "kernel_build": "pass",
+    "selftest_compile": "pass"
+  },
+  "limitations": [
+    "GPU/NPU/VRAM/storage/network/IO tenant budgets remain unsupported and fail closed rather than being falsely reported as enforced.",
+    "This adds tenant budget admission and accounting but does not create cgroup hierarchies or replace cgroup v2 enforcement.",
+    "CPU budget is exposed and accounted; deadline scheduling and hard CPU-time throttling remain separate work.",
+    "No claim of multi-host tenant isolation or physical accelerator qualification is made."
+  ]
+}

@@ -367,8 +367,11 @@ struct mutex graph_lock;
 	u64 failure_count;
 	u64 last_failure_sequence;
 	u64 session_id;
-	bool sandbox_bound;
-	u32 sandbox_flags;
+			bool sandbox_bound;
+		bool tenant_budget_valid;
+		struct agi_lc_tenant_budget tenant_budget;
+		u32 sandbox_flags;
+
 	u32 sandbox_state;
 	u64 sandbox_binding_id;
 	u64 sandbox_generation;
@@ -8679,6 +8682,120 @@ static u64 agi_lc_sat_add_u64(u64 left, u64 right)
 	return left + right;
 }
 
+static int agi_lc_tenant_budget_control(struct agi_lc_session *session,
+						 unsigned long arg)
+{
+	struct agi_lc_tenant_budget budget;
+	u64 observed_cpu = 0;
+	u64 observed_memory = 0;
+	u32 i;
+	int ret;
+
+	if (copy_from_user(&budget, (void __user *)arg, sizeof(budget)))
+		return -EFAULT;
+	if (budget.size != sizeof(budget) ||
+	    (budget.flags & ~AGI_LC_TENANT_BUDGET_FLAGS_ALL) ||
+	    budget.reserved32 || budget.session_id || budget.sandbox_binding_id ||
+	    budget.generation || budget.enforced_mask || budget.over_budget_mask ||
+	    budget.status || budget.reserved[0] ||
+	    budget.reserved[1])
+		return -EINVAL;
+	if (budget.operation != AGI_LC_TENANT_BUDGET_OP_SET &&
+	    budget.operation != AGI_LC_TENANT_BUDGET_OP_QUERY &&
+	    budget.operation != AGI_LC_TENANT_BUDGET_OP_CLEAR)
+		return -EINVAL;
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != session->session_id)
+		return -EPERM;
+	if ((budget.flags & AGI_LC_TENANT_BUDGET_FLAG_REQUIRE_SANDBOX) &&
+	    (!READ_ONCE(session->sandbox_bound) ||
+	     READ_ONCE(session->sandbox_state) != AGI_LC_SANDBOX_STATE_BOUND))
+		return -EPERM;
+	if (budget.operation == AGI_LC_TENANT_BUDGET_OP_SET) {
+		if (!budget.resource_mask ||
+		    (budget.resource_mask & ~AGI_LC_TENANT_BUDGET_SUPPORTED_MASK))
+			return -EOPNOTSUPP;
+		if ((budget.resource_mask & AGI_LC_RESOURCE_CPU) &&
+		    !budget.cpu_budget_ns)
+			return -EINVAL;
+		if ((budget.resource_mask & AGI_LC_RESOURCE_RAM) &&
+		    (!budget.memory_limit_bytes ||
+		     (budget.memory_limit_bytes & (PAGE_SIZE - 1))))
+			return -EINVAL;
+		if (!(budget.resource_mask & AGI_LC_RESOURCE_CPU) &&
+		    budget.cpu_budget_ns)
+			return -EINVAL;
+		if (!(budget.resource_mask & AGI_LC_RESOURCE_RAM) &&
+		    budget.memory_limit_bytes)
+			return -EINVAL;
+	}
+	if (budget.operation == AGI_LC_TENANT_BUDGET_OP_QUERY ||
+	    budget.operation == AGI_LC_TENANT_BUDGET_OP_CLEAR) {
+		if (budget.resource_mask || budget.cpu_budget_ns ||
+		    budget.memory_limit_bytes)
+			return -EINVAL;
+	}
+
+	for (i = 0; i < AGI_LC_AGENT_RECORDS; i++) {
+		struct agi_lc_agent_record *record = &session->agents[i];
+
+		if (!record->valid || !record->resource_demand_valid)
+			continue;
+		observed_cpu = agi_lc_sat_add_u64(observed_cpu,
+						 record->resource_demand.observed_cpu_time_ns);
+		observed_memory = agi_lc_sat_add_u64(observed_memory,
+						   record->resource_demand.observed_memory_bytes);
+	}
+	if (budget.operation == AGI_LC_TENANT_BUDGET_OP_SET) {
+		if ((budget.resource_mask & AGI_LC_RESOURCE_CPU) &&
+		    observed_cpu > budget.cpu_budget_ns)
+			return -EDQUOT;
+		if ((budget.resource_mask & AGI_LC_RESOURCE_RAM) &&
+		    observed_memory > budget.memory_limit_bytes)
+			return -EDQUOT;
+		session->tenant_budget = budget;
+		session->tenant_budget_valid = true;
+	} else if (budget.operation == AGI_LC_TENANT_BUDGET_OP_CLEAR) {
+		memset(&session->tenant_budget, 0, sizeof(session->tenant_budget));
+		session->tenant_budget_valid = false;
+	}
+	if (budget.operation != AGI_LC_TENANT_BUDGET_OP_QUERY) {
+		spin_lock_irq(&session->queue_lock);
+		session->change_generation++;
+		spin_unlock_irq(&session->queue_lock);
+		ret = agi_lc_push_record(session, AGI_LC_EVENT_RESOURCE_DEMAND, 0,
+					 budget.correlation, budget.resource_mask);
+		if (ret)
+			return ret;
+	}
+	budget.session_id = session->session_id;
+	budget.sandbox_binding_id = READ_ONCE(session->sandbox_bound) ?
+		READ_ONCE(session->sandbox_binding_id) : 0;
+	budget.generation = READ_ONCE(session->change_generation);
+	if (session->tenant_budget_valid) {
+		budget.resource_mask = session->tenant_budget.resource_mask;
+		budget.enforced_mask = budget.resource_mask;
+		budget.cpu_budget_ns = session->tenant_budget.cpu_budget_ns;
+		budget.memory_limit_bytes = session->tenant_budget.memory_limit_bytes;
+		budget.flags = session->tenant_budget.flags;
+		budget.status = AGI_LC_TENANT_BUDGET_STATUS_ACTIVE;
+		if ((budget.resource_mask & AGI_LC_RESOURCE_CPU) &&
+		    observed_cpu > budget.cpu_budget_ns)
+			budget.over_budget_mask |= AGI_LC_RESOURCE_CPU;
+		if ((budget.resource_mask & AGI_LC_RESOURCE_RAM) &&
+		    observed_memory > budget.memory_limit_bytes)
+			budget.over_budget_mask |= AGI_LC_RESOURCE_RAM;
+	} else {
+		budget.status = budget.operation == AGI_LC_TENANT_BUDGET_OP_CLEAR ?
+			AGI_LC_TENANT_BUDGET_STATUS_CLEARED :
+			AGI_LC_TENANT_BUDGET_STATUS_UNSET;
+	}
+	if (copy_to_user((void __user *)arg, &budget, sizeof(budget)))
+		return -EFAULT;
+	return 0;
+}
+
 static int agi_lc_get_tenant_snapshot(struct agi_lc_session *session,
 					       unsigned long arg)
 {
@@ -8752,6 +8869,17 @@ static int agi_lc_get_tenant_snapshot(struct agi_lc_session *session,
 		snapshot.accel_submissions = agi_lc_sat_add_u64(
 			snapshot.accel_submissions, demand->observed_accel_submissions);
 	}
+	if (session->tenant_budget_valid) {
+		snapshot.cpu_budget_ns = session->tenant_budget.cpu_budget_ns;
+		if (session->tenant_budget.resource_mask & AGI_LC_RESOURCE_RAM)
+			snapshot.memory_limit_bytes = session->tenant_budget.memory_limit_bytes;
+		if ((session->tenant_budget.resource_mask & AGI_LC_RESOURCE_CPU) &&
+		    snapshot.cpu_time_ns > session->tenant_budget.cpu_budget_ns)
+			snapshot.over_budget_mask |= AGI_LC_RESOURCE_CPU;
+		if ((session->tenant_budget.resource_mask & AGI_LC_RESOURCE_RAM) &&
+		    snapshot.memory_current_bytes > session->tenant_budget.memory_limit_bytes)
+			snapshot.over_budget_mask |= AGI_LC_RESOURCE_RAM;
+	}
 	if (snapshot.flags & AGI_LC_TENANT_FLAG_INCLUDE_LIGHT_AGENTS)
 		snapshot.light_agent_count = READ_ONCE(session->light_agent_count);
 	spin_lock_irqsave(&session->queue_lock, flags);
@@ -8813,6 +8941,12 @@ static int agi_lc_set_resource_demand(struct agi_lc_session *session,
 	record = agi_lc_find_agent(session, agent_id);
 	if (!record)
 		return -ENOENT;
+
+	if (session->tenant_budget_valid &&
+	    (session->tenant_budget.resource_mask & AGI_LC_RESOURCE_RAM) &&
+	    (demand.resource_mask & AGI_LC_RESOURCE_RAM) &&
+	    demand.memory_max_bytes > session->tenant_budget.memory_limit_bytes)
+		return -EDQUOT;
 
 	if (demand.resource_mask & AGI_LC_RESOURCE_CPU) {
 #ifdef CONFIG_UCLAMP_TASK
@@ -10120,6 +10254,9 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 		break;
 	case AGI_LC_GET_TENANT_SNAPSHOT:
 		ret = agi_lc_get_tenant_snapshot(session, arg);
+		break;
+	case AGI_LC_TENANT_BUDGET:
+		ret = agi_lc_tenant_budget_control(session, arg);
 		break;
 	case AGI_LC_ACCEL_REGISTER:
 		ret = agi_lc_accel_register(session, arg);

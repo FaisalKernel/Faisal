@@ -679,6 +679,15 @@
 #define AGI_LC_TENANT_FLAG_INCLUDE_LIGHT_AGENTS (1U << 0)
 #define AGI_LC_TENANT_FLAG_REQUIRE_SANDBOX (1U << 1)
 #define AGI_LC_TENANT_FLAGS_ALL ((1U << 2) - 1)
+#define AGI_LC_TENANT_BUDGET_OP_SET 1U
+#define AGI_LC_TENANT_BUDGET_OP_QUERY 2U
+#define AGI_LC_TENANT_BUDGET_OP_CLEAR 3U
+#define AGI_LC_TENANT_BUDGET_FLAG_REQUIRE_SANDBOX (1U << 2)
+#define AGI_LC_TENANT_BUDGET_FLAGS_ALL ((1U << 3) - 1)
+#define AGI_LC_TENANT_BUDGET_STATUS_UNSET 0U
+#define AGI_LC_TENANT_BUDGET_STATUS_ACTIVE 1U
+#define AGI_LC_TENANT_BUDGET_STATUS_CLEARED 2U
+#define AGI_LC_TENANT_BUDGET_SUPPORTED_MASK (AGI_LC_RESOURCE_CPU | AGI_LC_RESOURCE_RAM)
 
 #define AGI_LC_ACCEL_TYPE_GPU 1
 #define AGI_LC_ACCEL_TYPE_NPU 2
@@ -1172,6 +1181,24 @@ struct agi_lc_resource_snapshot {
 	__u64 accel_memory_bytes;
 	__u64 accel_submissions;
 	__u64 energy_uj;
+	__u64 correlation;
+	__u64 reserved[2];
+};
+
+struct agi_lc_tenant_budget {
+	__u32 size;
+	__u32 flags;
+	__u32 operation;
+	__u32 reserved32;
+	__u64 session_id;
+	__u64 sandbox_binding_id;
+	__u64 generation;
+	__u32 resource_mask;
+	__u32 enforced_mask;
+	__u32 over_budget_mask;
+	__u32 status;
+	__u64 cpu_budget_ns;
+	__u64 memory_limit_bytes;
 	__u64 correlation;
 	__u64 reserved[2];
 };
@@ -2403,6 +2430,7 @@ struct agi_lc_record {
 #define AGI_LC_OBSERVABILITY _IOWR(AGI_LC_IOC_MAGIC, 0x59, struct agi_lc_observability)
 #define AGI_LC_GET_RESOURCE_SNAPSHOT _IOWR(AGI_LC_IOC_MAGIC, 0x5a, struct agi_lc_resource_snapshot)
 #define AGI_LC_GET_TENANT_SNAPSHOT _IOWR(AGI_LC_IOC_MAGIC, 0x67, struct agi_lc_tenant_snapshot)
+#define AGI_LC_TENANT_BUDGET _IOWR(AGI_LC_IOC_MAGIC, 0x68, struct agi_lc_tenant_budget)
 #define AGI_LC_SET_WORLD_SUBSCRIPTION _IOWR(AGI_LC_IOC_MAGIC, 0x2f, struct agi_lc_world_subscription)
 #define AGI_LC_GET_WORLD_SUBSCRIPTION _IOWR(AGI_LC_IOC_MAGIC, 0x30, struct agi_lc_world_subscription)
 #define AGI_LC_ATTACH_TASK _IO(AGI_LC_IOC_MAGIC, 0x06)
