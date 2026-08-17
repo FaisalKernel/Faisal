@@ -19,6 +19,19 @@ static int fail(const char *what)
 	return 1;
 }
 
+static uint64_t elapsed_ns(const struct timespec *start,
+				 const struct timespec *end)
+{
+		int64_t seconds = end->tv_sec - start->tv_sec;
+		int64_t nanoseconds = end->tv_nsec - start->tv_nsec;
+
+	if (nanoseconds < 0) {
+		seconds--;
+		nanoseconds += 1000000000LL;
+	}
+	return (uint64_t)seconds * 1000000000ULL + (uint64_t)nanoseconds;
+}
+
 static int drain_records(int fd)
 {
 	struct agi_lc_record record;
@@ -144,10 +157,18 @@ int main(void)
 		.size = sizeof(accel_unsubscribe),
 		.correlation = 11515,
 	};
+	struct agi_lc_accel_device_account batch_accounts[4];
+	struct agi_lc_accel_device_account_batch accel_batch = {
+		.size = sizeof(accel_batch),
+		.entries_ptr = (uint64_t)(uintptr_t)batch_accounts,
+		.entry_count = 4,
+	};
 	struct agi_lc_accel_device accel_remove = {
 		.size = sizeof(accel_remove),
 		.correlation = 11510,
 	};
+	struct timespec bench_start, bench_end;
+	uint64_t single_ns, batch_ns, speedup_x100;
 	struct agi_lc_tenant_cpu_policy cpu_policy = {
 		.size = sizeof(cpu_policy),
 		.flags = AGI_LC_TENANT_CPU_FLAG_REQUIRE_CGROUP,
@@ -310,6 +331,74 @@ int main(void)
 		}
 	}
 	printf("M154_TENANT_ACCELERATOR_TELEMETRY_LOSS_OK\n");
+	if (drain_records(fd) < 0)
+		return fail("accelerator batch pre-drain");
+	memset(batch_accounts, 0, sizeof(batch_accounts));
+	for (int i = 0; i < 4; i++) {
+		batch_accounts[i].size = sizeof(batch_accounts[i]);
+		batch_accounts[i].flags = AGI_LC_ACCEL_ACCOUNT_MEMORY;
+		batch_accounts[i].device_id = accel.device_id;
+		batch_accounts[i].correlation = 11520 + (uint64_t)i;
+	}
+	if (ioctl(fd, AGI_LC_ACCEL_DEVICE_ACCOUNT_BATCH, &accel_batch) < 0 ||
+	    accel_batch.completed != 4 ||
+	    accel_batch.status != AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED)
+		return fail("accelerator batch accounting");
+	printf("M155_TENANT_ACCELERATOR_BATCH_ACCOUNTING_OK completed=%u\n",
+	       accel_batch.completed);
+	accel_batch.entry_count = 0;
+	accel_batch.completed = 0;
+	accel_batch.status = 0;
+	if (ioctl(fd, AGI_LC_ACCEL_DEVICE_ACCOUNT_BATCH, &accel_batch) >= 0 ||
+	    errno != EINVAL)
+		return fail("accelerator batch malformed input");
+	printf("M155_TENANT_ACCELERATOR_BATCH_MALFORMED_REJECT_OK\n");
+	accel_batch.entry_count = 4;
+	accel_subscribe.event_mask = 0;
+	if (ioctl(fd, AGI_LC_SUBSCRIBE, &accel_subscribe) < 0)
+		return fail("accelerator benchmark unsubscribe");
+	memset(&accel_event_fill, 0, sizeof(accel_event_fill));
+	accel_event_fill.size = sizeof(accel_event_fill);
+	accel_event_fill.flags = AGI_LC_ACCEL_ACCOUNT_MEMORY;
+	accel_event_fill.device_id = accel.device_id;
+	if (clock_gettime(CLOCK_MONOTONIC, &bench_start) < 0)
+		return fail("accelerator single benchmark clock");
+	for (int i = 0; i < 256; i++) {
+		memset(&accel_event_fill, 0, sizeof(accel_event_fill));
+		accel_event_fill.size = sizeof(accel_event_fill);
+		accel_event_fill.flags = AGI_LC_ACCEL_ACCOUNT_MEMORY;
+		accel_event_fill.device_id = accel.device_id;
+		accel_event_fill.correlation = 11600 + (uint64_t)i;
+		if (ioctl(fd, AGI_LC_ACCEL_DEVICE_ACCOUNT, &accel_event_fill) < 0)
+			return fail("accelerator single benchmark");
+	}
+	if (clock_gettime(CLOCK_MONOTONIC, &bench_end) < 0)
+		return fail("accelerator single benchmark clock");
+	single_ns = elapsed_ns(&bench_start, &bench_end);
+	if (clock_gettime(CLOCK_MONOTONIC, &bench_start) < 0)
+		return fail("accelerator batch benchmark clock");
+	for (int i = 0; i < 64; i++) {
+		memset(batch_accounts, 0, sizeof(batch_accounts));
+		for (int j = 0; j < 4; j++) {
+			batch_accounts[j].size = sizeof(batch_accounts[j]);
+			batch_accounts[j].flags = AGI_LC_ACCEL_ACCOUNT_MEMORY;
+			batch_accounts[j].device_id = accel.device_id;
+			batch_accounts[j].correlation = 11700 + (uint64_t)(i * 4 + j);
+		}
+		accel_batch.completed = 0;
+		accel_batch.status = 0;
+		if (ioctl(fd, AGI_LC_ACCEL_DEVICE_ACCOUNT_BATCH, &accel_batch) < 0 ||
+		    accel_batch.completed != 4 ||
+		    accel_batch.status != AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED)
+			return fail("accelerator batch benchmark");
+	}
+	if (clock_gettime(CLOCK_MONOTONIC, &bench_end) < 0)
+		return fail("accelerator batch benchmark clock");
+	batch_ns = elapsed_ns(&bench_start, &bench_end);
+	speedup_x100 = batch_ns ? (single_ns * 100ULL) / batch_ns : 0;
+	printf("M155_TENANT_ACCELERATOR_BATCH_BENCH_OK single_ns=%llu batch_ns=%llu speedup_x100=%llu\n",
+	       (unsigned long long)single_ns, (unsigned long long)batch_ns,
+	       (unsigned long long)speedup_x100);
 	if (ioctl(fd, AGI_LC_SUBSCRIBE, &accel_unsubscribe) < 0)
 		return fail("accelerator event unsubscribe");
 	accel_remove.device_id = accel.device_id;

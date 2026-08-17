@@ -731,6 +731,7 @@
 #define AGI_LC_ACCEL_ACCOUNT_EXACT (1U << 3)
 #define AGI_LC_ACCEL_ACCOUNT_RELEASE (1U << 4)
 #define AGI_LC_ACCEL_ACCOUNT_MAX ((1U << 5) - 1)
+#define AGI_LC_ACCEL_ACCOUNT_BATCH_MAX 64U
 
 #define AGI_LC_ACCEL_ISOLATION_IOMMU (1U << 0)
 #define AGI_LC_ACCEL_ISOLATION_SVA (1U << 1)
@@ -1121,6 +1122,17 @@ struct agi_lc_accel_device_account {
 	__u32 status;
 	__u32 reserved32;
 	__u64 correlation;
+	__u64 reserved[2];
+};
+
+struct agi_lc_accel_device_account_batch {
+	__u32 size;
+	__u32 flags;
+	__u64 entries_ptr;
+	__u32 entry_count;
+	__u32 completed;
+	__u32 status;
+	__u32 reserved32;
 	__u64 reserved[2];
 };
 
@@ -2462,6 +2474,7 @@ struct agi_lc_record {
 #define AGI_LC_ACCEL_SET_WORKLOAD _IOWR(AGI_LC_IOC_MAGIC, 0x37, struct agi_lc_accel_workload)
 #define AGI_LC_ACCEL_GET_WORKLOAD _IOWR(AGI_LC_IOC_MAGIC, 0x38, struct agi_lc_accel_workload)
 #define AGI_LC_ACCEL_DEVICE_ACCOUNT _IOWR(AGI_LC_IOC_MAGIC, 0x39, struct agi_lc_accel_device_account)
+#define AGI_LC_ACCEL_DEVICE_ACCOUNT_BATCH _IOWR(AGI_LC_IOC_MAGIC, 0x6b, struct agi_lc_accel_device_account_batch)
 #define AGI_LC_CHECKPOINT_MANIFEST _IOWR(AGI_LC_IOC_MAGIC, 0x3a, struct agi_lc_checkpoint_manifest)
 #define AGI_LC_RECOVERY _IOWR(AGI_LC_IOC_MAGIC, 0x3b, struct agi_lc_recovery)
 #define AGI_LC_AUTONOMY_CONTROL _IOWR(AGI_LC_IOC_MAGIC, 0x65, struct agi_lc_autonomy_control)

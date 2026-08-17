@@ -9571,30 +9571,28 @@ static int agi_lc_accel_get_workload(struct agi_lc_session *session,
 	return 0;
 }
 
-static int agi_lc_accel_device_account(struct agi_lc_session *session,
-						unsigned long arg)
+static int agi_lc_accel_device_account_apply(
+	struct agi_lc_session *session,
+	struct agi_lc_accel_device_account *account, bool lock_held)
 {
-	struct agi_lc_accel_device_account account;
 	struct agi_lc_accel_record *device;
 	u64 agent_id;
 	int ret;
 
-	if (copy_from_user(&account, (void __user *)arg, sizeof(account)))
-		return -EFAULT;
-	if (account.size != sizeof(account) ||
-	    (account.flags & ~AGI_LC_ACCEL_ACCOUNT_MAX) || !account.device_id ||
-	    (!account.flags) ||
-	    (!(account.flags & AGI_LC_ACCEL_ACCOUNT_COMPUTE) && account.compute_ns) ||
-	    (!(account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) && account.memory_bytes) ||
-	    (!(account.flags & AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS) && account.submissions) ||
-	    ((account.flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
-	     (!(account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) ||
-		      (account.flags & (AGI_LC_ACCEL_ACCOUNT_COMPUTE |
-					AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS)))) ||
-	    account.agent_id || account.tenant_cgroup_id ||
-	    account.tenant_cgroup_generation || account.device_memory_limit_bytes ||
-	    account.status || account.reserved32 ||
-	    account.reserved[0] || account.reserved[1])
+	if (account->size != sizeof(*account) ||
+	    (account->flags & ~AGI_LC_ACCEL_ACCOUNT_MAX) || !account->device_id ||
+	    (!account->flags) ||
+	    (!(account->flags & AGI_LC_ACCEL_ACCOUNT_COMPUTE) && account->compute_ns) ||
+	    (!(account->flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) && account->memory_bytes) ||
+	    (!(account->flags & AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS) && account->submissions) ||
+	    ((account->flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
+	     (!(account->flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) ||
+	      (account->flags & (AGI_LC_ACCEL_ACCOUNT_COMPUTE |
+				 AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS)))) ||
+	    account->agent_id || account->tenant_cgroup_id ||
+	    account->tenant_cgroup_generation || account->device_memory_limit_bytes ||
+	    account->status || account->reserved32 || account->reserved[0] ||
+	    account->reserved[1])
 		return -EINVAL;
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
@@ -9604,10 +9602,12 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 		return -EPERM;
 
 	agent_id = faisal_task_get_agent(current);
-	mutex_lock(&agi_lc_accel_lock);
-	device = agi_lc_find_accel_locked(account.device_id);
+	if (!lock_held)
+		mutex_lock(&agi_lc_accel_lock);
+	device = agi_lc_find_accel_locked(account->device_id);
 	if (!device) {
-		mutex_unlock(&agi_lc_accel_lock);
+		if (!lock_held)
+			mutex_unlock(&agi_lc_accel_lock);
 		return -ENODEV;
 	}
 	if (device->device.isolation_flags &
@@ -9617,87 +9617,137 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 		    device->device.owner_cgroup_id != session->tenant_cgroup_id ||
 		    device->device.owner_cgroup_generation !=
 			 session->tenant_cgroup_generation) {
-			mutex_unlock(&agi_lc_accel_lock);
+			if (!lock_held)
+				mutex_unlock(&agi_lc_accel_lock);
 			return -EPERM;
 		}
-		if ((account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) &&
-		    (account.flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
-		    account.memory_bytes > device->accounted_memory_bytes) {
-			account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_RELEASE_DENIED;
-			mutex_unlock(&agi_lc_accel_lock);
-			if (copy_to_user((void __user *)arg, &account, sizeof(account)))
-				return -EFAULT;
+		if ((account->flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) &&
+		    (account->flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
+		    account->memory_bytes > device->accounted_memory_bytes) {
+			account->status = AGI_LC_ACCEL_ACCOUNT_STATUS_RELEASE_DENIED;
+			if (!lock_held)
+				mutex_unlock(&agi_lc_accel_lock);
 			return -ERANGE;
 		}
-		if ((account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) &&
-		    !(account.flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
-		    (account.memory_bytes > device->device.total_memory_bytes ||
+		if ((account->flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) &&
+		    !(account->flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
+		    (account->memory_bytes > device->device.total_memory_bytes ||
 		     device->accounted_memory_bytes >
-			 device->device.total_memory_bytes - account.memory_bytes)) {
-			account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_MEMORY_DENIED;
-			mutex_unlock(&agi_lc_accel_lock);
-			if (copy_to_user((void __user *)arg, &account, sizeof(account)))
-				return -EFAULT;
+			 device->device.total_memory_bytes - account->memory_bytes)) {
+			account->status = AGI_LC_ACCEL_ACCOUNT_STATUS_MEMORY_DENIED;
+			if (!lock_held)
+				mutex_unlock(&agi_lc_accel_lock);
 			return -EDQUOT;
 		}
-		account.tenant_cgroup_id = session->tenant_cgroup_id;
-		account.tenant_cgroup_generation =
+		account->tenant_cgroup_id = session->tenant_cgroup_id;
+		account->tenant_cgroup_generation =
 			session->tenant_cgroup_generation;
-		account.device_memory_limit_bytes = device->device.total_memory_bytes;
+		account->device_memory_limit_bytes =
+			device->device.total_memory_bytes;
 	}
-	if ((account.flags & AGI_LC_ACCEL_ACCOUNT_COMPUTE) &&
-	    account.compute_ns > U64_MAX - device->device.compute_ns) {
-		account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_UNSUPPORTED;
-		mutex_unlock(&agi_lc_accel_lock);
-		if (copy_to_user((void __user *)arg, &account, sizeof(account)))
-			return -EFAULT;
+	if ((account->flags & AGI_LC_ACCEL_ACCOUNT_COMPUTE) &&
+	    account->compute_ns > U64_MAX - device->device.compute_ns) {
+		account->status = AGI_LC_ACCEL_ACCOUNT_STATUS_UNSUPPORTED;
+		if (!lock_held)
+			mutex_unlock(&agi_lc_accel_lock);
 		return -EOVERFLOW;
 	}
-	if ((account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) &&
-	    (!(account.flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
-	     (account.memory_bytes > U64_MAX - device->device.memory_bytes ||
-	      account.memory_bytes > U64_MAX - device->accounted_memory_bytes))) {
-		account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_UNSUPPORTED;
-		mutex_unlock(&agi_lc_accel_lock);
-		if (copy_to_user((void __user *)arg, &account, sizeof(account)))
-			return -EFAULT;
+	if ((account->flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) &&
+	    (!(account->flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) &&
+	     (account->memory_bytes > U64_MAX - device->device.memory_bytes ||
+	      account->memory_bytes > U64_MAX - device->accounted_memory_bytes))) {
+		account->status = AGI_LC_ACCEL_ACCOUNT_STATUS_UNSUPPORTED;
+		if (!lock_held)
+			mutex_unlock(&agi_lc_accel_lock);
 		return -EOVERFLOW;
 	}
-	if ((account.flags & AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS) &&
-	    account.submissions > U64_MAX - device->device.submissions) {
-		account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_UNSUPPORTED;
-		mutex_unlock(&agi_lc_accel_lock);
-		if (copy_to_user((void __user *)arg, &account, sizeof(account)))
-			return -EFAULT;
+	if ((account->flags & AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS) &&
+	    account->submissions > U64_MAX - device->device.submissions) {
+		account->status = AGI_LC_ACCEL_ACCOUNT_STATUS_UNSUPPORTED;
+		if (!lock_held)
+			mutex_unlock(&agi_lc_accel_lock);
 		return -EOVERFLOW;
 	}
-	if (account.flags & AGI_LC_ACCEL_ACCOUNT_COMPUTE) {
-		device->device.compute_ns += account.compute_ns;
-		faisal_task_accel_account(current, account.compute_ns, 0, 0);
+	if (account->flags & AGI_LC_ACCEL_ACCOUNT_COMPUTE) {
+		device->device.compute_ns += account->compute_ns;
+		faisal_task_accel_account(current, account->compute_ns, 0, 0);
 	}
-	if (account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) {
-		if (account.flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) {
-			device->device.memory_bytes -= account.memory_bytes;
-			device->accounted_memory_bytes -= account.memory_bytes;
-			faisal_task_accel_release(current, 0, account.memory_bytes, 0);
+	if (account->flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) {
+		if (account->flags & AGI_LC_ACCEL_ACCOUNT_RELEASE) {
+			device->device.memory_bytes -= account->memory_bytes;
+			device->accounted_memory_bytes -= account->memory_bytes;
+			faisal_task_accel_release(current, 0, account->memory_bytes, 0);
 		} else {
-			device->device.memory_bytes += account.memory_bytes;
-			device->accounted_memory_bytes += account.memory_bytes;
-			faisal_task_accel_account(current, 0, account.memory_bytes, 0);
+			device->device.memory_bytes += account->memory_bytes;
+			device->accounted_memory_bytes += account->memory_bytes;
+			faisal_task_accel_account(current, 0, account->memory_bytes, 0);
 		}
 	}
-	if (account.flags & AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS) {
-		device->device.submissions += account.submissions;
-		faisal_task_accel_account(current, 0, 0, account.submissions);
+	if (account->flags & AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS) {
+		device->device.submissions += account->submissions;
+		faisal_task_accel_account(current, 0, 0, account->submissions);
 	}
-	account.agent_id = agent_id;
-	account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED;
+	account->agent_id = agent_id;
+	account->status = AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED;
 	ret = agi_lc_push_record(session, AGI_LC_EVENT_ACCEL, 0,
-				 account.correlation, account.device_id);
+				 account->correlation, account->device_id);
 	if (ret)
-		account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_TELEMETRY_LOST;
-	mutex_unlock(&agi_lc_accel_lock);
+		account->status = AGI_LC_ACCEL_ACCOUNT_STATUS_TELEMETRY_LOST;
+	if (!lock_held)
+		mutex_unlock(&agi_lc_accel_lock);
+	return ret;
+}
+
+static int agi_lc_accel_device_account(struct agi_lc_session *session,
+					unsigned long arg)
+{
+	struct agi_lc_accel_device_account account;
+	int ret;
+
+	if (copy_from_user(&account, (void __user *)arg, sizeof(account)))
+		return -EFAULT;
+	ret = agi_lc_accel_device_account_apply(session, &account, false);
 	if (copy_to_user((void __user *)arg, &account, sizeof(account)))
+		return -EFAULT;
+	return ret;
+}
+
+static int agi_lc_accel_device_account_batch(struct agi_lc_session *session,
+						unsigned long arg)
+{
+	struct agi_lc_accel_device_account_batch batch;
+	struct agi_lc_accel_device_account *accounts;
+	size_t bytes;
+	u32 i;
+	int ret = 0;
+
+	if (copy_from_user(&batch, (void __user *)arg, sizeof(batch)))
+		return -EFAULT;
+	if (batch.size != sizeof(batch) || batch.flags || !batch.entries_ptr ||
+	    !batch.entry_count ||
+	    batch.entry_count > AGI_LC_ACCEL_ACCOUNT_BATCH_MAX ||
+	    batch.completed || batch.status || batch.reserved32 ||
+	    batch.reserved[0] || batch.reserved[1])
+		return -EINVAL;
+	bytes = (size_t)batch.entry_count * sizeof(*accounts);
+	accounts = memdup_user(u64_to_user_ptr(batch.entries_ptr), bytes);
+	if (IS_ERR(accounts))
+		return PTR_ERR(accounts);
+	mutex_lock(&agi_lc_accel_lock);
+	for (i = 0; i < batch.entry_count; i++) {
+		ret = agi_lc_accel_device_account_apply(session, &accounts[i], true);
+		batch.completed = i + 1;
+		if (ret)
+			break;
+	}
+	mutex_unlock(&agi_lc_accel_lock);
+	if (batch.completed)
+		batch.status = accounts[batch.completed - 1].status;
+	if (copy_to_user(u64_to_user_ptr(batch.entries_ptr),
+			 accounts, bytes))
+		ret = -EFAULT;
+	kfree(accounts);
+	if (copy_to_user((void __user *)arg, &batch, sizeof(batch)))
 		return -EFAULT;
 	return ret;
 }
@@ -10636,6 +10686,9 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 		break;
 	case AGI_LC_ACCEL_DEVICE_ACCOUNT:
 		ret = agi_lc_accel_device_account(session, arg);
+		break;
+	case AGI_LC_ACCEL_DEVICE_ACCOUNT_BATCH:
+		ret = agi_lc_accel_device_account_batch(session, arg);
 		break;
 	case AGI_LC_CHECKPOINT_MANIFEST:
 		ret = agi_lc_checkpoint_manifest(session, arg);
