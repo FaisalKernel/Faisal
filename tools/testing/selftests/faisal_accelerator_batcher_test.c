@@ -67,11 +67,14 @@ int main(void)
 	struct faisal_accel_batcher batcher;
 	struct agi_lc_event_backpressure state;
 	struct agi_lc_accel_device_account account;
+	uint64_t queries_before;
+	uint64_t flushes_before;
 
 	assert(faisal_accel_batcher_init(&batcher, 3, 7, 4, 0) < 0);
 	assert(faisal_accel_batcher_init(&batcher, 3, 7, 4, 4) == 0);
 	assert(faisal_accel_batcher_set_ioctl(&batcher, fake_ioctl) == 0);
 	assert(faisal_accel_batcher_set_resync(&batcher, fake_resync, &fake) == 0);
+	assert(faisal_accel_batcher_set_retry_backoff(&batcher, 1000, 8000) == 0);
 	memset(&fake, 0, sizeof(fake));
 	fake.resync_result = 0;
 	fake.pressure.size = sizeof(fake.pressure);
@@ -107,6 +110,13 @@ int main(void)
 	assert(faisal_accel_batcher_flush(&batcher) < 0 && errno == EAGAIN);
 	assert(faisal_accel_batcher_pending(&batcher) == 1);
 	assert(batcher.resync_failures == 1);
+	queries_before = batcher.backpressure_queries;
+	flushes_before = batcher.flushes;
+	errno = 0;
+	assert(faisal_accel_batcher_flush(&batcher) < 0 && errno == EAGAIN);
+	assert(batcher.fast_rejects == 1);
+	assert(batcher.backpressure_queries == queries_before);
+	assert(batcher.flushes == flushes_before);
 	fake.pressure.state = AGI_LC_EVENT_BACKPRESSURE_STATE_NORMAL;
 	fake.pressure.queued = 0;
 	assert(faisal_accel_batcher_acknowledge_loss(&batcher) == 0);
@@ -133,12 +143,13 @@ int main(void)
 	assert(faisal_accel_batcher_flush(&batcher) == 0);
 	assert(faisal_accel_batcher_pending(&batcher) == 0);
 	assert(batcher.submitted_entries >= 5);
-	printf("M158_ADAPTIVE_BATCHER_RESYNC_OK flushes=%llu queries=%llu losses=%llu resync=%llu failures=%llu target=%u\n",
+	printf("M159_ADAPTIVE_BATCHER_BACKOFF_OK flushes=%llu queries=%llu losses=%llu resync=%llu failures=%llu fast=%llu target=%u\n",
 	       (unsigned long long)batcher.flushes,
 	       (unsigned long long)batcher.backpressure_queries,
 	       (unsigned long long)batcher.telemetry_losses,
 	       (unsigned long long)batcher.resync_attempts,
 	       (unsigned long long)batcher.resync_failures,
+	       (unsigned long long)batcher.fast_rejects,
 	       batcher.target_batch);
 	return 0;
 }

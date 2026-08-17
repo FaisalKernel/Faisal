@@ -4,10 +4,46 @@
 #include <stdbool.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <time.h>
 
 static int default_ioctl(int fd, unsigned long request, void *arg)
 {
 	return ioctl(fd, request, arg);
+}
+
+static uint64_t monotonic_ns(void)
+{
+	struct timespec ts;
+
+	if (clock_gettime(CLOCK_MONOTONIC, &ts) < 0)
+		return 0;
+	if ((uint64_t)ts.tv_sec > UINT64_MAX / 1000000000ULL)
+		return UINT64_MAX;
+	return (uint64_t)ts.tv_sec * 1000000000ULL +
+		(uint64_t)ts.tv_nsec;
+}
+
+static void reset_retry_backoff(struct faisal_accel_batcher *batcher)
+{
+	batcher->retry_until_ns = 0;
+	batcher->retry_backoff_ns = FAISAL_ACCEL_BATCHER_DEFAULT_RETRY_NS;
+}
+
+static void arm_retry_backoff(struct faisal_accel_batcher *batcher)
+{
+	uint64_t now = monotonic_ns();
+	uint64_t delay = batcher->retry_backoff_ns;
+
+	if (!delay)
+		delay = FAISAL_ACCEL_BATCHER_DEFAULT_RETRY_NS;
+	if (now > UINT64_MAX - delay)
+		batcher->retry_until_ns = UINT64_MAX;
+	else
+		batcher->retry_until_ns = now + delay;
+	if (delay >= batcher->retry_max_ns / 2)
+		batcher->retry_backoff_ns = batcher->retry_max_ns;
+	else
+		batcher->retry_backoff_ns = delay * 2;
 }
 
 static uint32_t clamp_batch(uint32_t value, uint32_t max_batch)
@@ -52,6 +88,8 @@ int faisal_accel_batcher_init(struct faisal_accel_batcher *batcher,
 	batcher->device_id = device_id;
 	batcher->max_batch = max_batch;
 	batcher->target_batch = clamp_batch(initial_batch, max_batch);
+	batcher->retry_max_ns = FAISAL_ACCEL_BATCHER_MAX_RETRY_NS;
+	reset_retry_backoff(batcher);
 	batcher->ioctl_fn = default_ioctl;
 	return 0;
 }
@@ -62,6 +100,19 @@ int faisal_accel_batcher_set_ioctl(struct faisal_accel_batcher *batcher,
 	if (!batcher || !ioctl_fn)
 		return -1;
 	batcher->ioctl_fn = ioctl_fn;
+	return 0;
+}
+
+int faisal_accel_batcher_set_retry_backoff(struct faisal_accel_batcher *batcher,
+					      uint64_t initial_ns,
+					      uint64_t max_ns)
+{
+	if (!batcher || !initial_ns || initial_ns > max_ns ||
+	    max_ns > FAISAL_ACCEL_BATCHER_MAX_RETRY_NS)
+		return -1;
+	batcher->retry_backoff_ns = initial_ns;
+	batcher->retry_max_ns = max_ns;
+	batcher->retry_until_ns = 0;
 	return 0;
 }
 
@@ -117,6 +168,8 @@ int faisal_accel_batcher_query(struct faisal_accel_batcher *batcher,
 			grow_batch(batcher);
 	} else {
 		batcher->healthy_queries = 0;
+		if (batcher->loss_acknowledged)
+			reset_retry_backoff(batcher);
 	}
 	if (out)
 		*out = state;
@@ -134,6 +187,14 @@ int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
 		return -1;
 	if (!batcher->pending)
 		return 0;
+	{
+		uint64_t now = monotonic_ns();
+		if (now && batcher->retry_until_ns > now) {
+			batcher->fast_rejects++;
+			errno = EAGAIN;
+			return -1;
+		}
+	}
 	if (faisal_accel_batcher_query(batcher, &state) < 0)
 		return -1;
 	if (state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS &&
@@ -145,6 +206,7 @@ int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
 	    state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_FULL ||
 	    state.queued + batcher->pending > state.capacity) {
 		errno = EAGAIN;
+		arm_retry_backoff(batcher);
 		return -1;
 	}
 	memset(&batch, 0, sizeof(batch));
@@ -168,11 +230,13 @@ int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
 		if (ret == -EAGAIN || errno == EAGAIN) {
 			batcher->telemetry_losses++;
 			shrink_batch(batcher);
+			arm_retry_backoff(batcher);
 		}
 		return -1;
 	}
 	if (batcher->pending)
 		return -1;
+	reset_retry_backoff(batcher);
 	return 0;
 }
 
@@ -182,6 +246,7 @@ int faisal_accel_batcher_acknowledge_loss(struct faisal_accel_batcher *batcher)
 		return -1;
 	batcher->loss_acknowledged = 1;
 	batcher->healthy_queries = 0;
+	reset_retry_backoff(batcher);
 	return 0;
 }
 

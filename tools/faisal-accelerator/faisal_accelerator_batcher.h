@@ -7,6 +7,8 @@
 #define FAISAL_ACCEL_BATCHER_MIN_BATCH 1U
 #define FAISAL_ACCEL_BATCHER_DEFAULT_BATCH 8U
 #define FAISAL_ACCEL_BATCHER_MAX_BATCH AGI_LC_ACCEL_ACCOUNT_BATCH_MAX
+#define FAISAL_ACCEL_BATCHER_DEFAULT_RETRY_NS 1000000ULL
+#define FAISAL_ACCEL_BATCHER_MAX_RETRY_NS 100000000ULL
 
 typedef int (*faisal_accel_ioctl_fn)(int fd, unsigned long request,
 					 void *arg);
@@ -31,6 +33,10 @@ struct faisal_accel_batcher {
 	uint64_t telemetry_losses;
 	uint64_t resync_attempts;
 	uint64_t resync_failures;
+	uint64_t retry_until_ns;
+	uint64_t retry_backoff_ns;
+	uint64_t retry_max_ns;
+	uint64_t fast_rejects;
 	struct agi_lc_accel_device_account entries[FAISAL_ACCEL_BATCHER_MAX_BATCH];
 };
 
@@ -42,6 +48,9 @@ int faisal_accel_batcher_set_ioctl(struct faisal_accel_batcher *batcher,
 int faisal_accel_batcher_set_resync(struct faisal_accel_batcher *batcher,
 				    faisal_accel_resync_fn resync_fn,
 				    void *context);
+int faisal_accel_batcher_set_retry_backoff(struct faisal_accel_batcher *batcher,
+					      uint64_t initial_ns,
+					      uint64_t max_ns);
 int faisal_accel_batcher_submit(struct faisal_accel_batcher *batcher,
 				const struct agi_lc_accel_device_account *entry);
 int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher);
