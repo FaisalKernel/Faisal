@@ -25,7 +25,7 @@ cc -O2 -Wall -Wextra -Werror -static \
   -I"$LINUX/tools/faisal-replication" \
   "$LINUX/tools/testing/selftests/faisal_replication_election_test.c" \
   "$LINUX/tools/faisal-replication/faisal_replication_election.c" \
-  -o "$ELECTION_TEST"
+  -lcrypto -o "$ELECTION_TEST"
 
 rm -rf "$ROOTFS"
 mkdir -p "$ROOTFS/bin" "$ROOTFS/dev" "$ROOTFS/proc" "$ROOTFS/sys" "$ROOTFS/tmp"
@@ -99,6 +99,8 @@ for marker in \
   FJT_FUTURE_TERM_DENIED_OK \
   FJT_SELFTEST_OK \
   FJR_ELECTION_STATE_MACHINE_OK \
+  FJR_PERSISTENT_TERM_VOTEDFOR_RESTORE_OK \
+  FJR_CORRUPTED_ELECTION_METADATA_FAIL_CLOSED_OK \
   FJR_CONSENSUS_TIMEOUT_POLICY_OK \
   FJR_ELECTION_SELFTEST_OK \
   M108_INTENT_OBJECTIVE_CREATED_OK \

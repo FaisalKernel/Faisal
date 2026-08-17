@@ -1,5 +1,8 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include "../../faisal-replication/faisal_replication_election.h"
 
 static void check(int condition, const char *name, int rc)
@@ -21,8 +24,10 @@ int main(void)
 		.heartbeat_interval_ns = 25,
 		.random_seed = 19,
 	};
-	struct fjr_election election;
+	struct fjr_election election, rebooted;
 	enum fjr_action action;
+	char metadata_path[] = "/tmp/faisal-election-meta-XXXXXX";
+	int metadata_fd;
 	uint32_t granted;
 	int rc;
 
@@ -56,8 +61,27 @@ int main(void)
 	      "CURRENT_TERM_VOTE_GRANTED", rc);
 	check(fjr_receive_vote_request(&election, 3, 2, 3, 2, 1, &granted) == FJR_OK &&
 	      granted == 0, "SECOND_VOTE_DENIED", rc);
+	check(fjr_election_persist(&election, metadata_path) == FJR_OK &&
+	      election.metadata_generation == 1, "METADATA_PERSISTED", rc);
+	check(fjr_election_init(&rebooted, &config, 5000) == FJR_OK &&
+	      fjr_election_restore(&rebooted, metadata_path) == FJR_OK &&
+	      rebooted.current_term == election.current_term &&
+	      rebooted.voted_for == election.voted_for &&
+	      rebooted.metadata_generation == 1,
+	      "METADATA_RESTORED_AFTER_REBOOT", rc);
+	metadata_fd = open(metadata_path, O_WRONLY);
+	check(metadata_fd >= 0 && write(metadata_fd, "X", 1) == 1 &&
+	      close(metadata_fd) == 0 &&
+	      fjr_election_restore(&rebooted, metadata_path) == FJR_ERR_CORRUPT,
+	      "CORRUPTED_METADATA_REJECTED", rc);
+	unlink(metadata_path);
 	printf("FJR_ELECTION_STATE_MACHINE_OK term=%llu role=%u\n",
 	       (unsigned long long)election.current_term, election.role);
+	printf("FJR_PERSISTENT_TERM_VOTEDFOR_RESTORE_OK term=%llu voted_for=%llu generation=%llu\n",
+	       (unsigned long long)election.current_term,
+	       (unsigned long long)election.voted_for,
+	       (unsigned long long)rebooted.metadata_generation);
+	printf("FJR_CORRUPTED_ELECTION_METADATA_FAIL_CLOSED_OK\n");
 	printf("FJR_CONSENSUS_TIMEOUT_POLICY_OK min=%llu max=%llu heartbeat=%llu\n",
 	       (unsigned long long)config.min_election_timeout_ns,
 	       (unsigned long long)config.max_election_timeout_ns,

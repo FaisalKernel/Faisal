@@ -1,0 +1,30 @@
+{
+  "milestones": ["M139", "M140", "M141"],
+  "status": "validated_qemu_host_and_local_https_mock",
+  "M139_persistent_election_metadata": {
+    "record": "magic version term voted_for generation sha256 checksum",
+    "write_policy": "0600 temporary file write fsync atomic rename",
+    "restore_policy": "exact size magic version checksum and monotonic generation validation",
+    "evidence": ["FJR_PERSISTENT_TERM_VOTEDFOR_RESTORE_OK", "FJR_CORRUPTED_ELECTION_METADATA_FAIL_CLOSED_OK"]
+  },
+  "M140_generated_replication_bindings": {
+    "source": "tools/faisal-replication/faisal_replication.proto",
+    "generated": ["faisal_replication_pb2.py", "faisal_replication_pb2_grpc.py"],
+    "rpc_methods": ["RequestVote", "AppendEntries", "AppendJournal", "InstallSnapshot", "ReadCommit"],
+    "evidence": "protobuf serialization and generated stub smoke test passed"
+  },
+  "M141_vault_integration": {
+    "container_runner": "tools/faisal-replication/run_vault_dev_integration.sh",
+    "container_attempt": "FJT_VAULT_CONTAINER_UNAVAILABLE rc=77 because Docker is unavailable",
+    "fallback": "local HTTPS Vault-shaped Transit integration with temporary TLS certificate",
+    "evidence": ["FJT_VAULT_HTTPS_INTEGRATION_OK", "FJT_VAULT_MOCK_INTEGRATION_SELFTEST_OK"],
+    "credential_policy": "no live Vault token or production endpoint used"
+  },
+  "combined_qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+  "kernel_diagnostics": "none observed",
+  "limitations": [
+    "The durable election metadata is a local atomic backend; replication of term/vote state over gRPC remains pending.",
+    "Generated bindings are Python and require grpcio; other language bindings remain an operator build step.",
+    "A real HashiCorp Vault dev container could not run because Docker is unavailable; the local HTTPS test validates the client transport and response contract only."
+  ]
+}

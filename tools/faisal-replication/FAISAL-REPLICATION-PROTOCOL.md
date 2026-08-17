@@ -14,7 +14,8 @@ An elected leader must renew a bounded lease through quorum acknowledgements. Th
 
 ## Journal replication
 
-`AppendJournal` carries contiguous records. A follower accepts records only when the leader term is current, the previous digest equals the follower’s chain tail, each sequence is exactly the next expected sequence, each record signature verifies against the provisioned key identity, and the leader identity is authenticated by the TLS client certificate. The follower acknowledges its match sequence only after durable write and `fsync`.
+`AppendEntries` carries contiguous records; `AppendJournal` remains a compatibility alias.
+ A follower accepts records only when the leader term is current, the previous digest equals the follower’s chain tail, each sequence is exactly the next expected sequence, each record signature verifies against the provisioned key identity, and the leader identity is authenticated by the TLS client certificate. The follower acknowledges its match sequence only after durable write and `fsync`.
 
 `ReadCommit` returns only a quorum-committed term, sequence, and digest. A follower must not expose an uncommitted record as authoritative state. Snapshot installation uses the same signed identity and chain-root checks, and replaces state only after full digest verification.
 

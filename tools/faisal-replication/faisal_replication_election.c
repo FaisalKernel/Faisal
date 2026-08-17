@@ -1,5 +1,123 @@
 #include "faisal_replication_election.h"
+#include <errno.h>
+#include <fcntl.h>
+#include <stddef.h>
+#include <openssl/evp.h>
+#include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+static int valid_replica(const struct fjr_election *election, uint64_t id);
+
+static int metadata_digest(struct fjr_election_metadata *metadata)
+{
+	EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+	unsigned int length = 0;
+	int rc = FJR_ERR_CORRUPT;
+	memset(metadata->checksum, 0, sizeof(metadata->checksum));
+	if (ctx && EVP_DigestInit_ex(ctx, EVP_sha256(), NULL) == 1 &&
+	    EVP_DigestUpdate(ctx, metadata, offsetof(struct fjr_election_metadata,
+					      checksum)) == 1 &&
+	    EVP_DigestFinal_ex(ctx, metadata->checksum, &length) == 1 &&
+	    length == sizeof(metadata->checksum))
+		rc = FJR_OK;
+	EVP_MD_CTX_free(ctx);
+	return rc;
+}
+
+static int write_all(int fd, const void *data, size_t size)
+{
+	const uint8_t *bytes = data;
+	while (size) {
+		ssize_t written = write(fd, bytes, size);
+		if (written <= 0)
+			return FJR_ERR_IO;
+		bytes += written;
+		size -= (size_t)written;
+	}
+	return FJR_OK;
+}
+
+int fjr_election_persist(struct fjr_election *election,
+			 const char *metadata_path)
+{
+	struct fjr_election_metadata metadata = {
+		.magic = FJR_ELECTION_META_MAGIC,
+		.version = FJR_ELECTION_META_VERSION,
+		.term = election ? election->current_term : 0,
+		.voted_for = election ? election->voted_for : 0,
+		.generation = election ? election->metadata_generation + 1 : 0,
+	};
+	char temporary_path[512];
+	int fd, rc;
+
+	if (!election || !metadata_path || !*metadata_path ||
+	    metadata.term == 0 ||
+	    (metadata.voted_for && !valid_replica(election, metadata.voted_for)))
+		return FJR_ERR_ARGUMENT;
+	if (metadata.generation == 0 ||
+	    snprintf(temporary_path, sizeof(temporary_path), "%s.tmp.%ld",
+		     metadata_path, (long)getpid()) >= (int)sizeof(temporary_path))
+		return FJR_ERR_POLICY;
+	if (metadata_digest(&metadata) != FJR_OK)
+		return FJR_ERR_CORRUPT;
+	fd = open(temporary_path, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+	if (fd < 0)
+		return FJR_ERR_IO;
+	rc = write_all(fd, &metadata, sizeof(metadata));
+	if (rc == FJR_OK && fsync(fd) < 0)
+		rc = FJR_ERR_IO;
+	if (close(fd) < 0 && rc == FJR_OK)
+		rc = FJR_ERR_IO;
+	if (rc != FJR_OK) {
+		unlink(temporary_path);
+		return rc;
+	}
+	if (rename(temporary_path, metadata_path) < 0) {
+		unlink(temporary_path);
+		return FJR_ERR_IO;
+	}
+	election->metadata_generation = metadata.generation;
+	return FJR_OK;
+}
+
+int fjr_election_restore(struct fjr_election *election,
+			 const char *metadata_path)
+{
+	struct fjr_election_metadata metadata;
+	uint8_t expected_checksum[sizeof(metadata.checksum)];
+	int fd;
+	ssize_t got;
+
+	if (!election || !metadata_path || !*metadata_path)
+		return FJR_ERR_ARGUMENT;
+	fd = open(metadata_path, O_RDONLY | O_CLOEXEC);
+	if (fd < 0)
+		return errno == ENOENT ? FJR_ERR_IO : FJR_ERR_IO;
+	got = read(fd, &metadata, sizeof(metadata));
+	close(fd);
+	if (got != sizeof(metadata) || metadata.magic != FJR_ELECTION_META_MAGIC ||
+	    metadata.version != FJR_ELECTION_META_VERSION || !metadata.term ||
+	    metadata.generation == 0 ||
+	    (metadata.voted_for && !valid_replica(election, metadata.voted_for)))
+		return FJR_ERR_CORRUPT;
+	memcpy(expected_checksum, metadata.checksum, sizeof(expected_checksum));
+	if (metadata_digest(&metadata) != FJR_OK ||
+	    memcmp(expected_checksum, metadata.checksum, sizeof(expected_checksum)) != 0)
+		return FJR_ERR_CORRUPT;
+	if (metadata.term < election->current_term ||
+	    (metadata.term == election->current_term &&
+	     metadata.generation < election->metadata_generation))
+		return FJR_ERR_STALE;
+	election->current_term = metadata.term;
+	election->voted_for = metadata.voted_for;
+	election->metadata_generation = metadata.generation;
+	election->role = FJR_FOLLOWER;
+	election->leader_id = 0;
+	return FJR_OK;
+}
 
 static uint64_t next_random(struct fjr_election *election)
 {

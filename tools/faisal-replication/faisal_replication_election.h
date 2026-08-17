@@ -10,6 +10,10 @@
 #define FJR_ERR_STALE -3
 #define FJR_ERR_CONFLICT -4
 #define FJR_ERR_STATE -5
+#define FJR_ERR_IO -6
+#define FJR_ERR_CORRUPT -7
+#define FJR_ELECTION_META_MAGIC 0x46524d31U
+#define FJR_ELECTION_META_VERSION 1U
 
 enum fjr_role {
 	FJR_FOLLOWER = 0,
@@ -36,6 +40,15 @@ struct fjr_election_config {
 	uint64_t random_seed;
 };
 
+struct fjr_election_metadata {
+	uint32_t magic;
+	uint32_t version;
+	uint64_t term;
+	uint64_t voted_for;
+	uint64_t generation;
+	uint8_t checksum[32];
+};
+
 struct fjr_election {
 	uint64_t replica_id;
 	uint32_t replica_count;
@@ -47,6 +60,7 @@ struct fjr_election {
 	uint64_t current_term;
 	uint64_t voted_for;
 	uint64_t leader_id;
+	uint64_t metadata_generation;
 	uint64_t deadline_ns;
 	uint64_t votes_bitmap;
 	uint32_t votes_granted;
@@ -54,6 +68,10 @@ struct fjr_election {
 };
 
 int fjr_validate_config(const struct fjr_election_config *config);
+int fjr_election_persist(struct fjr_election *election,
+			 const char *metadata_path);
+int fjr_election_restore(struct fjr_election *election,
+			 const char *metadata_path);
 int fjr_election_init(struct fjr_election *election,
 		      const struct fjr_election_config *config,
 		      uint64_t now_ns);

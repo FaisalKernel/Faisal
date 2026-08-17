@@ -4,6 +4,7 @@ package faisal.replication.v1;
 
 service JournalReplication {
   rpc RequestVote(VoteRequest) returns (VoteResponse);
+  rpc AppendEntries(AppendRequest) returns (AppendResponse);
   rpc AppendJournal(AppendRequest) returns (AppendResponse);
   rpc InstallSnapshot(SnapshotRequest) returns (SnapshotResponse);
   rpc ReadCommit(ReadCommitRequest) returns (ReadCommitResponse);
