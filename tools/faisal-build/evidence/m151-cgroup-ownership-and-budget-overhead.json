@@ -1,0 +1,50 @@
+{
+  "milestone": "M151",
+  "status": "pass_qemu_kernel_build_host_benchmark_design_documented",
+  "features": {
+    "tenant_cgroup_ownership": {
+      "abi": "AGI_LC_TENANT_CGROUP 0x69",
+      "operations": ["BIND", "QUERY", "RELEASE"],
+      "ownership_rule": "cgroup2 target must be a direct child of the caller's current cgroup",
+      "identity": ["cgroup_id", "parent_cgroup_id", "session hierarchy_owner_id", "generation"],
+      "reference_lifetime": "cgroup reference released on explicit release or lifecycle file teardown",
+      "sandbox_interaction": "owned cgroup descendants are accepted by the session execution-context guard",
+      "qemu_markers": [
+        "M151_TENANT_CGROUP_OWNER_OK",
+        "M151_TENANT_CGROUP_QUERY_OK",
+        "M151_TENANT_CGROUP_RELEASE_OK"
+      ]
+    },
+    "budget_enforcement": {
+      "require_cgroup_flag": "AGI_LC_TENANT_BUDGET_FLAG_REQUIRE_CGROUP",
+      "qemu_result": "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK",
+      "durable_regression": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+    }
+  },
+  "benchmark": {
+    "artifact": "tools/faisal-build/evidence/m151-tenant-budget-check-overhead.json",
+    "matrix_artifact": "tools/faisal-build/evidence/m151-tenant-budget-check-overhead-matrix.log",
+    "operation": "high-concurrency host synchronization model",
+    "payload_bytes": 4096,
+    "profiles": [
+      {"threads": 2, "iterations_per_thread": 100000, "baseline_ops_per_second": 40494592.858, "checked_ops_per_second": 13676923.174, "overhead_percent": 196.080},
+      {"threads": 8, "iterations_per_thread": 100000, "baseline_ops_per_second": 51040704.004, "checked_ops_per_second": 14017647.798, "overhead_percent": 264.117},
+      {"threads": 32, "iterations_per_thread": 100000, "baseline_ops_per_second": 49736612.773, "checked_ops_per_second": 14685600.365, "overhead_percent": 238.676}
+    ],
+    "interpretation": "The serialized budget-check model sustained approximately 13.7–14.7 million checked operations per second in this host run; observed overhead was approximately 196–264 percent versus the atomic baseline.",
+    "limitation": "This is not a kernel ioctl, cgroup controller, QEMU, GPU, NPU, or production-cluster benchmark. Native kernel tracepoint and physical-system qualification remain required."
+  },
+  "design": {
+    "document": "FAISAL-TENANT-RESOURCE-DESIGN.md",
+    "hard_cpu_time": "future policy mapped to cgroup v2 cpu.max and cpu.stat with generation, capability, and fail-closed controller checks",
+    "gpu_npu": "future tenant claims bound to cgroup, device, generation, driver-authoritative compute/memory/submission counters, and delegated device capability",
+    "non_claims": ["No hard CPU throttling implemented in M151", "No GPU/NPU isolation or physical accelerator qualification claimed"]
+  },
+  "validation": {
+    "kernel_build": "pass",
+    "tenant_qemu": "pass",
+    "durable_qemu": "pass",
+    "selftest_compile": "pass",
+    "protected_files": "M63 files remain untracked and unstaged"
+  }
+}

@@ -20,6 +20,8 @@ cat > "$ROOTFS/init" <<'INIT'
 /bin/busybox --install -s /bin
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
+mkdir -p /sys/fs/cgroup
+mount -t cgroup2 none /sys/fs/cgroup || { echo M151_CGROUP2_MOUNT_FAIL; exit 1; }
 mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 printf 'FAISAL_M115_BOOT_OK\n'
 [ -e /dev/agi_lifecycle ] || { echo M115_DEVICE_NODE_MISSING; exit 1; }
@@ -41,7 +43,7 @@ cat "$LOG"
 cat /tmp/faisal-m115-tenant-qemu-stderr.log 2>/dev/null || true
 printf 'M115_QEMU_RC=%s\n' "$qemu_rc"
 [ "$qemu_rc" -ne 124 ]
-for marker in FAISAL_M115_BOOT_OK M115_TENANT_BUDGET_SET_OK M115_TENANT_BUDGET_ADMISSION_DENY_OK M115_TENANT_BUDGET_QUERY_OK M115_TENANT_AGGREGATE_OK M115_TENANT_MALFORMED_REJECT_OK M115_TENANT_BUDGET_CLEAR_OK M115_SELFTEST_EXIT=0 M115_SELFTEST_RC=0; do
+for marker in FAISAL_M115_BOOT_OK M151_TENANT_CGROUP_OWNER_OK M151_TENANT_CGROUP_QUERY_OK M115_TENANT_BUDGET_SET_OK M115_TENANT_BUDGET_ADMISSION_DENY_OK M115_TENANT_BUDGET_QUERY_OK M115_TENANT_AGGREGATE_OK M115_TENANT_MALFORMED_REJECT_OK M115_TENANT_BUDGET_CLEAR_OK M151_TENANT_CGROUP_RELEASE_OK M115_SELFTEST_EXIT=0 M115_SELFTEST_RC=0; do
   grep -q "$marker" "$LOG"
 done
 if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|possible circular locking dependency|data-race|use-after-free|kernel BUG|rcu: .*stall' "$LOG"; then

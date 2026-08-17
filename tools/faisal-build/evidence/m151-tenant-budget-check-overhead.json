@@ -1,0 +1,14 @@
+{
+  "benchmark": "faisal-tenant-budget-check-overhead",
+  "threads": 8,
+  "iterations_per_thread": 250000,
+  "bytes_per_operation": 4096,
+  "baseline_ops": 2000000,
+  "checked_ops": 2000000,
+  "baseline_ns": 44005261,
+  "checked_ns": 150264871,
+  "baseline_ops_per_second": 45449111.187,
+  "checked_ops_per_second": 13309830.745,
+  "overhead_percent": 241.470,
+  "interpretation": "Controlled host synchronization model; not a kernel syscall, QEMU, cgroup, GPU, NPU, or production-cluster benchmark."
+}

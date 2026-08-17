@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 static int fail(const char *what)
@@ -43,14 +45,35 @@ int main(void)
 			 AGI_LC_TENANT_FLAG_INCLUDE_LIGHT_AGENTS,
 	};
 	struct agi_lc_tenant_snapshot malformed = snapshot;
+	const char *cgroup_root = "/sys/fs/cgroup";
+	const char *tenant_path = "/sys/fs/cgroup/faisal-tenant-115";
+	int cgroup_fd = -1;
+	struct agi_lc_tenant_cgroup tenant_cgroup = {
+		.size = sizeof(tenant_cgroup),
+		.flags = AGI_LC_TENANT_CGROUP_FLAG_REQUIRE_SANDBOX,
+		.operation = AGI_LC_TENANT_CGROUP_BIND,
+		.cgroup_fd = -1,
+		.correlation = 11504,
+	};
+	struct agi_lc_tenant_cgroup tenant_query = {
+		.size = sizeof(tenant_query),
+		.operation = AGI_LC_TENANT_CGROUP_QUERY,
+		.cgroup_fd = -1,
+	};
+	struct agi_lc_tenant_cgroup tenant_release = {
+		.size = sizeof(tenant_release),
+		.operation = AGI_LC_TENANT_CGROUP_RELEASE,
+		.cgroup_fd = -1,
+	};
 	struct agi_lc_tenant_budget budget = {
 		.size = sizeof(budget),
-		.flags = AGI_LC_TENANT_BUDGET_FLAG_REQUIRE_SANDBOX,
+		.flags = AGI_LC_TENANT_BUDGET_FLAG_REQUIRE_SANDBOX |
+			 AGI_LC_TENANT_BUDGET_FLAG_REQUIRE_CGROUP,
 		.operation = AGI_LC_TENANT_BUDGET_OP_SET,
 		.resource_mask = AGI_LC_RESOURCE_CPU | AGI_LC_RESOURCE_RAM,
 		.cpu_budget_ns = 60ULL * 1000 * 1000 * 1000,
 		.memory_limit_bytes = 32ULL * 1024 * 1024,
-		.correlation = 11504,
+		.correlation = 11505,
 	};
 	struct agi_lc_resource_demand over_limit = demand;
 	struct agi_lc_tenant_budget query = {
@@ -77,6 +100,27 @@ int main(void)
 	agent.agent_id = light.agent_id;
 	if (ioctl(fd, AGI_LC_SET_AGENT, &agent) < 0)
 		return fail("set agent");
+	if (mount("none", cgroup_root, "cgroup2", 0, NULL) < 0 && errno != EBUSY)
+		return fail("cgroup2 mount");
+	if (mkdir(tenant_path, 0755) < 0 && errno != EEXIST)
+		return fail("tenant cgroup mkdir");
+	cgroup_fd = open(tenant_path, O_RDONLY | O_DIRECTORY);
+	if (cgroup_fd < 0)
+		return fail("tenant cgroup open");
+	tenant_cgroup.cgroup_fd = cgroup_fd;
+	if (ioctl(fd, AGI_LC_TENANT_CGROUP, &tenant_cgroup) < 0 ||
+	    tenant_cgroup.status != AGI_LC_TENANT_CGROUP_STATUS_BOUND ||
+	    !tenant_cgroup.cgroup_id || !tenant_cgroup.parent_cgroup_id ||
+	    tenant_cgroup.hierarchy_owner_id != create.session_id)
+		return fail("tenant cgroup bind");
+	printf("M151_TENANT_CGROUP_OWNER_OK cgroup=%llu parent=%llu\n",
+	       (unsigned long long)tenant_cgroup.cgroup_id,
+	       (unsigned long long)tenant_cgroup.parent_cgroup_id);
+	if (ioctl(fd, AGI_LC_TENANT_CGROUP, &tenant_query) < 0 ||
+	    tenant_query.status != AGI_LC_TENANT_CGROUP_STATUS_BOUND ||
+	    tenant_query.cgroup_id != tenant_cgroup.cgroup_id)
+		return fail("tenant cgroup query");
+	printf("M151_TENANT_CGROUP_QUERY_OK\n");
 	if (ioctl(fd, AGI_LC_SET_RESOURCE_DEMAND, &demand) < 0)
 		return fail("resource demand ioctl");
 	printf("M115_DEMAND status=%u enforced=0x%x unsupported=0x%x agent=%llu\\n",
@@ -130,7 +174,15 @@ int main(void)
 	if (ioctl(fd, AGI_LC_TENANT_BUDGET, &clear) < 0 ||
 	    clear.status != AGI_LC_TENANT_BUDGET_STATUS_CLEARED)
 		return fail("tenant budget clear");
-	printf("M115_TENANT_BUDGET_CLEAR_OK\nM115_SELFTEST_EXIT=0\n");
+	printf("M115_TENANT_BUDGET_CLEAR_OK\n");
+	if (ioctl(fd, AGI_LC_TENANT_CGROUP, &tenant_release) < 0 ||
+	    tenant_release.status != AGI_LC_TENANT_CGROUP_STATUS_REVOKED)
+		return fail("tenant cgroup release");
+	printf("M151_TENANT_CGROUP_RELEASE_OK\n");
+	close(cgroup_fd);
+	if (rmdir(tenant_path) < 0)
+		return fail("tenant cgroup rmdir");
+	printf("M115_SELFTEST_EXIT=0\n");
 	close(fd);
 	return 0;
 }

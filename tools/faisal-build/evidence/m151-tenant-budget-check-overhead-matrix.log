@@ -1,0 +1,45 @@
+THREADS=2
+{
+  "benchmark": "faisal-tenant-budget-check-overhead",
+  "threads": 2,
+  "iterations_per_thread": 100000,
+  "bytes_per_operation": 4096,
+  "baseline_ops": 200000,
+  "checked_ops": 200000,
+  "baseline_ns": 4938931,
+  "checked_ns": 14623172,
+  "baseline_ops_per_second": 40494592.858,
+  "checked_ops_per_second": 13676923.174,
+  "overhead_percent": 196.080,
+  "interpretation": "Controlled host synchronization model; not a kernel syscall, QEMU, cgroup, GPU, NPU, or production-cluster benchmark."
+}
+THREADS=8
+{
+  "benchmark": "faisal-tenant-budget-check-overhead",
+  "threads": 8,
+  "iterations_per_thread": 100000,
+  "bytes_per_operation": 4096,
+  "baseline_ops": 800000,
+  "checked_ops": 800000,
+  "baseline_ns": 15673765,
+  "checked_ns": 57070916,
+  "baseline_ops_per_second": 51040704.004,
+  "checked_ops_per_second": 14017647.798,
+  "overhead_percent": 264.117,
+  "interpretation": "Controlled host synchronization model; not a kernel syscall, QEMU, cgroup, GPU, NPU, or production-cluster benchmark."
+}
+THREADS=32
+{
+  "benchmark": "faisal-tenant-budget-check-overhead",
+  "threads": 32,
+  "iterations_per_thread": 100000,
+  "bytes_per_operation": 4096,
+  "baseline_ops": 3200000,
+  "checked_ops": 3200000,
+  "baseline_ns": 64338921,
+  "checked_ns": 217900523,
+  "baseline_ops_per_second": 49736612.773,
+  "checked_ops_per_second": 14685600.365,
+  "overhead_percent": 238.676,
+  "interpretation": "Controlled host synchronization model; not a kernel syscall, QEMU, cgroup, GPU, NPU, or production-cluster benchmark."
+}

@@ -370,6 +370,10 @@ struct mutex graph_lock;
 			bool sandbox_bound;
 		bool tenant_budget_valid;
 		struct agi_lc_tenant_budget tenant_budget;
+		struct cgroup *tenant_cgroup;
+		u64 tenant_cgroup_id;
+		u64 tenant_cgroup_parent_id;
+		u64 tenant_cgroup_generation;
 		u32 sandbox_flags;
 
 	u32 sandbox_state;
@@ -538,6 +542,18 @@ static bool agi_lc_sandbox_matches_current(
 					observed.reserved[0] == expected->reserved[0] &&
 					observed.reserved[1] == expected->reserved[1];
 
+}
+
+static bool agi_lc_tenant_cgroup_matches_current(
+		const struct agi_lc_session *session)
+{
+	struct cgroup *current_cgroup;
+
+	if (!session->tenant_cgroup)
+		return false;
+	current_cgroup = task_dfl_cgroup(current);
+	return cgroup_id(current_cgroup) == session->tenant_cgroup_parent_id ||
+		cgroup_is_descendant(current_cgroup, session->tenant_cgroup);
 }
 
 static int agi_lc_sandbox_validate_requirements(u32 flags,
@@ -5275,6 +5291,10 @@ static int agi_lc_release(struct inode *inode, struct file *file)
 	agi_lc_memory_release_session(session, true);
 	agi_lc_power_policy_release_all(session);
 	agi_lc_artifact_release_session(session, true);
+	if (session->tenant_cgroup) {
+		cgroup_put(session->tenant_cgroup);
+		session->tenant_cgroup = NULL;
+	}
 	memset(session->persistent_memory_records, 0, sizeof(session->persistent_memory_records));
 	kfree(session->ipc_channels);
 	kfree(session->light_agents);
@@ -8682,6 +8702,108 @@ static u64 agi_lc_sat_add_u64(u64 left, u64 right)
 	return left + right;
 }
 
+static int agi_lc_tenant_cgroup_control(struct agi_lc_session *session,
+						unsigned long arg)
+{
+	struct agi_lc_tenant_cgroup request;
+	struct cgroup *target = NULL;
+	struct cgroup *current_cgroup;
+	u64 cgroup_id_value = 0;
+	u64 parent_id = 0;
+	int ret = 0;
+
+	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
+		return -EFAULT;
+	if (request.size != sizeof(request) ||
+	    (request.flags & ~AGI_LC_TENANT_CGROUP_FLAGS_ALL) ||
+	    request.status || request.reserved32 || request.session_id ||
+	    request.cgroup_id || request.parent_cgroup_id ||
+	    request.hierarchy_owner_id || request.generation ||
+	    request.reserved[0] || request.reserved[1])
+		return -EINVAL;
+	if (request.operation != AGI_LC_TENANT_CGROUP_BIND &&
+	    request.operation != AGI_LC_TENANT_CGROUP_QUERY &&
+	    request.operation != AGI_LC_TENANT_CGROUP_RELEASE)
+		return -EINVAL;
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != session->session_id)
+		return -EPERM;
+	if (request.operation == AGI_LC_TENANT_CGROUP_BIND) {
+		if (request.cgroup_fd < 0 || session->tenant_cgroup)
+			return session->tenant_cgroup ? -EALREADY : -EINVAL;
+		if ((request.flags & AGI_LC_TENANT_CGROUP_FLAG_REQUIRE_SANDBOX) &&
+		    (!session->sandbox_bound ||
+		     session->sandbox_state != AGI_LC_SANDBOX_STATE_BOUND ||
+		     !agi_lc_sandbox_matches_current(&session->sandbox_binding)))
+			return -EPERM;
+		target = cgroup_get_from_fd(request.cgroup_fd);
+		if (IS_ERR(target))
+			return PTR_ERR(target);
+		current_cgroup = task_dfl_cgroup(current);
+		if (!cgroup_parent(target) ||
+		    cgroup_parent(target) != current_cgroup ||
+		    !cgroup_is_descendant(target, current_cgroup)) {
+			cgroup_put(target);
+			return -EXDEV;
+		}
+		cgroup_id_value = cgroup_id(target);
+		parent_id = cgroup_id(current_cgroup);
+		if (!cgroup_id_value || !parent_id) {
+			cgroup_put(target);
+			return -EOPNOTSUPP;
+		}
+		session->tenant_cgroup = target;
+		session->tenant_cgroup_id = cgroup_id_value;
+		session->tenant_cgroup_parent_id = parent_id;
+		session->tenant_cgroup_generation++;
+		ret = agi_lc_push_record(session, AGI_LC_EVENT_SECURITY_CAPABILITY,
+					 0, request.correlation, cgroup_id_value);
+		if (ret) {
+			session->tenant_cgroup = NULL;
+			session->tenant_cgroup_id = 0;
+			session->tenant_cgroup_parent_id = 0;
+			cgroup_put(target);
+			return ret;
+		}
+		request.status = AGI_LC_TENANT_CGROUP_STATUS_BOUND;
+	} else if (request.operation == AGI_LC_TENANT_CGROUP_QUERY) {
+		if (request.cgroup_fd != -1 || !session->tenant_cgroup)
+			return -ENOENT;
+		if (!agi_lc_tenant_cgroup_matches_current(session))
+			return -EXDEV;
+		request.status = AGI_LC_TENANT_CGROUP_STATUS_BOUND;
+	} else {
+		if (request.cgroup_fd != -1 || !session->tenant_cgroup)
+			return -ENOENT;
+		if (!agi_lc_tenant_cgroup_matches_current(session))
+			return -EXDEV;
+		cgroup_id_value = session->tenant_cgroup_id;
+		parent_id = session->tenant_cgroup_parent_id;
+		target = session->tenant_cgroup;
+		session->tenant_cgroup = NULL;
+		session->tenant_cgroup_id = 0;
+		session->tenant_cgroup_parent_id = 0;
+		session->tenant_cgroup_generation++;
+		cgroup_put(target);
+		request.status = AGI_LC_TENANT_CGROUP_STATUS_REVOKED;
+		ret = agi_lc_push_record(session, AGI_LC_EVENT_SECURITY_CAPABILITY,
+					 0, request.correlation, cgroup_id_value);
+	}
+	request.session_id = session->session_id;
+	request.cgroup_id = session->tenant_cgroup_id;
+	request.parent_cgroup_id = session->tenant_cgroup_parent_id;
+	request.hierarchy_owner_id = session->session_id;
+	request.generation = session->tenant_cgroup_generation;
+	if (request.status == AGI_LC_TENANT_CGROUP_STATUS_REVOKED) {
+		request.cgroup_id = cgroup_id_value;
+		request.parent_cgroup_id = parent_id;
+	}
+	if (copy_to_user((void __user *)arg, &request, sizeof(request)))
+		return -EFAULT;
+	return ret;
+}
+
 static int agi_lc_tenant_budget_control(struct agi_lc_session *session,
 						 unsigned long arg)
 {
@@ -8711,6 +8833,9 @@ static int agi_lc_tenant_budget_control(struct agi_lc_session *session,
 	if ((budget.flags & AGI_LC_TENANT_BUDGET_FLAG_REQUIRE_SANDBOX) &&
 	    (!READ_ONCE(session->sandbox_bound) ||
 	     READ_ONCE(session->sandbox_state) != AGI_LC_SANDBOX_STATE_BOUND))
+		return -EPERM;
+	if ((budget.flags & AGI_LC_TENANT_BUDGET_FLAG_REQUIRE_CGROUP) &&
+	    !session->tenant_cgroup)
 		return -EPERM;
 	if (budget.operation == AGI_LC_TENANT_BUDGET_OP_SET) {
 		if (!budget.resource_mask ||
@@ -10046,7 +10171,8 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 		return -ENOTTY;
 	mutex_lock(&session->ioctl_lock);
 	if (session->sandbox_bound && command != AGI_LC_SANDBOX &&
-	    !agi_lc_sandbox_matches_current(&session->sandbox_binding)) {
+	    !agi_lc_sandbox_matches_current(&session->sandbox_binding) &&
+	    !agi_lc_tenant_cgroup_matches_current(session)) {
 		session->sandbox_state = AGI_LC_SANDBOX_STATE_REVOKED;
 		mutex_unlock(&session->ioctl_lock);
 		return -EXDEV;
@@ -10257,6 +10383,9 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 		break;
 	case AGI_LC_TENANT_BUDGET:
 		ret = agi_lc_tenant_budget_control(session, arg);
+		break;
+	case AGI_LC_TENANT_CGROUP:
+		ret = agi_lc_tenant_cgroup_control(session, arg);
 		break;
 	case AGI_LC_ACCEL_REGISTER:
 		ret = agi_lc_accel_register(session, arg);
