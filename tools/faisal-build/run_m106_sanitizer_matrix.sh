@@ -23,13 +23,15 @@ build_mode() {
 	case "$mode" in
 	kasan)
 		"$LINUX/scripts/config" --file "$out/.config" \
-			-e DEBUG_KERNEL -e SLUB_DEBUG -e KASAN -e KASAN_GENERIC \
+			-e DEBUG_KERNEL -e SLUB_DEBUG -e CFS_BANDWIDTH -e CGROUP_SCHED \
+				-e KASAN -e KASAN_GENERIC \
 			-e KASAN_INLINE -e PROVE_LOCKING -e DEBUG_LOCK_ALLOC \
 			-e LOCKDEP -e UBSAN -e KCOV
 		;;
 	kcsan)
 		"$LINUX/scripts/config" --file "$out/.config" \
-			-e DEBUG_KERNEL -e KCSAN -e KCSAN_SELFTEST -e KCSAN_STRICT \
+			-e DEBUG_KERNEL -e SLUB_DEBUG -e CFS_BANDWIDTH -e CGROUP_SCHED \
+				-e KCSAN -e KCSAN_SELFTEST -e KCSAN_STRICT \
 						-e SLUB_DEBUG -e PROVE_LOCKING -e DEBUG_LOCK_ALLOC \
 			-e LOCKDEP -e UBSAN -e KCOV \
 			-d SERIO_I8042 -d KEYBOARD_ATKBD -d SERIO -d INPUT_KEYBOARD
