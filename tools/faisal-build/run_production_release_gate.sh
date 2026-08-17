@@ -9,6 +9,10 @@ BUILD_A=${FAISAL_BUILD_A:-}
 BUILD_B=${FAISAL_BUILD_B:-}
 ARTIFACT_OUT=${FAISAL_ARTIFACT_OUT:-}
 PUBLIC_KEY=${FAISAL_PUBLIC_KEY:-}
+RELEASE_ROOT_DISTRIBUTION=${FAISAL_RELEASE_ROOT_DISTRIBUTION:-}
+RELEASE_KEYRING=${FAISAL_RELEASE_KEYRING:-}
+RELEASE_ATTESTATION=${FAISAL_RELEASE_ATTESTATION:-}
+RELEASE_AUTHORITY_REPORT=${FAISAL_RELEASE_AUTHORITY_REPORT:-${ARTIFACT_OUT:-/tmp}/FAISAL-release-authority.tsv}
 SECURITY_MANIFEST=${FAISAL_SECURITY_MANIFEST:-}
 ADVISORY_LEDGER=${FAISAL_ADVISORY_LEDGER:-}
 ACCELERATOR_EVIDENCE=${FAISAL_ACCELERATOR_EVIDENCE:-}
@@ -26,6 +30,14 @@ fail() { echo "FAISAL_RELEASE_GATE_FAIL:$*" >&2; exit 1; }
 [ -n "$ARTIFACT_OUT" ] || fail "FAISAL_ARTIFACT_OUT is required"
 [ -n "$PUBLIC_KEY" ] || fail "FAISAL_PUBLIC_KEY is required"
 [ -r "$PUBLIC_KEY" ] || fail "public key is unreadable"
+[ -n "$RELEASE_ROOT_DISTRIBUTION" ] || fail "FAISAL_RELEASE_ROOT_DISTRIBUTION is required"
+[ -r "$RELEASE_ROOT_DISTRIBUTION" ] || fail "trusted root distribution is unreadable"
+[ -n "$RELEASE_KEYRING" ] || fail "FAISAL_RELEASE_KEYRING is required"
+[ -r "$RELEASE_KEYRING" ] || fail "trusted release keyring is unreadable"
+[ -r "$RELEASE_KEYRING.sig" ] || fail "trusted release keyring signature is missing"
+[ -n "$RELEASE_ATTESTATION" ] || fail "FAISAL_RELEASE_ATTESTATION is required"
+[ -r "$RELEASE_ATTESTATION" ] || fail "release attestation is unreadable"
+[ -r "$RELEASE_ATTESTATION.sig" ] || fail "release attestation signature is missing"
 [ -n "$SECURITY_MANIFEST" ] || fail "FAISAL_SECURITY_MANIFEST is required"
 [ -n "$ADVISORY_LEDGER" ] || fail "FAISAL_ADVISORY_LEDGER is required"
 [ -n "$ACCELERATOR_EVIDENCE" ] || fail "FAISAL_ACCELERATOR_EVIDENCE is required"
@@ -34,12 +46,26 @@ fail() { echo "FAISAL_RELEASE_GATE_FAIL:$*" >&2; exit 1; }
 [ -x "$LINUX/tools/faisal-build/verify_advisory_ledger.sh" ] || fail "advisory ledger verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_security_release_evidence.sh" ] || fail "security evidence verifier unavailable"
+[ -r "$LINUX/tools/faisal-build/faisal_release_authority.py" ] || fail "release authority verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/compare_reproducible_builds.sh" ] || fail "reproducibility comparator unavailable"
 [ "$RUN_ADAPTER_CONFORMANCE" = 0 ] || [ "$RUN_ADAPTER_CONFORMANCE" = 1 ] || fail "invalid adapter conformance mode"
 [ "$RUN_ADAPTER_CONFORMANCE" = 0 ] || [ -x "$LINUX/tools/faisal-build/run_adapter_conformance_gate.sh" ] || fail "adapter conformance gate unavailable"
 
 mkdir -p "$(dirname "$REPORT")"
 printf 'check\tstatus\tdetail\n' > "$REPORT"
+
+python3 "$LINUX/tools/faisal-build/faisal_release_authority.py" verify \
+  --root-distribution "$RELEASE_ROOT_DISTRIBUTION" \
+  --keyring "$RELEASE_KEYRING" \
+  --attestation "$RELEASE_ATTESTATION" \
+  --manifest "$ARTIFACT_OUT/FAISAL-build-manifest.json" \
+  --sbom "$ARTIFACT_OUT/FAISAL-SBOM.spdx" \
+  --checksums "$ARTIFACT_OUT/FAISAL-artifact-sha256sums.txt" \
+  --report "$RELEASE_AUTHORITY_REPORT" >/tmp/faisal-release-authority-gate.log 2>&1 || {
+  cat /tmp/faisal-release-authority-gate.log >&2
+  fail "operator-controlled release authority verification"
+}
+printf 'operator_release_authority\tpass\t%s\n' "$RELEASE_AUTHORITY_REPORT" >> "$REPORT"
 
 FAISAL_BUILD="$BUILD_A" \
 FAISAL_ARTIFACT_OUT="$ARTIFACT_OUT" \
