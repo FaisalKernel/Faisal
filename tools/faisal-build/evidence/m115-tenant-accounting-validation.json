@@ -1,0 +1,46 @@
+{
+  "milestone": "M115",
+  "feature": "kernel tenant aggregate resource accounting",
+  "status": "partially_validated_tenant_accounting",
+  "kernel_base": "Linux v7.2-rc7",
+  "abi": 38,
+  "build": {
+    "out_of_tree": "/home/ubuntu/agi-kernel/build/m115-focused",
+    "config": {
+      "CONFIG_AGI_LIFECYCLE": "y",
+      "CONFIG_UCLAMP_TASK": "y",
+      "CONFIG_SECURITY_LANDLOCK": "y",
+      "CONFIG_DEVTMPFS": "y",
+      "CONFIG_DEVTMPFS_MOUNT": "y"
+    },
+    "strict_lifecycle_module_compile": "pass",
+    "boot_image": "arch/x86/boot/bzImage"
+  },
+  "uapi": {
+    "new_ioctl": "AGI_LC_GET_TENANT_SNAPSHOT",
+    "ioctl_number": "0x67",
+    "authority": "read-only aggregate query; lineage-bound; optional kernel-attested sandbox requirement",
+    "overflow_behavior": "saturating u64 addition"
+  },
+  "qemu": {
+    "harness": "tools/faisal-build/run_tenant_accounting_qemu.sh",
+    "result": "pass",
+    "markers": [
+      "FAISAL_M115_BOOT_OK",
+      "M115_DEMAND status=2 enforced=0x3 unsupported=0x0",
+      "M115_TENANT_AGGREGATE_OK agents=1 active=1 light=1 memory_limit=16777216",
+      "M115_TENANT_MALFORMED_REJECT_OK",
+      "M115_SELFTEST_EXIT=0",
+      "M115_SELFTEST_RC=0",
+      "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+    ],
+    "kernel_diagnostics": "none"
+  },
+  "claims_not_made": [
+    "No claim of complete tenant isolation is made; namespace creation and cgroup hierarchy ownership remain open.",
+    "No claim of worker supervision is made; heartbeat, restart, and migration gates remain open.",
+    "No current-head sanitizer matrix result is claimed for M115; dedicated KASAN/KCSAN/lockdep validation remains open.",
+    "No claim of production readiness is made."
+  ],
+  "next_dependency": "M115-worker-supervision-namespace-cgroup-ownership-and-sanitizer-validation"
+}

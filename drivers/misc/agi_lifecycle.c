@@ -8618,6 +8618,96 @@ static int agi_lc_get_resource_snapshot(struct agi_lc_session *session,
 	return 0;
 }
 
+static u64 agi_lc_sat_add_u64(u64 left, u64 right)
+{
+	if (U64_MAX - left < right)
+		return U64_MAX;
+	return left + right;
+}
+
+static int agi_lc_get_tenant_snapshot(struct agi_lc_session *session,
+					       unsigned long arg)
+{
+	struct agi_lc_tenant_snapshot snapshot;
+	unsigned long flags;
+	u32 i;
+
+	if (copy_from_user(&snapshot, (void __user *)arg, sizeof(snapshot)))
+		return -EFAULT;
+	if (snapshot.size != sizeof(snapshot) ||
+	    (snapshot.flags & ~AGI_LC_TENANT_FLAGS_ALL) ||
+	    snapshot.session_id || snapshot.sandbox_binding_id ||
+	    snapshot.sampled_at_ns || snapshot.generation || snapshot.resource_mask ||
+	    snapshot.measured_mask || snapshot.unsupported_mask ||
+	    snapshot.over_budget_mask || snapshot.agent_count ||
+	    snapshot.active_agent_count || snapshot.light_agent_count ||
+	    snapshot.reserved32 || snapshot.cpu_time_ns || snapshot.cpu_budget_ns ||
+	    snapshot.cpu_elapsed_ns || snapshot.memory_rss_bytes ||
+	    snapshot.memory_limit_bytes || snapshot.memory_current_bytes ||
+	    snapshot.network_tx_bytes || snapshot.network_rx_bytes ||
+	    snapshot.storage_read_bytes || snapshot.storage_write_bytes ||
+	    snapshot.io_read_chars || snapshot.io_write_chars ||
+	    snapshot.accel_compute_ns || snapshot.accel_memory_bytes ||
+	    snapshot.accel_submissions || snapshot.correlation ||
+	    snapshot.reserved[0] || snapshot.reserved[1])
+		return -EINVAL;
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != session->session_id)
+		return -EPERM;
+	if ((snapshot.flags & AGI_LC_TENANT_FLAG_REQUIRE_SANDBOX) &&
+	    (!READ_ONCE(session->sandbox_bound) ||
+	     READ_ONCE(session->sandbox_state) != AGI_LC_SANDBOX_STATE_BOUND))
+		return -EPERM;
+
+	snapshot.session_id = session->session_id;
+	snapshot.sandbox_binding_id = READ_ONCE(session->sandbox_bound) ?
+		READ_ONCE(session->sandbox_binding_id) : 0;
+	snapshot.sampled_at_ns = ktime_get_ns();
+	for (i = 0; i < AGI_LC_AGENT_RECORDS; i++) {
+		struct agi_lc_agent_record *record = &session->agents[i];
+		struct agi_lc_resource_demand *demand;
+
+		if (!record->valid)
+			continue;
+		snapshot.agent_count++;
+		if (record->state != AGI_LC_AGENT_STATE_COMPLETED)
+			snapshot.active_agent_count++;
+		if (!record->resource_demand_valid)
+			continue;
+		demand = &record->resource_demand;
+		snapshot.resource_mask |= demand->resource_mask;
+		snapshot.measured_mask |= demand->enforced_mask;
+		snapshot.unsupported_mask |= demand->unsupported_mask;
+		snapshot.cpu_time_ns = agi_lc_sat_add_u64(snapshot.cpu_time_ns,
+						  demand->observed_cpu_time_ns);
+		snapshot.cpu_elapsed_ns = agi_lc_sat_add_u64(snapshot.cpu_elapsed_ns,
+						     demand->observed_cpu_time_ns);
+		snapshot.memory_current_bytes = agi_lc_sat_add_u64(
+			snapshot.memory_current_bytes, demand->observed_memory_bytes);
+		if (demand->memory_max_bytes)
+			snapshot.memory_limit_bytes = agi_lc_sat_add_u64(
+				snapshot.memory_limit_bytes, demand->memory_max_bytes);
+		if (demand->memory_max_bytes &&
+		    demand->observed_memory_bytes > demand->memory_max_bytes)
+			snapshot.over_budget_mask |= AGI_LC_RESOURCE_RAM;
+		snapshot.accel_compute_ns = agi_lc_sat_add_u64(
+			snapshot.accel_compute_ns, demand->observed_accel_compute_ns);
+		snapshot.accel_memory_bytes = agi_lc_sat_add_u64(
+			snapshot.accel_memory_bytes, demand->observed_accel_memory_bytes);
+		snapshot.accel_submissions = agi_lc_sat_add_u64(
+			snapshot.accel_submissions, demand->observed_accel_submissions);
+	}
+	if (snapshot.flags & AGI_LC_TENANT_FLAG_INCLUDE_LIGHT_AGENTS)
+		snapshot.light_agent_count = READ_ONCE(session->light_agent_count);
+	spin_lock_irqsave(&session->queue_lock, flags);
+	snapshot.generation = session->change_generation;
+	spin_unlock_irqrestore(&session->queue_lock, flags);
+	if (copy_to_user((void __user *)arg, &snapshot, sizeof(snapshot)))
+		return -EFAULT;
+	return 0;
+}
+
 static int agi_lc_set_resource_demand(struct agi_lc_session *session,
 						      unsigned long arg)
 
@@ -9973,6 +10063,9 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 		break;
 	case AGI_LC_GET_RESOURCE_SNAPSHOT:
 		ret = agi_lc_get_resource_snapshot(session, arg);
+		break;
+	case AGI_LC_GET_TENANT_SNAPSHOT:
+		ret = agi_lc_get_tenant_snapshot(session, arg);
 		break;
 	case AGI_LC_ACCEL_REGISTER:
 		ret = agi_lc_accel_register(session, arg);

@@ -675,6 +675,9 @@
 #define AGI_LC_RESOURCE_STATUS_PARTIAL 1
 #define AGI_LC_RESOURCE_STATUS_ENFORCED 2
 #define AGI_LC_RESOURCE_STATUS_UNSUPPORTED 3
+#define AGI_LC_TENANT_FLAG_INCLUDE_LIGHT_AGENTS (1U << 0)
+#define AGI_LC_TENANT_FLAG_REQUIRE_SANDBOX (1U << 1)
+#define AGI_LC_TENANT_FLAGS_ALL ((1U << 2) - 1)
 
 #define AGI_LC_ACCEL_TYPE_GPU 1
 #define AGI_LC_ACCEL_TYPE_NPU 2
@@ -1172,6 +1175,39 @@ struct agi_lc_resource_snapshot {
 	__u64 reserved[2];
 };
 
+struct agi_lc_tenant_snapshot {
+	__u32 size;
+	__u32 flags;
+	__u64 session_id;
+	__u64 sandbox_binding_id;
+	__u64 sampled_at_ns;
+	__u64 generation;
+	__u32 resource_mask;
+	__u32 measured_mask;
+	__u32 unsupported_mask;
+	__u32 over_budget_mask;
+	__u32 agent_count;
+	__u32 active_agent_count;
+	__u32 light_agent_count;
+	__u32 reserved32;
+	__u64 cpu_time_ns;
+	__u64 cpu_budget_ns;
+	__u64 cpu_elapsed_ns;
+	__u64 memory_rss_bytes;
+	__u64 memory_limit_bytes;
+	__u64 memory_current_bytes;
+	__u64 network_tx_bytes;
+	__u64 network_rx_bytes;
+	__u64 storage_read_bytes;
+	__u64 storage_write_bytes;
+	__u64 io_read_chars;
+	__u64 io_write_chars;
+	__u64 accel_compute_ns;
+	__u64 accel_memory_bytes;
+	__u64 accel_submissions;
+	__u64 correlation;
+	__u64 reserved[2];
+};
 struct agi_lc_light_agent {
 	__u32 size;
 	__u32 flags;
@@ -2365,6 +2401,7 @@ struct agi_lc_record {
 #define AGI_LC_REFLECTION _IOWR(AGI_LC_IOC_MAGIC, 0x58, struct agi_lc_reflection)
 #define AGI_LC_OBSERVABILITY _IOWR(AGI_LC_IOC_MAGIC, 0x59, struct agi_lc_observability)
 #define AGI_LC_GET_RESOURCE_SNAPSHOT _IOWR(AGI_LC_IOC_MAGIC, 0x5a, struct agi_lc_resource_snapshot)
+#define AGI_LC_GET_TENANT_SNAPSHOT _IOWR(AGI_LC_IOC_MAGIC, 0x67, struct agi_lc_tenant_snapshot)
 #define AGI_LC_SET_WORLD_SUBSCRIPTION _IOWR(AGI_LC_IOC_MAGIC, 0x2f, struct agi_lc_world_subscription)
 #define AGI_LC_GET_WORLD_SUBSCRIPTION _IOWR(AGI_LC_IOC_MAGIC, 0x30, struct agi_lc_world_subscription)
 #define AGI_LC_ATTACH_TASK _IO(AGI_LC_IOC_MAGIC, 0x06)
