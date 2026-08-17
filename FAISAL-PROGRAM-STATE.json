@@ -1443,6 +1443,7 @@
     "m118_worker_supervision": "pass_bounded_heartbeat_timeout_reassignment_quarantine_after_three_restarts_qemu",
     "m119_namespace_cgroup_attestation": "pass_cgroup_namespace_identity_hierarchy_owner_binding_qemu",
     "m120_checkpoint_bound_handoff": "pass_exact_checkpoint_digest_required_untrusted_digest_denied_lease_fenced_qemu",
+    "m121_authenticated_handoff_token": "pass_target_generation_timestamp_checkpoint_bound_token_tamper_denial_qemu",
     "adapter_conformance_gate": "pass_four_qemu_adapters_sandbox_network_repository_scanner_fail_closed_rollback_replay",
     "m108_durable_execution_qemu": "pass",
     "m108_aggregate_qemu_harnesses": 29,

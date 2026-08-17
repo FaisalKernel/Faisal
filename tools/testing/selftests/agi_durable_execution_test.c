@@ -124,12 +124,22 @@ int main(int argc, char **argv)
 		{
 		uint64_t previous_generation = worker.lease_generation;
 		uint8_t untrusted_checkpoint[FEX_DIGEST_SIZE] = { 0 };
+		uint8_t handoff_token[FEX_HANDOFF_TOKEN_SIZE];
+		uint8_t tampered_token[FEX_HANDOFF_TOKEN_SIZE];
 		CHECK_EQ(fex_handoff_verified(&service, node_c.task_id, 9001, 12, 100,
 				untrusted_checkpoint), FEX_ERR_AUTHORITY,
 				"UNTRUSTED_HANDOFF_DIGEST");
 		printf("M120_UNTRUSTED_HANDOFF_DIGEST_DENIED_OK\n");
-		CHECK_OK(fex_handoff_verified(&service, node_c.task_id, 9001, 12, 100,
-				 checkpoint.checkpoint_digest), "WORKER_HANDOFF");
+		CHECK_OK(fex_make_handoff_token(&service, node_c.task_id, 9001, 12,
+				 handoff_token), "MAKE_HANDOFF_TOKEN");
+		memcpy(tampered_token, handoff_token, sizeof(tampered_token));
+		tampered_token[0] ^= 0x01;
+		CHECK_EQ(fex_handoff_token_verified(&service, node_c.task_id, 9001, 12,
+				100, tampered_token), FEX_ERR_AUTHORITY,
+				"TAMPERED_HANDOFF_TOKEN");
+		printf("M121_TAMPERED_HANDOFF_TOKEN_DENIED_OK\n");
+		CHECK_OK(fex_handoff_token_verified(&service, node_c.task_id, 9001, 12,
+				100, handoff_token), "WORKER_HANDOFF");
 
 		CHECK_OK(fex_query_worker(&service, node_c.task_id, &worker),
 			 "QUERY_WORKER_HANDOFF");

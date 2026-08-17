@@ -1,0 +1,34 @@
+{
+  "milestone": "M121",
+  "feature": "authenticated checkpoint-bound handoff token",
+  "status": "validated_qemu",
+  "token_binding": [
+    "objective checkpoint digest",
+    "task ID",
+    "target worker ID",
+    "handoff timestamp",
+    "current lease generation"
+  ],
+  "security_properties": {
+    "tampered_token": "denied with FEX_ERR_AUTHORITY",
+    "wrong_target_or_generation": "token mismatch prevents admission",
+    "checkpoint_authority": "exact persisted checkpoint digest still required",
+    "model_output_authority": false,
+    "remote_host_attestation": "not claimed; remains a separate distributed gate"
+  },
+  "evidence": {
+    "tampered_token_denial": "M121_TAMPERED_HANDOFF_TOKEN_DENIED_OK",
+    "checkpoint_bound_handoff": "M120_CHECKPOINT_BOUND_HANDOFF_OK",
+    "lease_fenced_handoff": "M117_WORKER_HANDOFF_OK",
+    "timeout_reassignment": "M115_WORKER_TIMEOUT_REASSIGN_OK",
+    "quarantine": "M118_WORKER_QUARANTINE_OK",
+    "replay": "M117_WORKER_HANDOFF_REPLAY_OK",
+    "qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+    "kernel_diagnostics": "none observed"
+  },
+  "limitations": [
+    "The token is a local authenticated admission primitive, not a network transport protocol.",
+    "Production deployment still requires remote host identity, key provisioning, replay-window policy, and network-partition testing.",
+    "The token does not turn model output into authority."
+  ]
+}

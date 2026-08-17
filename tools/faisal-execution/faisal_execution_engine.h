@@ -15,6 +15,7 @@
 #define FEX_ENGINE_VERSION 1U
 #define FEX_DIGEST_SIZE FTS_DIGEST_SIZE
 #define FEX_MAX_WORKER_RESTARTS 3U
+#define FEX_HANDOFF_TOKEN_SIZE FEX_DIGEST_SIZE
 
 /* Persisted objective state is a replay contract, not a model claim. */
 enum fex_objective_state {
@@ -170,6 +171,13 @@ int fex_handoff_verified(struct fex_service *service, uint64_t task_id,
 					 uint64_t new_worker_id, uint64_t now_ns,
 					 uint64_t lease_ns,
 					 const uint8_t checkpoint_digest[FEX_DIGEST_SIZE]);
+int fex_make_handoff_token(const struct fex_service *service, uint64_t task_id,
+					 uint64_t new_worker_id, uint64_t now_ns,
+					 uint8_t token[FEX_HANDOFF_TOKEN_SIZE]);
+int fex_handoff_token_verified(struct fex_service *service, uint64_t task_id,
+					 uint64_t new_worker_id, uint64_t now_ns,
+					 uint64_t lease_ns,
+					 const uint8_t token[FEX_HANDOFF_TOKEN_SIZE]);
 
 int fex_supervise(struct fex_service *service, uint64_t now_ns,
 				 uint64_t timeout_ns, uint32_t *reassigned,

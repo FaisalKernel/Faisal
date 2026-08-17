@@ -532,6 +532,67 @@ int fex_handoff_verified(struct fex_service *service, uint64_t task_id,
 		rc == FTS_ERR_LEASE ? FEX_ERR_STATE : FEX_ERR_STATE;
 }
 
+int fex_make_handoff_token(const struct fex_service *service, uint64_t task_id,
+				   uint64_t new_worker_id, uint64_t now_ns,
+				   uint8_t token[FEX_HANDOFF_TOKEN_SIZE])
+{
+	struct fex_service *mutable_service = (struct fex_service *)service;
+	struct fex_node *node;
+	struct fex_worker *worker;
+	struct fex_objective *objective;
+	uint8_t material[FEX_DIGEST_SIZE + 4 * sizeof(uint64_t)];
+
+	if (!service || !task_id || !new_worker_id || !now_ns || !token)
+		return FEX_ERR_ARGUMENT;
+	pthread_mutex_lock(&mutable_service->lock);
+	node = find_node(mutable_service, task_id);
+	worker = find_worker(mutable_service, task_id);
+	objective = node ? find_objective(mutable_service, node->objective_id) : NULL;
+	if (!node || !worker || !objective) {
+		pthread_mutex_unlock(&mutable_service->lock);
+		return FEX_ERR_NOT_FOUND;
+	}
+	memcpy(material, objective->state_digest, FEX_DIGEST_SIZE);
+	memcpy(material + FEX_DIGEST_SIZE, &task_id, sizeof(task_id));
+	memcpy(material + FEX_DIGEST_SIZE + sizeof(task_id), &new_worker_id,
+	       sizeof(new_worker_id));
+	memcpy(material + FEX_DIGEST_SIZE + 2 * sizeof(task_id), &now_ns,
+	       sizeof(now_ns));
+	memcpy(material + FEX_DIGEST_SIZE + 3 * sizeof(task_id),
+	       &worker->lease_generation, sizeof(worker->lease_generation));
+	digest_bytes(material, sizeof(material), token);
+	pthread_mutex_unlock(&mutable_service->lock);
+	return FEX_OK;
+}
+
+int fex_handoff_token_verified(struct fex_service *service, uint64_t task_id,
+				       uint64_t new_worker_id, uint64_t now_ns,
+				       uint64_t lease_ns,
+				       const uint8_t token[FEX_HANDOFF_TOKEN_SIZE])
+{
+	uint8_t expected[FEX_HANDOFF_TOKEN_SIZE];
+	struct fex_node node;
+	struct fex_objective objective;
+	int rc;
+
+	if (!token)
+		return FEX_ERR_ARGUMENT;
+	rc = fex_make_handoff_token(service, task_id, new_worker_id, now_ns,
+				    expected);
+	if (rc != FEX_OK)
+		return rc;
+	if (memcmp(expected, token, FEX_HANDOFF_TOKEN_SIZE) != 0)
+		return FEX_ERR_AUTHORITY;
+	rc = fex_query_node(service, task_id, &node);
+	if (rc != FEX_OK)
+		return rc;
+	rc = fex_query_objective(service, node.objective_id, &objective);
+	if (rc != FEX_OK)
+		return rc;
+	return fex_handoff_verified(service, task_id, new_worker_id, now_ns,
+					lease_ns, objective.state_digest);
+}
+
 int fex_supervise(struct fex_service *service, uint64_t now_ns,
 
 			  uint64_t timeout_ns, uint32_t *reassigned,
