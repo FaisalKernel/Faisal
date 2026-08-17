@@ -35,6 +35,37 @@ static void invalidate_pressure_cache(struct faisal_accel_batcher *batcher)
 	batcher->pressure_cache_timestamp_ns = 0;
 }
 
+static void cache_pressure_after_submission(
+		struct faisal_accel_batcher *batcher,
+		const struct agi_lc_event_backpressure *state,
+		uint32_t completed)
+{
+	struct agi_lc_event_backpressure cached;
+	uint64_t now;
+
+	if (!completed || !batcher->pressure_cache_ns ||
+	    state->state != AGI_LC_EVENT_BACKPRESSURE_STATE_NORMAL ||
+	    !state->capacity || state->queued > state->capacity ||
+	    (uint64_t)completed > state->capacity - state->queued) {
+		invalidate_pressure_cache(batcher);
+		return;
+	}
+	cached = *state;
+	cached.queued += completed;
+	if (cached.queued >= cached.capacity / 2) {
+		invalidate_pressure_cache(batcher);
+		return;
+	}
+	now = monotonic_ns();
+	if (!now) {
+		invalidate_pressure_cache(batcher);
+		return;
+	}
+	batcher->cached_pressure = cached;
+	batcher->pressure_cache_timestamp_ns = now;
+	batcher->pressure_cache_valid = 1;
+}
+
 static int pressure_cache_fresh(struct faisal_accel_batcher *batcher,
 				struct agi_lc_event_backpressure *out)
 {
@@ -231,8 +262,10 @@ int faisal_accel_batcher_query(struct faisal_accel_batcher *batcher,
 }
 
 static int flush_entries(struct faisal_accel_batcher *batcher,
-			  const struct agi_lc_accel_device_account *entries,
-			  uint32_t count, int direct, uint32_t *completed_out)
+				  const struct agi_lc_accel_device_account *entries,
+				  uint32_t count, int direct,
+				  int preserve_pressure_cache,
+				  uint32_t *completed_out)
 {
 	struct agi_lc_event_backpressure state;
 	struct agi_lc_accel_device_account_batch batch;
@@ -308,7 +341,10 @@ static int flush_entries(struct faisal_accel_batcher *batcher,
 	}
 	if (batcher->pending)
 		return -1;
-	invalidate_pressure_cache(batcher);
+	if (preserve_pressure_cache)
+		cache_pressure_after_submission(batcher, &state, completed);
+	else
+		invalidate_pressure_cache(batcher);
 	reset_retry_backoff(batcher);
 	return 0;
 }
@@ -318,7 +354,7 @@ int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
 	if (!batcher || !batcher->pending)
 		return 0;
 	return flush_entries(batcher, batcher->entries, batcher->pending,
-				     0, NULL);
+				     0, 0, NULL);
 }
 
 int faisal_accel_batcher_acknowledge_loss(struct faisal_accel_batcher *batcher)
@@ -380,7 +416,7 @@ int faisal_accel_batcher_submit_many(struct faisal_accel_batcher *batcher,
 		if (!batcher->pending &&
 		    (chunk == batcher->max_batch ||
 		     (flush_after && chunk == count - position))) {
-			ret = flush_entries(batcher, entries + position, chunk, 1,
+			ret = flush_entries(batcher, entries + position, chunk, 1, 1,
 					    &completed);
 			if (accepted_count)
 				*accepted_count += chunk;

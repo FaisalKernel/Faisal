@@ -70,15 +70,18 @@ int main(void)
 	struct agi_lc_event_backpressure state;
 	struct agi_lc_accel_device_account account;
 	struct agi_lc_accel_device_account many[8];
+	struct agi_lc_accel_device_account many_pressure[32];
 	struct faisal_accel_batcher regular;
 	struct faisal_accel_batcher coalesced;
 	struct faisal_accel_batcher partial_direct;
+	struct faisal_accel_batcher pressure_coalesced;
 	uint32_t accepted;
 	uint32_t accepted_full;
 	uint32_t regular_ioctls;
 	uint32_t coalesced_ioctls;
 	uint64_t queries_before;
 	uint64_t flushes_before;
+	uint64_t pressure_queries_before;
 
 	assert(faisal_accel_batcher_init(&batcher, 3, 7, 4, 0) < 0);
 	assert(faisal_accel_batcher_init(&batcher, 3, 7, 4, 4) == 0);
@@ -195,6 +198,28 @@ int main(void)
 	       !faisal_accel_batcher_pending(&partial_direct));
 	printf("M163_DIRECT_PARTIAL_OK direct_submissions=%llu direct_pointer=1 accepted=%u\n",
 	       (unsigned long long)partial_direct.direct_submissions, accepted);
+	memset(&fake, 0, sizeof(fake));
+	fake.pressure.size = sizeof(fake.pressure);
+	fake.pressure.capacity = 64;
+	fake.pressure.state = AGI_LC_EVENT_BACKPRESSURE_STATE_NORMAL;
+	for (int i = 0; i < 32; i++)
+		many_pressure[i] = entry(7, 400 + (uint64_t)i);
+	assert(faisal_accel_batcher_init(&pressure_coalesced, 3, 7, 8, 8) == 0);
+	assert(faisal_accel_batcher_set_ioctl(&pressure_coalesced, fake_ioctl) == 0);
+	pressure_queries_before = pressure_coalesced.backpressure_queries;
+	assert(faisal_accel_batcher_submit_many(&pressure_coalesced,
+						many_pressure, 32, 0, &accepted) == 0);
+	assert(accepted == 32 && fake.batch_calls == 4 &&
+	       pressure_coalesced.direct_submissions == 4 &&
+	       pressure_coalesced.backpressure_queries - pressure_queries_before == 1 &&
+	       pressure_coalesced.pressure_cache_hits == 3 &&
+	       !faisal_accel_batcher_pending(&pressure_coalesced));
+	printf("M164_SUBMIT_MANY_PRESSURE_CACHE_OK ioctls=%u queries=%llu cache_hits=%llu accepted=%u direct_submissions=%llu\n",
+	       fake.batch_calls,
+	       (unsigned long long)pressure_coalesced.backpressure_queries,
+	       (unsigned long long)pressure_coalesced.pressure_cache_hits,
+	       accepted,
+	       (unsigned long long)pressure_coalesced.direct_submissions);
 	printf("M161_COALESCED_SUBMIT_OK regular_ioctls=%u coalesced_ioctls=%u accepted=%u\n",
 	       regular_ioctls, coalesced_ioctls, accepted_full);
 	printf("M160_ADAPTIVE_PRESSURE_CACHE_OK flushes=%llu queries=%llu cache_hits=%llu losses=%llu resync=%llu failures=%llu fast=%llu target=%u\n",
