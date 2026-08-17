@@ -1,0 +1,75 @@
+{
+  "schema": "org.faisal.evidence.m153-final-production-qualification.v1",
+  "milestone": "M153",
+  "source_revision": "41ae99377d76cf4e0aa542b0d9566d680ebbbed5",
+  "source_parent": "6bcb59f7d5b3e4aa2669c29ec86821fde5cc3d48",
+  "recorded_at": "2026-08-17T13:12:00Z",
+  "status": "conditional_preproduction_not_production_release",
+  "implementation": {
+    "accelerator_memory_release": "bounded release operation with explicit AGI_LC_ACCEL_ACCOUNT_RELEASE flag, ERANGE underflow denial, tenant ownership and generation validation, and FAISAL task-counter reconciliation",
+    "cpu_throttle_measurement": "tenant selftest moves the task into the owned cgroup, runs a bounded busy worker under 50,000/100,000 microsecond cpu.max policy, observes throttled_usec, restores the task to the parent cgroup, and verifies child hierarchy teardown",
+    "test_commit": "41ae99377d76cf4e0aa542b0d9566d680ebbbed5"
+  },
+  "reproducible_build": {
+    "build_a": "/home/ubuntu/agi-kernel/build/industry-repro-final2-a",
+    "build_b": "/home/ubuntu/agi-kernel/build/industry-repro-final2-b",
+    "comparison_report": "/home/ubuntu/agi-kernel/build/industry-repro-final2-compare.tsv",
+    "result": "pass_byte_identical",
+    "source_date_epoch": 1786971955,
+    "config_sha256": "003e03a277c47585b6c36c00810bf36e61dc91b487f1162e0ad51f514bdfa08b",
+    "bzimage_sha256": "8d17b33310a58853f3321b048890d5d35ececeab5b988c56d67480de1b7afd36",
+    "vmlinux_sha256": "ddd7ed469f94fa89a22b5a6c5e76dd8540ec5c0db8a5b056faefa556edfb6df8",
+    "builder_ids": ["builder-a", "builder-b"],
+    "builder_hosts": ["host-a", "host-b"],
+    "qualification_scope": "two independent output directories on the same sandbox host; not independent physical hosts"
+  },
+  "runtime_validation": {
+    "tenant_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-final2-tenant-qemu.log",
+    "tenant_result": "pass",
+    "tenant_markers": [
+      "M153_TENANT_CGROUP_TASK_MOVE_OK",
+      "M153_TENANT_CPU_THROTTLE_OBSERVED_OK throttled=297189",
+      "M152_TENANT_CPU_STALE_GENERATION_DENY_OK",
+      "M152_TENANT_CPU_THROTTLE_QUERY_OK throttled=297189",
+      "M152_TENANT_CPU_THROTTLE_CLEAR_OK",
+      "M153_TENANT_PARENT_TASK_RESTORE_OK",
+      "M153_TENANT_ACCELERATOR_RELEASE_UNDERFLOW_DENY_OK",
+      "M153_TENANT_ACCELERATOR_MEMORY_RELEASE_OK",
+      "M115_SELFTEST_RC=0"
+    ],
+    "durable_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-final2-durable-qemu.log",
+    "durable_result": "pass",
+    "adapter_report": "/home/ubuntu/agi-kernel/build/faisal-final2-adapter-conformance.tsv",
+    "adapter_result": "pass_four_adapters",
+    "replication_python_log": "/home/ubuntu/agi-kernel/build/faisal-final2-replication-python.log",
+    "replication_result": "23_passed_one_tls_fixture_skipped",
+    "sanitizer_summary": "/home/ubuntu/agi-kernel/build/m153-sanitizers/m106-sanitizer-matrix.tsv",
+    "sanitizer_result": "kasan_and_kcsan_compile_qemu_clean; sanitizer source parent 6bcb59f7d; current commit adds only test-harness changes"
+  },
+  "artifact_integrity": {
+    "artifact_directory": "/home/ubuntu/agi-kernel/build/industry-artifacts-final2",
+    "manifest": "FAISAL-build-manifest.json",
+    "sbom": "FAISAL-SBOM.spdx",
+    "checksums": "FAISAL-artifact-sha256sums.txt",
+    "verification_report": "FAISAL-release-verification.tsv",
+    "checksum_status": "pass",
+    "spdx_status": "pass",
+    "manifest_status": "pass",
+    "signature_status": "unsigned_development_audit"
+  },
+  "fail_closed_release_gate": {
+    "log": "/home/ubuntu/agi-kernel/build/faisal-final-production-gate-blockers.log",
+    "result": "blocked",
+    "first_missing_requirement": "FAISAL_PUBLIC_KEY operator-controlled release verification key",
+    "interpretation": "release gate correctly refuses production release without a trusted operator-controlled signing root"
+  },
+  "known_limitations": [
+    "Kernel source remains v7.2.0-rc7 development-line based; no stable/LTS forward-port has been completed.",
+    "Artifacts are unsigned because no operator-controlled production signing key was supplied; test fixtures are not promoted to a production trust root.",
+    "Reproducible comparison uses two builder identities and output trees on one sandbox host, not independent physical build hosts.",
+    "No physical GPU/NPU, VRAM, IOMMU, DMA, vendor-driver, reset, or fleet qualification has occurred.",
+    "Replication TLS fixture certificates were not generated; the Python suite recorded one skipped TLS fixture test while live localhost mTLS partition/recovery had previously passed.",
+    "External CVE/advisory response ownership and operational deployment governance remain unqualified."
+  ]
+}
+

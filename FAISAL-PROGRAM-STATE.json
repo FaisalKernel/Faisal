@@ -1402,7 +1402,11 @@
     "FAISAL-M111",
     "FAISAL-M112",
     "FAISAL-M113",
-    "FAISAL-M114"
+    "FAISAL-M114",
+    "FAISAL-M150",
+    "FAISAL-M151",
+    "FAISAL-M152",
+    "FAISAL-M153"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1418,9 +1422,9 @@
     "tools/testing/selftests/agi_autonomy_orchestrator_test.c"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "M153-sustained-cpu-throttle-benchmark-and-independent-rebuild",
+  "next_dependency": "operator-controlled-release-signing-and-stable-lts-forward-port",
   "industry_readiness": {
-    "status": "preproduction_prototype_not_production_ready",
+    "status": "conditional_preproduction_release_blocked",
     "audit_document": "FAISAL-INDUSTRY-READINESS-AUDIT.md",
     "research_document": "FAISAL-INDUSTRY-READINESS-RESEARCH.md",
     "machine_evidence": "tools/faisal-build/evidence/industry-readiness-audit.json",
@@ -1444,9 +1448,16 @@
     "m152_tenant_cpu_throttling": "pass_cgroup_v2_cpu_max_scheduler_bridge_set_query_clear_generation_fencing_qemu",
     "m152_accelerator_isolation": "pass_tenant_owned_gpu_control_plane_memory_accounting_edquot_over_limit_release_qemu_hardware_pending",
     "m152_comprehensive_regression": "pass_durable_tenant_adapter_replication_provider_election_and_live_partition_suite_one_tls_fixture_skip",
+    "m153_final_production_qualification": "tools/faisal-build/evidence/m153-final-production-qualification.json",
+    "m153_cpu_throttle_observation": "pass_busy_worker_in_owned_cgroup_cpu_max_50_percent_observed_297189_usec_parent_restore_cleanup_qemu",
+    "m153_accelerator_release_reconciliation": "pass_bounded_release_underflow_erange_task_counter_reconciliation_qemu",
+    "m153_reproducible_build": "pass_final2_two_builder_ids_byte_identical_bzimage_and_vmlinux_same_sandbox_host",
+    "m153_sanitizer_matrix": "pass_kasan_kcsan_compile_qemu_clean_cfs_bandwidth_preserved",
+    "m153_final_artifact_integrity": "pass_manifest_spdx_checksums_source_bound_unsigned",
+    "m153_release_gate": "blocked_fail_closed_missing_operator_controlled_faisal_public_key",
     "m116_knowledge_precision_qemu": "pass_kernel_freshness_provenance_confidence_fail_closed",
     "m104_rollback_qemu": "pass_approval_canary_rollback_replay",
-    "production_release_gate": "pass_signed_artifacts_reproducibility_comparison_and_rollback_qemu",
+    "production_release_gate": "blocked_unsigned_artifacts_operator_key_required; reproducibility_and_rollback_pass",
     "security_release_evidence_gate": "pass_signed_fresh_source_bound_scanner_sanitizer_advisory_schema",
     "production_kernel_line_gate": "pass_fail_closed_current_7.2.0_rc7_development_line_blocked",
     "advisory_ledger_gate": "pass_signed_source_bound_fresh_resolved_records",
@@ -1526,26 +1537,16 @@
     "uapi_fuzz_calls": 8192,
     "bounded_soak_ioctl_calls": 98304,
     "sparse_status": "pass_with_two_memset_warnings",
-    "reproducibility_status": "comparison_gate_implemented_independent_builder_evidence_pending",
+    "reproducibility_status": "pass_two_complete_outputs_byte_identical_same_sandbox_host_scope_limited",
     "release_blockers": [
-      "stable_or_lts_forward_port",
-      "trusted_signed_artifacts",
-      "independent_reproducible_rebuild",
-      "cve_and_upstream_response_process",
-      "real_accelerator_hardware_qualification",
-      "staged_checkpatch_cleanup",
-      "worker_supervision_and_agent_migration",
-      "sustained_cpu_throttle_benchmark_and_physical_accelerator_qualification",
-      "worker_supervision_and_agent_migration",
-      "distributed_adapter_conformance",
-      "worker_supervision_and_agent_migration",
-      "deployment_governance_and_rollback",
-      "kernel_enforced_sandbox_identity_and_multitenant_worker_supervision",
-      "real_repository_analysis_and_change_application_adapters",
-      "kernel_enforced_sandbox_identity_and_multitenant_worker_supervision",
-      "real_build_dependency_vulnerability_and_ci_scanner_adapters",
-      "sustained_cpu_throttle_benchmark_and_physical_accelerator_qualification",
-      "current_head_sanitizer_validation_for_new_launcher_and_scanner_paths"
+      "operator_controlled_release_signing_key_and_trusted_public_key_distribution",
+      "stable_or_lts_forward_port_and_upstream_patch_requalification",
+      "independent_physical_builder_or_attested_build_farm_qualification",
+      "cve_and_upstream_response_process_with_owned_advisory_ledger",
+      "physical_gpu_npu_vram_iommu_dma_and_vendor_driver_qualification",
+      "replication_tls_fixture_generation_and_full_tls_fixture_pass",
+      "deployment_governance_worker_migration_and_operational_rollback",
+      "staged_checkpatch_cleanup_and_external_security_review"
     ]
   }
 }
