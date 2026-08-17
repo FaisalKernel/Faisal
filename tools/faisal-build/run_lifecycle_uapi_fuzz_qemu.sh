@@ -8,6 +8,9 @@ ROOTFS=${FAISAL_FUZZ_ROOTFS:-$ROOT/build/qemu-faisal-uapi-fuzz}
 LOG="$ROOTFS/qemu.log"
 TEST="$BUILD/agi_lifecycle_uapi_fuzz_test"
 FUZZ_ITERATIONS=${FAISAL_UAPI_FUZZ_ITERATIONS:-4096}
+QEMU_SMP=${FAISAL_QEMU_SMP:-2}
+QEMU_MEMORY=${FAISAL_QEMU_MEMORY:-768M}
+QEMU_TIMEOUT_SECONDS=${FAISAL_QEMU_TIMEOUT_SECONDS:-180}
 
 cc -O2 -Wall -Wextra -Werror -Wno-cpp -static \
   -I"$LINUX/include/uapi" \
@@ -50,23 +53,27 @@ EOF
 sed -i "s/__FAISAL_UAPI_FUZZ_ITERATIONS__/$FUZZ_ITERATIONS/" "$ROOTFS/init"
 chmod +x "$ROOTFS/init"
 ( cd "$ROOTFS" && find . -print0 | cpio --null -o -H newc 2>/dev/null | gzip -9 > "$ROOTFS/initramfs.cpio.gz" )
-qemu-system-x86_64 \
+set +e
+ timeout "${QEMU_TIMEOUT_SECONDS}s" qemu-system-x86_64 \
   -M pc \
   -accel tcg,thread=multi \
   -cpu qemu64 \
-  -smp 2 \
-  -m 768M \
+  -smp "$QEMU_SMP" \
+  -m "$QEMU_MEMORY" \
   -kernel "$BUILD/arch/x86/boot/bzImage" \
   -initrd "$ROOTFS/initramfs.cpio.gz" \
   -append 'console=ttyS0 quiet' \
   -nographic \
   -no-reboot \
-  > "$LOG" 2>&1 || true
-
+  > "$LOG" 2>&1
+qemu_rc=$?
+set -e
+printf 'FAISAL_UAPI_FUZZ_QEMU_RC=%s\n' "$qemu_rc" >> "$LOG"
+[ "$qemu_rc" -ne 124 ]
 grep -q 'FAISAL_UAPI_FUZZ_BOOT_OK' "$LOG"
 grep -q 'FAISAL_UAPI_FUZZ_OK' "$LOG"
 grep -q 'FAISAL_UAPI_FUZZ_RC=0' "$LOG"
-if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel' "$LOG"; then
+if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|possible circular locking dependency|data-race|use-after-free|kernel BUG|rcu: .*stall' "$LOG"; then
   echo 'FAISAL_UAPI_FUZZ_KERNEL_DIAGNOSTIC_FOUND' >&2
   exit 1
 fi

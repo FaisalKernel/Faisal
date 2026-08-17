@@ -40,6 +40,9 @@ build_mode() {
 	make -C "$LINUX" O="$out" -j"${M106_JOBS:-$(nproc)}" bzImage >> "$log" 2>&1
 	FAISAL_BUILD="$out" FAISAL_FUZZ_ROOTFS="$M106_ROOT/qemu-$mode" \
 	FAISAL_UAPI_FUZZ_ITERATIONS="$ITERATIONS" \
+	FAISAL_QEMU_SMP="${M106_QEMU_SMP:-1}" \
+	FAISAL_QEMU_MEMORY="${M106_QEMU_MEMORY:-768M}" \
+	FAISAL_QEMU_TIMEOUT_SECONDS="${M106_QEMU_TIMEOUT_SECONDS:-900}" \
 		"$LINUX/tools/faisal-build/run_lifecycle_uapi_fuzz_qemu.sh" > "$runlog" 2>&1
 	if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|possible circular locking dependency|data-race|use-after-free|kernel BUG|rcu: .*stall' \
 		"$M106_ROOT/qemu-$mode/qemu.log"; then

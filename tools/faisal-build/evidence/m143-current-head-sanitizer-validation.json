@@ -1,0 +1,41 @@
+{
+  "milestone": "M143",
+  "feature": "current-head sanitizer validation for trusted launcher and scanner paths",
+  "status": "pass_bounded_qemu_profiles",
+  "kernel_image": "build/m106-sanitizers/{kasan,kcsan}/arch/x86/boot/bzImage",
+  "profiles": {
+    "kasan_lifecycle_uapi": "pass_16_iterations_one_vcpu",
+    "kasan_trusted_launcher": "pass",
+    "kasan_scanner_adapter": "pass",
+    "kcsan_lockdep_lifecycle_uapi": "pass_16_iterations_one_vcpu",
+    "kcsan_lockdep_trusted_launcher": "pass_extended_300_second_boot_bound",
+    "kcsan_lockdep_scanner_adapter": "pass_extended_300_second_boot_bound"
+  },
+  "markers": [
+    "FAISAL_UAPI_FUZZ_QEMU_VALIDATION_OK",
+    "M114_SANDBOX_LAUNCHER_QEMU_VALIDATION_OK",
+    "M114_SCANNER_ADAPTER_QEMU_VALIDATION_OK",
+    "M114_TRUSTED_LAUNCHER_LANDLOCK_SECCOMP_OK",
+    "M114_TRUSTED_LAUNCHER_CGROUP_FAIL_CLOSED_OK",
+    "M114_REAL_BUILD_ADAPTER_OK",
+    "M114_REAL_DEPENDENCY_ADAPTER_OK",
+    "M114_VULNERABILITY_ADAPTER_FAIL_CLOSED_OK"
+  ],
+  "harness_hardening": {
+    "configurable_vcpu_count": true,
+    "configurable_memory": true,
+    "explicit_timeout": true,
+    "rcu_stall_detection": true,
+    "timeout_is_failure": true
+  },
+  "observations": [
+    "KASAN and KCSAN/lockdep images booted and passed the trusted launcher and scanner selftests without sanitizer or lockdep markers.",
+    "The original two-vCPU KASAN run at 256 fuzz iterations produced repeated RCU stall diagnostics under TCG and was terminated; it was not reported as a pass.",
+    "A bounded one-vCPU KASAN run at 16 iterations completed cleanly."
+  ],
+  "limitations": [
+    "The available environment uses QEMU TCG rather than hardware acceleration; high-iteration sanitizer timing is not representative of production hardware.",
+    "The current evidence does not qualify physical hardware, KVM, or a full 256-iteration KASAN run on a production-class host.",
+    "ACPI AML timeout messages are present in QEMU logs but are unrelated to FAISAL code paths and are not treated as clean-hardware evidence."
+  ]
+}
