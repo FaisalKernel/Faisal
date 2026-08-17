@@ -140,7 +140,8 @@ set -- \
  tools/faisal-build/run_sandbox_fabric_qemu.sh \
  tools/faisal-build/run_software_engineering_qemu.sh \
  tools/faisal-build/run_repository_adapter_qemu.sh \
- tools/faisal-build/run_scanner_adapter_qemu.sh
+ tools/faisal-build/run_scanner_adapter_qemu.sh \
+ tools/faisal-build/run_sandbox_launcher_qemu.sh
 count=0
 for harness do
 	count=$((count + 1))

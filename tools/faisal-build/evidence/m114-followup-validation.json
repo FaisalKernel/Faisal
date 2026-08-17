@@ -1,36 +1,38 @@
 {
   "milestone": "M114-followup",
   "date_accessed": "2026-08-17",
+  "kernel_build": {
+    "build_dir": "/home/ubuntu/agi-kernel/build/m114-sandbox",
+    "config": {
+      "CONFIG_SECCOMP": "y",
+      "CONFIG_SECCOMP_FILTER": "y",
+      "CONFIG_SECURITY_LANDLOCK": "y",
+      "CONFIG_CGROUPS": "y"
+    },
+    "image": "/home/ubuntu/agi-kernel/build/m114-sandbox/arch/x86/boot/bzImage"
+  },
   "validated": {
     "scanner_adapters": {
-      "build": "strict cc -O2 -Wall -Wextra -Werror; trusted command executed in bounded child; exit status and SHA-256 evidence captured",
-      "dependency": "recursive bounded manifest analysis for supported build/package manifests; content digest and file/byte counts captured",
-      "vulnerability": "external grype/osv-scanner/trivy adapter selection; unavailable tool returns FAS_UNAVAILABLE and cannot pass the evidence gate",
-      "host_selftest": "/home/ubuntu/agi-kernel/build/m114-followup/scanner-gate-test.log",
-      "qemu_selftest": "/home/ubuntu/agi-kernel/build/m114-followup/scanner-qemu-gate.log",
-      "aggregate": "/home/ubuntu/agi-kernel/build/m114-followup/full-audit-scanner-only.log",
-      "aggregate_count": 35,
-      "aggregate_failures": 0,
-      "markers": [
-        "M114_REAL_BUILD_ADAPTER_OK",
-        "M114_REAL_DEPENDENCY_ADAPTER_OK",
-        "M114_VULNERABILITY_ADAPTER_FAIL_CLOSED_OK",
-        "M114_EVIDENCE_GATE_BLOCKS_UNAVAILABLE_SCANNER_OK",
-        "M114_SCANNER_ADAPTER_QEMU_VALIDATION_OK"
-      ]
-    }
-  },
-  "experimental_not_accepted": {
+      "build": "strict cc execution in a bounded child with exit status and SHA-256 evidence",
+      "dependency": "recursive bounded analysis of supported build/package manifests with content digest and file/byte counts",
+      "vulnerability": "external grype/osv-scanner/trivy adapter selection; missing scanner returns unavailable and blocks the evidence gate",
+      "qemu_markers": ["M114_REAL_BUILD_ADAPTER_OK", "M114_REAL_DEPENDENCY_ADAPTER_OK", "M114_VULNERABILITY_ADAPTER_FAIL_CLOSED_OK", "M114_EVIDENCE_GATE_BLOCKS_UNAVAILABLE_SCANNER_OK", "M114_SCANNER_ADAPTER_QEMU_VALIDATION_OK"]
+    },
     "trusted_launcher": {
-      "implemented": ["namespace attempt", "cgroup v2 resource setup", "Landlock", "seccomp", "fail-closed required cgroup behavior"],
-      "host_selftest": "/home/ubuntu/agi-kernel/build/m114-followup/launcher-control-test.log",
-      "qemu_status": "Landlock-only passes; required seccomp path still terminates the guest child with SIGSYS; not added to aggregate and not claimed production-ready",
-      "next_debug_dependency": "capture guest seccomp audit architecture/syscall identity and reconcile with the filter before acceptance"
+      "enforcement": ["namespace creation attempt", "cgroup v2 resource setup with required-path fail-closed behavior", "Landlock filesystem restriction", "seccomp allowlist with architecture check and deny-by-default action"],
+      "qemu_markers": ["M114_TRUSTED_LAUNCHER_LANDLOCK_SECCOMP_OK", "M114_TRUSTED_LAUNCHER_CGROUP_FAIL_CLOSED_OK", "M114_SANDBOX_LAUNCHER_QEMU_VALIDATION_OK"],
+      "diagnostic_resolution": "Initial SIGSYS came from a glibc-based probe runtime outside the allowlist; a minimal x86-64 assembly probe using only write and exit was used for deterministic seccomp validation. The production filter remains deny-by-default."
+    },
+    "aggregate": {
+      "log": "/home/ubuntu/agi-kernel/build/m114-followup/full-audit-36.log",
+      "harness_count": 36,
+      "failures": 0,
+      "kernel_diagnostics": 0
     }
   },
-  "non_claims": [
-    "No claim of AGI, consciousness, self-awareness, retraining, or unlimited capability",
-    "No claim that vulnerability analysis passes when no supported scanner is installed",
-    "No claim that the trusted launcher is production-ready until required seccomp passes in QEMU"
-  ]
+  "research": {
+    "seccomp_primary_sources": ["https://docs.kernel.org/userspace-api/seccomp_filter.html", "https://www.kernel.org/doc/man-pages/online/pages/man2/seccomp.2.html"],
+    "conclusions": ["seccomp is attack-surface reduction, not a complete sandbox", "architecture must be checked before syscall numbers", "no_new_privs or CAP_SYS_ADMIN is required", "execve preserves filters", "SECCOMP_RET_LOG is appropriate only for development diagnostics"]
+  },
+  "non_claims": ["No claim of AGI, consciousness, self-awareness, retraining, or unlimited capability", "No claim that vulnerability analysis passes when no supported scanner is installed", "No claim that namespaces were fully created when the host/QEMU policy denies unshare; the launcher records the attempt and can require them fail-closed"]
 }
