@@ -17,6 +17,7 @@ SECURITY_MANIFEST=${FAISAL_SECURITY_MANIFEST:-}
 ADVISORY_LEDGER=${FAISAL_ADVISORY_LEDGER:-}
 ACCELERATOR_EVIDENCE=${FAISAL_ACCELERATOR_EVIDENCE:-}
 REPLICATION_EVIDENCE=${FAISAL_REPLICATION_EVIDENCE:-}
+DEPLOYMENT_EVIDENCE=${FAISAL_DEPLOYMENT_EVIDENCE:-}
 REQUIRE_PRODUCTION_LINE=${FAISAL_REQUIRE_PRODUCTION_LINE:-1}
 KERNEL_SOURCE=${FAISAL_KERNEL_SOURCE:-$LINUX}
 REQUIRED_KERNEL_LINE=${FAISAL_REQUIRED_KERNEL_LINE:-}
@@ -55,9 +56,15 @@ case "$REPLICATION_EVIDENCE" in
   *.json) : ;;
   *) fail "structured JSON replication qualification evidence is required for production qualification" ;;
 esac
+[ -n "$DEPLOYMENT_EVIDENCE" ] || fail "FAISAL_DEPLOYMENT_EVIDENCE is required"
+case "$DEPLOYMENT_EVIDENCE" in
+  *.json) : ;;
+  *) fail "structured JSON deployment governance evidence is required for production qualification" ;;
+esac
 [ -x "$LINUX/tools/faisal-build/verify_industry_artifacts.sh" ] || fail "artifact verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_accelerator_qualification.sh" ] || fail "accelerator verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_replication_qualification.py" ] || fail "replication verifier unavailable"
+[ -x "$LINUX/tools/faisal-build/verify_deployment_governance.py" ] || fail "deployment governance verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_advisory_ledger.sh" ] || fail "advisory ledger verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_security_release_evidence.sh" ] || fail "security evidence verifier unavailable"
@@ -148,6 +155,15 @@ FAISAL_REPLICATION_VERIFY_REPORT="${REPORT}.replication.tsv" \
   fail "full TLS replication qualification verification"
 }
 printf 'replication_qualification\tpass\t%s\n' "$REPLICATION_EVIDENCE" >> "$REPORT"
+FAISAL_DEPLOYMENT_EVIDENCE="$DEPLOYMENT_EVIDENCE" \
+FAISAL_PUBLIC_KEY="$PUBLIC_KEY" \
+FAISAL_EXPECTED_SOURCE_REV="$expected_source_revision" \
+FAISAL_DEPLOYMENT_VERIFY_REPORT="${REPORT}.deployment.tsv" \
+  python3 "$LINUX/tools/faisal-build/verify_deployment_governance.py" >/tmp/faisal-release-deployment-gate.log 2>&1 || {
+  cat /tmp/faisal-release-deployment-gate.log >&2
+  fail "deployment governance verification"
+}
+printf 'deployment_governance\tpass\t%s\n' "$DEPLOYMENT_EVIDENCE" >> "$REPORT"
 if [ "$RUN_ADAPTER_CONFORMANCE" = 1 ]; then
   FAISAL_BUILD="$BUILD_A" \
   FAISAL_ADAPTER_CONFORMANCE_REPORT="${REPORT}.adapter.tsv" \
