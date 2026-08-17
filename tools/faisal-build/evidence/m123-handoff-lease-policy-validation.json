@@ -1,0 +1,25 @@
+{
+  "milestone": "M123",
+  "feature": "bounded authenticated handoff lease duration",
+  "status": "validated_qemu",
+  "policy": {
+    "maximum_handoff_lease_ns": 60000000000,
+    "overlong_lease": "denied with FEX_ERR_POLICY",
+    "valid_token_required": true,
+    "checkpoint_and_generation_binding": true
+  },
+  "evidence": {
+    "overlong_lease_denial": "M123_OVERLONG_HANDOFF_LEASE_DENIED_OK",
+    "stale_token_denial": "M122_STALE_HANDOFF_TOKEN_DENIED_OK",
+    "tamper_denial": "M121_TAMPERED_HANDOFF_TOKEN_DENIED_OK",
+    "valid_handoff": "M120_CHECKPOINT_BOUND_HANDOFF_OK",
+    "quarantine": "M118_WORKER_QUARANTINE_OK",
+    "qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+    "kernel_diagnostics": "none observed"
+  },
+  "limitations": [
+    "The 60-second maximum is a conservative platform policy and requires operational tuning from distributed workload measurements.",
+    "Remote host identity, key provisioning, clock discipline, and network partition handling remain separate production gates.",
+    "The policy restricts handoff leases but does not create a complete distributed scheduler."
+  ]
+}

@@ -142,6 +142,10 @@ int main(int argc, char **argv)
 				FEX_HANDOFF_TOKEN_MAX_AGE_NS + 1, 100, handoff_token),
 				FEX_ERR_AUTHORITY, "STALE_HANDOFF_TOKEN");
 		printf("M122_STALE_HANDOFF_TOKEN_DENIED_OK\n");
+		CHECK_EQ(fex_handoff_token_verified(&service, node_c.task_id, 9001, 12,
+				FEX_MAX_HANDOFF_LEASE_NS + 1, handoff_token),
+				FEX_ERR_POLICY, "OVERLONG_HANDOFF_LEASE");
+		printf("M123_OVERLONG_HANDOFF_LEASE_DENIED_OK\n");
 		CHECK_OK(fex_handoff_token_verified(&service, node_c.task_id, 9001, 12,
 				100, handoff_token), "WORKER_HANDOFF");
 

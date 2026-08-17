@@ -579,6 +579,8 @@ int fex_handoff_token_verified(struct fex_service *service, uint64_t task_id,
 
 	if (!token || !service || !now_ns)
 		return FEX_ERR_ARGUMENT;
+	if (!lease_ns || lease_ns > FEX_MAX_HANDOFF_LEASE_NS)
+		return FEX_ERR_POLICY;
 	memcpy(&issued_at_ns, token, sizeof(issued_at_ns));
 	if (now_ns < issued_at_ns ||
 	    now_ns - issued_at_ns > FEX_HANDOFF_TOKEN_MAX_AGE_NS)
