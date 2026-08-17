@@ -1,0 +1,106 @@
+{
+  "project": "FAISAL",
+  "milestone": "M166-operator-controlled-release-authority",
+  "recorded_at": "2026-08-17T17:26:15Z",
+  "code_commit": "aa765734c3bc0f4997a7f3387ed5b50b306a3bc4",
+  "parent_commit": "b96bce7d1d313c9a2bc47ab63e08f424beb3830c",
+  "kernel": {
+    "source_revision": "M156 validated kernel build",
+    "build_directory": "/home/ubuntu/agi-kernel/build/m156-backpressure",
+    "bzImage_sha256": "4098292a9ca43f521cb67617e970165aff17047db591a7827aea0c690cf7b88d",
+    "kernel_changes_in_m166": false,
+    "scope": "userspace release authority and release-gate integration"
+  },
+  "implementation": {
+    "authority_tool": "tools/faisal-build/faisal_release_authority.py",
+    "production_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "operator_documentation": "FAISAL-RELEASE-SIGNING.md",
+    "selftest": "tools/faisal-build/test_faisal_release_authority.py",
+    "artifact_e2e_test": "tools/faisal-build/test_faisal_release_artifacts.sh",
+    "root_schema": "org.faisal.trusted-root.v1",
+    "keyring_schema": "org.faisal.trusted-keyring.v1",
+    "attestation_schema": "org.faisal.release-attestation.v1",
+    "algorithm": "RSA-SHA256 via OpenSSL detached signatures",
+    "authority_layers": [
+      "offline/root-controlled trusted-keyring signature",
+      "active release-key artifact attestation signature",
+      "explicit operator approval binding",
+      "artifact SHA-256 digest binding",
+      "freshness, validity, revocation, and rollback policy checks"
+    ],
+    "private_key_policy": "No private key is written to release metadata, evidence, or the repository; production keys remain operator/HSM/KMS controlled."
+  },
+  "tests": {
+    "authority_selftest": {
+      "result": "pass",
+      "marker": "FAISAL_RELEASE_AUTHORITY_SELFTEST_OK valid_tamper_revocation_stale_approval_unauthorized_root=pass",
+      "log": "/home/ubuntu/agi-kernel/build/faisal-release-authority-selftest.log",
+      "log_sha256": "b0da1cea20b65e0e5b5c17e582596164ea4e818a99db6f40be8fe3b5f05ae280"
+    },
+    "artifact_end_to_end": {
+      "result": "pass",
+      "marker": "FAISAL_RELEASE_ARTIFACT_AUTHORITY_E2E_OK valid_generation_sign_verify_tamper_denial=pass",
+      "log": "/home/ubuntu/agi-kernel/build/faisal-release-authority-artifact-e2e.log",
+      "log_sha256": "7497ac8b8fda5d04e6498a602e0afffef00994f5ca167a1f4cde83fe2e8a8552"
+    },
+    "production_gate_fail_closed": {
+      "result": "pass",
+      "condition": "missing trusted root distribution rejected before release approval",
+      "log": "/home/ubuntu/agi-kernel/build/faisal-release-gate-fail-closed.log",
+      "log_sha256": "6cf895587968ccc3b12fbc54b255aa9a3bc2f440b12f40213dca465f758f6464"
+    }
+  },
+  "regressions": {
+    "tenant_accounting_qemu": {
+      "return_code": 0,
+      "log": "/home/ubuntu/agi-kernel/build/faisal-release-tenant-regression.log",
+      "log_sha256": "f46e8c33cbb3c95493c1c8b2e2d90321d9d8981d4d7b3c8fbbc33141513c5d9a",
+      "markers": [
+        "M163_DIRECT_PARTIAL_OK",
+        "M164_SUBMIT_MANY_PRESSURE_CACHE_OK",
+        "M163_BATCHER_SELFTEST_RC=0",
+        "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+      ]
+    },
+    "durable_execution_qemu": {
+      "return_code": 0,
+      "log": "/home/ubuntu/agi-kernel/build/faisal-release-durable-regression.log",
+      "log_sha256": "bce7145b2da9c29461be1e37a5a3af2ac9f8d16f9eddeb1b6e5c1237f74a76ac",
+      "markers": [
+        "M108_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+        "M108_EXECUTION_REPLAY_OK",
+        "FJT_SPLIT_BRAIN_DENIED_OK",
+        "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+      ]
+    }
+  },
+  "security_properties": {
+    "root_substitution_denied": true,
+    "keyring_signature_required": true,
+    "release_signature_required": true,
+    "revoked_release_key_denied": true,
+    "stale_operator_approval_denied": true,
+    "negative_operator_approval_denied": true,
+    "artifact_tamper_denied": true,
+    "artifact_digest_binding_required": true,
+    "model_output_is_not_authority": true,
+    "unsigned_or_missing_trust_metadata_fails_closed": true
+  },
+  "production_boundary": {
+    "repository_workflow_gap": "closed_bounded_software_implementation",
+    "production_release_status": "still_blocked",
+    "remaining_operator_requirements": [
+      "authorized operator provisions real root and release keys through controlled HSM/KMS/key ceremony",
+      "trusted root public key is distributed through an independently governed channel",
+      "operator identity and approval records are independently governed and audited",
+      "independent builder/attested build farm validates release artifacts",
+      "stable/LTS forward-port, physical accelerator qualification, CVE process, external security review, and deployment governance remain open blockers"
+    ],
+    "claims_not_made": [
+      "No real production private key was generated or exposed",
+      "No hardware-backed HSM/KMS operation was claimed",
+      "No physical hardware qualification was claimed",
+      "No production release approval was claimed"
+    ]
+  }
+}
