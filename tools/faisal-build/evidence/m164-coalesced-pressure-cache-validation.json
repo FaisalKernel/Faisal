@@ -1,0 +1,113 @@
+{
+  "schema": "org.faisal.evidence.m164-coalesced-pressure-cache-validation.v1",
+  "milestone": "M164",
+  "source_revision": "8546f36d5e8cde873d3b4ebe437e757f3a4195ba",
+  "source_parent": "26c1ca4423cbe2ab4a2660826b600c240141bf58",
+  "recorded_at": "2026-08-17T16:13:39Z",
+  "status": "validated_bounded_userspace_qemu_and_deterministic_unit_test_not_production_release",
+  "implementation": {
+    "library": "tools/faisal-accelerator/faisal_accelerator_batcher.{c,h}",
+    "improvement": "After a successful direct coalesced submission, the batcher now advances a previously validated healthy normal-pressure snapshot by the completed count and reuses it for subsequent synchronous chunks within the bounded cache lifetime.",
+    "scope": "The optimization is enabled only for submit_many() direct flushes. The ordinary public flush path continues to invalidate the cache after submission, preserving existing observation semantics for independently initiated flushes.",
+    "fail_closed_rules": [
+      "Cache reuse is disabled when the submission does not complete entries.",
+      "Cache reuse is disabled for non-normal pressure state, invalid capacity, queue overflow, half-capacity reach, or unavailable monotonic time.",
+      "Existing loss, EAGAIN, retry-backoff, resynchronization, admission, and kernel authorization paths remain authoritative."
+    ],
+    "security": "The change only reduces redundant userspace pressure-query ioctls after a validated synchronous submission. It grants no authority, bypasses no kernel check, and does not treat model output as authorization."
+  },
+  "unit_validation": {
+    "source": "tools/testing/selftests/faisal_accelerator_batcher_test.c",
+    "compile": "pass_static_wall_wextra_werror",
+    "result": "pass",
+    "marker": "M164_SUBMIT_MANY_PRESSURE_CACHE_OK ioctls=4 queries=1 cache_hits=3 accepted=32 direct_submissions=4",
+    "coverage": [
+      "32-entry submit_many() workload divided into four direct eight-entry chunks",
+      "one initial pressure query followed by three healthy-cache hits",
+      "four direct submissions and all 32 entries accepted",
+      "cache invalidation at the half-capacity boundary",
+      "existing M160 pressure-cache, M161 coalescing, M162 full-chunk zero-copy, and M163 partial-direct checks retained"
+    ],
+    "measured_control_path": {
+      "workload_entries": 32,
+      "chunk_size": 8,
+      "direct_submissions": 4,
+      "batch_ioctls": 4,
+      "pressure_queries": 1,
+      "pressure_cache_hits": 3,
+      "accepted_entries": 32,
+      "pending_entries": 0,
+      "query_reduction_vs_uncached_four_chunk_path": 0.75
+    }
+  },
+  "runtime_validation": {
+    "tenant_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m164-tenant-qemu.log",
+    "tenant_qemu_return_code": 0,
+    "tenant_result": "pass",
+    "required_markers": [
+      "M154_TENANT_ACCELERATOR_TELEMETRY_LOSS_OK",
+      "M156_TENANT_EVENT_BACKPRESSURE_QUERY_OK queued=64 dropped=1 state=3",
+      "M155_TENANT_ACCELERATOR_BATCH_ACCOUNTING_OK completed=4",
+      "M155_TENANT_ACCELERATOR_BATCH_MALFORMED_REJECT_OK",
+      "M155_TENANT_ACCELERATOR_BATCH_BENCH_OK single_ns=5899919 batch_ns=4409931 speedup_x100=133",
+      "M160_ADAPTIVE_PRESSURE_CACHE_OK flushes=5 queries=14 cache_hits=2 losses=4 resync=2 failures=1 fast=1 target=1",
+      "M161_COALESCED_SUBMIT_OK regular_ioctls=2 coalesced_ioctls=1 accepted=8",
+      "M162_ZERO_COPY_COALESCED_OK direct_submissions=1 direct_pointer=1 accepted=8",
+      "M163_DIRECT_PARTIAL_OK direct_submissions=1 direct_pointer=1 accepted=3",
+      "M164_SUBMIT_MANY_PRESSURE_CACHE_OK ioctls=4 queries=1 cache_hits=3 accepted=32 direct_submissions=4",
+      "M163_BATCHER_SELFTEST_RC=0",
+      "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+    ],
+    "tenant_kernel_diagnostic_scan": "clean",
+    "durable_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m164-durable-qemu.log",
+    "durable_qemu_return_code": 0,
+    "durable_result": "pass",
+    "durable_markers": [
+      "M108_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+      "M108_EXECUTION_REPLAY_OK generation=1",
+      "M108_ENGINE_REPLAY_FAIL_CLOSED_OK",
+      "FJT_SPLIT_BRAIN_PARTITION_ATTACK_DENIED_OK",
+      "FJR_CONSENSUS_TIMEOUT_POLICY_OK min=100 max=200 heartbeat=25",
+      "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+    ],
+    "durable_kernel_diagnostic_scan": "clean"
+  },
+  "productivity_interpretation": {
+    "benefit": "For the controlled 32-entry, four-chunk direct workload, pressure queries fell from four uncached queries to one query, a measured 75 percent reduction in pressure-query ioctl count for that path, while batch submission count and accepted-entry behavior remained unchanged.",
+    "scope": "The result measures control-plane ioctl reduction in a deterministic injected-kernel unit path and QEMU integration gate. It is not an end-to-end latency, CPU, memory-bandwidth, or physical-accelerator throughput claim.",
+    "raw_throughput_scope": "The integrated gate retained the inherited M155 synthetic QEMU accounting benchmark at speedup_x100=133 in this run; M164 does not claim an isolated raw-throughput gain."
+  },
+  "build_artifact": {
+    "kernel_source": "M156 kernel image reused; M164 is userspace runtime/test/gate integration.",
+    "kernel_build_directory": "/home/ubuntu/agi-kernel/build/m156-backpressure",
+    "bzimage_sha256": "4098292a9ca43f521cb67617e970165aff17047db591a7827aea0c690cf7b88d",
+    "vmlinux_sha256": "60229862db8230c29d68b4c11587a511a3dcfcabc590a685462ad4382c403fb1",
+    "config_sha256": "003e03a277c47585b6c36c00810bf36e61dc91b487f1162e0ad51f514bdfa08b",
+    "config_required_check": "CONFIG_CFS_BANDWIDTH=y"
+  },
+  "source_quality": {
+    "git_diff_check": "pass",
+    "tenant_selftest_compile": "pass_static_wall_wextra_werror",
+    "adaptive_batcher_compile": "pass_static_wall_wextra_werror",
+    "shell_syntax_check": "pass",
+    "diagnostic_scan": "tenant_and_durable_logs_clean",
+    "protected_files_staged": false,
+    "protected_files": [
+      "M63-COMPUTE-CONTEXT-DESIGN.md",
+      "M63-SECURITY-REVIEW.md"
+    ]
+  },
+  "release_gate": {
+    "status": "blocked",
+    "reason": "M164 is bounded userspace/QEMU validation. Physical accelerator qualification, independent reproducible production builders, signed artifacts, stable/LTS forward-port qualification, and external security governance remain required.",
+    "model_output_is_authority": false,
+    "hardware_claim": "No physical GPU, NPU, VRAM, IOMMU, DMA, vendor-driver, reset, or fleet qualification is claimed."
+  },
+  "known_limitations": [
+    "The 75 percent query reduction is measured for a controlled four-chunk healthy-pressure workload and is not universal.",
+    "Cache state is bounded by the existing expiry and safety invalidation rules; it is not a substitute for kernel-side admission checks.",
+    "The unit test uses an injected ioctl model; QEMU validates integration and packaging, not physical accelerator behavior.",
+    "No isolated M164 raw-throughput improvement is claimed; the M155 benchmark remains supporting context only.",
+    "The kernel remains based on the Linux v7.2-rc7 development line and production release qualification remains incomplete."
+  ]
+}
