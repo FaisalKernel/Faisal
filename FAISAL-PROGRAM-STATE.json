@@ -1424,12 +1424,14 @@
     "audit_document": "FAISAL-INDUSTRY-READINESS-AUDIT.md",
     "research_document": "FAISAL-INDUSTRY-READINESS-RESEARCH.md",
     "machine_evidence": "tools/faisal-build/evidence/industry-readiness-audit.json",
-    "aggregate_qemu_harnesses": 36,
+    "aggregate_qemu_harnesses": 37,
     "aggregate_diagnostic_gate": "pass",
-    "m106_current_head_kasan_qemu": "pass",
-    "m106_current_head_kcsan_qemu": "pass_headless_profile_legacy_ps2_disabled",
+    "m106_current_head_kasan_qemu": "pass_current_head_after_m116",
+    "m106_current_head_kcsan_qemu": "pass_current_head_after_m116_headless_profile_legacy_ps2_disabled",
     "m106_uapi_fuzz_iterations_per_profile": 256,
-    "m106_sanitizer_matrix_diagnostic_gate": "pass",
+    "m106_sanitizer_matrix_diagnostic_gate": "pass_current_head_kasan_kcsan_clean",
+    "m116_knowledge_precision_qemu": "pass_kernel_freshness_provenance_confidence_fail_closed",
+    "m104_rollback_qemu": "pass_approval_canary_rollback_replay",
     "m108_durable_execution_qemu": "pass",
     "m108_aggregate_qemu_harnesses": 29,
     "m108_execution_features": "intent_dag_dispatch_retry_backoff_checkpoint_restart_recovery_replay_cancellation_and_authority_denial",
@@ -1467,10 +1469,9 @@
     "uapi_fuzz_calls": 8192,
     "bounded_soak_ioctl_calls": 98304,
     "sparse_status": "pass_with_two_memset_warnings",
-    "reproducibility_status": "failed_unpinned_independent_comparison",
+    "reproducibility_status": "comparison_gate_implemented_independent_builder_evidence_pending",
     "release_blockers": [
       "stable_or_lts_forward_port",
-      "current_head_sanitizer_matrix",
       "trusted_signed_artifacts",
       "independent_reproducible_rebuild",
       "cve_and_upstream_response_process",
@@ -1489,7 +1490,6 @@
       "tenant_resource_accounting_and_worker_supervision",
       "worker_heartbeat_timeout_restart_and_reassignment",
       "namespace_creation_and_cgroup_hierarchy_ownership",
-      "current_head_sanitizer_validation_for_m115",
       "current_head_sanitizer_validation_for_new_launcher_and_scanner_paths"
     ]
   }
