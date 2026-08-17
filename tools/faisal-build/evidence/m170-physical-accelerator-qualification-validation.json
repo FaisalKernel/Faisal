@@ -1,0 +1,113 @@
+{
+  "project": "FAISAL",
+  "milestone": "M170-physical-gpu-npu-vram-iommu-dma-vendor-driver-qualification",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "bea7ceadf44e4c83a9f337928329ebc00b812569",
+  "lts_source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+  "status": "physical_qualification_blocked_no_device_visible",
+  "objective": "Replace device-count/QEMU-only accelerator evidence with a fail-closed physical-device qualification gate.",
+  "authoritative_requirements": {
+    "research_record": "tools/faisal-build/evidence/accelerator-research-2026-08-18.md",
+    "research_record_sha256": "073e710b2f212fcdd33406e66721d7f210953e90ec5f30fa57e0710b48d062b9",
+    "sources": [
+      {
+        "url": "https://docs.kernel.org/core-api/dma-api-howto.html",
+        "requirement": "DMA buffers, mapping, synchronization, DMA masks, and error paths must follow the Linux DMA API."
+      },
+      {
+        "url": "https://docs.kernel.org/gpu/drm-mm.html",
+        "requirement": "Dedicated accelerator memory must be distinguished from system memory; TTM/GEM/VRAM paths require memory-management evidence."
+      },
+      {
+        "url": "https://docs.kernel.org/driver-api/vfio.html",
+        "requirement": "IOMMU groups are the minimum secure ownership/isolation unit; topology and ACS limitations must be reviewed because DMA is the critical device-isolation risk."
+      }
+    ]
+  },
+  "implementation": {
+    "structured_validator": "tools/faisal-build/verify_physical_accelerator_qualification.py",
+    "structured_validator_sha256": "fdf9bfd90147436a33056d83ee1bf41025f67736d5998671234cbdb09dcb62c1",
+    "unit_test": "tools/faisal-build/test_verify_physical_accelerator_qualification.py",
+    "unit_test_sha256": "22a0c1a79ddcf57a8e192ec6c4f94d92c891c788b5c9c429ada8a64e6d244add",
+    "inventory_collector": "tools/faisal-build/collect_physical_accelerator_inventory.py",
+    "inventory_collector_sha256": "cce42a4cc558db77084a6537c04da25fc829a840571f8e1693c17b894708b0ad",
+    "qualification_runbook": "FAISAL-ACCELERATOR-QUALIFICATION.md",
+    "qualification_runbook_sha256": "0e86c2c8ead7d9742d6f94121ea2ddadd9f76260b0ae6b68c9c90ab1d8bbf93a",
+    "legacy_wrapper": "tools/faisal-build/verify_accelerator_qualification.sh",
+    "legacy_wrapper_sha256": "19573e3bd594b58b093f1ac28664ac9e593f2b3e9722bfbe95d9df3032bd9376",
+    "production_gate_sha256": "1aca63589add80c857879aa76e18ec0788377841cdcfac5463ae1a284143e4e6",
+    "schema": "org.faisal.physical-accelerator-qualification.v2",
+    "required_controls": [
+      "PCI BDF, vendor ID, device ID, stable identity, and device type",
+      "signed vendor/upstream driver module provenance and firmware hashes",
+      "IOMMU enabled, driver, group membership, group isolation, DMA protection, ACS/topology review",
+      "physical VRAM total/free values with allocation, reclamation, accounting, and isolation tests",
+      "DMA mask, mapping, synchronization, unmap, fault containment, IOMMU translation, and arbitrary-access denial",
+      "reset recovery, stress, multi-tenant isolation, driver error recovery, and physical workload tests",
+      "physical observation, operator confirmation, hardware-attestation class, and accountable release authority",
+      "model_output_is_authority=false"
+    ]
+  },
+  "synthetic_regression": {
+    "result": "pass_synthetic_only",
+    "marker": "FAISAL_PHYSICAL_ACCELERATOR_VERIFIER_TEST_OK synthetic_hardware_pass_qemu_iommu_vram_dma_driver_tamper_denied",
+    "coverage": [
+      "synthetic structured hardware report accepted by validator",
+      "CLI and shell-wrapper delegation accepted",
+      "QEMU-only mode rejected when hardware is required",
+      "disabled IOMMU rejected",
+      "host-RAM substitution for VRAM rejected",
+      "unsigned driver rejected",
+      "signature tampering rejected"
+    ],
+    "claim_boundary": "The positive fixture is cryptographic policy testing only and is not physical-device evidence."
+  },
+  "current_environment_inventory": {
+    "record": "/home/ubuntu/agi-kernel/build/m170-accelerator/physical-accelerator-inventory-final.json",
+    "record_sha256": "b0fdb80bd1be14ca1e826460413d6e843047684e14f977a8d802f52510a593b6",
+    "inventory_claim": "inventory_only_not_a_physical_qualification_result",
+    "accelerator_pci_devices": 0,
+    "iommu_groups": 0,
+    "dev_dri_exists": false,
+    "dev_kfd_exists": false,
+    "dev_vfio_exists": false,
+    "lspci_available": false,
+    "nvidia_smi_available": false,
+    "rocminfo_available": false,
+    "xpu_smi_available": false,
+    "physical_observation": false
+  },
+  "existing_software_baseline": {
+    "record": "/home/ubuntu/agi-kernel/build/release-attested/accelerator-evidence.env",
+    "record_sha256": "1906995225cd7957cc19a28a4bd8349d8e0f2ac9780fa13484eaa0bdd110130f",
+    "mode": "qemu",
+    "backend": "qemu-tcg",
+    "status": "pass",
+    "scope": "QEMU/software isolation, accounting, and sanitizer evidence only; no physical GPU/NPU, VRAM, IOMMU, DMA, or vendor-driver qualification."
+  },
+  "production_gate": {
+    "result": "blocked_fail_closed",
+    "physical_hardware_required": true,
+    "structured_json_required": true,
+    "blocked_reasons": [
+      "No physical GPU/NPU is visible in the sandbox inventory.",
+      "No IOMMU group is visible for an accelerator.",
+      "No physical VRAM measurement is available.",
+      "No physical DMA mapping/fault-containment test is available.",
+      "No vendor-driver or firmware provenance is available for a physical device.",
+      "No operator-observed physical workload/reset/recovery evidence is available."
+    ],
+    "claims_not_made": [
+      "No physical GPU/NPU qualification claim.",
+      "No VRAM capacity or isolation claim.",
+      "No IOMMU/DMA safety claim for a physical accelerator.",
+      "No vendor-driver production compatibility claim.",
+      "No hardware attestation claim."
+    ]
+  },
+  "release_status": {
+    "accelerator_blocker": "open_physical_evidence_required",
+    "overall_production_release": "blocked",
+    "external_completion": "Run the signed JSON report on an operator-controlled host with a real GPU/NPU, IOMMU enabled, vendor driver and firmware provenance, physical workload/stress/recovery tests, and independently review the evidence."
+  }
+}

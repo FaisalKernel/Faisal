@@ -9,6 +9,13 @@ EXPECTED_REV=${FAISAL_EXPECTED_SOURCE_REV:-}
 REQUIRE_HARDWARE=${FAISAL_REQUIRE_ACCELERATOR_HARDWARE:-0}
 REPORT=${FAISAL_ACCELERATOR_VERIFY_REPORT:-${EVIDENCE:-/tmp}/FAISAL-accelerator-verification.tsv}
 
+# Physical production qualification uses the structured JSON evidence schema.
+case "$EVIDENCE" in
+  *.json)
+    exec python3 "$(dirname "$0")/verify_physical_accelerator_qualification.py"
+    ;;
+esac
+
 fail() { echo "FAISAL_ACCELERATOR_GATE_FAIL:$*" >&2; exit 1; }
 [ -n "$EVIDENCE" ] || fail "FAISAL_ACCELERATOR_EVIDENCE is required"
 [ -r "$EVIDENCE" ] || fail "accelerator evidence unreadable"

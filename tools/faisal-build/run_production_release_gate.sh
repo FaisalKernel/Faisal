@@ -45,6 +45,10 @@ case "$ADVISORY_LEDGER" in
   *) fail "structured JSON advisory ledger is required for production qualification" ;;
 esac
 [ -n "$ACCELERATOR_EVIDENCE" ] || fail "FAISAL_ACCELERATOR_EVIDENCE is required"
+case "$ACCELERATOR_EVIDENCE" in
+  *.json) : ;;
+  *) fail "structured JSON accelerator qualification evidence is required for production qualification" ;;
+esac
 [ -x "$LINUX/tools/faisal-build/verify_industry_artifacts.sh" ] || fail "artifact verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_accelerator_qualification.sh" ] || fail "accelerator verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_advisory_ledger.sh" ] || fail "advisory ledger verifier unavailable"
