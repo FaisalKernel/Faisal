@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "56ae7ed62",
-  "current_tag": "FAISAL-M114-SANDBOX-BINDING",
+  "current_head": "c7a7a73d23926f42217b55bbcfc2c594d6a62841",
+  "current_tag": "FAISAL-M114-TRUSTED-LAUNCHER-SCANNERS",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1295,23 +1295,21 @@
       "id": "M114-kernel-enforced-sandbox-identity-multitenant-worker-supervision-and-real-build-scanner-adapters",
       "phase": 7,
       "name": "Kernel-attested sandbox identity binding and real security/build adapters",
-      "status": "partially_validated_kernel_identity_binding",
+      "status": "validated_bounded_kernel_identity_scanner_and_launcher_controls",
       "priority": 110,
       "depends_on": [
         "M113-repository-adapter"
       ],
       "evidence": [
-        "tools/faisal-build/evidence/m114-sandbox-binding-validation.json"
+        "tools/faisal-build/evidence/m114-sandbox-binding-validation.json",
+        "tools/faisal-build/evidence/m114-followup-validation.json",
+        "tools/faisal-build/evidence/seccomp-research-2026-08-17.md",
+        "tools/faisal-build/run_full_faisal_audit.sh"
       ],
-      "next_action": "Implement the trusted launcher and real scanner adapters.",
+      "next_action": "Retain 36-harness, scanner fail-closed, Landlock/seccomp, cgroup fail-closed, and kernel identity-binding coverage; next implement tenant accounting and worker supervision with sanitizer evidence.",
       "remaining_gates": [
         "launcher_namespace_creation",
         "cgroup_resource_enforcement",
-        "landlock_enforcement",
-        "seccomp_enforcement",
-        "build_scanner_adapter",
-        "dependency_analyzer_adapter",
-        "vulnerability_scanner_adapter",
         "tenant_accounting_qemu",
         "sanitizer_matrix"
       ]
@@ -1382,13 +1380,13 @@
     "tools/testing/selftests/agi_autonomy_orchestrator_test.c"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "M114-followup-trusted-sandbox-launcher-and-real-build-vulnerability-scanner-adapters",
+  "next_dependency": "M115-multitenant-resource-accounting-worker-supervision-and-sanitizer-validation",
   "industry_readiness": {
     "status": "preproduction_prototype_not_production_ready",
     "audit_document": "FAISAL-INDUSTRY-READINESS-AUDIT.md",
     "research_document": "FAISAL-INDUSTRY-READINESS-RESEARCH.md",
     "machine_evidence": "tools/faisal-build/evidence/industry-readiness-audit.json",
-    "aggregate_qemu_harnesses": 28,
+    "aggregate_qemu_harnesses": 36,
     "aggregate_diagnostic_gate": "pass",
     "m106_current_head_kasan_qemu": "pass",
     "m106_current_head_kcsan_qemu": "pass_headless_profile_legacy_ps2_disabled",
@@ -1416,6 +1414,9 @@
     "m112_model_authority_boundary": "model_proposals_require_independent_verification_and_explicit_deployment_approval",
     "m113_repository_adapter_qemu": "pass",
     "m113_aggregate_qemu_harnesses": 34,
+    "m114_followup_aggregate_qemu_harnesses": 36,
+    "m114_followup_scanner_adapters": "pass_real_build_dependency_and_fail_closed_vulnerability",
+    "m114_followup_trusted_launcher": "pass_qemu_landlock_seccomp_and_cgroup_fail_closed",
     "m113_repository_features": "real_workspace_analysis_sha256_file_and_tree_provenance_bounded_staging_path_policy_backup_rollback_replay_corruption_fail_closed",
     "m113_authority_boundary": "workspace_constrained_staging_only; no production write or command execution authority",
     "m105_verified_autonomy_orchestrator_qemu": "pass",
@@ -1444,7 +1445,9 @@
       "kernel_enforced_sandbox_identity_and_multitenant_worker_supervision",
       "real_repository_analysis_and_change_application_adapters",
       "kernel_enforced_sandbox_identity_and_multitenant_worker_supervision",
-      "real_build_dependency_vulnerability_and_ci_scanner_adapters"
+      "real_build_dependency_vulnerability_and_ci_scanner_adapters",
+      "tenant_resource_accounting_and_worker_supervision",
+      "current_head_sanitizer_validation_for_new_launcher_and_scanner_paths"
     ]
   }
 }
