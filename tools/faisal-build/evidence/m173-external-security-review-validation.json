@@ -1,0 +1,108 @@
+{
+  "project": "FAISAL",
+  "milestone": "M173-external-security-review-readiness",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "6022f4c979353097b214661e31cd4f3ed2091474",
+  "status": "review_readiness_qualified_external_review_pending",
+  "objective": "Prepare a source-bound, signed, fail-closed package for a genuinely independent external security review without fabricating reviewer identity, findings, or approval.",
+  "authoritative_research": {
+    "record": "tools/faisal-build/evidence/external-security-review-research-2026-08-18.md",
+    "record_sha256": "ba5c6d89951855fb2e5778aa5f74f3601a767854b51f7d259b9c75e9e1b6e66f",
+    "sources": [
+      {
+        "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+        "conclusion": "NIST SSDF provides a common secure-development vocabulary and emphasizes practices that reduce vulnerabilities, mitigate undetected flaws, and address root causes."
+      },
+      {
+        "url": "https://www.cisa.gov/securebydesign",
+        "conclusion": "CISA places product-security ownership at the provider level and treats security as a core product requirement rather than only a technical feature."
+      },
+      {
+        "url": "https://docs.kernel.org/process/security-bugs.html",
+        "conclusion": "Linux distinguishes private security-bug intake, subsystem-maintainer coordination, and public disclosure; FAISAL must preserve that separation."
+      }
+    ]
+  },
+  "implementation": {
+    "validator": "tools/faisal-build/verify_external_security_review.py",
+    "validator_sha256": "8d66ebd7fc7c843c8aac1bb6eb86aefd0438f6172935f4cbe375fbf2c4299307",
+    "test": "tools/faisal-build/test_verify_external_security_review.py",
+    "test_sha256": "bad2bb2a38178cc4558f91a1ba8fbf62edec8d3e4ddc5bd6cacdc6578d29400e",
+    "release_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "release_gate_sha256": "1ef54a1f2d58d714965e8448bf9995794e3a08056bcae174e7787175522757a1",
+    "internal_security_verifier_sha256": "7d0fc3531731d48797d239cdbde7c9c32154fd5b0741a9e1329eef0da039cb52",
+    "runbook": "FAISAL-EXTERNAL-SECURITY-REVIEW.md",
+    "runbook_sha256": "c7a169c21b33a234bd99c1a58452684a8fa4b394f2c2a2ab693a54aa70a2c68e"
+  },
+  "required_external_evidence": {
+    "evidence_class": "independent_external",
+    "reviewer_organization_and_id": true,
+    "reviewer_qualification_evidence": true,
+    "conflict_declaration": true,
+    "independence_attestation": true,
+    "engagement_id_and_signed_scope": true,
+    "source_and_artifact_binding": true,
+    "full_domain_scope": true,
+    "finding_ledger": true,
+    "critical_and_high_disposition": true,
+    "retest_evidence": true,
+    "residual_risk_and_expiry": true,
+    "final_production_disposition": true,
+    "detached_signature": true
+  },
+  "tests": {
+    "validator_cli_suite": {
+      "result": "pass_independence_scope_findings_disposition_stale_tamper_and_model_authority_denied",
+      "log": "/home/ubuntu/agi-kernel/build/m173-security-review/external-review-unit-final.log",
+      "log_sha256": "834c6057de85e4af1758e3a613f150b19e72d041c9b81f7aa46b7ab204f13b83"
+    },
+    "project_self_review_denial": {
+      "result": "pass_fail_closed",
+      "report": "/home/ubuntu/agi-kernel/build/m173-security-review/self-review-not-independent.json",
+      "report_sha256": "ed89c9a250ff5fd3f661aa2ba0cf6ccc1faea7642f28ca3861b09c3b03b7579b",
+      "signature_sha256": "334f7d41a84db96b21750a786438455425677ae7d528c8da55775c9e49ce0d19",
+      "rejection_log_sha256": "1770e98d2a5ff847a57ccae8d66dbfb619d9d43b6b44831bc1e8c033d466aa4a",
+      "verification_report_sha256": "c4aae1457552555b9a5b8b401c1d695c704d6de61690e0af6c65be7b45b1c2c1",
+      "expected_reason": "reviewer independence or conflict declaration failed"
+    },
+    "existing_internal_security_evidence": {
+      "manifest": "/home/ubuntu/agi-kernel/build/release-attested/security-release.env",
+      "manifest_sha256": "806836ddeaf100765e092971d41fceef7e9d4482910e8f8f6838f77c111ca277",
+      "signature_sha256": "800d2750a4792cf1d063e468d4ec6e14c7d56722645c0aff0696f8eb43cc16cf",
+      "validation_key_sha256": "af20b51fcca0c8c91f1ffd98151b8f0d67b05aa37628bbc507257c82a35633b4",
+      "scope": "internal_signed_security_evidence_only_not_independent_external_review"
+    }
+  },
+  "release_gate": {
+    "requires": "signed structured independent external-security-review JSON in addition to existing internal security evidence",
+    "fails_closed_for": [
+      "missing external review",
+      "project-affiliated or self-review",
+      "missing reviewer qualification or conflict declaration",
+      "incomplete domain scope",
+      "unresolved critical/high findings",
+      "missing retest or residual-risk disposition",
+      "stale or wrong-source evidence",
+      "signature tampering",
+      "model output used as security authority"
+    ]
+  },
+  "production_boundary": {
+    "readiness_package": "pass",
+    "independent_external_review": "not_available_in_sandbox",
+    "production_release_gate": "blocked",
+    "limitations": [
+      "No independent external reviewer or qualified audit organization participated.",
+      "No real external findings, remediation retests, or signed production disposition exist.",
+      "Internal FAISAL security reviews, scans, fuzzing, sanitizers, and QEMU regressions are preparation evidence only.",
+      "The local validation key is not an auditor identity or production trust root.",
+      "The release gate now rejects self-authored or project-affiliated review evidence."
+    ],
+    "claims_not_made": [
+      "No claim of independent security review completion.",
+      "No claim of vulnerability-free software.",
+      "No claim of production security approval.",
+      "No claim that model output can authorize security disposition."
+    ]
+  }
+}
