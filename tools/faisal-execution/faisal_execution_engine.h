@@ -14,6 +14,7 @@
 #define FEX_ENGINE_MAGIC 0x46455831U
 #define FEX_ENGINE_VERSION 1U
 #define FEX_DIGEST_SIZE FTS_DIGEST_SIZE
+#define FEX_MAX_WORKER_RESTARTS 3U
 
 /* Persisted objective state is a replay contract, not a model claim. */
 enum fex_objective_state {
@@ -44,7 +45,8 @@ enum fex_worker_health {
 	FEX_WORKER_TIMED_OUT = 2,
 	FEX_WORKER_REASSIGNED = 3,
 	FEX_WORKER_COMPLETED = 4,
-	FEX_WORKER_DEAD_LETTER = 5
+	FEX_WORKER_DEAD_LETTER = 5,
+	FEX_WORKER_QUARANTINED = 6
 };
 
 enum fex_status {

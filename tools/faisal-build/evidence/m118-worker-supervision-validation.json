@@ -1,0 +1,29 @@
+{
+  "milestone": "M118",
+  "feature": "bounded worker heartbeat supervision and quarantine",
+  "status": "validated_qemu",
+  "source_boundary": "model output has no authority; worker transitions are driven only by signed task-service state, lease generation, heartbeat time, and explicit supervisor policy",
+  "policy": {
+    "max_worker_restarts": 3,
+    "quarantine_terminal_state": true,
+    "automatic_retry_is_bounded": true,
+    "explicit_handoff_remains_required_for_recovery": true
+  },
+  "evidence": {
+    "qemu_harness": "tools/faisal-build/run_durable_execution_qemu.sh",
+    "boot": "FAISAL_M108_BOOT_OK",
+    "handoff": "M117_WORKER_HANDOFF_OK",
+    "timeout_reassignment": "M115_WORKER_TIMEOUT_REASSIGN_OK",
+    "quarantine": "M118_WORKER_QUARANTINE_OK",
+    "replay": "M117_WORKER_HANDOFF_REPLAY_OK",
+    "fail_closed_corruption": "M108_ENGINE_REPLAY_FAIL_CLOSED_OK",
+    "model_authority_boundary": "M108_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+    "kernel_diagnostics": "none observed",
+    "qemu_result": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+  },
+  "limitations": [
+    "This validates the local durable execution engine in QEMU, not cross-host network migration.",
+    "Hardware-backed worker identity and provider-specific attestation remain gated.",
+    "The quarantine threshold is a bounded policy constant and requires future operational tuning from measured production traces."
+  ]
+}

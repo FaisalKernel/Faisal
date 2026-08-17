@@ -346,9 +346,15 @@ int fex_dispatch(struct fex_service *service, uint64_t objective_id,
 		struct fts_task task;
 		int rc;
 
-		if (node->objective_id != objective_id || node->state == FTS_TASK_SUCCEEDED ||
-		    node->state == FTS_TASK_CANCELLED || node->state == FTS_TASK_DEAD_LETTER)
-			continue;
+					if (node->objective_id != objective_id || node->state == FTS_TASK_SUCCEEDED ||
+			    node->state == FTS_TASK_CANCELLED || node->state == FTS_TASK_DEAD_LETTER)
+				continue;
+			{
+				struct fex_worker *existing = find_worker(service, node->task_id);
+				if (existing && existing->health == FEX_WORKER_QUARANTINED)
+					continue;
+			}
+
 					if (!find_worker(service, node->task_id) &&
 			    service->worker_count >= FEX_MAX_WORKERS) {
 				pthread_mutex_unlock(&service->lock);
@@ -488,11 +494,6 @@ int fex_supervise(struct fex_service *service, uint64_t now_ns,
 	pthread_mutex_lock(&service->lock);
 	*reassigned = 0;
 	*dead_lettered = 0;
-	rc = fts_recover_expired(&service->tasks, now_ns, &recovered, &expired_dead);
-	if (rc != FTS_OK) {
-		pthread_mutex_unlock(&service->lock);
-		return FEX_ERR_STATE;
-	}
 	for (i = 0; i < service->worker_count; i++) {
 		struct fex_worker *worker = &service->workers[i];
 		struct fts_task task;
@@ -503,13 +504,18 @@ int fex_supervise(struct fex_service *service, uint64_t now_ns,
 		if (fts_query(&service->tasks, worker->task_id, &task) != FTS_OK)
 			continue;
 		timed_out = task.state == FTS_TASK_LEASED || task.state == FTS_TASK_RUNNING;
-		if (timed_out && now_ns >= worker->last_heartbeat_ns &&
-		    now_ns - worker->last_heartbeat_ns >= timeout_ns) {
-			struct fts_task failed;
-			int frc = fts_fail(&service->tasks, worker->task_id,
-					   worker->lease_generation, now_ns,
-					   FTS_FAILURE_SYSTEMIC,
-					   "worker heartbeat timeout", 1, &failed);
+					if (timed_out && now_ns >= worker->last_heartbeat_ns &&
+			    now_ns - worker->last_heartbeat_ns >= timeout_ns) {
+				struct fts_task failed;
+				int quarantine = worker->restart_count + 1 >=
+					FEX_MAX_WORKER_RESTARTS;
+				int frc = fts_fail(&service->tasks, worker->task_id,
+						   worker->lease_generation, now_ns,
+						   FTS_FAILURE_SYSTEMIC,
+						   quarantine ? "worker heartbeat timeout; quarantined" :
+						   "worker heartbeat timeout",
+						   1, &failed);
+
 			if (frc != FTS_OK && frc != FTS_ERR_STOPPED)
 				continue;
 			task = failed;
@@ -517,14 +523,18 @@ int fex_supervise(struct fex_service *service, uint64_t now_ns,
 		worker->last_transition_ns = now_ns;
 		worker->lease_deadline_ns = task.lease_until_ns;
 		worker->lease_generation = task.lease_generation;
-		if (task.state == FTS_TASK_READY || task.state == FTS_TASK_RETRY_WAIT) {
-			worker->health = FEX_WORKER_REASSIGNED;
-			worker->restart_count++;
-			worker->reassignment_count++;
-			(*reassigned)++;
-		} else if (task.state == FTS_TASK_DEAD_LETTER) {
-			worker->health = FEX_WORKER_DEAD_LETTER;
-			worker->failure_class = task.failure_class;
+					if (task.state == FTS_TASK_READY || task.state == FTS_TASK_RETRY_WAIT) {
+				worker->health = FEX_WORKER_REASSIGNED;
+				worker->restart_count++;
+				worker->reassignment_count++;
+				(*reassigned)++;
+			} else if (task.state == FTS_TASK_DEAD_LETTER) {
+				worker->health = worker->restart_count + 1 >=
+					FEX_MAX_WORKER_RESTARTS ? FEX_WORKER_QUARANTINED :
+					FEX_WORKER_DEAD_LETTER;
+				worker->restart_count++;
+								worker->failure_class = task.failure_class;
+
 			(*dead_lettered)++;
 		} else if (task.state == FTS_TASK_SUCCEEDED) {
 			worker->health = FEX_WORKER_COMPLETED;
@@ -536,6 +546,11 @@ int fex_supervise(struct fex_service *service, uint64_t now_ns,
 			pthread_mutex_unlock(&service->lock);
 			return FEX_ERR_IO;
 		}
+	}
+	rc = fts_recover_expired(&service->tasks, now_ns, &recovered, &expired_dead);
+	if (rc != FTS_OK) {
+		pthread_mutex_unlock(&service->lock);
+		return FEX_ERR_STATE;
 	}
 	for (i = 0; i < service->node_count; i++) {
 		struct fts_task task;

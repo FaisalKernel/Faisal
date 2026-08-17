@@ -33,8 +33,8 @@ int main(int argc, char **argv)
 {
 	char prefix[] = "/tmp/faisal-m108-execution-XXXXXX";
 	struct fex_service service;
-	struct fex_objective objective, replayed;
-	struct fex_node node_a, node_b, node_c, query_node;
+	struct fex_objective objective, replayed, quarantine_objective;
+	struct fex_node node_a, node_b, node_c, node_d, query_node;
 	struct fex_checkpoint checkpoint;
 	uint8_t working[FEX_DIGEST_SIZE], world[FEX_DIGEST_SIZE], resource[FEX_DIGEST_SIZE];
 	uint32_t dependency;
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
 			fail("WORKER_HEALTHY_STATE", FEX_ERR_STATE);
 	{
 		uint64_t previous_generation = worker.lease_generation;
-		CHECK_OK(fex_handoff(&service, node_c.task_id, 9001, 12, 5),
+		CHECK_OK(fex_handoff(&service, node_c.task_id, 9001, 12, 100),
 			 "WORKER_HANDOFF");
 		CHECK_OK(fex_query_worker(&service, node_c.task_id, &worker),
 			 "QUERY_WORKER_HANDOFF");
@@ -147,6 +147,33 @@ int main(int argc, char **argv)
 		fail("WORKER_REASSIGNED_STATE", FEX_ERR_STATE);
 	printf("M115_WORKER_TIMEOUT_REASSIGN_OK reassigned=%u restart_count=%u\n",
 	       reassigned, worker.restart_count);
+
+	CHECK_OK(fex_create_objective(&service, "intent: quarantine unhealthy worker",
+				100000000000ULL, 1000000000ULL, 1000000ULL, 1,
+				25, &quarantine_objective), "CREATE_QUARANTINE_OBJECTIVE");
+	CHECK_OK(fex_add_node(&service, quarantine_objective.objective_id, "m118-node-d",
+				"bounded recovery worker", 300, 100, 2, NULL, 0, 1, 0,
+				&node_d), "ADD_D");
+	CHECK_OK(fex_dispatch(&service, quarantine_objective.objective_id, 30, 100, &claimed),
+			 "DISPATCH_D_FIRST");
+	CHECK_OK(fex_supervise(&service, 40, 5, &reassigned, &supervised_dead),
+			 "SUPERVISE_D_FIRST");
+	CHECK_OK(fex_dispatch(&service, quarantine_objective.objective_id, 3000000030ULL, 100,
+			 &claimed), "DISPATCH_D_SECOND");
+	CHECK_OK(fex_supervise(&service, 3000000040ULL, 5, &reassigned,
+			 &supervised_dead), "SUPERVISE_D_SECOND");
+	CHECK_OK(fex_dispatch(&service, quarantine_objective.objective_id, 8000000030ULL, 100,
+			 &claimed), "DISPATCH_D_THIRD");
+	CHECK_OK(fex_supervise(&service, 8000000040ULL, 5, &reassigned,
+			 &supervised_dead), "SUPERVISE_D_THIRD");
+	CHECK_OK(fex_query_worker(&service, node_d.task_id, &worker),
+			 "QUERY_WORKER_QUARANTINED");
+	if (worker.health != FEX_WORKER_QUARANTINED ||
+	    worker.restart_count != FEX_MAX_WORKER_RESTARTS ||
+	    supervised_dead != 1)
+		fail("WORKER_QUARANTINE_STATE", FEX_ERR_STATE);
+	printf("M118_WORKER_QUARANTINE_OK restarts=%u dead_lettered=%u\n",
+	       worker.restart_count, supervised_dead);
 	fex_close(&service);
 
 	CHECK_OK(fex_open(&service, prefix, require_kernel), "REOPEN");
@@ -155,7 +182,7 @@ int main(int argc, char **argv)
 	if (recovered != 0 || dead_lettered != 0)
 		fail("RECOVER_COUNTS", FEX_ERR_STATE);
 	CHECK_OK(fex_query_node(&service, node_c.task_id, &query_node), "QUERY_C_RECOVERED");
-	if (query_node.state != FTS_TASK_READY)
+	if (query_node.state != FTS_TASK_RETRY_WAIT)
 		fail("WORKER_RESCHEDULE_STATE", FEX_ERR_STATE);
 	CHECK_OK(fex_query_worker(&service, node_c.task_id, &worker),
 			 "QUERY_WORKER_REPLAY");
