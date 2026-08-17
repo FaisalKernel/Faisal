@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "8ff9047bfd740ad8330587361b2b693a4aea4795",
-  "current_tag": "FAISAL-M155-ACCELERATOR-BATCH-ACCOUNTING",
+  "current_head": "772cf43a05527aa5d16e4c4885d932fc16bf8f8f",
+  "current_tag": "FAISAL-M156-EVENT-BACKPRESSURE-QUERY",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1408,7 +1408,8 @@
     "FAISAL-M152",
     "FAISAL-M153",
     "FAISAL-M154",
-    "FAISAL-M155"
+    "FAISAL-M155",
+    "FAISAL-M156"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1563,6 +1564,13 @@
     "m155_durable_execution_regression": "pass_final_kernel_durable_execution_journal_trust_replication_election_and_split_brain_denial_return_0",
     "m155_evidence": "tools/faisal-build/evidence/m155-accelerator-batch-accounting-validation.json",
     "m155_kernel_artifacts": "bzImage_sha256_25c5b516b5be09dc55ddd8a978cf4e291891bcbf1969f0c4de7b3b3bfae00c37_vmlinux_sha256_4a079d2e80394b9d2bbf799b67454b57dc5967341a9919b7571e9dcfe48cf8ca",
-    "m155_release_scope": "bounded_qemu_software_validation_only_physical_accelerator_and_operator_signed_release_pending"
+    "m155_release_scope": "bounded_qemu_software_validation_only_physical_accelerator_and_operator_signed_release_pending",
+    "m156_event_backpressure_query": "pass_additive_uapi_lineage_authorized_queue_locked_loss_and_sequence_telemetry",
+    "m156_tenant_qemu": "pass_final_kernel_backpressure_query_m154_m155_and_prior_tenant_markers_return_0",
+    "m156_durable_execution_regression": "pass_final_kernel_durable_execution_journal_trust_replication_election_and_split_brain_denial_return_0",
+    "m156_evidence": "tools/faisal-build/evidence/m156-event-backpressure-query-validation.json",
+    "m156_kernel_artifacts": "bzImage_sha256_4098292a9ca43f521cb67617e970165aff17047db591a7827aea0c690cf7b88d_vmlinux_sha256_60229862db8230c29d68b4c11587a511a3dcfcabc590a685462ad4382c403fb1",
+    "m156_productivity_scope": "adaptive_backpressure_telemetry_enables_user_space_batch_and_drain_control_no_independent_raw_throughput_claim",
+    "m156_release_scope": "bounded_qemu_software_validation_only_physical_accelerator_and_operator_signed_release_pending"
   }
 }

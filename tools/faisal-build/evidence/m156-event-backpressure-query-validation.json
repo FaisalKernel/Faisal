@@ -1,0 +1,73 @@
+{
+  "schema": "org.faisal.evidence.m156-event-backpressure-query-validation.v1",
+  "milestone": "M156",
+  "source_revision": "772cf43a05527aa5d16e4c4885d932fc16bf8f8f",
+  "source_parent": "0f7d6e1e4c826e7d4d0c3771beb6a843cea77889",
+  "recorded_at": "2026-08-17T15:55:00Z",
+  "status": "validated_bounded_qemu_not_production_release",
+  "implementation": {
+    "uapi": "Added struct agi_lc_event_backpressure, explicit NORMAL/NEAR_FULL/FULL/LOSS states, and additive AGI_LC_EVENT_BACKPRESSURE ioctl 0x6c without changing the existing ABI number or single-entry/batch accounting interfaces.",
+    "reported_telemetry": "The query reports ring capacity, queued records, cumulative dropped records, oldest and newest queued sequence, next sequence, and a sticky loss state when telemetry has been dropped.",
+    "security": "The query requires a live non-revoked session and matching lifecycle lineage, validates all input/output fields, reads queue state under queue_lock, and copies results back only after unlocking.",
+    "productivity_impact": "User-space runtimes can observe backpressure before issuing additional work, drain adaptively, reduce batch size, or escalate telemetry-loss handling. This is an adaptive-control primitive; it does not claim universal raw throughput improvement by itself.",
+    "selftest": "Tenant QEMU fills the 64-entry ring, verifies the 65th accelerator event reports telemetry loss, queries backpressure, and asserts queued=64, capacity=64, dropped_records>0, LOSS state, and ordered sequence watermarks."
+  },
+  "build": {
+    "command": "make O=/home/ubuntu/agi-kernel/build/m156-backpressure -j4 bzImage",
+    "result": "pass",
+    "build_directory": "/home/ubuntu/agi-kernel/build/m156-backpressure",
+    "bzimage_sha256": "4098292a9ca43f521cb67617e970165aff17047db591a7827aea0c690cf7b88d",
+    "vmlinux_sha256": "60229862db8230c29d68b4c11587a511a3dcfcabc590a685462ad4382c403fb1",
+    "config_sha256": "003e03a277c47585b6c36c00810bf36e61dc91b487f1162e0ad51f514bdfa08b",
+    "config_required_check": "CONFIG_CFS_BANDWIDTH=y"
+  },
+  "runtime_validation": {
+    "tenant_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m156-tenant-qemu-gated.log",
+    "tenant_qemu_return_code": 0,
+    "tenant_result": "pass",
+    "required_markers": [
+      "M154_TENANT_ACCELERATOR_TELEMETRY_LOSS_OK",
+      "M156_TENANT_EVENT_BACKPRESSURE_QUERY_OK queued=64 dropped=1 state=3",
+      "M155_TENANT_ACCELERATOR_BATCH_ACCOUNTING_OK completed=4",
+      "M155_TENANT_ACCELERATOR_BATCH_MALFORMED_REJECT_OK",
+      "M155_TENANT_ACCELERATOR_BATCH_BENCH_OK single_ns=4463181 batch_ns=4176601 speedup_x100=106",
+      "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK"
+    ],
+    "tenant_kernel_diagnostic_scan": "clean",
+    "durable_qemu_log": "/home/ubuntu/agi-kernel/build/faisal-m156-durable-qemu.log",
+    "durable_qemu_return_code": 0,
+    "durable_result": "pass",
+    "durable_markers": [
+      "M108_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+      "M108_EXECUTION_REPLAY_OK",
+      "M108_ENGINE_REPLAY_FAIL_CLOSED_OK",
+      "FJT_SPLIT_BRAIN_PARTITION_ATTACK_DENIED_OK",
+      "FJR_CONSENSUS_TIMEOUT_POLICY_OK",
+      "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK"
+    ],
+    "durable_kernel_diagnostic_scan": "clean"
+  },
+  "source_quality": {
+    "git_diff_check": "pass",
+    "selftest_compile": "pass_static_wall_wextra_werror",
+    "shell_syntax_check": "pass",
+    "protected_files_staged": false,
+    "protected_files": [
+      "M63-COMPUTE-CONTEXT-DESIGN.md",
+      "M63-SECURITY-REVIEW.md"
+    ]
+  },
+  "release_gate": {
+    "status": "blocked",
+    "reason": "M156 is bounded QEMU/software validation. Operator-controlled signing, stable/LTS forward-port qualification, independent build-farm qualification, physical accelerator qualification, and external security governance remain required.",
+    "model_output_is_authority": false,
+    "hardware_claim": "No physical GPU, NPU, VRAM, IOMMU, DMA, vendor-driver, reset, or fleet qualification is claimed."
+  },
+  "known_limitations": [
+    "Backpressure telemetry is advisory state for adaptive user-space control; the kernel does not automatically change batch size or drain user-space queues.",
+    "The LOSS state is sticky for the session through cumulative dropped_records and requires higher-level resynchronization policy.",
+    "The benchmark in the same gate is inherited M155 synthetic QEMU TCG accounting coverage; M156 does not claim an independent throughput gain.",
+    "The kernel remains based on the Linux v7.2-rc7 development line and has not completed stable or LTS forward-port requalification.",
+    "The build is not independently reproduced on separate physical builders and artifacts are unsigned."
+  ]
+}
