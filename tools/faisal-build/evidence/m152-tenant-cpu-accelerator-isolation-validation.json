@@ -2,7 +2,7 @@
   "milestone": "M152",
   "status": "pass_kernel_build_qemu_validation",
   "date": "2026-08-17",
-  "source_revision": "64bc2c11a5be045bea94c3924a0196c0c9ecd807",
+  "source_revision": "cc773f099a570d5d1b3bf56bde4cdbfce7703d93",
   "kernel": {
     "source": "Linux v7.2-rc7 FAISAL tree",
     "build_directory": "/home/ubuntu/agi-kernel/build/m152-resource",
