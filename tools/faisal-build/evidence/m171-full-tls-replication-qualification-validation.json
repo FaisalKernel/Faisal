@@ -1,0 +1,120 @@
+{
+  "project": "FAISAL",
+  "milestone": "M171-full-tls-replication-fixture-qualification",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "8ab7502e3d1298efed065cb96a93b691690ec158",
+  "lts_source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+  "status": "full_software_fixture_pass_physical_and_production_pki_pending",
+  "objective": "Qualify the actual FAISAL gRPC replication service over mutual TLS with signed quorum commits, durable state, split-brain safety, recovery, and negative-path denial.",
+  "authoritative_research": {
+    "record": "tools/faisal-replication/FAISAL-REPLICATION-QUALIFICATION-RESEARCH-2026-08-18.md",
+    "record_sha256": "295b1130b06466c0321bf2d4db7a06c75af4dc5206bd0cb3f883043b1cd2ac86",
+    "sources": [
+      {
+        "url": "https://grpc.io/docs/guides/auth/",
+        "conclusion": "gRPC supports SSL/TLS and optional client certificates for mutual authentication; the fixture must validate both transport encryption and client identity."
+      },
+      {
+        "url": "https://raft.github.io/",
+        "conclusion": "Consensus progresses with a majority and must stop rather than return an incorrect result when only a minority is available; replicated state machines require identical ordered state."
+      }
+    ]
+  },
+  "implementation": {
+    "protocol": "tools/faisal-replication/faisal_replication.proto",
+    "protocol_sha256": "7d2d80f80978b2e68b5b04db7f841c3a5f08de98618788329b07d4844e348d45",
+    "generated_pb2_sha256": "60d1c53cc6b13b32d282c3773772db08854f21327fb21a3c032f86ffdf403b3f",
+    "generated_pb2_grpc_sha256": "c78e794afc971da512017be61a7f0c96826533907eb681e403e4b66aafb07a5e",
+    "daemon_sha256": "c23f6559333989e401b866e04fc5d983db2322f2b1d5b294b7059cd8cc99263b",
+    "providers_sha256": "32da5974b0306005cd5806e7702b88a5bcf4bb6a00ae5867a6cf1519dd26cdb3",
+    "fixture": "tools/faisal-replication/full_tls_replication_fixture.py",
+    "fixture_sha256": "5d152ff5e4e7ad84bd06486a17509c75adf4ec78de05a047677e02fe5c7b6e9b",
+    "launcher": "tools/faisal-replication/run_full_tls_replication_fixture.sh",
+    "launcher_sha256": "13aa4d97ba0545627a4f58081dee0fd168b85daf9beb4eae4f41d79b2d57b2d8",
+    "validator": "tools/faisal-build/verify_replication_qualification.py",
+    "validator_sha256": "b995e340d1658260622215ca402e949162c5219707172fef62dfb6cb786248df",
+    "validator_test": "tools/faisal-build/test_verify_replication_qualification.py",
+    "validator_test_sha256": "3c954c3e4969665ef2a5d87b19f7644f31081b26bac8ff05fbc5ea4eb7aabf10",
+    "runbook": "FAISAL-REPLICATION-QUALIFICATION.md",
+    "runbook_sha256": "c36125d28660ee34aba3edca5ce00b11520fac0d2b660076001d5b2cc187d067",
+    "protocol_doc_sha256": "589c7066361c8171c09073985e1052a9b064242a3efab616df7a8c2a646d9318",
+    "commit_safety_change": "Non-zero leader_commit now requires a signed strict-majority QuorumCertificate; invalid certificates are rejected before journal mutation."
+  },
+  "fixture": {
+    "report": "/home/ubuntu/agi-kernel/build/m171-replication/full-tls-replication-fixture.json",
+    "report_sha256": "b33003b4e0f8e761f3751c9086f17bf690374b9a4099ff1e14b5c4396e7c2dbc",
+    "detached_signature": "/home/ubuntu/agi-kernel/build/m171-replication/full-tls-replication-fixture.json.sig",
+    "detached_signature_sha256": "59f4721ed36af99ccbcf3c9807f232ce4188d90f00a6d05ad02397d037464f3c",
+    "verification_report": "/home/ubuntu/agi-kernel/build/m171-replication/replication-verification-committed.tsv",
+    "verification_report_sha256": "3674dd853aca02cb74aa4bff89d6a0286d38079bd7354475a8e3c47c31eddf11",
+    "validation_public_key": "/home/ubuntu/agi-kernel/build/release-attested/public.pem",
+    "validation_public_key_sha256": "af20b51fcca0c8c91f1ffd98151b8f0d67b05aa37628bbc507257c82a35633b4",
+    "signature_scope": "existing local validation key only; not a production PKI root",
+    "cluster_id": 71,
+    "replica_count": 3,
+    "quorum_size": 2,
+    "transport": "gRPC_TLS_mutual_authentication",
+    "certificate_identity": "distinct_CN_replica_1_to_3",
+    "markers": [
+      "TLS_GRPC_MTLS_CERT_IDENTITY_OK",
+      "QUORUM_ELECTION_TERM1_OK",
+      "APPEND_ENTRIES_DURABLE_AND_QUORUM_COMMIT_OK",
+      "MINORITY_PARTITION_INJECTED_OK",
+      "MAJORITY_PARTITION_COMMIT_OK",
+      "MINORITY_ONE_VOTE_COMMIT_DENIED_OK",
+      "PARTITION_HEAL_AND_CHAIN_REPAIR_OK",
+      "TAMPERED_RECORD_AND_UNDERQUORUM_CERT_DENIED_OK",
+      "TLS_CLIENT_CERT_IDENTITY_MISMATCH_DENIED_OK",
+      "UNTRUSTED_CA_CLIENT_DENIED_OK",
+      "DURABLE_REBOOT_RESTORE_OK"
+    ],
+    "negative_paths": [
+      "wrong client certificate identity",
+      "untrusted client certificate authority",
+      "tampered record signature",
+      "under-quorum certificate",
+      "minority partition commit"
+    ]
+  },
+  "tests": {
+    "binding_selftest": {"result": "pass", "log_sha256": "fb184ea57734512b1f088f9181209901b9cd46df3eb7eaa2500ea9e48dde20b5"},
+    "daemon_selftest": {"result": "pass", "log_sha256": "0d6653413f55f7cf64dbfab59b6b29c640ade8e63585414ab2a44a0892a5ed0a"},
+    "provider_selftest": {"result": "pass", "log_sha256": "9f169aa04896ef0203477ff61d8d57406ec0dab00b71ec15cf38cdae22509147"},
+    "tls_selftest": {"result": "pass_with_existing_fixture_skipped", "log_sha256": "16ba752c32957f3b2943ad473825fe6f0c70e1f1be428ad10b951d3af1a90efe", "note": "The old fixture-specific test skipped because its external fixture directory was absent; the new full fixture exercised actual gRPC/mTLS instead."},
+    "hardware_rotation_selftest": {"result": "pass_synthetic_provider_paths", "log_sha256": "86794120640779cb671ba5e0c86a20ba9e34a1c58d875f22e893ed52afef9026"},
+    "replication_validator_selftest": {"result": "pass", "log_sha256": "0f75c01268e5addf6c0c8f8b6120649603ceaded039a88c7ad81cf08f995dcba"},
+    "live_socket_partition_fixture": {"result": "pass", "log_sha256": "033d176f7bc63e3c86634b481f77747e3753f69a1fd285c2d876303feaf99b96", "markers": ["FJT_TLS_REPLICATION_HANDSHAKE_OK", "FJT_LIVE_PARTITION_DROP_OBSERVED_OK", "FJT_LIVE_PARTITION_RECOVERY_OK", "FJT_LIVE_SOCKET_PARTITION_SELFTEST_OK", "FJT_LIVE_SOCKET_PARTITION_QEMU_HOST_VALIDATION_OK"]}
+  },
+  "security_properties": {
+    "model_output_is_authority": false,
+    "mutual_tls_required": true,
+    "certificate_identity_checked": true,
+    "signed_identity_required": true,
+    "signed_record_required": true,
+    "signed_quorum_certificate_required_for_commit": true,
+    "strict_majority_required": true,
+    "minority_commit_denied": true,
+    "invalid_certificate_rejected_before_mutation": true,
+    "durable_state_checksum_and_fsync": true
+  },
+  "production_boundary": {
+    "full_software_fixture": "pass",
+    "physical_and_production_pki": "pending",
+    "production_release_gate": "blocked",
+    "limitations": [
+      "Three replicas run on one host in-process; this is not independent multi-host qualification.",
+      "The fixture uses an ephemeral self-signed test CA and generated test keys, not production PKI.",
+      "The detached signature uses the existing local validation key, not an operator production signing ceremony.",
+      "No live AWS KMS or Vault credentials were exercised.",
+      "No physical TPM or secure-enclave key was exercised.",
+      "The live socket fault fixture uses loopback iptables; it does not prove cross-host network behavior.",
+      "The existing fixture-specific TLS selftest skipped because its optional external certificate directory was absent; the new full fixture is the exercised gRPC/mTLS path."
+    ],
+    "claims_not_made": [
+      "No claim of production PKI qualification.",
+      "No claim of independent multi-host consensus qualification.",
+      "No claim of live KMS, Vault, TPM, or secure-enclave qualification.",
+      "No claim that the kernel is production-ready overall."
+    ]
+  }
+}
