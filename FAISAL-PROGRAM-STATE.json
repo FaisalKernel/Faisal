@@ -1449,6 +1449,7 @@
     "m124_handoff_token_one_time_consumption": "pass_replayed_token_denied_bounded_128_entry_service_lifetime_table_qemu",
     "m125_durable_handoff_token_replay": "pass_consumed_token_journal_record_fsync_replay_restart_denial_qemu",
     "m126_execution_journal_hash_chain": "pass_version2_previous_digest_record_digest_restart_verify_corruption_fail_closed_qemu",
+    "m127_journal_sequence_policy": "pass_contiguous_sequence_unknown_kind_and_payload_rejection_qemu",
     "adapter_conformance_gate": "pass_four_qemu_adapters_sandbox_network_repository_scanner_fail_closed_rollback_replay",
     "m108_durable_execution_qemu": "pass",
     "m108_aggregate_qemu_harnesses": 29,

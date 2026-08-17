@@ -149,6 +149,7 @@ int fex_replay(struct fex_service *service)
 	uint8_t material[4096];
 	uint8_t computed_digest[FEX_DIGEST_SIZE];
 	struct fex_record_header digest_header;
+	uint64_t expected_sequence = 1;
 
 	if (!service || service->engine_fd < 0)
 		return FEX_ERR_ARGUMENT;
@@ -165,7 +166,8 @@ int fex_replay(struct fex_service *service)
 		if (got == 0)
 			break;
 		if (got != sizeof(header) || header.magic != FEX_ENGINE_MAGIC ||
-		    header.version != FEX_ENGINE_VERSION || header.size > sizeof(payload))
+		    header.version != FEX_ENGINE_VERSION || header.size > sizeof(payload) ||
+		    header.sequence != expected_sequence)
 			return FEX_ERR_CORRUPT;
 				if (read(service->engine_fd, payload, header.size) !=
 			    (ssize_t)header.size)
@@ -187,6 +189,17 @@ int fex_replay(struct fex_service *service)
 			return FEX_ERR_CORRUPT;
 		memcpy(service->journal_chain_digest, header.record_digest,
 		       FEX_DIGEST_SIZE);
+		if (!((header.kind == FEX_RECORD_OBJECTIVE &&
+		       header.size == sizeof(struct fex_objective)) ||
+		      (header.kind == FEX_RECORD_NODE &&
+		       header.size == sizeof(struct fex_node)) ||
+		      (header.kind == FEX_RECORD_CHECKPOINT &&
+		       header.size == sizeof(struct fex_checkpoint)) ||
+		      (header.kind == FEX_RECORD_WORKER &&
+		       header.size == sizeof(struct fex_worker)) ||
+		      (header.kind == FEX_RECORD_CONSUMED_HANDOFF_TOKEN &&
+		       header.size == FEX_HANDOFF_TOKEN_SIZE)))
+			return FEX_ERR_CORRUPT;
 		if (header.kind == FEX_RECORD_OBJECTIVE &&
 
 		    header.size == sizeof(struct fex_objective)) {
@@ -230,7 +243,8 @@ int fex_replay(struct fex_service *service)
 						service->consumed_handoff_token_count++], payload,
 					       FEX_HANDOFF_TOKEN_SIZE);
 				}
-				service->next_event_sequence = header.sequence + 1;
+			expected_sequence++;
+			service->next_event_sequence = expected_sequence;
 
 		offset += sizeof(header) + header.size;
 	}

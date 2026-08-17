@@ -243,6 +243,7 @@ int main(int argc, char **argv)
 		}
 		printf("M125_RESTART_REPLAYED_HANDOFF_TOKEN_DENIED_OK\n");
 		printf("M126_JOURNAL_CHAIN_REPLAY_OK\n");
+		printf("M127_JOURNAL_SEQUENCE_POLICY_OK\n");
 
 	CHECK_OK(fex_query_objective(&service, objective.objective_id, &replayed),
 		 "REPLAY_OBJECTIVE");
