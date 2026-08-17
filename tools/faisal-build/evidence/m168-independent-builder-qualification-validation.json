@@ -1,0 +1,118 @@
+{
+  "project": "FAISAL",
+  "milestone": "M168-independent-builder-or-attested-build-farm-qualification",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "52527b4b59a02d5115152d43415b34d1aeb00170",
+  "status": "blocked_external_independence_required",
+  "purpose": "Close the independent physical builder or attested build-farm release blocker without treating same-sandbox reproducibility as independent qualification.",
+  "source": {
+    "lts_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+    "lts_parent": "304b7527e0e2f6b405145a7ba40144ac62f78afb",
+    "kernel": "Linux 6.18.44 LTS",
+    "config_sha256": "2c282274f1f716e2b1135b0a1fb819f99525dbe099ea0d31f1b3a2676f980e06",
+    "source_date_epoch": 1786991936,
+    "required_config": {
+      "CONFIG_CFS_BANDWIDTH": "y"
+    }
+  },
+  "implementation": {
+    "verifier": "tools/faisal-build/verify_builder_qualification.py",
+    "verifier_sha256": "da145496c4cbf8ce43084b51ec253179e2cc1974512f0144e27e317f9ab0c2f9",
+    "unit_test": "tools/faisal-build/test_verify_builder_qualification.py",
+    "unit_test_result": "pass_synthetic_external_signature_tamper_denial_local_identity_denial",
+    "unit_test_log": "/home/ubuntu/agi-kernel/build/m167-builder-qualification/unit.log",
+    "unit_test_log_sha256": "4884835d299b7c1634a0c65b6b960a998d9715c54f06b32dc9a89686fac11577",
+    "policy": {
+      "accepted_identity_evidence_types": [
+        "physical_host_measurement",
+        "provider_attestation"
+      ],
+      "rejected_identity_evidence_types": [
+        "local_machine_id",
+        "container_machine_id",
+        "self_report"
+      ],
+      "required_checks": [
+        "detached_RSA_SHA256_signature_verification",
+        "source_revision_equality",
+        "configuration_digest_equality",
+        "distinct_external_identity_digests",
+        "artifact_name_set_equality",
+        "artifact_size_equality",
+        "artifact_SHA256_equality"
+      ],
+      "fail_closed": true
+    }
+  },
+  "reproducibility_pair": {
+    "result": "pass_byte_identical_same_host_only",
+    "primary_output": "/home/ubuntu/agi-kernel/build/m167-builder-qualification/repro-primary",
+    "secondary_output": "/home/ubuntu/agi-kernel/build/m167-builder-qualification/repro-secondary",
+    "primary_build_log": "/home/ubuntu/agi-kernel/build/m167-builder-qualification/primary-build.log",
+    "primary_build_log_sha256": "93040e9086967b21d90642e3f06112bbcbb8dddabf8541de72cce226a0a7cf2d",
+    "secondary_build_log": "/home/ubuntu/agi-kernel/build/m167-builder-qualification/secondary-build.log",
+    "secondary_build_log_sha256": "ca6aed79a905639d802c5fde7e24f07f02876e3f7fdb01492bc1a77f4b3e6ab8",
+    "comparison": "/home/ubuntu/agi-kernel/build/m167-builder-qualification/comparison.env",
+    "comparison_sha256": "8329e2b26fa5a4c585603188ada9d4516c491881c269ef0045eb6043af8649f2",
+    "artifact_hashes": {
+      "primary_bzImage_sha256": "294984e091cb9dca37686d80e26a1ef7b3944e59d9ec1e19238fb45b01fb4245",
+      "secondary_bzImage_sha256": "294984e091cb9dca37686d80e26a1ef7b3944e59d9ec1e19238fb45b01fb4245",
+      "primary_vmlinux_sha256": "4254d28f55140a63856b60c0d54ee7706a7e2cc0ac8a695486faa4786adf571b",
+      "secondary_vmlinux_sha256": "4254d28f55140a63856b60c0d54ee7706a7e2cc0ac8a695486faa4786adf571b"
+    },
+    "builder_labels": {
+      "primary": "primary-local-same-host",
+      "secondary": "secondary-local-same-host"
+    },
+    "scope_boundary": "Both output trees were built in the same sandbox container and therefore are not independent physical builders."
+  },
+  "qualification_gate": {
+    "result": "blocked_fail_closed",
+    "report": "/home/ubuntu/agi-kernel/build/m167-builder-qualification/qualification-result.json",
+    "report_sha256": "9c8882fabdcdafb1558310e97bf28fa3470a7fc43ba10ab9a08c94cd77744cb5",
+    "log": "/home/ubuntu/agi-kernel/build/m167-builder-qualification/qualification.log",
+    "log_sha256": "578e5bf8e9915dd8ab204cd4080d2fadf56872a2083219d3e06ee0cce3bae3b4",
+    "blocked_reason": "self-reported/local identity is not qualifying evidence; no external physical-host measurement or provider attestation was available",
+    "same_container_machine_identity_digest_sha256": "a441212879f47d76745e2c398f8acca8d6945381f7e35819690651b93f1dee3c",
+    "interpretation": "The gate correctly rejects the pair even though bzImage and vmlinux are byte-identical."
+  },
+  "environment_boundary": {
+    "sandbox_virtualization": "docker container",
+    "kvm_available": false,
+    "configured_git_remote": false,
+    "configured_external_ci_runner": false,
+    "docker_cli_available": false,
+    "production_attestation_available": false,
+    "physical_independence_claim": false
+  },
+  "required_external_completion": {
+    "status": "pending",
+    "acceptable_paths": [
+      "Two independently governed physical or cloud builder hosts produce signed reports with externally verifiable host measurements and matching artifacts.",
+      "An attested build farm signs the source revision, configuration digest, toolchain identity, measured builder identity, artifact digests, and build log digest under an operator-trusted/provider-trusted attestation root.",
+      "The resulting reports are passed to verify_builder_qualification.py verify and return FAISAL_BUILDER_QUALIFICATION_OK."
+    ],
+    "minimum_attestation_fields": [
+      "source_revision",
+      "config_sha256",
+      "toolchain_identity",
+      "builder_identity.evidence_type",
+      "builder_identity.issuer",
+      "builder_identity.identity_digest_sha256",
+      "artifact name, size, and SHA256",
+      "detached signature and trusted public key or provider attestation chain"
+    ]
+  },
+  "production_boundary": {
+    "independent_builder_blocker": "open",
+    "reproducibility_evidence": "strengthened_same_host_only",
+    "production_release_status": "blocked",
+    "claims_not_made": [
+      "No independent physical-builder qualification is claimed.",
+      "No cloud-provider or hardware attestation is claimed.",
+      "No production trust root is claimed.",
+      "Synthetic unit-test external identities are not release evidence.",
+      "Same-host byte identity is not treated as independence."
+    ]
+  }
+}

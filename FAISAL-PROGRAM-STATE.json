@@ -6,7 +6,7 @@
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
   "current_head": "d715ba813de66e39bccd2c36b2a4a2ad6636a194",
-  "current_tag": "FAISAL-M167-LTS-6.18.44-FORWARD-PORT",
+  "current_tag": "FAISAL-M168-BUILDER-QUALIFICATION-GATE",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1433,7 +1433,7 @@
     "tools/testing/selftests/agi_autonomy_orchestrator_test.c"
   ],
   "completion_definition": "The program remains active until the kernel primitives, trusted system services, AGI runtime, browser/tool boundaries, verified information pipeline, multi-agent integration, self-testing, deployment gates, monitoring, and rollback have executable evidence and no unresolved critical regressions.",
-  "next_dependency": "representative-lts-requalification-and-remaining-production-release-blockers",
+  "next_dependency": "external-independent-builder-or-attested-build-farm-execution",
   "industry_readiness": {
     "status": "conditional_preproduction_release_blocked",
     "audit_document": "FAISAL-INDUSTRY-READINESS-AUDIT.md",
@@ -1473,7 +1473,7 @@
     "security_release_evidence_gate": "pass_signed_fresh_source_bound_scanner_sanitizer_advisory_schema",
     "production_kernel_line_gate": "pass_fail_closed_current_7.2.0_rc7_development_line_blocked",
     "advisory_ledger_gate": "pass_signed_source_bound_fresh_resolved_records",
-    "independent_builder_comparison": "pass_two_complete_outputs_distinct_builder_ids_equal_artifacts_same_host_environment",
+    "independent_builder_comparison": "blocked_fail_closed_m168_pair_byte_identical_same_sandbox_container_external_identity_attestation_missing",
     "attested_release_gate_v3": "pass_signed_artifacts_security_advisory_reproducibility_rollback",
     "accelerator_qualification_gate": "pass_signed_qemu_isolation_accounting_sanitizer_physical_hardware_pending",
     "m117_worker_handoff": "pass_atomic_lease_fenced_owner_transfer_generation_increment_replay_qemu",
@@ -1562,7 +1562,8 @@
     ],
     "release_blocker_status": {
       "stable_or_lts_forward_port_and_upstream_patch_requalification": "partially_resolved_lts_6.18.44_forward_port_build_tenant_and_durable_qemu_pass_bounded_one_vcpu_soak_pass_representative_multivcpu_tcg_soak_pending",
-      "production_release_gate": "blocked_fail_closed_operator_key_independent_builder_physical_accelerator_cve_process_external_security_review_and_operational_governance_remaining"
+      "production_release_gate": "blocked_fail_closed_operator_key_independent_builder_physical_accelerator_cve_process_external_security_review_and_operational_governance_remaining",
+      "independent_physical_builder_or_attested_build_farm_qualification": "open_same_sandbox_pair_byte_identical_but_verifier_rejects_local_container_identity_external_signed_measurement_required"
     },
     "m154_accelerator_accounting_telemetry_loss": "pass_u64_overflow_admission_event_ring_backpressure_eagain_and_telemetry_lost_status_qemu",
     "m154_tenant_qemu": "pass_m154_telemetry_loss_marker_and_m115_m152_m153_regressions_return_0",
@@ -1662,6 +1663,12 @@
     "m167_lts_durable_qemu": "pass_return_0_m108_fjt_fjr_markers",
     "m167_lts_industry_soak": "pass_bounded_one_vcpu_tcg_two_rounds_64_iterations_return_0;full_two_vcpu_tcg_uapi_fuzz_rcu_stall_limitation_not_suppressed",
     "m167_lts_evidence": "tools/faisal-build/evidence/m167-lts-6.18.44-forward-port-validation.json",
-    "m167_release_scope": "production_release_still_blocked;bounded_software_qemu_requalification_only_no_physical_hardware_independent_builder_or_operator_signed_release_claim"
+    "m167_release_scope": "production_release_still_blocked;bounded_software_qemu_requalification_only_no_physical_hardware_independent_builder_or_operator_signed_release_claim",
+    "m168_builder_verifier": "pass_signature_artifact_digest_source_config_and_external_identity_policy_unit_test;local_container_identity_denied_fail_closed",
+    "m168_reproducibility_pair": "pass_linux_6.18.44_lts_primary_secondary_bzimage_and_vmlinux_byte_identical_same_sandbox_only",
+    "m168_builder_qualification": "blocked_external_physical_builder_or_attested_farm_evidence_required_verifier_returned_nonzero_as_designed",
+    "m168_reproducibility_artifacts": "bzImage_sha256_294984e091cb9dca37686d80e26a1ef7b3944e59d9ec1e19238fb45b01fb4245_vmlinux_sha256_4254d28f55140a63856b60c0d54ee7706a7e2cc0ac8a695486faa4786adf571b",
+    "m168_evidence": "tools/faisal-build/evidence/m168-independent-builder-qualification-validation.json",
+    "m168_release_scope": "production_release_still_blocked_same_host_reproducibility_strengthened_external_builder_or_attested_farm_pending"
   }
 }
