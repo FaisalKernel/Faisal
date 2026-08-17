@@ -1,0 +1,119 @@
+{
+  "project": "FAISAL",
+  "milestone": "M165-multi-tenant-qemu-latency-benchmark",
+  "recorded_at": "2026-08-17T17:11:30Z",
+  "code_commit": "9eb943326ac71c01123186128ebbc8401e147557",
+  "parent_commit": "a777f61756ff5880988f5e8d7c0607372e01d6ff",
+  "kernel": {
+    "source_revision": "M156 validated kernel build",
+    "build_directory": "/home/ubuntu/agi-kernel/build/m156-backpressure",
+    "bzImage_sha256": "4098292a9ca43f521cb67617e970165aff17047db591a7827aea0c690cf7b88d",
+    "qemu_arch": "x86_64",
+    "qemu_acceleration": "tcg",
+    "memory_mb": 768,
+    "vcpus": 2
+  },
+  "implementation": {
+    "benchmark_source": "tools/testing/selftests/faisal_accelerator_multi_tenant_benchmark.c",
+    "qemu_harness": "tools/faisal-build/run_multi_tenant_latency_qemu.sh",
+    "analysis_tools": [
+      "tools/faisal-build/analyze_multi_tenant_latency.py",
+      "tools/faisal-build/combine_multi_tenant_latency_replicates.py"
+    ],
+    "workload": "Each isolated tenant registers a FAISAL session, sandbox, light agent, tenant cgroup, and tenant-owned accelerator, then performs four-entry batch accounting submissions. Setup events are disabled and drained; each measured batch resets kernel-written entry state before submission.",
+    "matrix": {
+      "tenant_levels": [1, 2, 4, 8],
+      "iterations_per_tenant": 256,
+      "batch_entries": 4,
+      "replicas": 2
+    }
+  },
+  "replicas": [
+    {
+      "name": "final",
+      "qemu_return_code": 0,
+      "log": "/home/ubuntu/agi-kernel/build/faisal-mt-final-qemu.log",
+      "log_sha256": "65c2753169248f69d2ea9e55eb8de1f56dcd8a53ef534b0e5ab61e6389daa256",
+      "runner_log": "/home/ubuntu/agi-kernel/build/faisal-mt-final-runner.log",
+      "validation_marker": "FAISAL_MT_QEMU_LATENCY_VALIDATION_OK"
+    },
+    {
+      "name": "replicate",
+      "qemu_return_code": 0,
+      "log": "/home/ubuntu/agi-kernel/build/faisal-mt-replicate-qemu.log",
+      "log_sha256": "8b5e7d1aacef3b27745524431b1639d0c2c338876541cfce707623ae3bfaa0b4",
+      "runner_log": "/home/ubuntu/agi-kernel/build/faisal-mt-replicate-runner.log",
+      "validation_marker": "FAISAL_MT_QEMU_LATENCY_VALIDATION_OK"
+    }
+  ],
+  "combined_summary": {
+    "source": "/home/ubuntu/agi-kernel/build/faisal-mt-combined-summary.json",
+    "sha256": "24b154981bb226722006fece3d7878b0d19089516acf893377424c8a2b48be39",
+    "levels": [
+      {
+        "tenants": 1,
+        "median_avg_p50_ns": 79083,
+        "median_max_p95_ns": 218712,
+        "median_max_p99_ns": 9948263474,
+        "median_aggregate_ops_s_x100": 1723967,
+        "p50_spread_ratio": 1.2249950763863489,
+        "p95_spread_ratio": 1.0250736097479676,
+        "variance_flag": false
+      },
+      {
+        "tenants": 2,
+        "median_avg_p50_ns": 193924,
+        "median_max_p95_ns": 13264379663,
+        "median_max_p99_ns": 23213084261,
+        "median_aggregate_ops_s_x100": 1336491,
+        "p50_spread_ratio": 1.8660769708255742,
+        "p95_spread_ratio": 55036.77790294807,
+        "variance_flag": true
+      },
+      {
+        "tenants": 4,
+        "median_avg_p50_ns": 829231180,
+        "median_max_p95_ns": 26529855366,
+        "median_max_p99_ns": 315026154434,
+        "median_aggregate_ops_s_x100": 1010373,
+        "p50_spread_ratio": 5526.931473426329,
+        "p95_spread_ratio": 16725.154455498603,
+        "variance_flag": true
+      },
+      {
+        "tenants": 8,
+        "median_avg_p50_ns": 231061,
+        "median_max_p95_ns": 7385229,
+        "median_max_p99_ns": 9399917,
+        "median_aggregate_ops_s_x100": 3144454,
+        "p50_spread_ratio": 2.215752995699553,
+        "p95_spread_ratio": 1.308840788401694,
+        "variance_flag": false
+      }
+    ]
+  },
+  "validation": {
+    "strict_c_build": "pass_-O2_-Wall_-Wextra_-Werror_static",
+    "python_parser_compile": "pass",
+    "shell_syntax": "pass",
+    "all_replica_levels_returned_zero": true,
+    "all_tenant_measurements_reported_zero_failures": true,
+    "kernel_diagnostic_scan": "clean_on_both_qemu_logs",
+    "protected_files_preserved": [
+      "M63-COMPUTE-CONTEXT-DESIGN.md",
+      "M63-SECURITY-REVIEW.md"
+    ]
+  },
+  "interpretation": {
+    "supported_claim": "Two clean QEMU/TCG replicas measured per-tenant batch-accounting latency and aggregate wall-time throughput across 1, 2, 4, and 8 concurrent tenant levels.",
+    "variance_finding": "The 2-tenant and 4-tenant levels show extreme replica spread, so their tail-latency medians are not stable enough for a performance claim without more repetitions or pinned-host measurement.",
+    "security_scope": "The benchmark uses existing FAISAL capability, sandbox, cgroup, tenant ownership, and accelerator isolation checks; model output is not involved and cannot become kernel authority.",
+    "not_claimed": [
+      "No physical GPU/NPU/V RAM/IOMMU qualification",
+      "No production throughput guarantee",
+      "No claim that QEMU/TCG latency represents hardware latency",
+      "No claim of general scheduler superiority",
+      "No claim that storage of measurements constitutes model learning"
+    ]
+  }
+}
