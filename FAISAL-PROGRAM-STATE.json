@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "9eb943326ac71c01123186128ebbc8401e147557",
-  "current_tag": "FAISAL-M165-MULTI-TENANT-QEMU-LATENCY",
+  "current_head": "aa765734c3bc0f4997a7f3387ed5b50b306a3bc4",
+  "current_tag": "FAISAL-M166-OPERATOR-RELEASE-AUTHORITY",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1642,6 +1642,14 @@
     "m165_repeatability": "variance_flagged_2_and_4_tenant_levels_extreme_replica_spread_more_repetitions_or_pinned_host_required",
     "m165_evidence": "tools/faisal-build/evidence/m165-multi-tenant-qemu-latency-validation.json",
     "m165_productivity_scope": "measured_multi_tenant_batch_accounting_latency_and_wall_time_throughput_in_qemu_tcg_no_hardware_or_production_throughput_claim",
-    "m165_release_scope": "bounded_qemu_software_benchmark_only_physical_accelerator_operator_signed_release_and_independent_host_qualification_pending"
+    "m165_release_scope": "bounded_qemu_software_benchmark_only_physical_accelerator_operator_signed_release_and_independent_host_qualification_pending",
+    "m166_operator_release_authority": "pass_offline_root_signed_trusted_keyring_active_release_key_attestation_operator_approval_artifact_digest_binding_rotation_revocation_fail_closed",
+    "m166_release_gate_integration": "pass_missing_trusted_root_keyring_attestation_rejected_before_production_approval",
+    "m166_selftest": "pass_valid_sign_verify_tamper_revocation_stale_approval_unauthorized_approval_root_substitution",
+    "m166_tenant_qemu": "pass_m156_kernel_m115_m154_m155_m156_m163_m164_markers_return_0",
+    "m166_durable_qemu": "pass_model_output_not_authority_replay_split_brain_and_durable_execution_return_0",
+    "m166_evidence": "tools/faisal-build/evidence/m166-operator-release-authority-validation.json",
+    "m166_productivity_scope": "repository_level_operator_controlled_release_authority_gap_closed_bounded_software_validation_no_real_production_key_or_hardware_claim",
+    "m166_release_scope": "production_release_still_blocked_until_real_operator_hsm_kms_key_ceremony_root_distribution_independent_builder_and_remaining_release_blockers"
   }
 }
