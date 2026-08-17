@@ -1,0 +1,184 @@
+#include "faisal_accelerator_batcher.h"
+
+#include <errno.h>
+#include <stdbool.h>
+#include <string.h>
+#include <sys/ioctl.h>
+
+static int default_ioctl(int fd, unsigned long request, void *arg)
+{
+	return ioctl(fd, request, arg);
+}
+
+static uint32_t clamp_batch(uint32_t value, uint32_t max_batch)
+{
+	if (value < FAISAL_ACCEL_BATCHER_MIN_BATCH)
+		return FAISAL_ACCEL_BATCHER_MIN_BATCH;
+	if (value > max_batch)
+		return max_batch;
+	return value;
+}
+
+static void shrink_batch(struct faisal_accel_batcher *batcher)
+{
+	uint32_t next = batcher->target_batch / 2;
+
+	batcher->target_batch = clamp_batch(next, batcher->max_batch);
+	batcher->healthy_queries = 0;
+}
+
+static void grow_batch(struct faisal_accel_batcher *batcher)
+{
+	uint32_t next;
+
+	if (batcher->target_batch >= batcher->max_batch)
+		return;
+	next = batcher->target_batch > batcher->max_batch / 2 ?
+		batcher->max_batch : batcher->target_batch * 2;
+	batcher->target_batch = clamp_batch(next, batcher->max_batch);
+	batcher->healthy_queries = 0;
+}
+
+int faisal_accel_batcher_init(struct faisal_accel_batcher *batcher,
+			      int fd, uint64_t device_id,
+			      uint32_t initial_batch, uint32_t max_batch)
+{
+	if (!batcher || fd < 0 || !device_id ||
+	    max_batch < FAISAL_ACCEL_BATCHER_MIN_BATCH ||
+	    max_batch > FAISAL_ACCEL_BATCHER_MAX_BATCH)
+		return -1;
+	memset(batcher, 0, sizeof(*batcher));
+	batcher->fd = fd;
+	batcher->device_id = device_id;
+	batcher->max_batch = max_batch;
+	batcher->target_batch = clamp_batch(initial_batch, max_batch);
+	batcher->ioctl_fn = default_ioctl;
+	return 0;
+}
+
+int faisal_accel_batcher_set_ioctl(struct faisal_accel_batcher *batcher,
+				   faisal_accel_ioctl_fn ioctl_fn)
+{
+	if (!batcher || !ioctl_fn)
+		return -1;
+	batcher->ioctl_fn = ioctl_fn;
+	return 0;
+}
+
+int faisal_accel_batcher_query(struct faisal_accel_batcher *batcher,
+			       struct agi_lc_event_backpressure *out)
+{
+	struct agi_lc_event_backpressure state = {
+		.size = sizeof(state),
+	};
+	bool pressured = false;
+
+	if (!batcher || !batcher->ioctl_fn)
+		return -1;
+	if (batcher->ioctl_fn(batcher->fd, AGI_LC_EVENT_BACKPRESSURE,
+			      &state) < 0)
+		return -1;
+	batcher->backpressure_queries++;
+	if (state.dropped_records > batcher->observed_dropped_records) {
+		batcher->observed_dropped_records = state.dropped_records;
+		batcher->telemetry_losses++;
+		batcher->loss_acknowledged = 0;
+		pressured = true;
+	}
+	if (state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_NEAR_FULL ||
+	    state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_FULL ||
+	    (state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS &&
+	     !batcher->loss_acknowledged))
+		pressured = true;
+	if (pressured)
+		shrink_batch(batcher);
+	else if (state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_NORMAL &&
+		 state.queued < state.capacity / 2) {
+		if (++batcher->healthy_queries >= 4)
+			grow_batch(batcher);
+	} else {
+		batcher->healthy_queries = 0;
+	}
+	if (out)
+		*out = state;
+	return 0;
+}
+
+int faisal_accel_batcher_flush(struct faisal_accel_batcher *batcher)
+{
+	struct agi_lc_event_backpressure state;
+	struct agi_lc_accel_device_account_batch batch;
+	uint32_t completed;
+	int ret;
+
+	if (!batcher)
+		return -1;
+	if (!batcher->pending)
+		return 0;
+	if (faisal_accel_batcher_query(batcher, &state) < 0)
+		return -1;
+	if ((state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_LOSS &&
+	     !batcher->loss_acknowledged) ||
+	    state.state == AGI_LC_EVENT_BACKPRESSURE_STATE_FULL ||
+	    state.queued + batcher->pending > state.capacity) {
+		errno = EAGAIN;
+		return -1;
+	}
+	memset(&batch, 0, sizeof(batch));
+	batch.size = sizeof(batch);
+	batch.entries_ptr = (uint64_t)(uintptr_t)batcher->entries;
+	batch.entry_count = batcher->pending;
+	ret = batcher->ioctl_fn(batcher->fd,
+				AGI_LC_ACCEL_DEVICE_ACCOUNT_BATCH, &batch);
+	batcher->flushes++;
+	completed = batch.completed;
+	if (completed > batcher->pending)
+		completed = batcher->pending;
+	if (completed) {
+		batcher->submitted_entries += completed;
+		batcher->pending -= completed;
+		if (batcher->pending)
+			memmove(batcher->entries, batcher->entries + completed,
+				batcher->pending * sizeof(batcher->entries[0]));
+	}
+	if (ret < 0) {
+		if (ret == -EAGAIN || errno == EAGAIN) {
+			batcher->telemetry_losses++;
+			shrink_batch(batcher);
+		}
+		return -1;
+	}
+	if (batcher->pending)
+		return -1;
+	return 0;
+}
+
+int faisal_accel_batcher_acknowledge_loss(struct faisal_accel_batcher *batcher)
+{
+	if (!batcher)
+		return -1;
+	batcher->loss_acknowledged = 1;
+	batcher->healthy_queries = 0;
+	return 0;
+}
+
+int faisal_accel_batcher_submit(struct faisal_accel_batcher *batcher,
+				const struct agi_lc_accel_device_account *entry)
+{
+	if (!batcher || !entry || entry->size != sizeof(*entry) ||
+	    entry->device_id != batcher->device_id ||
+	    batcher->pending >= batcher->max_batch)
+		return -1;
+	if (batcher->pending >= batcher->target_batch &&
+	    faisal_accel_batcher_flush(batcher) < 0)
+		return -1;
+	batcher->entries[batcher->pending++] = *entry;
+	if (batcher->pending >= batcher->target_batch)
+		return faisal_accel_batcher_flush(batcher);
+	return 0;
+}
+
+uint32_t faisal_accel_batcher_pending(const struct faisal_accel_batcher *batcher)
+{
+	return batcher ? batcher->pending : 0;
+}
