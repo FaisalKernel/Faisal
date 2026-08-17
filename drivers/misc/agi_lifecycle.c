@@ -7229,7 +7229,7 @@ static int agi_lc_knowledge_control(struct agi_lc_session *session,
 		return -EFAULT;
 	if (knowledge.size != sizeof(knowledge) ||
 	    knowledge.operation < AGI_LC_KNOWLEDGE_PUBLISH ||
-	    knowledge.operation > AGI_LC_KNOWLEDGE_UPDATE ||
+	    knowledge.operation > AGI_LC_KNOWLEDGE_VALIDATE ||
 	    knowledge.flags & ~(AGI_LC_KNOWLEDGE_FLAG_PRIMARY |
 				AGI_LC_KNOWLEDGE_FLAG_SECONDARY |
 				AGI_LC_KNOWLEDGE_FLAG_SIGNED |
@@ -7392,6 +7392,50 @@ static int agi_lc_knowledge_control(struct agi_lc_session *session,
 					&sequence);
 		record->knowledge.evidence_sequence = sequence;
 		knowledge = record->knowledge;
+		goto out_copy;
+	case AGI_LC_KNOWLEDGE_VALIDATE:
+		/*
+		 * Precision gate: this is an observation-validity query only.
+		 * It never authorizes an action and never treats model output as
+		 * evidence.  The caller supplies a minimum confidence threshold
+		 * and may require freshness; the kernel checks its own journaled
+		 * verification, conflict, digest, and monotonic freshness state.
+		 */
+		if (!knowledge.record_id ||
+		    (knowledge.flags & ~(AGI_LC_KNOWLEDGE_FLAG_FRESHNESS_REQUIRED)) ||
+		    knowledge.source_id || knowledge.source_uri_hash || knowledge.source_rank ||
+		    knowledge.source_kind || knowledge.verification_state ||
+		    knowledge.conflict_state || knowledge.freshness_state ||
+		    knowledge.retrieval_realtime_ns || knowledge.retrieval_boottime_ns ||
+		    knowledge.publication_realtime_ns || knowledge.freshness_ttl_ns ||
+		    knowledge.expires_realtime_ns || knowledge.checked_realtime_ns ||
+		    knowledge.crosscheck_count || knowledge.conflict_count ||
+		    knowledge.provenance_sequence || knowledge.evidence_sequence ||
+		    knowledge.parent_record_id || knowledge.generation || knowledge.session_id ||
+		    knowledge.lineage_id || knowledge.agent_id || knowledge.task_id ||
+		    knowledge.tgid || knowledge.creator_pid || knowledge.creator_tgid ||
+		    knowledge.creator_uid || knowledge.creator_euid ||
+		    memchr_inv(knowledge.source_digest, 0, AGI_LC_DIGEST_SIZE) ||
+		    memchr_inv(knowledge.content_digest, 0, AGI_LC_DIGEST_SIZE) ||
+		    memchr_inv(knowledge.evidence_digest, 0, AGI_LC_DIGEST_SIZE))
+			return -EINVAL;
+		record = agi_lc_knowledge_find(session, knowledge.record_id);
+		if (!record)
+			return -ENOENT;
+		agi_lc_knowledge_refresh(record);
+		ret = 0;
+		if (record->knowledge.verification_state != AGI_LC_KNOWLEDGE_VERIFY_VERIFIED ||
+		    record->knowledge.conflict_state == AGI_LC_KNOWLEDGE_CONFLICT_DETECTED ||
+		    !memchr_inv(record->knowledge.content_digest, 0, AGI_LC_DIGEST_SIZE) ||
+		    !memchr_inv(record->knowledge.evidence_digest, 0, AGI_LC_DIGEST_SIZE) ||
+		    record->knowledge.confidence_ppm < knowledge.confidence_ppm)
+			ret = -EACCES;
+		else if ((knowledge.flags & AGI_LC_KNOWLEDGE_FLAG_FRESHNESS_REQUIRED) &&
+			 record->knowledge.freshness_state != AGI_LC_KNOWLEDGE_FRESH)
+			ret = -EAGAIN;
+		knowledge = record->knowledge;
+		knowledge.operation = AGI_LC_KNOWLEDGE_VALIDATE;
+		knowledge.status = ret;
 		goto out_copy;
 	case AGI_LC_KNOWLEDGE_UPDATE:
 		if (!knowledge.record_id || !knowledge.source_id || !knowledge.source_uri_hash ||

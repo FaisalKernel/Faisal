@@ -135,6 +135,7 @@ set -- \
  tools/faisal-build/run_autonomy_control_qemu.sh \
  tools/faisal-build/run_autonomy_orchestrator_qemu.sh \
  tools/faisal-build/run_durable_execution_qemu.sh \
+ tools/faisal-build/run_knowledge_precision_qemu.sh \
  tools/faisal-build/run_collaboration_memory_qemu.sh \
  tools/faisal-build/run_world_model_router_qemu.sh \
  tools/faisal-build/run_sandbox_fabric_qemu.sh \
