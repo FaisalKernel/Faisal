@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux v7.2-rc7",
-  "current_head": "ede46da6d69d510beb626310047d0b7e64e16637",
-  "current_tag": "FAISAL-M161-COALESCED-SUBMISSIONS",
+  "current_head": "0b10bf56b023f47ab6ee9f18a1abe6c44a1886cb",
+  "current_tag": "FAISAL-M162-ZERO-COPY-COALESCED",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1414,7 +1414,8 @@
     "FAISAL-M158",
     "FAISAL-M159",
     "FAISAL-M160",
-    "FAISAL-M161"
+    "FAISAL-M161",
+    "FAISAL-M162"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1611,6 +1612,13 @@
     "m161_durable_execution_regression": "pass_final_kernel_durable_execution_journal_trust_replication_election_and_split_brain_denial_return_0",
     "m161_evidence": "tools/faisal-build/evidence/m161-coalesced-submission-validation.json",
     "m161_productivity_scope": "controlled_eight_entry_scenario_reduced_batch_submission_ioctls_50_percent_no_isolated_raw_throughput_claim",
-    "m161_release_scope": "bounded_qemu_and_unit_validation_only_physical_accelerator_and_operator_signed_release_pending"
+    "m161_release_scope": "bounded_qemu_and_unit_validation_only_physical_accelerator_and_operator_signed_release_pending",
+    "m162_zero_copy_coalesced": "pass_full_coalesced_chunk_uses_caller_pointer_direct_submission_counter_and_partial_completion_buffer_preserved",
+    "m162_zero_copy_unit": "pass_direct_pointer_verified_regular_two_to_one_coalesced_submission_accepted_eight_pending_zero",
+    "m162_tenant_qemu": "pass_m156_kernel_with_m162_zero_copy_marker_and_m115_m154_m155_m156_m160_m161_regressions_return_0",
+    "m162_durable_execution_regression": "pass_final_kernel_durable_execution_journal_trust_replication_election_and_split_brain_denial_return_0",
+    "m162_evidence": "tools/faisal-build/evidence/m162-zero-copy-coalesced-validation.json",
+    "m162_productivity_scope": "controlled_full_chunk_avoids_one_userspace_copy_and_retains_m161_two_to_one_ioctl_reduction_no_isolated_raw_throughput_claim",
+    "m162_release_scope": "bounded_qemu_and_unit_validation_only_physical_accelerator_and_operator_signed_release_pending"
   }
 }
