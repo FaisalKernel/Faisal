@@ -9882,7 +9882,27 @@ static int tg_set_cfs_bandwidth(struct task_group *tg,
 	return 0;
 }
 
+int faisal_sched_group_set_cpu_bandwidth(struct cgroup_subsys_state *css,
+			u64 period_us, s64 quota_us, u64 burst_us)
+{
+	struct task_group *tg;
+
+	if (!css || !period_us || period_us > 1000000 ||
+	    burst_us > 1000000)
+		return -EINVAL;
+	if (quota_us < 0)
+		quota_us = RUNTIME_INF;
+	else if (!quota_us || quota_us > 1000000ULL * 1024ULL)
+		return -EINVAL;
+	tg = css_tg(css);
+	if (!tg)
+		return -ENODEV;
+	return tg_set_cfs_bandwidth(tg, period_us, quota_us, burst_us);
+}
+EXPORT_SYMBOL_GPL(faisal_sched_group_set_cpu_bandwidth);
+
 static u64 tg_get_cfs_period(struct task_group *tg)
+
 {
 	u64 cfs_period_us;
 
@@ -10038,6 +10058,27 @@ static u64 throttled_time_self(struct task_group *tg)
 
 	return total;
 }
+
+int faisal_sched_group_get_cpu_bandwidth(struct cgroup_subsys_state *css,
+			u64 *period_us, s64 *quota_us, u64 *burst_us,
+			u64 *throttled_usec)
+{
+	struct task_group *tg;
+	u64 quota;
+
+	if (!css || !period_us || !quota_us || !burst_us || !throttled_usec)
+		return -EINVAL;
+	tg = css_tg(css);
+	if (!tg)
+		return -ENODEV;
+	*period_us = tg_get_cfs_period(tg);
+	quota = tg_get_cfs_quota(tg);
+	*quota_us = quota == RUNTIME_INF ? -1 : (s64)quota;
+	*burst_us = tg_get_cfs_burst(tg);
+	*throttled_usec = throttled_time_self(tg) / NSEC_PER_USEC;
+	return 0;
+}
+EXPORT_SYMBOL_GPL(faisal_sched_group_get_cpu_bandwidth);
 
 static int cpu_cfs_local_stat_show(struct seq_file *sf, void *v)
 {

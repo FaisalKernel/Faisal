@@ -1,0 +1,64 @@
+{
+  "milestone": "M152",
+  "status": "pass_kernel_build_qemu_validation",
+  "date": "2026-08-17",
+  "source_revision": "64bc2c11a5be045bea94c3924a0196c0c9ecd807",
+  "kernel": {
+    "source": "Linux v7.2-rc7 FAISAL tree",
+    "build_directory": "/home/ubuntu/agi-kernel/build/m152-resource",
+    "bzImage_sha256": "300eba82cb9bc1c6e6c9ec545060ed84526e0dcd87dc35a153703ac3c5a40601",
+    "vmlinux_sha256": "52f9476d99ecf34047bcc6d6c7a8a5f25913e6e6a9b92f87633138c241682b6f",
+    "config": {
+      "CONFIG_CGROUPS": "y",
+      "CONFIG_CGROUP_SCHED": "y",
+      "CONFIG_CFS_BANDWIDTH": "y"
+    },
+    "build_result": "pass",
+    "build_log": "/home/ubuntu/agi-kernel/build/m152-resource/m152final.log"
+  },
+  "hard_cpu_time_throttling": {
+    "uapi": "AGI_LC_TENANT_CPU_POLICY ioctl 0x6a",
+    "policy": "tenant-owned cgroup v2 child controlled through cpu.max; cpu.stat usage/throttled_usec returned on query",
+    "operations": ["SET", "QUERY", "CLEAR"],
+    "security": [
+      "session must own a directly delegated tenant cgroup",
+      "generation fencing rejects stale policy transitions",
+      "CPU controller must be present and explicitly enabled in cgroup.subtree_control",
+      "unsupported or unavailable controller paths fail closed"
+    ],
+    "scheduler_bridge": "faisal_sched_group_set_cpu_bandwidth()/get_cpu_bandwidth() call the upstream CFS bandwidth group implementation and are exported GPL-only",
+    "qemu_markers": [
+      "M152_TENANT_CPU_THROTTLE_SET_OK generation=1 quota=50000",
+      "M152_TENANT_CPU_STALE_GENERATION_DENY_OK",
+      "M152_TENANT_CPU_THROTTLE_QUERY_OK throttled=0",
+      "M152_TENANT_CPU_THROTTLE_CLEAR_OK"
+    ]
+  },
+  "accelerator_tenant_memory_isolation": {
+    "uapi": "AGI_LC_ACCEL_ISOLATION_TENANT_MEMORY with accelerator registration, account, and release extensions",
+    "ownership": "registered device is bound to session identity, tenant child cgroup ID, and tenant cgroup generation",
+    "accounting": "device-memory account is accepted only within total device memory and reports tenant ownership and memory limit",
+    "denial": "over-limit account returns EDQUOT and AGI_LC_ACCEL_ACCOUNT_STATUS_MEMORY_DENIED",
+    "qemu_markers": [
+      "M152_TENANT_ACCELERATOR_CLAIM_OK device=1 memory=16777216",
+      "M152_TENANT_ACCELERATOR_MEMORY_ACCOUNT_OK",
+      "M152_TENANT_ACCELERATOR_MEMORY_DENY_OK",
+      "M152_TENANT_ACCELERATOR_RELEASE_OK"
+    ],
+    "hardware_scope": "provider-neutral control-plane validation only; no physical GPU/NPU, VRAM, DMA, IOMMU, vendor-driver, or production accelerator qualification claimed"
+  },
+  "validation": {
+    "tenant_qemu": "pass; tools/faisal-build/run_tenant_accounting_qemu.sh; log /home/ubuntu/agi-kernel/build/qemu-faisal-m152-final3/qemu.log",
+    "durable_execution_qemu": "pass; M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+    "adapter_conformance": "pass; four QEMU adapters; report /home/ubuntu/agi-kernel/build/m152-adapter-conformance.tsv",
+    "provider_gate_qemu": "pass; M91_PROVIDER_GATE_QEMU_VALIDATION_OK",
+    "accelerator_regression_qemu": "pass; M79_QEMU_VALIDATION_OK",
+    "protected_files": "M63-COMPUTE-CONTEXT-DESIGN.md and M63-SECURITY-REVIEW.md remain untracked and unstaged"
+  },
+  "limitations": [
+    "cpu.max enforcement is validated in a QEMU cgroup2 hierarchy, not on a production multi-socket host",
+    "reported throttled_usec was zero in the short policy smoke test; a sustained workload benchmark is still needed to quantify throttle behavior",
+    "accelerator accounting validates ownership and memory admission semantics without a physical accelerator",
+    "no claim is made that FAISAL is AGI, conscious, self-learning, or hardware-qualified solely from this milestone"
+  ]
+}

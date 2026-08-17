@@ -104,6 +104,7 @@ struct agi_lc_autonomy_record {
 struct agi_lc_accel_record {
 	bool valid;
 	struct agi_lc_accel_device device;
+	u64 accounted_memory_bytes;
 };
 
 struct agi_lc_agent_record {
@@ -374,6 +375,8 @@ struct mutex graph_lock;
 		u64 tenant_cgroup_id;
 		u64 tenant_cgroup_parent_id;
 		u64 tenant_cgroup_generation;
+		bool tenant_cpu_policy_valid;
+		struct agi_lc_tenant_cpu_policy tenant_cpu_policy;
 		u32 sandbox_flags;
 
 	u32 sandbox_state;
@@ -8702,6 +8705,122 @@ static u64 agi_lc_sat_add_u64(u64 left, u64 right)
 	return left + right;
 }
 
+static int agi_lc_tenant_cpu_policy_control(
+		struct agi_lc_session *session, unsigned long arg)
+{
+	struct agi_lc_tenant_cpu_policy policy;
+	struct cgroup_subsys_state *css;
+	u64 period_us, burst_us, throttled_usec;
+	s64 quota_us;
+	int ret;
+
+	if (copy_from_user(&policy, (void __user *)arg, sizeof(policy)))
+		return -EFAULT;
+	if (policy.size != sizeof(policy) ||
+	    (policy.flags & ~AGI_LC_TENANT_CPU_FLAGS_ALL) ||
+	    policy.status || policy.reserved32 || policy.generation ||
+	    policy.throttled_usec || policy.reserved[0] || policy.reserved[1])
+		return -EINVAL;
+	if (policy.operation != AGI_LC_TENANT_CPU_OP_SET &&
+	    policy.operation != AGI_LC_TENANT_CPU_OP_QUERY &&
+	    policy.operation != AGI_LC_TENANT_CPU_OP_CLEAR)
+		return -EINVAL;
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != session->session_id)
+		return -EPERM;
+	if ((policy.flags & AGI_LC_TENANT_CPU_FLAG_REQUIRE_CGROUP) &&
+	    !session->tenant_cgroup)
+		return -EPERM;
+	if (!session->tenant_cgroup)
+		return -EPERM;
+	if (!agi_lc_tenant_cgroup_matches_current(session))
+		return -EXDEV;
+	if (policy.operation == AGI_LC_TENANT_CPU_OP_SET) {
+		u64 max_quota;
+
+		if (policy.mode != AGI_LC_TENANT_CPU_MODE_HARD_THROTTLE ||
+		    policy.period_us < 1000 || policy.period_us > 1000000 ||
+		    policy.quota_us <= 0 || policy.burst_us > policy.period_us)
+			return -EINVAL;
+		if (policy.expected_generation != session->tenant_cpu_policy.generation)
+			return -EAGAIN;
+		max_quota = policy.period_us * num_online_cpus();
+		if (policy.quota_us > max_quota)
+			return -EINVAL;
+	} else if (policy.operation == AGI_LC_TENANT_CPU_OP_QUERY) {
+		if (policy.mode || policy.period_us || policy.quota_us ||
+		    policy.burst_us || policy.expected_generation)
+			return -EINVAL;
+	} else {
+		if (policy.mode || policy.period_us || policy.quota_us ||
+		    policy.burst_us ||
+		    policy.expected_generation != session->tenant_cpu_policy.generation)
+			return -EINVAL;
+		if (!session->tenant_cpu_policy_valid)
+			return -ENOENT;
+	}
+
+	rcu_read_lock();
+	css = cgroup_css(session->tenant_cgroup, &cpu_cgrp_subsys);
+	if (!css || !css_tryget_online(css))
+		css = NULL;
+	rcu_read_unlock();
+	if (!css)
+		return -ENODEV;
+
+	if (policy.operation == AGI_LC_TENANT_CPU_OP_SET) {
+		ret = faisal_sched_group_set_cpu_bandwidth(css, policy.period_us,
+				policy.quota_us, policy.burst_us);
+		if (!ret) {
+			session->tenant_cpu_policy = policy;
+			session->tenant_cpu_policy.generation++;
+			session->tenant_cpu_policy.status =
+			AGI_LC_TENANT_CPU_STATUS_ACTIVE;
+			session->tenant_cpu_policy_valid = true;
+			policy = session->tenant_cpu_policy;
+		}
+	} else {
+		ret = faisal_sched_group_get_cpu_bandwidth(css, &period_us,
+				&quota_us, &burst_us, &throttled_usec);
+		if (!ret) {
+			policy.period_us = period_us;
+			policy.quota_us = quota_us;
+			policy.burst_us = burst_us;
+			policy.throttled_usec = throttled_usec;
+			if (policy.operation == AGI_LC_TENANT_CPU_OP_CLEAR) {
+				ret = faisal_sched_group_set_cpu_bandwidth(css,
+					period_us, -1, 0);
+				if (!ret) {
+					session->tenant_cpu_policy_valid = false;
+					session->tenant_cpu_policy.generation++;
+					policy.status = AGI_LC_TENANT_CPU_STATUS_CLEARED;
+					policy.generation =
+						session->tenant_cpu_policy.generation;
+				} else {
+					policy.status = AGI_LC_TENANT_CPU_STATUS_UNSUPPORTED;
+				}
+			} else {
+				policy.status = session->tenant_cpu_policy_valid ?
+					AGI_LC_TENANT_CPU_STATUS_ACTIVE :
+					AGI_LC_TENANT_CPU_STATUS_UNSET;
+				policy.generation =
+					session->tenant_cpu_policy.generation;
+			}
+		}
+	}
+	css_put(css);
+	if (ret)
+		return ret == -EOPNOTSUPP ? -EOPNOTSUPP : ret;
+	ret = agi_lc_push_record(session, AGI_LC_EVENT_RESOURCE_DEMAND, 0,
+				policy.correlation, policy.generation);
+	if (ret)
+		return ret;
+	if (copy_to_user((void __user *)arg, &policy, sizeof(policy)))
+		return -EFAULT;
+	return 0;
+}
+
 static int agi_lc_tenant_cgroup_control(struct agi_lc_session *session,
 						unsigned long arg)
 {
@@ -9198,7 +9317,9 @@ static int agi_lc_accel_register(struct agi_lc_session *session,
 	    device.online || device.compute_ns || device.memory_bytes ||
 	    device.submissions || device.next_device_id || !device.name[0] ||
 	    !device.driver[0] || device.name[sizeof(device.name) - 1] ||
-	    device.driver[sizeof(device.driver) - 1] || device.correlation == 0 ||
+	    device.driver[sizeof(device.driver) - 1] ||
+	    device.owner_session_id || device.owner_cgroup_id ||
+	    device.owner_cgroup_generation || device.correlation == 0 ||
 	    device.reserved[0] || device.reserved[1])
 		return -EINVAL;
 	if (!capable(CAP_SYS_ADMIN))
@@ -9207,6 +9328,15 @@ static int agi_lc_accel_register(struct agi_lc_session *session,
 		return -ESHUTDOWN;
 	if (faisal_task_get_lineage(current) != session->session_id)
 		return -EPERM;
+	if ((device.isolation_flags & AGI_LC_ACCEL_ISOLATION_TENANT_MEMORY) &&
+	    (!session->tenant_cgroup || !(device.capabilities &
+			AGI_LC_ACCEL_CAP_DEVICE_MEMORY) ||
+	     !device.total_memory_bytes ||
+	     device.available_memory_bytes > device.total_memory_bytes))
+		return -EPERM;
+	if (!(device.capabilities & AGI_LC_ACCEL_CAP_DEVICE_MEMORY) &&
+	    (device.total_memory_bytes || device.available_memory_bytes))
+		return -EOPNOTSUPP;
 
 	mutex_lock(&agi_lc_accel_lock);
 	for (i = 0; i < AGI_LC_ACCEL_DEVICES; i++)
@@ -9220,7 +9350,11 @@ static int agi_lc_accel_register(struct agi_lc_session *session,
 	}
 	device.device_id = atomic64_inc_return(&agi_lc_next_accel_device);
 	device.online = 1;
+	device.owner_session_id = session->session_id;
+	device.owner_cgroup_id = session->tenant_cgroup_id;
+	device.owner_cgroup_generation = session->tenant_cgroup_generation;
 	record->device = device;
+	record->accounted_memory_bytes = 0;
 	record->valid = true;
 	if (copy_to_user((void __user *)arg, &device, sizeof(device))) {
 		record->valid = false;
@@ -9270,6 +9404,7 @@ static int agi_lc_accel_unregister(struct agi_lc_session *session,
 	}
 	record->valid = false;
 	record->device.online = 0;
+	record->accounted_memory_bytes = 0;
 out_unlock:
 	mutex_unlock(&agi_lc_accel_lock);
 	if (ret)
@@ -9350,7 +9485,9 @@ static int agi_lc_accel_set_workload(struct agi_lc_session *session,
 	    (workload.isolation_flags & ~AGI_LC_ACCEL_ISOLATION_MAX) ||
 	    (workload.coordination_flags & ~AGI_LC_ACCEL_COORD_MAX) ||
 	    workload.state || workload.reserved32 || workload.compute_ns ||
-	    workload.memory_bytes || workload.submissions || workload.reserved[0] ||
+	    workload.memory_bytes || workload.submissions ||
+	    workload.tenant_cgroup_id || workload.tenant_cgroup_generation ||
+	    workload.reserved[0] ||
 	    workload.reserved[1])
 		return -EINVAL;
 	if (!session->session_id || READ_ONCE(session->revoked))
@@ -9372,6 +9509,20 @@ static int agi_lc_accel_set_workload(struct agi_lc_session *session,
 	    workload.coordination_flags & ~device->device.coordination_flags) {
 		mutex_unlock(&agi_lc_accel_lock);
 		return -EOPNOTSUPP;
+	}
+	if (device->device.isolation_flags &
+	    AGI_LC_ACCEL_ISOLATION_TENANT_MEMORY) {
+		if (!session->tenant_cgroup ||
+		    device->device.owner_session_id != session->session_id ||
+		    device->device.owner_cgroup_id != session->tenant_cgroup_id ||
+		    device->device.owner_cgroup_generation !=
+			 session->tenant_cgroup_generation) {
+			mutex_unlock(&agi_lc_accel_lock);
+			return -EPERM;
+		}
+		workload.tenant_cgroup_id = session->tenant_cgroup_id;
+		workload.tenant_cgroup_generation =
+			session->tenant_cgroup_generation;
 	}
 	agent->accel_workload = workload;
 	agent->accel_workload.agent_id = agent_id;
@@ -9402,6 +9553,7 @@ static int agi_lc_accel_get_workload(struct agi_lc_session *session,
 	    query.latency_sensitive || query.deadline_ns || query.isolation_flags ||
 	    query.coordination_flags || query.state || query.reserved32 ||
 	    query.compute_ns || query.memory_bytes || query.submissions ||
+	    query.tenant_cgroup_id || query.tenant_cgroup_generation ||
 	    query.correlation || query.reserved[0] || query.reserved[1])
 		return -EINVAL;
 	if (!session->session_id || READ_ONCE(session->revoked))
@@ -9435,7 +9587,9 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 	    (!(account.flags & AGI_LC_ACCEL_ACCOUNT_COMPUTE) && account.compute_ns) ||
 	    (!(account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) && account.memory_bytes) ||
 	    (!(account.flags & AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS) && account.submissions) ||
-	    account.agent_id || account.status || account.reserved32 ||
+	    account.agent_id || account.tenant_cgroup_id ||
+	    account.tenant_cgroup_generation || account.device_memory_limit_bytes ||
+	    account.status || account.reserved32 ||
 	    account.reserved[0] || account.reserved[1])
 		return -EINVAL;
 	if (!capable(CAP_SYS_ADMIN))
@@ -9452,12 +9606,38 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 		mutex_unlock(&agi_lc_accel_lock);
 		return -ENODEV;
 	}
+	if (device->device.isolation_flags &
+	    AGI_LC_ACCEL_ISOLATION_TENANT_MEMORY) {
+		if (!session->tenant_cgroup ||
+		    device->device.owner_session_id != session->session_id ||
+		    device->device.owner_cgroup_id != session->tenant_cgroup_id ||
+		    device->device.owner_cgroup_generation !=
+			 session->tenant_cgroup_generation) {
+			mutex_unlock(&agi_lc_accel_lock);
+			return -EPERM;
+		}
+		if ((account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) &&
+		    (account.memory_bytes > device->device.total_memory_bytes ||
+		     device->accounted_memory_bytes >
+			 device->device.total_memory_bytes - account.memory_bytes)) {
+			account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_MEMORY_DENIED;
+			mutex_unlock(&agi_lc_accel_lock);
+			if (copy_to_user((void __user *)arg, &account, sizeof(account)))
+				return -EFAULT;
+			return -EDQUOT;
+		}
+		account.tenant_cgroup_id = session->tenant_cgroup_id;
+		account.tenant_cgroup_generation =
+			session->tenant_cgroup_generation;
+		account.device_memory_limit_bytes = device->device.total_memory_bytes;
+	}
 	if (account.flags & AGI_LC_ACCEL_ACCOUNT_COMPUTE) {
 		device->device.compute_ns += account.compute_ns;
 		faisal_task_accel_account(current, account.compute_ns, 0, 0);
 	}
 	if (account.flags & AGI_LC_ACCEL_ACCOUNT_MEMORY) {
 		device->device.memory_bytes += account.memory_bytes;
+		device->accounted_memory_bytes += account.memory_bytes;
 		faisal_task_accel_account(current, 0, account.memory_bytes, 0);
 	}
 	if (account.flags & AGI_LC_ACCEL_ACCOUNT_SUBMISSIONS) {
@@ -9465,7 +9645,7 @@ static int agi_lc_accel_device_account(struct agi_lc_session *session,
 		faisal_task_accel_account(current, 0, 0, account.submissions);
 	}
 	account.agent_id = agent_id;
-	account.status = 0;
+	account.status = AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED;
 	mutex_unlock(&agi_lc_accel_lock);
 	if (copy_to_user((void __user *)arg, &account, sizeof(account)))
 		return -EFAULT;
@@ -10386,6 +10566,9 @@ static long agi_lc_ioctl(struct file *file, unsigned int command,
 		break;
 	case AGI_LC_TENANT_CGROUP:
 		ret = agi_lc_tenant_cgroup_control(session, arg);
+		break;
+	case AGI_LC_TENANT_CPU_POLICY:
+		ret = agi_lc_tenant_cpu_policy_control(session, arg);
 		break;
 	case AGI_LC_ACCEL_REGISTER:
 		ret = agi_lc_accel_register(session, arg);

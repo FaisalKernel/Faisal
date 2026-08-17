@@ -89,6 +89,14 @@ extern struct mutex cgroup_mutex;
 extern spinlock_t css_set_lock;
 extern struct blocking_notifier_head cgroup_lifetime_notifier;
 
+#if defined(CONFIG_CGROUP_SCHED) && defined(CONFIG_CFS_BANDWIDTH)
+int faisal_sched_group_set_cpu_bandwidth(struct cgroup_subsys_state *css,
+			u64 period_us, s64 quota_us, u64 burst_us);
+int faisal_sched_group_get_cpu_bandwidth(struct cgroup_subsys_state *css,
+			u64 *period_us, s64 *quota_us, u64 *burst_us,
+			u64 *throttled_usec);
+#endif
+
 #define SUBSYS(_x) extern struct cgroup_subsys _x ## _cgrp_subsys;
 #include <linux/cgroup_subsys.h>
 #undef SUBSYS

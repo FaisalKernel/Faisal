@@ -87,6 +87,15 @@ struct task_delay_info;
 struct task_exec_state;
 struct task_group;
 struct task_struct;
+struct cgroup_subsys_state;
+
+#if defined(CONFIG_CGROUP_SCHED) && defined(CONFIG_CFS_BANDWIDTH)
+int faisal_sched_group_set_cpu_bandwidth(struct cgroup_subsys_state *css,
+			u64 period_us, s64 quota_us, u64 burst_us);
+int faisal_sched_group_get_cpu_bandwidth(struct cgroup_subsys_state *css,
+			u64 *period_us, s64 *quota_us, u64 *burst_us,
+			u64 *throttled_usec);
+#endif
 struct timespec64;
 struct user_event_mm;
 

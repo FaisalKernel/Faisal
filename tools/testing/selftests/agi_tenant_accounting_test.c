@@ -65,6 +65,65 @@ int main(void)
 		.operation = AGI_LC_TENANT_CGROUP_RELEASE,
 		.cgroup_fd = -1,
 	};
+	struct agi_lc_accel_device accel = {
+		.size = sizeof(accel),
+		.type = AGI_LC_ACCEL_TYPE_GPU,
+		.capabilities = AGI_LC_ACCEL_CAP_DEVICE_MEMORY,
+		.accounting_flags = AGI_LC_ACCEL_ACCOUNT_MEMORY,
+		.isolation_flags = AGI_LC_ACCEL_ISOLATION_TENANT_MEMORY,
+		.total_memory_bytes = 16ULL * 1024 * 1024,
+		.available_memory_bytes = 16ULL * 1024 * 1024,
+		.name = "qemu-tenant-gpu",
+		.driver = "faisal-test",
+		.correlation = 11507,
+	};
+	struct agi_lc_accel_device_account accel_account = {
+		.size = sizeof(accel_account),
+		.flags = AGI_LC_ACCEL_ACCOUNT_MEMORY,
+		.memory_bytes = 8ULL * 1024 * 1024,
+		.correlation = 11508,
+	};
+	struct agi_lc_accel_device_account accel_over = {
+		.size = sizeof(accel_over),
+		.flags = AGI_LC_ACCEL_ACCOUNT_MEMORY,
+		.memory_bytes = 9ULL * 1024 * 1024,
+		.correlation = 11509,
+	};
+	struct agi_lc_accel_device accel_remove = {
+		.size = sizeof(accel_remove),
+		.correlation = 11510,
+	};
+	struct agi_lc_tenant_cpu_policy cpu_policy = {
+		.size = sizeof(cpu_policy),
+		.flags = AGI_LC_TENANT_CPU_FLAG_REQUIRE_CGROUP,
+		.operation = AGI_LC_TENANT_CPU_OP_SET,
+		.mode = AGI_LC_TENANT_CPU_MODE_HARD_THROTTLE,
+		.period_us = 100000,
+		.quota_us = 50000,
+		.expected_generation = 0,
+		.correlation = 11506,
+	};
+	struct agi_lc_tenant_cpu_policy cpu_stale = {
+		.size = sizeof(cpu_stale),
+		.flags = AGI_LC_TENANT_CPU_FLAG_REQUIRE_CGROUP,
+		.operation = AGI_LC_TENANT_CPU_OP_SET,
+		.mode = AGI_LC_TENANT_CPU_MODE_HARD_THROTTLE,
+		.period_us = 100000,
+		.quota_us = 25000,
+		.expected_generation = 0,
+		.correlation = 11511,
+	};
+	struct agi_lc_tenant_cpu_policy cpu_query = {
+		.size = sizeof(cpu_query),
+		.flags = AGI_LC_TENANT_CPU_FLAG_REQUIRE_CGROUP,
+		.operation = AGI_LC_TENANT_CPU_OP_QUERY,
+	};
+	struct agi_lc_tenant_cpu_policy cpu_clear = {
+		.size = sizeof(cpu_clear),
+		.flags = AGI_LC_TENANT_CPU_FLAG_REQUIRE_CGROUP,
+		.operation = AGI_LC_TENANT_CPU_OP_CLEAR,
+		.expected_generation = 1,
+	};
 	struct agi_lc_tenant_budget budget = {
 		.size = sizeof(budget),
 		.flags = AGI_LC_TENANT_BUDGET_FLAG_REQUIRE_SANDBOX |
@@ -121,6 +180,54 @@ int main(void)
 	    tenant_query.cgroup_id != tenant_cgroup.cgroup_id)
 		return fail("tenant cgroup query");
 	printf("M151_TENANT_CGROUP_QUERY_OK\n");
+	if (ioctl(fd, AGI_LC_ACCEL_REGISTER, &accel) < 0 ||
+	    !accel.device_id || accel.owner_session_id != create.session_id ||
+	    accel.owner_cgroup_id != tenant_cgroup.cgroup_id)
+		return fail("tenant accelerator register");
+	printf("M152_TENANT_ACCELERATOR_CLAIM_OK device=%llu memory=%llu\n",
+	       (unsigned long long)accel.device_id,
+	       (unsigned long long)accel.total_memory_bytes);
+	accel_account.device_id = accel.device_id;
+	if (ioctl(fd, AGI_LC_ACCEL_DEVICE_ACCOUNT, &accel_account) < 0 ||
+	    accel_account.status != AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED ||
+	    accel_account.tenant_cgroup_id != tenant_cgroup.cgroup_id ||
+	    accel_account.device_memory_limit_bytes != accel.total_memory_bytes)
+		return fail("tenant accelerator account");
+	printf("M152_TENANT_ACCELERATOR_MEMORY_ACCOUNT_OK\n");
+	accel_over.device_id = accel.device_id;
+	if (ioctl(fd, AGI_LC_ACCEL_DEVICE_ACCOUNT, &accel_over) >= 0 ||
+	    errno != EDQUOT ||
+	    accel_over.status != AGI_LC_ACCEL_ACCOUNT_STATUS_MEMORY_DENIED)
+		return fail("tenant accelerator memory isolation");
+	printf("M152_TENANT_ACCELERATOR_MEMORY_DENY_OK\n");
+	accel_remove.device_id = accel.device_id;
+	if (ioctl(fd, AGI_LC_ACCEL_UNREGISTER, &accel_remove) < 0)
+		return fail("tenant accelerator unregister");
+	printf("M152_TENANT_ACCELERATOR_RELEASE_OK\n");
+	if (ioctl(fd, AGI_LC_TENANT_CPU_POLICY, &cpu_policy) < 0 ||
+	    cpu_policy.status != AGI_LC_TENANT_CPU_STATUS_ACTIVE ||
+	    cpu_policy.generation != 1 || cpu_policy.quota_us != 50000)
+		return fail("tenant cpu policy set");
+	printf("M152_TENANT_CPU_THROTTLE_SET_OK generation=%llu quota=%lld\n",
+	       (unsigned long long)cpu_policy.generation,
+	       (long long)cpu_policy.quota_us);
+	errno = 0;
+	if (ioctl(fd, AGI_LC_TENANT_CPU_POLICY, &cpu_stale) >= 0 ||
+	    errno != EAGAIN)
+		return fail("tenant cpu stale generation");
+	printf("M152_TENANT_CPU_STALE_GENERATION_DENY_OK\n");
+	if (ioctl(fd, AGI_LC_TENANT_CPU_POLICY, &cpu_query) < 0 ||
+	    cpu_query.status != AGI_LC_TENANT_CPU_STATUS_ACTIVE ||
+	    cpu_query.quota_us != 50000 || cpu_query.period_us != 100000)
+		return fail("tenant cpu policy query");
+	printf("M152_TENANT_CPU_THROTTLE_QUERY_OK throttled=%llu\n",
+	       (unsigned long long)cpu_query.throttled_usec);
+	cpu_clear.expected_generation = cpu_policy.generation;
+	if (ioctl(fd, AGI_LC_TENANT_CPU_POLICY, &cpu_clear) < 0 ||
+	    cpu_clear.status != AGI_LC_TENANT_CPU_STATUS_CLEARED ||
+	    cpu_clear.generation != 2)
+		return fail("tenant cpu policy clear");
+	printf("M152_TENANT_CPU_THROTTLE_CLEAR_OK\n");
 	if (ioctl(fd, AGI_LC_SET_RESOURCE_DEMAND, &demand) < 0)
 		return fail("resource demand ioctl");
 	printf("M115_DEMAND status=%u enforced=0x%x unsupported=0x%x agent=%llu\\n",

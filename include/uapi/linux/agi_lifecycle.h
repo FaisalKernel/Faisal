@@ -697,6 +697,16 @@
 #define AGI_LC_TENANT_CGROUP_STATUS_UNBOUND 0U
 #define AGI_LC_TENANT_CGROUP_STATUS_BOUND 1U
 #define AGI_LC_TENANT_CGROUP_STATUS_REVOKED 2U
+#define AGI_LC_TENANT_CPU_OP_SET 1U
+#define AGI_LC_TENANT_CPU_OP_QUERY 2U
+#define AGI_LC_TENANT_CPU_OP_CLEAR 3U
+#define AGI_LC_TENANT_CPU_MODE_HARD_THROTTLE 1U
+#define AGI_LC_TENANT_CPU_FLAG_REQUIRE_CGROUP (1U << 0)
+#define AGI_LC_TENANT_CPU_FLAGS_ALL AGI_LC_TENANT_CPU_FLAG_REQUIRE_CGROUP
+#define AGI_LC_TENANT_CPU_STATUS_UNSET 0U
+#define AGI_LC_TENANT_CPU_STATUS_ACTIVE 1U
+#define AGI_LC_TENANT_CPU_STATUS_CLEARED 2U
+#define AGI_LC_TENANT_CPU_STATUS_UNSUPPORTED 3U
 
 #define AGI_LC_ACCEL_TYPE_GPU 1
 #define AGI_LC_ACCEL_TYPE_NPU 2
@@ -725,7 +735,8 @@
 #define AGI_LC_ACCEL_ISOLATION_SVA (1U << 1)
 #define AGI_LC_ACCEL_ISOLATION_EXCLUSIVE (1U << 2)
 #define AGI_LC_ACCEL_ISOLATION_DRIVER (1U << 3)
-#define AGI_LC_ACCEL_ISOLATION_MAX ((1U << 4) - 1)
+#define AGI_LC_ACCEL_ISOLATION_TENANT_MEMORY (1U << 4)
+#define AGI_LC_ACCEL_ISOLATION_MAX ((1U << 5) - 1)
 
 #define AGI_LC_ACCEL_COORD_SCHEDULER (1U << 0)
 #define AGI_LC_ACCEL_COORD_FENCE (1U << 1)
@@ -734,6 +745,9 @@
 #define AGI_LC_ACCEL_COORD_MAX ((1U << 4) - 1)
 
 #define AGI_LC_ACCEL_WORKLOAD_BOUND 1
+#define AGI_LC_ACCEL_ACCOUNT_STATUS_ACCEPTED 0
+#define AGI_LC_ACCEL_ACCOUNT_STATUS_MEMORY_DENIED 1
+#define AGI_LC_ACCEL_ACCOUNT_STATUS_UNSUPPORTED 2
 
 #define AGI_LC_RESOURCE_ENERGY_AVAILABLE (1U << 0)
 
@@ -1060,6 +1074,9 @@ struct agi_lc_accel_device {
 	__u64 next_device_id;
 	char name[32];
 	char driver[32];
+	__u64 owner_session_id;
+	__u64 owner_cgroup_id;
+	__u64 owner_cgroup_generation;
 	__u64 correlation;
 	__u64 reserved[2];
 };
@@ -1081,6 +1098,8 @@ struct agi_lc_accel_workload {
 	__u64 compute_ns;
 	__u64 memory_bytes;
 	__u64 submissions;
+	__u64 tenant_cgroup_id;
+	__u64 tenant_cgroup_generation;
 	__u64 correlation;
 	__u64 reserved[2];
 };
@@ -1093,6 +1112,9 @@ struct agi_lc_accel_device_account {
 	__u64 memory_bytes;
 	__u64 submissions;
 	__u64 agent_id;
+	__u64 tenant_cgroup_id;
+	__u64 tenant_cgroup_generation;
+	__u64 device_memory_limit_bytes;
 	__u32 status;
 	__u32 reserved32;
 	__u64 correlation;
@@ -1206,6 +1228,23 @@ struct agi_lc_tenant_cgroup {
 	__u64 parent_cgroup_id;
 	__u64 hierarchy_owner_id;
 	__u64 generation;
+	__u64 correlation;
+	__u64 reserved[2];
+};
+
+struct agi_lc_tenant_cpu_policy {
+	__u32 size;
+	__u32 flags;
+	__u32 operation;
+	__u32 mode;
+	__s32 status;
+	__u32 reserved32;
+	__u64 period_us;
+	__s64 quota_us;
+	__u64 burst_us;
+	__u64 expected_generation;
+	__u64 generation;
+	__u64 throttled_usec;
 	__u64 correlation;
 	__u64 reserved[2];
 };
@@ -2457,6 +2496,7 @@ struct agi_lc_record {
 #define AGI_LC_GET_TENANT_SNAPSHOT _IOWR(AGI_LC_IOC_MAGIC, 0x67, struct agi_lc_tenant_snapshot)
 #define AGI_LC_TENANT_BUDGET _IOWR(AGI_LC_IOC_MAGIC, 0x68, struct agi_lc_tenant_budget)
 #define AGI_LC_TENANT_CGROUP _IOWR(AGI_LC_IOC_MAGIC, 0x69, struct agi_lc_tenant_cgroup)
+#define AGI_LC_TENANT_CPU_POLICY _IOWR(AGI_LC_IOC_MAGIC, 0x6a, struct agi_lc_tenant_cpu_policy)
 #define AGI_LC_SET_WORLD_SUBSCRIPTION _IOWR(AGI_LC_IOC_MAGIC, 0x2f, struct agi_lc_world_subscription)
 #define AGI_LC_GET_WORLD_SUBSCRIPTION _IOWR(AGI_LC_IOC_MAGIC, 0x30, struct agi_lc_world_subscription)
 #define AGI_LC_ATTACH_TASK _IO(AGI_LC_IOC_MAGIC, 0x06)

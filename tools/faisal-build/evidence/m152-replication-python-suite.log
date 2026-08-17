@@ -1,0 +1,23 @@
+test_vote_and_append_round_trip (tools.testing.selftests.test_faisal_replication_bindings.ReplicationBindingTests.test_vote_and_append_round_trip) ... ok
+test_certificate_identity_mismatch_denied (tools.testing.selftests.test_faisal_replication_daemon.ReplicationDaemonTest.test_certificate_identity_mismatch_denied) ... ok
+test_corrupt_state_fails_closed (tools.testing.selftests.test_faisal_replication_daemon.ReplicationDaemonTest.test_corrupt_state_fails_closed) ... ok
+test_invalid_chain_is_denied_without_mutation (tools.testing.selftests.test_faisal_replication_daemon.ReplicationDaemonTest.test_invalid_chain_is_denied_without_mutation) ... ok
+test_missing_verification_callback_denies_authority (tools.testing.selftests.test_faisal_replication_daemon.ReplicationDaemonTest.test_missing_verification_callback_denies_authority) ... ok
+test_valid_append_is_durable (tools.testing.selftests.test_faisal_replication_daemon.ReplicationDaemonTest.test_valid_append_is_durable) ... ok
+test_vote_persists_and_restores (tools.testing.selftests.test_faisal_replication_daemon.ReplicationDaemonTest.test_vote_persists_and_restores) ... ok
+test_authenticated_vote_and_append_round_trip (tools.testing.selftests.test_faisal_replication_tls.ReplicationTlsIntegrationTest.test_authenticated_vote_and_append_round_trip) ... skipped 'TLS fixture certificates not generated'
+test_daemon_accepts_only_trusted_provider_signatures (tools.testing.selftests.test_faisal_replication_providers.ProviderTest.test_daemon_accepts_only_trusted_provider_signatures) ... ok
+test_malformed_signature_length_denied (tools.testing.selftests.test_faisal_replication_providers.ProviderTest.test_malformed_signature_length_denied) ... ok
+test_tampered_identity_and_record_denied (tools.testing.selftests.test_faisal_replication_providers.ProviderTest.test_tampered_identity_and_record_denied) ... ok
+test_unknown_key_and_generation_denied (tools.testing.selftests.test_faisal_replication_providers.ProviderTest.test_unknown_key_and_generation_denied) ... ok
+test_valid_attestation_and_record (tools.testing.selftests.test_faisal_replication_providers.ProviderTest.test_valid_attestation_and_record) ... ok
+test_background_rotation_changes_verification_without_restart (tools.testing.selftests.test_faisal_replication_hardware_rotation.HardwareRotationTest.test_background_rotation_changes_verification_without_restart) ... ok
+test_invalid_rotation_preserves_active_key (tools.testing.selftests.test_faisal_replication_hardware_rotation.HardwareRotationTest.test_invalid_rotation_preserves_active_key) ... ok
+test_missing_tpm_provider_is_unavailable_not_software_fallback (tools.testing.selftests.test_faisal_replication_hardware_rotation.HardwareRotationTest.test_missing_tpm_provider_is_unavailable_not_software_fallback) ... ok
+test_rotation_activates_new_generation_and_revokes_old (tools.testing.selftests.test_faisal_replication_hardware_rotation.HardwareRotationTest.test_rotation_activates_new_generation_and_revokes_old) ... ok
+test_secure_enclave_digest_mismatch_is_rejected (tools.testing.selftests.test_faisal_replication_hardware_rotation.HardwareRotationTest.test_secure_enclave_digest_mismatch_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.032s
+
+OK (skipped=1)

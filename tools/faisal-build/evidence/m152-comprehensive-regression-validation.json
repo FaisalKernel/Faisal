@@ -1,0 +1,69 @@
+{
+  "milestone": "M152 comprehensive regression",
+  "date": "2026-08-17",
+  "kernel_build": "/home/ubuntu/agi-kernel/build/m152-resource",
+  "kernel_sha256": {
+    "bzImage": "300eba82cb9bc1c6e6c9ec545060ed84526e0dcd87dc35a153703ac3c5a40601",
+    "vmlinux": "52f9476d99ecf34047bcc6d6c7a8a5f25913e6e6a9b92f87633138c241682b6f"
+  },
+  "suite": {
+    "durable_execution_qemu": {
+      "status": "pass",
+      "marker": "M108_DURABLE_EXECUTION_QEMU_VALIDATION_OK",
+      "coverage": "M108 through M149 durable execution, handoff authority, journal integrity, KMS, quorum partition, election persistence, and replay",
+      "log": "/home/ubuntu/agi-kernel/build/qemu-faisal-durable-execution/qemu.log"
+    },
+    "tenant_accounting_qemu": {
+      "status": "pass",
+      "marker": "M115_TENANT_ACCOUNTING_QEMU_VALIDATION_OK",
+      "coverage": "M115 budget enforcement, M151 cgroup ownership, M152 cpu.max throttling and accelerator memory isolation",
+      "log": "/home/ubuntu/agi-kernel/build/qemu-faisal-m152-final2/qemu.log"
+    },
+    "adapter_conformance": {
+      "status": "pass",
+      "adapters": ["sandbox", "nondeterministic network", "repository", "scanner"],
+      "marker": "FAISAL_ADAPTER_CONFORMANCE_QEMU_OK",
+      "report": "/home/ubuntu/agi-kernel/build/m152-adapter-conformance.tsv"
+    },
+    "replication_python": {
+      "status": "pass_with_one_environmental_skip",
+      "tests_run": 18,
+      "tests_passed": 17,
+      "tests_skipped": 1,
+      "skip": "TLS fixture certificates not generated; live TLS socket test separately passed",
+      "log": "tools/faisal-build/evidence/m152-replication-python-suite.log"
+    },
+    "replication_election_c": {
+      "status": "pass",
+      "marker": "FJR_ELECTION_SELFTEST_OK",
+      "coverage": "state machine, quorum promotion, stale/conflicting append rejection, term/vote persistence, restart restore, corruption fail-closed",
+      "log": "tools/faisal-build/evidence/m152-election-selftest.log"
+    },
+    "replication_live_partition": {
+      "status": "pass",
+      "markers": ["FJT_LIVE_PARTITION_DROP_OBSERVED_OK", "FJT_LIVE_PARTITION_RECOVERY_OK", "FJT_LIVE_SOCKET_PARTITION_QEMU_HOST_VALIDATION_OK"],
+      "log": "tools/faisal-build/evidence/m152-live-partition-suite.log"
+    },
+    "provider_gate_qemu": {
+      "status": "pass",
+      "marker": "M91_PROVIDER_GATE_QEMU_VALIDATION_OK",
+      "log": "/home/ubuntu/agi-kernel/build/qemu-faisal-m152-provider/qemu.log"
+    },
+    "accelerator_regression_qemu": {
+      "status": "pass",
+      "marker": "M79_QEMU_VALIDATION_OK",
+      "log": "/home/ubuntu/agi-kernel/build/qemu-faisal-accelerator-validation/qemu.log"
+    }
+  },
+  "aggregate_status": "pass_for_available_virtualized_and_host_validation",
+  "release_limitations": [
+    "No physical GPU/NPU or device-memory/IOMMU qualification was performed.",
+    "The TLS Python fixture test was skipped because fixture certificates were not generated; the live mutual-TLS partition/recovery test passed.",
+    "This regression suite does not establish a stable/LTS forward-port, independent reproducible rebuild, signed production artifact, or production deployment qualification.",
+    "No claim is made that model output is authority, that stored experience is neural retraining, or that FAISAL is AGI/conscious."
+  ],
+  "protected_files": {
+    "M63-COMPUTE-CONTEXT-DESIGN.md": "untracked and unstaged",
+    "M63-SECURITY-REVIEW.md": "untracked and unstaged"
+  }
+}
