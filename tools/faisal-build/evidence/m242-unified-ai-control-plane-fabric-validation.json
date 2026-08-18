@@ -1,0 +1,126 @@
+{
+  "project": "FAISAL",
+  "milestone": "M242-unified-ai-control-plane-fabric",
+  "recorded_at": "2026-08-18T20:47:56Z",
+  "status": "local_unified_control_plane_contract_qualified_distributed_production_qualification_pending",
+  "objective": "Unify existing M236-M241 control-plane boundaries through a provider-neutral fabric for topology-aware node observations, sharded workload placement, durable leases, migration, backpressure, quarantine, recovery, and replay without placing model reasoning or hardware drivers in kernel space.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://docs.ray.io/en/latest/ray-core/scheduling/placement-group.html",
+        "finding": "Ray placement groups atomically reserve resource bundles, support PACK/SPREAD and strict variants, and are used for gang scheduling and distributed-training fault-tolerance tradeoffs.",
+        "impact": "M242 uses bounded shard placement and durable leases as a provider-neutral reservation boundary; it does not claim to replace a cluster scheduler or autoscaler."
+      },
+      {
+        "url": "https://kubernetes.io/docs/tasks/administer-cluster/topology-manager/",
+        "finding": "Kubernetes Topology Manager coordinates CPU, memory, and device hints because independent placement can split resources across NUMA nodes; restricted and single-NUMA policies may reject unsuitable placement.",
+        "impact": "M242 binds topology digests and locality requirements to shard placement and fails closed when required locality is not satisfied."
+      },
+      {
+        "url": "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/",
+        "finding": "Kubernetes Device Plugins expose vendor-neutral registration, health, allocation, and topology metadata for GPUs, NICs, FPGAs, and other specialized devices.",
+        "impact": "M242 treats device capacity, health, topology, and accelerator masks as verified observations from external adapters; no vendor driver or physical device behavior is fabricated."
+      },
+      {
+        "url": "https://docs.nvidia.com/dynamo/knowledge-base/overview",
+        "finding": "NVIDIA Dynamo separates request, control, and state planes and uses KV-aware routing, prefill/decode disaggregation, planner scaling, lease expiry, worker draining, migration/cancellation, load shedding, multi-tier KV state, and high-speed transfer paths.",
+        "impact": "M242 implements only the provider-neutral local contract for shard placement, leases, backpressure, health/quarantine, and recovery; physical inference and transfer qualification remain external."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-fabric/faisal_fabric.h",
+    "source": "tools/faisal-fabric/faisal_fabric.c",
+    "selftest": "tools/testing/selftests/faisal_fabric_test.c",
+    "benchmark": "tools/testing/selftests/faisal_fabric_benchmark.c",
+    "concurrency_test": "tools/testing/selftests/faisal_fabric_concurrency_test.c",
+    "fuzz_test": "tools/testing/selftests/faisal_fabric_fuzz_test.c",
+    "runner": "tools/faisal-build/run_fabric_validation.sh",
+    "abi": 1,
+    "platform_abi": 41,
+    "kernel_abi_changed": false,
+    "features": [
+      "provider-neutral node registration with health, pressure, thermal, forecast, capacity, availability, identity, topology, NUMA, and accelerator observations",
+      "shard submission referencing existing objective, agent, tenant, trace, task/session generation, M240 budget receipt digest, provenance, locality, demand, deadline, and priority",
+      "health-, pressure-, thermal-, forecast-, capacity-, and locality-aware deterministic placement scoring",
+      "append-only fdatasync-backed SHA-256 event journal with continuity and replay validation",
+      "durable placement leases with expiry, generation fencing, renewal, release, and resource accounting",
+      "migration lease transfer with source-resource restoration, destination reservation, and placement-generation increment",
+      "bounded queue backpressure and fail-closed capacity rejection",
+      "node quarantine with shard recovery marking and lease quarantine",
+      "expired lease recovery with deadline-based recoverable versus unrecoverable classification",
+      "transactional rollback for registration, submission, placement, migration, release, and event append failures",
+      "model-output-is-not-authority and verified-input/authority gates"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M242_FABRIC_SELFTEST_EXIT=0 cases=48 mutation_rejections=6",
+    "scale_benchmark": {
+      "nodes": [1, 4, 16, 32, 64],
+      "shards": [1, 32, 128, 256],
+      "operations": "node registration plus shard submit/place/renew",
+      "representative_final_points": {
+        "1_nodes_256_shards": {"operations": 769, "elapsed_ns": 178775911, "ns_per_operation": 232478.43},
+        "16_nodes_256_shards": {"operations": 784, "elapsed_ns": 177648281, "ns_per_operation": 226592.20},
+        "64_nodes_256_shards": {"operations": 832, "elapsed_ns": 177807612, "ns_per_operation": 213711.07}
+      },
+      "scope": "durable userspace fabric control-plane operations with SHA-256 journal and fdatasync; not model inference, tokens/sec, physical accelerator communication, or energy measurement"
+    },
+    "concurrency": "M242_FABRIC_CONCURRENCY_EXIT=0 threads=8 shards=256 failures=0; replay passed",
+    "fuzzing": "M242_FABRIC_FUZZ_EXIT=0 iterations=10000 rejected=10000 accepted=0",
+    "asan_ubsan": "M242_FABRIC_SANITIZERS_OK; lifecycle and concurrency tests passed with leak detection and halt-on-error",
+    "adjacent_regressions": {
+      "m241": "M241 validation passed: selftest cases=38 mutation_rejections=8; 512-objective scale; 8-thread 256-objective concurrency; ASan/UBSan",
+      "m240": "M240 validation passed: selftest cases=22 mutation_rejections=64; benchmark 100000 rounds / 300000 operations / 9857.18 ns per operation",
+      "m236": "M236 validation passed: selftest cases=29; benchmark 100000 rounds / 1000000 operations / 3195.82 ns per operation",
+      "m237": "M237 validation passed: cases=24 mutation_rejections=64; benchmark 100000 rounds / 400000 operations / 1743.90 ns per operation",
+      "m238": "M238 validation passed: core cases=18, bridge cases=12, mutation_rejections=64; benchmark 100000 rounds / 500000 operations / 2002.05 ns per operation",
+      "m239": "M239 validation passed: cases=16 mutation_rejections=64; benchmark 100000 rounds / 400000 operations / 1008.38 ns per operation"
+    },
+    "qemu": "FAISAL_M76_QEMU_VALIDATION_OK; Linux 7.2 recovered artifact, ACPI-on, one vCPU, 4 GiB",
+    "industry_soak": "FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256 total_iterations=1024",
+    "multi_tenant": "FAISAL_MT_QEMU_LATENCY_VALIDATION_OK tenants=1,2,4,8 with zero reported failures; TCG timing outliers remain fixture-specific",
+    "broad_stress": "FAISAL_M80_QEMU_VALIDATION_OK, FAISAL_GRAPH_FAULT_QEMU_VALIDATION_OK, FAISAL_UAPI_WRITE_STRESS_QEMU_VALIDATION_OK",
+    "known_diagnostic_policy": "ACPI-on SMP RCU stall profiles remain rejected and unsuppressed"
+  },
+  "security": {
+    "authority_required_for_shard": true,
+    "verified_input_required_for_shard": true,
+    "topology_locality_required_when_flagged": true,
+    "tampered_event_rejected": true,
+    "tampered_lease_digest_rejected_on_replay": true,
+    "replayed_out_of_order_event_rejected": true,
+    "expired_lease_recovery_fenced_by_deadline": true,
+    "quarantined_node_stops_new_placement": true,
+    "stale_placement_generation_accepted": false,
+    "capacity_overflow_accepted": false,
+    "model_output_is_authority": false,
+    "fake_hardware_evidence": false,
+    "fake_external_evidence": false
+  },
+  "boundary": {
+    "production_approval": false,
+    "million_agent_scale": false,
+    "distributed_consensus": false,
+    "live_multihost_transport": false,
+    "physical_gpu_npu": false,
+    "hbm_vram": false,
+    "iommu_dma": false,
+    "vendor_driver": false,
+    "zero_copy_tensor_network": false,
+    "tokens_per_second": false,
+    "inference_latency": false,
+    "accelerator_utilization": false,
+    "energy_per_inference": false,
+    "model_retraining_or_consciousness": false
+  },
+  "qualification_limits": [
+    "M242 is a bounded userspace provider-neutral fabric contract and does not implement kernel-space reasoning, model inference, vendor drivers, physical DMA, or accelerator reset behavior.",
+    "The current service is bounded at FF_MAX_NODES=64, FF_MAX_SHARDS=256, FF_MAX_LEASES=512, and FF_MAX_EVENTS=4096; larger fleets require sharded durable storage and externally qualified distributed transport.",
+    "The placement benchmark measures control-plane journal and fdatasync overhead only; it is not a comparison against Ray, Kubernetes, Dynamo, vLLM, SGLang, or physical Linux inference throughput.",
+    "Topology and accelerator fields are evidence-bound observations; no physical NUMA, GPU, NPU, HBM/VRAM, IOMMU/DMA, NIC, RDMA, or power behavior was available for qualification.",
+    "Production release remains blocked by independent builder equivalence, operator signing and trusted-key operations, physical accelerator qualification, independent external security review, production PKI/KMS/attestation, live multihost migration/rollback, and operator-owned CVE response."
+  ]
+}

@@ -99,6 +99,7 @@ def main() -> None:
         'm239-evidence-bound-kv-tier-telemetry-validation.json',
         'm240-adaptive-resource-budget-validation.json',
         'm241-agent-runtime-supervisor-validation.json',
+        'm242-unified-ai-control-plane-fabric-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:
