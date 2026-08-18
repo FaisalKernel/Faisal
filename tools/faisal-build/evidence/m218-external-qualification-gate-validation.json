@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M218-external-qualification-gate",
-  "recorded_at": "2026-08-18T10:46:00Z",
+  "recorded_at": "2026-08-18T10:47:00Z",
   "status": "external_qualification_intake_wired_into_production_gate_and_fail_closed_tests_pass",
   "implementation": {
     "release_gate": "tools/faisal-build/run_production_release_gate.sh",
