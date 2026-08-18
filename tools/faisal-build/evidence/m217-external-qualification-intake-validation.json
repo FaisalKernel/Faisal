@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M217-external-qualification-intake",
-  "recorded_at": "2026-08-18T10:42:30Z",
+  "recorded_at": "2026-08-18T10:44:10Z",
   "status": "candidate_bound_signed_external_qualification_intake_and_rejection_tests_pass",
   "implementation": {
     "verifier": "tools/faisal-build/verify_external_qualification_intake.py",
