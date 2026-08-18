@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "28bca6ddd4924470c8c26d428084477be692f4ff",
-  "current_tag": "FAISAL-M231-CORRELATED-RECOVERY-DECISION",
+  "current_head": "f1b94690b42f1eace4d93ebf81944cd452229306",
+  "current_tag": "FAISAL-M232-VERIFIED-RESEARCH-CONSENSUS",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1957,5 +1957,11 @@
   "m231_research_boundary": "researched_opentelemetry_context_traces_baggage_ebpf_temporal_sel4_unikraft_and_provider_neutral_recovery_contract_selected",
   "m231_model_authority_boundary": "model_output_trace_context_and_baggage_are_untrusted_irreversible_recovery_requires_independent_authority_and_compensation",
   "m231_validation_boundary": "strict_userspace_selftest_sanitizer_100000_round_benchmark_acpi_on_one_vcpu_qemu_m229_m230_m228_regressions_and_industry_soak_passed",
-  "m231_production_boundary": "production_approval_false_physical_accelerator_external_builder_external_security_review_live_multihost_and_independent_evidence_pending"
+  "m231_production_boundary": "production_approval_false_physical_accelerator_external_builder_external_security_review_live_multihost_and_independent_evidence_pending",
+  "m232_verified_research_consensus": "pass_source_diversity_freshness_citation_binding_conflict_scoring_provenance_replay_and_generation_contract",
+  "m232_verified_research_consensus_evidence": "tools/faisal-build/evidence/m232-verified-research-consensus-validation.json",
+  "m232_research_boundary": "researched_linux_landlock_vllm_structured_outputs_gemini_search_grounding_anthropic_web_search_opentelemetry_and_local_runtime_evidence",
+  "m232_model_authority_boundary": "structured_output_citations_search_results_and_model_claims_are_untrusted_source_evidence_and_policy_required",
+  "m232_validation_boundary": "strict_userspace_selftest_sanitizer_100000_round_benchmark_acpi_on_one_vcpu_qemu_m229_m230_m231_m228_regressions_and_industry_soak_pending_final_evidence_bind",
+  "m232_production_boundary": "production_approval_false_live_web_provider_physical_accelerator_external_builder_external_security_review_and_independent_evidence_pending"
 }
