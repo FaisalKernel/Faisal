@@ -1,0 +1,118 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-execution-memory-snapshot-index-2026-08-20",
+  "recorded_at": "2026-08-18T23:28:10Z",
+  "status": "bounded_execution_memory_snapshot_index_qualified",
+  "objective": "Provide a durable, generation-fenced, retention-aware short-term execution-memory snapshot index that supports restart recovery without conflating resumable task state with long-term learned memory.",
+  "research": [
+    {
+      "source": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "conclusion": "LangGraph separates thread-scoped checkpointers from cross-thread long-term stores, warns that in-memory checkpointers do not survive restart, and recommends retention controls for unbounded checkpoint growth.",
+      "implementation_impact": "FAISAL adds a compact append-only snapshot journal with replay, expiry, retention classes, compaction metadata, and separate identity/generation binding."
+    },
+    {
+      "source": "https://www.letta.com/blog/benchmarking-ai-agent-memory/",
+      "conclusion": "Letta reports that filesystem-oriented memory can perform strongly and argues that agent context management and tool use matter as much as storage technology.",
+      "implementation_impact": "FAISAL prioritizes simple, auditable snapshot/index behavior and long-running resume measurement rather than adding another opaque vector memory dependency."
+    },
+    {
+      "source": "https://openvla.github.io/",
+      "conclusion": "OpenVLA is an open-source vision-language-action model with multi-robot support and parameter-efficient adaptation, while its evaluations show task-dependent generalization and recovery.",
+      "implementation_impact": "Future VLA and robotics integrations must treat action proposals as untrusted data and bind them to capability-scoped actuation, verification, budgets, and recovery."
+    },
+    {
+      "source": "https://developers.openai.com/api/docs/models",
+      "conclusion": "The live paid-model catalog and current model documentation expose multiple capability and cost tiers, but provider/model metadata is not execution authority.",
+      "implementation_impact": "The snapshot contract remains provider-neutral and records no hard-coded provider authority or model-specific privilege."
+    }
+  ],
+  "implementation": {
+    "header": "tools/faisal-snapshot-index/faisal_snapshot_index.h",
+    "source": "tools/faisal-snapshot-index/faisal_snapshot_index.c",
+    "design": "tools/faisal-snapshot-index/FAISAL-SNAPSHOT-INDEX-DESIGN.md",
+    "selftest": "tools/testing/selftests/faisal_snapshot_index_test.c",
+    "benchmark": "tools/testing/selftests/faisal_snapshot_index_benchmark.c",
+    "fuzz_test": "tools/testing/selftests/faisal_snapshot_index_fuzz_test.c",
+    "runner": "tools/faisal-build/run_snapshot_index_validation.sh",
+    "abi": 1,
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "append-only fsync-backed snapshot journal",
+      "SHA-256 payload, snapshot, record, and continuity digests",
+      "objective/task/agent identity binding",
+      "objective and task generation fencing",
+      "latest active restore with age, expiry, retention, and importance policy",
+      "ephemeral, standard, and pinned retention classes",
+      "automatic expiry with pinned preservation",
+      "newer-snapshot-required deterministic compaction",
+      "active-snapshot index excluding compacted and expired history from restore scans",
+      "replay and corruption fail-closed behavior",
+      "model-proposal and verified flags retained as non-authoritative provenance metadata"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11 -pthread",
+    "selftest": "FSI_SNAPSHOT_INDEX_SELFTEST_OK cases=24 active=1 compacted=1 expired=1 replay_records=5",
+    "benchmark": {
+      "marker": "FSI_SNAPSHOT_INDEX_BENCHMARK_OK",
+      "snapshots_before": 100,
+      "snapshots_after": 1,
+      "iterations": 20000,
+      "restore_before_ns": 58704031,
+      "restore_after_ns": 51479114,
+      "before_ns_per_request": 2935.20,
+      "after_ns_per_request": 2573.96,
+      "compaction_reduction_permille": 990,
+      "restore_time_reduction_permille": 123,
+      "interpretation": "The active index reduced live restore candidates from 100 to 1 and reduced measured restore time by 12.3 permille on the deterministic fixture. This is a local snapshot-index measurement, not an end-to-end model, token, or production workload claim."
+    },
+    "fuzzing": "FSI_SNAPSHOT_INDEX_FUZZ_OK iterations=10000 rejected=8572 accepted=64",
+    "asan_ubsan": "FSI_SNAPSHOT_INDEX_ASAN_UBSAN_OK",
+    "thread_sanitizer": "FSI_SNAPSHOT_INDEX_TSAN_OK",
+    "runner": "FSI_SNAPSHOT_INDEX_VALIDATION_OK",
+    "adjacent_regressions": {
+      "m82_memory_orchestrator_qemu": "M82_QEMU_VALIDATION_OK",
+      "m83_memory_transaction_qemu": "M83_QEMU_VALIDATION_OK",
+      "legacy_persistent_memory_wrapper": "intentionally_blocked_by_unqualified_legacy_guard; not used as qualification evidence"
+    },
+    "live_model_catalog": {
+      "captured": true,
+      "model_count": 10,
+      "archive": "/home/ubuntu/agi-kernel/build/frontier/live-model-catalog-2026-08-20.json",
+      "sha256": "40054874a368d65dc021b80b2849ea92eb0398dcdac50e608280562bc286829f",
+      "interpretation": "The catalog was researched for provider-neutral design only. No model ID, price, provider claim, or model output grants authority."
+    }
+  },
+  "boundary": {
+    "production_approval": false,
+    "physical_hardware_qualification": false,
+    "live_robotics_qualification": false,
+    "live_model_execution": false,
+    "independent_external_security_review": false,
+    "independent_builder": false,
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "security_boundaries": {
+    "snapshot_payload_is_authority": false,
+    "model_proposal_is_authority": false,
+    "stale_generation_restore": false,
+    "tampered_record_replay": false,
+    "sole_snapshot_compaction": false,
+    "pinned_snapshot_auto_expiry": false,
+    "oversized_payload_admission": false,
+    "browser_or_robot_action_authorization": false,
+    "privileged_kernel_code_changed": false
+  },
+  "qualification_limits": [
+    "This is a bounded userspace/reference persistence contract and does not replace the existing durable task engine, long-term experience memory, or production distributed checkpoint service.",
+    "The benchmark uses a deterministic local 100-snapshot fixture and does not claim proportional reduction in model latency, token cost, energy, or end-to-end objective completion time.",
+    "No live MCP server, paid model call, browser session, robotics device, GPU/NPU, physical DMA/IOMMU path, or production cluster was used.",
+    "The legacy persistent-memory wrapper remains intentionally blocked by the repository’s unqualified-legacy guard; current M82 and M83 memory harnesses passed and are the valid adjacent qualification paths.",
+    "Production approval remains blocked by external builder, signing, physical hardware, secure boot/TPM, external security review, live multi-host, and operational evidence requirements."
+  ]
+}
