@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M239-evidence-bound-kv-tier-telemetry",
-  "recorded_at": "2026-08-18T19:49:12Z",
+  "recorded_at": "2026-08-18T19:51:44Z",
   "status": "local_contract_qualified_hardware_neutral_telemetry_and_hardware_qualification_pending",
   "objective": "Provide a provider-neutral contract for model KV-cache residency and memory-tier transitions with locality, generation, freshness, capacity, provenance, and authority enforcement.",
   "research": {
