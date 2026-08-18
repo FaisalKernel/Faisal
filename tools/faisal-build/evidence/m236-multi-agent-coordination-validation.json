@@ -1,0 +1,150 @@
+{
+  "project": "FAISAL",
+  "milestone": "M236-provider-neutral-multi-agent-coordination",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "status": "local_contract_qualified_external_multihost_and_production_identity_qualification_pending",
+  "objective": "Coordinate autonomous agents through capability negotiation, evidence-bound delegation, quorum voting, challenge escalation, generation fencing, replay protection, tamper-evident receipts, and explicit authority separation without treating model output as execution authority.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://github.com/agiresearch/AIOS",
+        "finding": "AIOS provides a user-space AI-agent operating-system abstraction for scheduling, context, memory, storage, tools, and SDK integration.",
+        "impact": "FAISAL extends the abstraction with deterministic evidence, authority, generation, and receipt contracts rather than copying a provider or framework."
+      },
+      {
+        "url": "https://docs.vllm.ai/en/latest/",
+        "finding": "vLLM provides high-performance serving features including PagedAttention, continuous batching, prefix caching, structured outputs, tool parsers, distributed parallelism, and disaggregated prefill/decode.",
+        "impact": "FAISAL treats runtime/provider outputs as untrusted evidence and keeps routing, capability, lineage, and authority provider-neutral."
+      },
+      {
+        "url": "https://developers.openai.com/api/docs/guides/structured-outputs",
+        "finding": "OpenAI Structured Outputs constrain responses to JSON Schema and distinguish structured responses from function calling; the application still bridges proposals to tools.",
+        "impact": "Schema adherence is recorded as evidence but never promoted to authorization."
+      },
+      {
+        "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools",
+        "finding": "Anthropic client tools use names, descriptions, JSON Schema inputs, and optional examples; the client executes client tools and returns results.",
+        "impact": "M236 normalizes provider tool proposals into capability-bound delegation and quorum state."
+      },
+      {
+        "url": "https://ai.google.dev/gemini-api/docs/structured-output",
+        "finding": "Gemini structured outputs support JSON Schema for extraction, classification, and agentic tool inputs, with documented schema limitations.",
+        "impact": "Structured output is a format guarantee, not proof of freshness, correctness, safety, or authority."
+      },
+      {
+        "url": "https://docs.kernel.org/scheduler/sched-ext.html",
+        "finding": "Linux sched_ext provides a BPF scheduler extension with dynamic switching and fail-safe reversion to the fair scheduler on errors or stalls.",
+        "impact": "FAISAL keeps semantic coordination outside kernel authority and can supply bounded scheduling hints to trusted adapters without replacing Linux scheduling."
+      },
+      {
+        "url": "https://modelcontextprotocol.io/specification/2025-06-18",
+        "finding": "MCP defines host/client/server roles, stateful JSON-RPC, capability negotiation, tools, resources, prompts, cancellation, and explicit trust and consent guidance.",
+        "impact": "M236 adopts capability-negotiation concepts while adding kernel-side recipient, generation, evidence, quorum, and authority gates."
+      },
+      {
+        "url": "https://temporal.io/blog/what-is-durable-execution",
+        "finding": "Temporal describes durable execution as crash-proof execution that reconstructs workflow state across processes and machines and supports long-running objectives.",
+        "impact": "M236 adds durable delegation settlement semantics compatible with FAISAL’s existing execution and recovery contracts."
+      },
+      {
+        "url": "https://openai.github.io/openai-agents-python/",
+        "finding": "OpenAI Agents SDK provides agents, tools, guardrails, handoffs, sessions, MCP integration, tracing, testing, and sandbox agents.",
+        "impact": "M236 makes handoff and guardrail outcomes evidence-bearing and provider-neutral rather than implicit authority."
+      },
+      {
+        "url": "https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/",
+        "finding": "Kubernetes scheduling separates feasibility filtering, scoring, reservation/permit stages, and final binding.",
+        "impact": "M236 applies the same separation to agent capability admission, evidence, quorum, challenge, and commit."
+      }
+    ],
+    "live_model_catalog": {
+      "retrieved_at": "2026-08-18",
+      "count": 10,
+      "ids": [
+        "gpt-5-nano",
+        "gpt-5-mini",
+        "gpt-5",
+        "gpt-5.5",
+        "claude-haiku-4-5",
+        "claude-sonnet-4-6",
+        "claude-opus-4-6",
+        "claude-opus-4-7",
+        "gemini-3-flash-preview",
+        "gemini-3.1-pro-preview"
+      ]
+    }
+  },
+  "implementation": {
+    "header": "tools/faisal-coordination/faisal_coordination.h",
+    "source": "tools/faisal-coordination/faisal_coordination.c",
+    "selftest": "tools/testing/selftests/faisal_coordination_test.c",
+    "benchmark": "tools/testing/selftests/faisal_coordination_benchmark.c",
+    "runner": "tools/faisal-build/run_coordination_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "agent identity and generation registration",
+      "capability registration with scope and confidence",
+      "capability negotiation with minimum confidence admission",
+      "delegation objective, trace, parent, target, participant, budget, deadline, and lease binding",
+      "provider-neutral model proposal and delegated-work flags",
+      "evidence and provenance digest binding",
+      "quorum approval and rejection accounting",
+      "challenge vote escalation that blocks commit",
+      "coordinator and agent generation fencing",
+      "deadline, lease, budget, participant, and capability policy gates",
+      "per-agent vote replay rejection",
+      "SHA-256 canonical request, vote-set, and receipt digests",
+      "receipt query and tamper verification",
+      "explicit authority requirement independent of model output"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M236_SELFTEST_EXIT=0",
+    "selftest_cases": 29,
+    "benchmark_rounds": 100000,
+    "benchmark_operations": 1000000,
+    "benchmark_elapsed_ns": 3193830255,
+    "benchmark_ns_per_operation": 3193.83,
+    "asan_ubsan": true,
+    "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK on ACPI-on one-vCPU 4G; FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256",
+    "regression_m235": "M235 source remains integrated; post-change local coordination validation passed",
+    "known_diagnostic_policy": "ACPI-on SMP profiles that produce RCU stalls remain rejected and unsuppressed"
+  },
+  "boundary": {
+    "production_approval": false,
+    "live_multihost_agent_coordination": false,
+    "external_builder": false,
+    "physical_accelerator": false,
+    "independent_security_review": false,
+    "production_pki": false,
+    "live_kms_attestation": false,
+    "paid_provider_qualification": false,
+    "model_retraining_or_consciousness_claim": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "tool_call_is_execution": false,
+    "provider_protocol_is_authority": false,
+    "unlisted_participant_accepted": false,
+    "capability_confidence_bypassed": false,
+    "generation_mismatch_accepted": false,
+    "stale_deadline_or_lease_accepted": false,
+    "budget_overrun_admitted": false,
+    "duplicate_vote_accepted": false,
+    "replayed_evidence_accepted": false,
+    "challenge_committed": false,
+    "tampered_receipt_verified": false,
+    "missing_explicit_authority_committed": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "M236 is a deterministic C userspace coordination and receipt fixture, not a distributed transport, gRPC service, Raft implementation, MCP runtime, or live multi-host deployment.",
+    "No model was invoked and no provider credential or provider response was used as authority.",
+    "No physical GPU/NPU, VRAM, IOMMU, DMA, vendor-driver, production KMS, TPM, external PKI, or independent builder qualification was performed.",
+    "The contract supplies explicit policy inputs but does not itself authenticate an external operator key or establish a production trust root.",
+    "Production release remains blocked by the project’s external evidence gate."
+  ]
+}
