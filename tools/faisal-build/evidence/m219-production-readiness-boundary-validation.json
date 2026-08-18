@@ -1,0 +1,31 @@
+{
+  "project": "FAISAL",
+  "milestone": "M219-production-readiness-boundary",
+  "recorded_at": "2026-08-18T10:49:00Z",
+  "status": "bounded_candidate_boundary_verified_and_overstatement_rejected",
+  "implementation": {
+    "verifier": "tools/faisal-build/verify_production_readiness_boundary.py",
+    "verifier_sha256": "b7ac3d559cb7bad62b5dfe301abed8ffe65edd2ceac9e6c139f156c383b3196b",
+    "checks": [
+      "candidate status must be bounded_candidate_not_production_approved",
+      "production approval and external evidence completeness overstatements rejected",
+      "complete M204-M218 local evidence index required",
+      "production-style tag overstatement rejected",
+      "protected external qualification boundary remains explicit"
+    ]
+  },
+  "validation": {
+    "positive": "FAISAL_PRODUCTION_READINESS_BOUNDARY_OK checks=20 status=bounded_candidate_not_production_approved",
+    "negative": "M219_NEGATIVE_OVERSTATEMENT_REJECT_OK"
+  },
+  "boundary": {
+    "production_approval": false,
+    "external_evidence_complete": false,
+    "independent_builder": false,
+    "physical_accelerator": false,
+    "independent_security_review": false,
+    "operator_ceremony": false,
+    "model_output_is_authority": false,
+    "note": "This verifier prevents local metadata from overstating readiness; it does not create or substitute for independent external qualification."
+  }
+}
