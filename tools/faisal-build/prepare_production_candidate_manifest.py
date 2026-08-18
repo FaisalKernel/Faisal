@@ -40,6 +40,7 @@ def main() -> None:
         'm179-live-deployment-qualification-readiness-validation.json',
         'm180-lts-soak-requalification-validation.json',
         'm181-cve-operations-readiness-validation.json',
+        # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:
         path = repo / 'tools/faisal-build/evidence' / name
