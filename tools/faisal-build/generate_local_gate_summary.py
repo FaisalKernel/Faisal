@@ -24,6 +24,7 @@ def main() -> None:
     p.add_argument('--state', type=Path, required=True)
     p.add_argument('--report', type=Path, required=True)
     p.add_argument('--output', type=Path, required=True)
+    p.add_argument('--generated-at', default=None, help='UTC timestamp override for reproducibility validation')
     args = p.parse_args()
     repo = args.repo.resolve()
     candidate = json.loads(args.candidate.resolve().read_text())
@@ -33,7 +34,7 @@ def main() -> None:
     summary = {
         'project': 'FAISAL',
         'schema': 'org.faisal.local-gate-summary.v1',
-        'generated_at': datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z'),
+        'generated_at': args.generated_at or datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z'),
         'status': 'local_evidence_summary_not_production_approval',
         'candidate': {
             'path': str(args.candidate.resolve()),

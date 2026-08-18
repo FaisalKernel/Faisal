@@ -1,0 +1,36 @@
+{
+  "project": "FAISAL",
+  "milestone": "M212-local-gate-summary-reproducibility",
+  "recorded_at": "2026-08-18T10:30:00Z",
+  "status": "local_gate_summary_reproduction_and_mutation_rejection_pass",
+  "implementation": {
+    "generator": "tools/faisal-build/generate_local_gate_summary.py",
+    "generator_sha256": "6dfbc01550ecb2c116eb4b0b03c3bf537e06fb803a85b9db1d0711552dced4db",
+    "reproducibility_verifier": "tools/faisal-build/verify_local_gate_summary_reproducibility.py",
+    "reproducibility_verifier_sha256": "153bd8e23fa8f2266e002f9ac7e7068c495ddd615f1f43d0b9ae148c312b6641",
+    "negative_test": "build/test_m212_summary_repro.py",
+    "negative_test_sha256": "f2642cc1d61ca6a6702b15d33254e3a87dc92193259134d43f1416a9cae5b9d7",
+    "checks": [
+      "existing 15-check local summary verifier",
+      "controlled timestamp semantic regeneration equality",
+      "boundary mutation rejection"
+    ]
+  },
+  "validation": {
+    "positive": "FAISAL_LOCAL_GATE_SUMMARY_REPRODUCIBLE_OK checks=2",
+    "negative": [
+      "M212_NEGATIVE_SUMMARY_MUTATION_REJECT_OK"
+    ],
+    "m211_regression": "FAISAL_LOCAL_GATE_SUMMARY_OK checks=15"
+  },
+  "boundary": {
+    "local_reproducibility_only": true,
+    "independent_builder": false,
+    "operator_signature": false,
+    "physical_hardware": false,
+    "external_security_review": false,
+    "production_approval": false,
+    "model_output_is_authority": false,
+    "note": "Reproducible local summary generation does not provide independent build, signing, hardware, external review, or production approval evidence."
+  }
+}
