@@ -46,6 +46,7 @@ def main() -> None:
         'm186-driver-style-validation.json',
         'm187-world-queue-helper-validation.json',
         'm188-queue-overflow-validation.json',
+        'm189-write-side-lifecycle-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:

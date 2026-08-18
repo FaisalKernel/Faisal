@@ -1,0 +1,56 @@
+{
+  "project": "FAISAL",
+  "milestone": "M189-write-side-lifecycle-stress",
+  "schema": "org.faisal.write-side-lifecycle-validation.v1",
+  "recorded_at": "2026-08-18T08:46:45Z",
+  "repository_parent_commit": "8206498a511c58a68cbd3b5a7fe05b7e7255414d",
+  "status": "write_side_graph_stress_pass_acpi_off_smp_pass_acpi_on_1vcpu_pass_acpi_on_smp_rejected_on_rcu_diagnostic",
+  "implementation": {
+    "selftest": "tools/testing/selftests/agi_lifecycle_write_stress_test.c",
+    "selftest_sha256": "a59e995d7890fc11f843f4be77247d26672c9e395f6fe12c2a4a8fadbf07f673",
+    "runner": "tools/faisal-build/run_lifecycle_write_stress_qemu.sh",
+    "runner_sha256": "578e28924411901db9e671318735f211c8f04cf9a5c8e5a2139bb70ccbf47fb0",
+    "existing_runner_hardened": "tools/faisal-build/run_lifecycle_uapi_fuzz_qemu.sh",
+    "existing_runner_sha256": "e9265de4e372a2184c24c031e927ab90d3ced72f9bdc2872612aa5e305b48a2b",
+    "strict_compile": "cc -O2 -Wall -Wextra -Werror -Wno-cpp -static passed",
+    "workload": "AGI_LC_CREATE, AGI_LC_ATTACH_TASK, 64 graph-node creates, and 64 graph-node cancels using valid UAPI requests"
+  },
+  "profiles": {
+    "acpi_off_2vcpu": {
+      "result": "pass",
+      "markers": "FAISAL_UAPI_WRITE_STRESS_QEMU_VALIDATION_OK\n",
+      "guest_log": "build/m189-runner-hardening/write-acpi-off-guest.log"
+    },
+    "acpi_on_1vcpu": {
+      "result": "pass",
+      "markers": "missing",
+      "guest_log": "build/m189-runner-hardening/write-acpi-on-1vcpu-guest.log"
+    },
+    "acpi_on_2vcpu": {
+      "result": "rejected_rcu_diagnostic",
+      "runner_log": "FAISAL_UAPI_WRITE_STRESS_DIAGNOSTIC_FOUND\n",
+      "guest_log": "build/m189-runner-hardening/write-acpi-on-2vcpu-guest.log",
+      "reason": "RCU stall and kthread-starvation diagnostics are now hard failures even when the guest success marker appears."
+    },
+    "read_only_fuzz_acpi_off_2vcpu": {
+      "result": "pass",
+      "runner_log": "FAISAL_UAPI_FUZZ_QEMU_VALIDATION_OK\n"
+    }
+  },
+  "security_boundary": {
+    "model_output_is_not_authority": true,
+    "valid_capability_sequence_required": true,
+    "malformed_or_unauthorized_write_is_not_counted_as_queue_qualification": true
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "ACPI-on SMP is qualified.",
+      "Physical accelerator qualification occurred.",
+      "Independent security review occurred.",
+      "Operator signing or attested build-farm qualification occurred.",
+      "FAISAL is production-approved."
+    ],
+    "remaining_action": "Use the write-side stress result in the candidate contract, keep ACPI-on SMP rejected, and complete independent external production evidence."
+  }
+}
