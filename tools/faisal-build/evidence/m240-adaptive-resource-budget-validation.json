@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M240-adaptive-resource-budget",
-  "recorded_at": "2026-08-18T20:08:00Z",
+  "recorded_at": "2026-08-18T20:10:00Z",
   "status": "local_contract_qualified_hardware_neutral_resource_admission_and_production_qualification_pending",
   "objective": "Provide a provider-neutral adaptive resource-budget contract that binds CPU, memory, GPU, NPU, network, storage, cost, and energy budgets to agent objectives with authority separation, generation fencing, deadline enforcement, receipt integrity, and fail-closed accounting.",
   "research": {
