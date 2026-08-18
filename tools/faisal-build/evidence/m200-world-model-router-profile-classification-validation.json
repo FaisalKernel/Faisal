@@ -1,0 +1,79 @@
+{
+  "project": "FAISAL",
+  "milestone": "M200-world-model-router-profile-classification",
+  "schema": "org.faisal.world-model-router-profile-classification.v1",
+  "recorded_at": "2026-08-18T09:27:30Z",
+  "status": "runner_hardened_acpi_off_1vcpu_pass_acpi_on_2vcpu_pass_no_diagnostics_global_qemu_block_preserved",
+  "implementation": {
+    "runner": "tools/faisal-build/run_world_model_router_qemu.sh",
+    "runner_sha256": "2da82b0bd20e0d25a3a98972918eaacb2fd5261f127219d3cc433d05d3934ed5",
+    "properties": [
+      "self-contained strict static compilation",
+      "configurable ACPI, SMP, memory, and timeout",
+      "marker-driven termination",
+      "explicit profile result marker",
+      "strict kernel diagnostics including RCU stalls and kthread starvation"
+    ]
+  },
+  "profiles": {
+    "acpi_off_1vcpu": {
+      "result": "qualified",
+      "runner_log": "build/m200-router/acpi-off-runner.log",
+      "guest_log": "build/m200-router/acpi-off/qemu.log",
+      "markers": [
+        "FAISAL_M110_BOOT_OK",
+        "M110_WORLD_STATE_OPEN_OK",
+        "M110_OBSERVED_EXPECTED_DRIFT_ACTIONABLE_OK",
+        "M110_WORLD_RECONCILIATION_RESOLVED_OK",
+        "M110_WORLD_REPLAY_OK",
+        "M110_WORLD_REPLAY_FAIL_CLOSED_OK",
+        "M110_SMALL_TO_LARGE_ESCALATION_OK",
+        "M110_LARGE_TO_SMALL_COST_AWARE_OK",
+        "M110_PROVIDER_PRIVACY_LOCALITY_FILTER_OK",
+        "M110_SELFTEST_EXIT=0",
+        "M110_SELFTEST_RC=0",
+        "FAISAL_M110_TEST_COMPLETE"
+      ]
+    },
+    "acpi_on_2vcpu": {
+      "result": "qualified_for_this_workload",
+      "runner_log": "build/m200-router/acpi-on-smp-runner.log",
+      "guest_log": "build/m200-router/acpi-on-smp/qemu.log",
+      "markers": [
+        "FAISAL_M110_BOOT_OK",
+        "M110_WORLD_STATE_OPEN_OK",
+        "M110_OBSERVED_EXPECTED_DRIFT_ACTIONABLE_OK",
+        "M110_WORLD_RECONCILIATION_RESOLVED_OK",
+        "M110_WORLD_REPLAY_OK",
+        "M110_WORLD_REPLAY_FAIL_CLOSED_OK",
+        "M110_SMALL_TO_LARGE_ESCALATION_OK",
+        "M110_LARGE_TO_SMALL_COST_AWARE_OK",
+        "M110_PROVIDER_PRIVACY_LOCALITY_FILTER_OK",
+        "M110_SELFTEST_EXIT=0",
+        "M110_SELFTEST_RC=0",
+        "FAISAL_M110_TEST_COMPLETE"
+      ],
+      "diagnostics": [],
+      "scope_note": "This pass does not remove the separate global ACPI-on SMP RCU-stall blocker observed by other heavier QEMU workloads."
+    }
+  },
+  "validated_properties": [
+    "world-state open, drift detection, reconciliation, replay, and corruption fail-closed behavior",
+    "small-to-large model escalation",
+    "large-to-small cost-aware routing",
+    "provider privacy and locality filtering",
+    "profile classification does not suppress diagnostics"
+  ],
+  "production_boundary": {
+    "status": "not_production_approved",
+    "global_qemu_status": "blocked_by_workload_specific_acpi_on_2vcpu_rcu_preempt_stall_profiles",
+    "claims_not_made": [
+      "all ACPI-on SMP workloads are qualified",
+      "physical accelerator qualification",
+      "independent builder or attested-farm qualification",
+      "independent external security review",
+      "operator-controlled production signing ceremony",
+      "live multihost deployment and rollback qualification"
+    ]
+  }
+}
