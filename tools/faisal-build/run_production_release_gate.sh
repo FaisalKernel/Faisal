@@ -17,6 +17,9 @@ SECURITY_MANIFEST=${FAISAL_SECURITY_MANIFEST:-}
 ADVISORY_LEDGER=${FAISAL_ADVISORY_LEDGER:-}
 ACCELERATOR_EVIDENCE=${FAISAL_ACCELERATOR_EVIDENCE:-}
 REPLICATION_EVIDENCE=${FAISAL_REPLICATION_EVIDENCE:-}
+EXTERNAL_REPLICATION_EVIDENCE=${FAISAL_EXTERNAL_REPLICATION_EVIDENCE:-}
+EXTERNAL_REPLICATION_PUBLIC_KEY=${FAISAL_EXTERNAL_REPLICATION_PUBLIC_KEY:-$PUBLIC_KEY}
+EXTERNAL_REPLICATION_PACKAGE=${FAISAL_EXTERNAL_REPLICATION_PACKAGE:-}
 DEPLOYMENT_EVIDENCE=${FAISAL_DEPLOYMENT_EVIDENCE:-}
 EXTERNAL_SECURITY_REVIEW=${FAISAL_EXTERNAL_SECURITY_REVIEW:-}
 EXTERNAL_SECURITY_REVIEW_PACKAGE=${FAISAL_EXTERNAL_SECURITY_REVIEW_PACKAGE:-}
@@ -70,6 +73,15 @@ case "$ACCELERATOR_EVIDENCE" in
   *) fail "structured JSON accelerator qualification evidence is required for production qualification" ;;
 esac
 [ -n "$REPLICATION_EVIDENCE" ] || fail "FAISAL_REPLICATION_EVIDENCE is required"
+[ -n "$EXTERNAL_REPLICATION_EVIDENCE" ] || fail "FAISAL_EXTERNAL_REPLICATION_EVIDENCE is required"
+case "$EXTERNAL_REPLICATION_EVIDENCE" in
+  *.json) : ;;
+  *) fail "structured JSON external replication qualification evidence is required for production qualification" ;;
+esac
+[ -r "$EXTERNAL_REPLICATION_EVIDENCE" ] || fail "external replication qualification evidence is unreadable"
+[ -n "$EXTERNAL_REPLICATION_PACKAGE" ] || fail "FAISAL_EXTERNAL_REPLICATION_PACKAGE is required"
+[ -r "$EXTERNAL_REPLICATION_PACKAGE" ] || fail "external replication package manifest is unreadable"
+[ -r "$EXTERNAL_REPLICATION_PUBLIC_KEY" ] || fail "external replication validation public key is unreadable"
 case "$REPLICATION_EVIDENCE" in
   *.json) : ;;
   *) fail "structured JSON replication qualification evidence is required for production qualification" ;;
@@ -95,6 +107,7 @@ esac
 [ -x "$LINUX/tools/faisal-build/verify_industry_artifacts.sh" ] || fail "artifact verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_accelerator_qualification.sh" ] || fail "accelerator verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_replication_qualification.py" ] || fail "replication verifier unavailable"
+[ -x "$LINUX/tools/faisal-build/verify_external_replication_qualification.py" ] || fail "external replication verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_deployment_governance.py" ] || fail "deployment governance verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_external_security_review.py" ] || fail "external security-review verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_advisory_ledger.sh" ] || fail "advisory ledger verifier unavailable"
@@ -199,6 +212,16 @@ FAISAL_REPLICATION_VERIFY_REPORT="${REPORT}.replication.tsv" \
   fail "full TLS replication qualification verification"
 }
 printf 'replication_qualification\tpass\t%s\n' "$REPLICATION_EVIDENCE" >> "$REPORT"
+FAISAL_EXTERNAL_REPLICATION_EVIDENCE="$EXTERNAL_REPLICATION_EVIDENCE" \
+FAISAL_EXTERNAL_REPLICATION_PUBLIC_KEY="$EXTERNAL_REPLICATION_PUBLIC_KEY" \
+FAISAL_EXTERNAL_REPLICATION_PACKAGE="$EXTERNAL_REPLICATION_PACKAGE" \
+FAISAL_EXPECTED_SOURCE_REV="$expected_source_revision" \
+FAISAL_EXTERNAL_REPLICATION_VERIFY_REPORT="${REPORT}.external-replication.tsv" \
+  python3 "$LINUX/tools/faisal-build/verify_external_replication_qualification.py" >/tmp/faisal-release-external-replication-gate.log 2>&1 || {
+  cat /tmp/faisal-release-external-replication-gate.log >&2
+  fail "external multi-host replication qualification verification"
+}
+printf 'external_replication_qualification\tpass\t%s\n' "$EXTERNAL_REPLICATION_EVIDENCE" >> "$REPORT"
 FAISAL_DEPLOYMENT_EVIDENCE="$DEPLOYMENT_EVIDENCE" \
 FAISAL_PUBLIC_KEY="$PUBLIC_KEY" \
 FAISAL_EXPECTED_SOURCE_REV="$expected_source_revision" \
