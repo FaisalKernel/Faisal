@@ -1,0 +1,61 @@
+{
+  "project": "FAISAL",
+  "milestone": "M202-end-to-end-hardened-qemu",
+  "schema": "org.faisal.end-to-end-hardened-qemu-validation.v1",
+  "recorded_at": "2026-08-18T09:38:23Z",
+  "status": "acpi_off_1vcpu_pass_acpi_on_2vcpu_rejected_rcu_diagnostic",
+  "implementation": {
+    "runner": "tools/faisal-build/run_end_to_end_hardened_qemu.sh",
+    "runner_sha256": "29d8fdee395b99a978521eaabce255650a1553775d48b1970054889abfde72a3",
+    "strict_compile": "coordinator plus memory, experience, world, orchestrator, browser services; -O2 -Wall -Wextra -Werror -static -pthread",
+    "runner_properties": [
+      "configurable ACPI, SMP, memory, timeout",
+      "marker-driven termination",
+      "strict kernel diagnostics including RCU stalls"
+    ]
+  },
+  "acpi_off_1vcpu": {
+    "result": "pass",
+    "runner_log": "build/m202-end-to-end/runner.log",
+    "guest_log": "build/m202-end-to-end/rootfs/qemu.log",
+    "required_markers": [
+      "FAISAL_M76_BOOT_OK",
+      "M76_TASK_INPUT_FUZZ_OK iterations=64",
+      "M76_TASK_INPUT_BOUNDARY_OK",
+      "M76_INDEPENDENT_APPROVAL_DENIAL_OK",
+      "M76_LONG_HORIZON_GRAPH_OK",
+      "M76_MULTI_AGENT_IPC_OK",
+      "M76_MONITORING_REFLECTION_OK",
+      "M76_DEPLOYMENT_GATE_APPROVED_OK",
+      "M76_FAILURE_RECOVERY_OK",
+      "M76_SELFTEST_EXIT=0",
+      "FAISAL_M76_TEST_RC=0",
+      "FAISAL_M76_TEST_COMPLETE"
+    ]
+  },
+  "acpi_on_2vcpu": {
+    "result": "rejected_rcu_diagnostic",
+    "runner_log": "build/m202-end-to-end-acpi-on/runner.log",
+    "guest_log": "build/m202-end-to-end-acpi-on/rootfs/qemu.log",
+    "reason": "Repeated rcu_preempt stalls, RCU_GP_WAIT_FQS, and kthread-starvation diagnostics caused fail-closed rejection."
+  },
+  "validated_properties": [
+    "64 malformed task-input cases rejected",
+    "independent supervisor/operator approval denial",
+    "long-horizon five-stage graph completion",
+    "multi-agent IPC and monitoring/reflection markers",
+    "deployment gate approval only under explicit approvals",
+    "browser-stage failure recovery with deployment gate closed"
+  ],
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "ACPI-on SMP qualification",
+      "physical accelerator qualification",
+      "independent builder or attested-farm qualification",
+      "independent external security review",
+      "operator-controlled production signing ceremony",
+      "live multihost deployment and rollback qualification"
+    ]
+  }
+}
