@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "43d1be770bad4e7cfbe07e1f73ccc54035217555",
-  "current_tag": "FAISAL-M183-UAPI-CHECKPATCH-CLEANUP",
+  "current_head": "0228f9dd324559f19692388911a346f98ee9012c",
+  "current_tag": "FAISAL-M184-DRIVER-CHECKPATCH-CLEANUP",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1417,7 +1417,8 @@
     "FAISAL-M161",
     "FAISAL-M162",
     "FAISAL-M163",
-    "FAISAL-M164"
+    "FAISAL-M164",
+    "FAISAL-M184-DRIVER-CHECKPATCH-CLEANUP"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1749,5 +1750,11 @@
     "m183_uapi_checkpatch_evidence": "tools/faisal-build/evidence/m183-uapi-checkpatch-validation.json",
     "m183_candidate_manifest": "/home/ubuntu/agi-kernel/build/m183-candidate/production-candidate.json sha256=d7fce4cca8dddfdc224174d78143b0666a0bec849a4de86b1986ea49bc995b2d",
     "m183_release_scope": "bounded_candidate_software_qemu_and_uapi_quality_evidence_pass_lifecycle_driver_cleanup_external_operator_hardware_multihost_and_independent_review_pending"
+  },
+  "completed_work": {
+    "m184_driver_checkpatch_cleanup": "pass_driver_checkpatch_zero_errors_eighteen_warnings_graph_and_compute_context_control_reformatted_semantics_preserved_compile_pass_qemu_timeout_requalification_open",
+    "m184_driver_checkpatch_evidence": "tools/faisal-build/evidence/m184-driver-checkpatch-validation.json",
+    "m184_candidate_manifest": "/home/ubuntu/agi-kernel/build/m184-candidate/production-candidate.json sha256=ca9153cf8e856d18482869943946b29b29c9042e732794e826401e67c2a24dcd",
+    "m184_release_scope": "bounded_driver_quality_and_configured_compile_pass_candidate_manifest_verified_qemu_requalification_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
   }
 }
