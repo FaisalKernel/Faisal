@@ -2,23 +2,27 @@
   "project": "FAISAL",
   "milestone": "M207-candidate-evidence-freshness",
   "schema": "org.faisal.candidate-evidence-freshness-validation.v1",
-  "recorded_at": "2026-08-18T10:03:10Z",
+  "recorded_at": "2026-08-18T10:04:55Z",
   "status": "freshness_and_bounded_lineage_pass_stale_and_future_rejections_pass",
   "implementation": {
     "freshness_auditor": "tools/faisal-build/audit_candidate_evidence_freshness.py",
     "freshness_auditor_sha256": "9c935fa944fdc939ef2c5c2d40548fdba46005dce23c9f728aa9af4be04a2674",
     "negative_test": "build/test_m207_freshness_negative.py",
-    "negative_test_sha256": "cf2939b46984ba1ac3160c37910cd60668809e59573f51627f6cbe348a6f1444",
+    "negative_test_sha256": "aae85ad72ea38a913e8ba122ae30d0269240984540608b1777b38a65e8e105ac",
     "checks": [
       "candidate, provenance, and state lineages remain within three ancestor commits",
       "candidate, provenance, and evidence timestamps are not future-dated",
       "candidate and provenance timestamps do not predate their bound commits",
       "evidence timestamp follows provenance generation",
       "candidate remains bounded and not production-approved"
-    ]
+    ],
+    "candidate_manifest": "build/m207-candidate/production-candidate.json",
+    "candidate_manifest_sha256": "47f047317358dc9bc84115f96017e2d1d949b94bfdee3bc7667bcfb3ec1cf6f1",
+    "provenance_manifest": "build/m207-provenance/FAISAL-build-manifest.json",
+    "provenance_manifest_sha256": "5d1a037738b6cad65de4dcceef6aff97cdee6c90a61af26f57b55e06ac71680d"
   },
   "validation": {
-    "positive": "FAISAL_CANDIDATE_EVIDENCE_FRESHNESS_OK checks=15 head=74092f62719b77c81e3d62836967ca1effb36ab0",
+    "positive": "FAISAL_CANDIDATE_EVIDENCE_FRESHNESS_OK checks=15 head=7b304355d78eae653a81d4ee1209a84d99c1d0fb",
     "negative": [
       "M207_NEGATIVE_FUTURE_TIMESTAMP_REJECT_OK",
       "M207_NEGATIVE_STALE_LINEAGE_REJECT_OK",
