@@ -1,0 +1,41 @@
+{
+  "project": "FAISAL",
+  "milestone": "M188-queue-overflow-helper",
+  "schema": "org.faisal.queue-overflow-validation.v1",
+  "recorded_at": "2026-08-18T08:36:23Z",
+  "repository_parent_commit": "663fb2c26e6f8b1efdeea1fb38d8f5719915b2a7",
+  "status": "queue_overflow_helper_compile_pass_zero_checkpatch_errors_zero_warnings",
+  "scope": {
+    "file": "drivers/misc/agi_lifecycle.c",
+    "file_sha256": "0c1fc7717a0ad61f70f74419b50938952549949c82449ef091f90c4a68140b3d",
+    "change": "Extracted full-ring world/drop-new/drop-low overflow handling into agi_lc_queue_full_locked().",
+    "semantic_invariants": [
+      "queue-full detection remains in agi_lc_push_record_ex under session->queue_lock",
+      "drop-low selection and priority threshold remain delegated to agi_lc_world_drop_low_locked()",
+      "world and observability drop counters are updated on the same paths",
+      "world resynchronization state and sequence output are preserved",
+      "drop-new and drop-low rejection continue to return -EAGAIN",
+      "successful record insertion continues only when the helper returns zero"
+    ],
+    "checkpatch": "0 errors, 0 warnings",
+    "compile": "pass with build/industry-production-m153/.config and CONFIG_CFS_BANDWIDTH=y"
+  },
+  "validation_artifacts": {
+    "checkpatch_log": "build/m188-queue-helper-final-check/checkpatch.log",
+    "compile_log": "build/m188-queue-helper-final-check/compile.log",
+    "checkpatch_tail": "total: 0 errors, 0 warnings, 11314 lines checked\n\ndrivers/misc/agi_lifecycle.c has no obvious style problems and is ready for submission.",
+    "compile_tail": "",
+    "runtime_scope": "Existing qualified ACPI-off 2-vCPU fuzz profile remains required for runtime regression; this helper is write-side overflow logic not exercised by the read-only fuzz workload."
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "Full lifecycle write-side graph/world stress qualification passed.",
+      "ACPI-on SMP RCU qualification passed.",
+      "Physical hardware qualification occurred.",
+      "Independent security review occurred.",
+      "FAISAL is production-approved."
+    ],
+    "remaining_action": "Add or run a write-side queue-overflow regression workload, then complete all external production qualifications."
+  }
+}
