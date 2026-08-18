@@ -27,6 +27,11 @@ REQUIRED_KERNEL_LINE=${FAISAL_REQUIRED_KERNEL_LINE:-}
 EXPECTED_KERNEL_VERSION=${FAISAL_EXPECTED_KERNEL_VERSION:-}
 RUN_ROLLBACK_QEMU=${FAISAL_RUN_ROLLBACK_QEMU:-0}
 RUN_ADAPTER_CONFORMANCE=${FAISAL_RUN_ADAPTER_CONFORMANCE:-1}
+SIGNING_OPERATIONAL_PROOF=${FAISAL_SIGNING_AUTHORITY_OPERATIONAL_PROOF:-}
+SIGNING_ROOT_DISTRIBUTION=${FAISAL_SIGNING_AUTHORITY_ROOT_DISTRIBUTION:-$RELEASE_ROOT_DISTRIBUTION}
+SIGNING_KEYRING=${FAISAL_SIGNING_AUTHORITY_KEYRING:-$RELEASE_KEYRING}
+SIGNING_SOURCE_REVISION=${FAISAL_SIGNING_AUTHORITY_SOURCE_REVISION:-}
+SIGNING_OPERATIONAL_REPORT=${FAISAL_SIGNING_AUTHORITY_REPORT:-${ARTIFACT_OUT:-/tmp}/FAISAL-signing-authority-operational.tsv}
 REPORT=${FAISAL_RELEASE_GATE_REPORT:-${ARTIFACT_OUT:-/tmp}/FAISAL-production-release-gate.tsv}
 
 fail() { echo "FAISAL_RELEASE_GATE_FAIL:$*" >&2; exit 1; }
@@ -43,6 +48,16 @@ fail() { echo "FAISAL_RELEASE_GATE_FAIL:$*" >&2; exit 1; }
 [ -n "$RELEASE_ATTESTATION" ] || fail "FAISAL_RELEASE_ATTESTATION is required"
 [ -r "$RELEASE_ATTESTATION" ] || fail "release attestation is unreadable"
 [ -r "$RELEASE_ATTESTATION.sig" ] || fail "release attestation signature is missing"
+[ -n "$SIGNING_OPERATIONAL_PROOF" ] || fail "FAISAL_SIGNING_AUTHORITY_OPERATIONAL_PROOF is required"
+[ -r "$SIGNING_OPERATIONAL_PROOF" ] || fail "signing-authority operational proof is unreadable"
+case "$SIGNING_OPERATIONAL_PROOF" in
+  *.json) : ;;
+  *) fail "structured JSON signing-authority operational proof is required" ;;
+esac
+[ -r "$SIGNING_ROOT_DISTRIBUTION" ] || fail "signing-authority root distribution is unreadable"
+[ -r "$SIGNING_KEYRING" ] || fail "signing-authority keyring is unreadable"
+[ -r "$SIGNING_KEYRING.sig" ] || fail "signing-authority keyring signature is missing"
+[ -n "$SIGNING_SOURCE_REVISION" ] || fail "FAISAL_SIGNING_AUTHORITY_SOURCE_REVISION is required"
 [ -n "$SECURITY_MANIFEST" ] || fail "FAISAL_SECURITY_MANIFEST is required"
 [ -n "$ADVISORY_LEDGER" ] || fail "FAISAL_ADVISORY_LEDGER is required"
 case "$ADVISORY_LEDGER" in
@@ -86,6 +101,7 @@ esac
 [ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_security_release_evidence.sh" ] || fail "security evidence verifier unavailable"
 [ -r "$LINUX/tools/faisal-build/faisal_release_authority.py" ] || fail "release authority verifier unavailable"
+[ -x "$LINUX/tools/faisal-build/verify_signing_authority_operational_proof.py" ] || fail "signing-authority operational-proof verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/compare_reproducible_builds.sh" ] || fail "reproducibility comparator unavailable"
 [ "$RUN_ADAPTER_CONFORMANCE" = 0 ] || [ "$RUN_ADAPTER_CONFORMANCE" = 1 ] || fail "invalid adapter conformance mode"
 [ "$RUN_ADAPTER_CONFORMANCE" = 0 ] || [ -x "$LINUX/tools/faisal-build/run_adapter_conformance_gate.sh" ] || fail "adapter conformance gate unavailable"
@@ -135,6 +151,17 @@ fi
 
 expected_source_revision=$(sed -n 's/^source_revision=//p' "$BUILD_A/reproducible-build.env" | head -1)
 [ -n "$expected_source_revision" ] || fail "build A source revision missing"
+[ "$SIGNING_SOURCE_REVISION" = "$expected_source_revision" ] || fail "signing-authority proof source revision differs from build A"
+python3 "$LINUX/tools/faisal-build/verify_signing_authority_operational_proof.py" \
+  --proof "$SIGNING_OPERATIONAL_PROOF" \
+  --root-distribution "$SIGNING_ROOT_DISTRIBUTION" \
+  --keyring "$SIGNING_KEYRING" \
+  --expected-source-revision "$expected_source_revision" \
+  --report "$SIGNING_OPERATIONAL_REPORT" >/tmp/faisal-signing-authority-operational-gate.log 2>&1 || {
+  cat /tmp/faisal-signing-authority-operational-gate.log >&2
+  fail "signing-authority operational proof verification"
+}
+printf 'signing_authority_operational_proof\tpass\t%s\n' "$SIGNING_OPERATIONAL_REPORT" >> "$REPORT"
 FAISAL_SECURITY_MANIFEST="$SECURITY_MANIFEST" \
 FAISAL_PUBLIC_KEY="$PUBLIC_KEY" \
 FAISAL_EXPECTED_SOURCE_REV="$expected_source_revision" \
