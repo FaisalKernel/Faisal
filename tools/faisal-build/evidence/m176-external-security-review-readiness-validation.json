@@ -1,0 +1,99 @@
+{
+  "project": "FAISAL",
+  "milestone": "M176-external-security-review-readiness",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "1deba0d4a7839e3e3f6f0d963fa2a10f81d8c8de",
+  "status": "review_readiness_qualified_external_execution_pending",
+  "objective": "Bind a genuinely independent security review to an exact candidate and fail closed on package, key, scope, finding, retest, residual-risk, and disposition mismatches without fabricating external assurance.",
+  "authoritative_research": {
+    "record": "tools/faisal-build/evidence/external-security-review-research-2026-08-18.md",
+    "record_sha256": "198e08df769eaf0fda4a64695051ee95398071b053f8f79de63d2713574c51b7",
+    "sources": [
+      {
+        "url": "https://csrc.nist.gov/pubs/sp/800/115/final",
+        "conclusion": "Technical security testing requires planned testing, findings analysis, and mitigation strategy development."
+      },
+      {
+        "url": "https://csrc.nist.gov/projects/cprt/catalog",
+        "conclusion": "NIST maintains current assessment, authorization, and monitoring control content through CPRT."
+      },
+      {
+        "url": "https://www.cisa.gov/securebydesign",
+        "conclusion": "Product security is a core provider responsibility and must be owned as a product requirement."
+      }
+    ]
+  },
+  "candidate": {
+    "source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+    "source_worktree_revision": "1deba0d4a7839e3e3f6f0d963fa2a10f81d8c8de",
+    "artifact_sha256": "8766f1019d80598c7982d91d89d7df27385a91ca7ea17d114d8869267204870b",
+    "config_sha256": "2c282274f1f716e2b1135b0a1fb819f99525dbe099ea0d31f1b3a2676f980e06",
+    "build_id": "faisal-esr-candidate-105f2b85e4c2-8766f1019d80",
+    "handoff_manifest_sha256": "2fc4fd262d7dca182ed7a0c281c4bf323f3b1be1e55202834bce933cf83b25f8"
+  },
+  "review_package": {
+    "manifest": "/home/ubuntu/agi-kernel/build/m176-external-security-review/review-package.json",
+    "manifest_sha256": "2bea1a50d6a7d67b6df1490079c7d8953ecefe8c39ac4f41e36cbc660bcc0cbf",
+    "archive": "/home/ubuntu/agi-kernel/build/m176-external-security-review/faisal-esr-candidate-105f2b85e4c2-8766f1019d80.tar.gz",
+    "archive_sha256": "2256b08fc6c3dd43ff437bc82c0613b14de6243372f9cbbf1a9249b1349c2190",
+    "status": "handoff_ready_external_execution_required",
+    "contains": [
+      "exact LTS kernel artifact",
+      "exact kernel configuration",
+      "source and worktree provenance",
+      "physical accelerator handoff manifest",
+      "external-review runbook",
+      "external-review validator and tests",
+      "production release gate",
+      "program state",
+      "review evidence template rejected until externally completed and signed"
+    ]
+  },
+  "implementation": {
+    "package_generator": "tools/faisal-build/prepare_external_security_review_bundle.py",
+    "package_generator_sha256": "c59cf6dc629cb4b46ac0d9382e0ec8a9d47063e073aed8ff07bb87e04d11bedf",
+    "validator": "tools/faisal-build/verify_external_security_review.py",
+    "validator_sha256": "300d488374333d52a57be0c6267d4e8e6766cd35f1c7599f14f1f85fea8a55a2",
+    "release_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "release_gate_sha256": "13f85227c695c621c83277aa54e2b9b557fc9698ed0280887124c6fc805c36b2",
+    "runbook": "FAISAL-EXTERNAL-SECURITY-REVIEW.md",
+    "runbook_sha256": "8d19105c7af6f486510547eb5ee82471e9c4509e82ca18e0d1dd8aaee6d13e6f",
+    "package_test_sha256": "9257f394ead6539988bb52970bb0ef78114a63286e399acd9c1e8bcf22a9de56",
+    "validator_test_sha256": "184df24e8218fd9e895c61a9e385d819789f70bf7678b9c51b87cb2e36129cd4",
+    "reviewer_key_boundary": "separate external reviewer public key required; operator release key is not accepted as reviewer identity"
+  },
+  "required_external_evidence": {
+    "independent_qualified_reviewer": true,
+    "separate_reviewer_public_key": true,
+    "reviewer_key_fingerprint_bound_to_report": true,
+    "signed_engagement_and_scope": true,
+    "all_required_domains_completed": true,
+    "complete_signed_finding_ledger": true,
+    "remediation_and_independent_retest_evidence": true,
+    "residual_risk_with_accountable_expiry": true,
+    "signed_final_production_disposition": true
+  },
+  "tests": {
+    "existing_validator_suite": "pass_independence_scope_findings_disposition_stale_tamper_and_model_authority_denied",
+    "package_integration_suite": "pass_exact_candidate_key_binding_signed_disposition_and_package_tamper_denied",
+    "placeholder_template": "pass_fail_closed_unsigned_placeholder_rejected",
+    "production_gate_boundary": "fail_closed_external_review_package_and_external_reviewer_key_required"
+  },
+  "production_boundary": {
+    "review_readiness": "pass",
+    "independent_external_review": "pending_external_execution",
+    "production_release_gate": "blocked",
+    "limitations": [
+      "No independent qualified reviewer participated in this sandbox execution.",
+      "No genuine external findings, remediation retests, residual-risk acceptance, or signed production disposition exist.",
+      "The package generator and synthetic fixtures are preparation evidence only.",
+      "No security approval or vulnerability-free claim is made."
+    ],
+    "claims_not_made": [
+      "No independent external review completion claim.",
+      "No production security approval claim.",
+      "No claim that internal tests equal external assurance.",
+      "No claim that model output can authorize security disposition."
+    ]
+  }
+}

@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "7c8cc8027caffbb9abedaa5e2d90292ba15d99d6",
-  "current_tag": "FAISAL-M175-PHYSICAL-ACCELERATOR-HANDOFF",
+  "current_head": "1deba0d4a7839e3e3f6f0d963fa2a10f81d8c8de",
+  "current_tag": "FAISAL-M176-EXTERNAL-SECURITY-REVIEW-READINESS",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1568,7 +1568,7 @@
       "physical_gpu_npu_vram_iommu_dma_vendor_driver_qualification": "partially_resolved_m175_physical_hardware_handoff_bundle_exact_lts_source_config_bzimage_inventory_collector_validator_and_operator_runbook_ready_synthetic_gate_pass_sandbox_inventory_zero_accelerators_zero_iommu_groups_physical_gpu_npu_vram_iommu_dma_vendor_driver_evidence_pending",
       "replication_production_tls_pki_and_external_multihost_fixture_qualification": "partially_resolved_m171_actual_three_node_grpc_mtls_fixture_signed_quorum_commit_minority_denial_recovery_durable_reload_and_negative_paths_pass_production_pki_external_multihost_and_live_kms_pending",
       "deployment_external_orchestrator_multihost_migration_and_operational_rollback_qualification": "partially_resolved_m172_signed_fail_closed_governance_validator_approval_binding_abi_state_compatibility_worker_fence_canary_rollback_recovery_and_m78_qemu_regression_pass_external_orchestrator_multihost_migration_irreversible_side_effect_compensation_and_production_approval_pending",
-      "staged_checkpatch_cleanup_and_external_security_review_qualification": "partially_resolved_m173_source_bound_review_package_independence_scope_findings_retest_and_disposition_validator_synthetic_tests_pass_genuine_external_reviewer_and_signed_disposition_pending"
+      "staged_checkpatch_cleanup_and_external_security_review_qualification": "partially_resolved_m176_exact_candidate_review_package_manifest_hash_separate_external_reviewer_key_fingerprint_signed_final_report_and_disposition_contract_validator_and_integration_tests_pass_genuine_independent_qualified_reviewer_external_findings_remediation_retests_residual_risk_acceptance_and_signed_disposition_pending"
     },
     "m154_accelerator_accounting_telemetry_loss": "pass_u64_overflow_admission_event_ring_backpressure_eagain_and_telemetry_lost_status_qemu",
     "m154_tenant_qemu": "pass_m154_telemetry_loss_marker_and_m115_m152_m153_regressions_return_0",
@@ -1707,6 +1707,11 @@
     "m175_physical_accelerator_handoff": "pass_exact_lts_source_config_bzimage_hardware_inventory_collector_physical_validator_and_operator_runbook_bundle_generated",
     "m175_physical_accelerator_inventory": "pass_truthful_sandbox_inventory_zero_pci_accelerators_zero_iommu_groups_no_dri_kfd_vfio_or_nvidia_nodes",
     "m175_physical_accelerator_evidence": "tools/faisal-build/evidence/m175-physical-accelerator-handoff-validation.json",
-    "m175_release_scope": "physical_gpu_npu_vram_iommu_dma_vendor_driver_and_hardware_workload_evidence_pending_on_real_operator_controlled_device_host"
+    "m175_release_scope": "physical_gpu_npu_vram_iommu_dma_vendor_driver_and_hardware_workload_evidence_pending_on_real_operator_controlled_device_host",
+    "m176_external_security_review_readiness": "pass_exact_candidate_lts_artifact_config_source_provenance_accelerator_handoff_manifest_runbook_validator_tests_and_program_state_package_generated",
+    "m176_external_security_review_package": "/home/ubuntu/agi-kernel/build/m176-external-security-review/review-package.json sha256=2bea1a50d6a7d67b6df1490079c7d8953ecefe8c39ac4f41e36cbc660bcc0cbf",
+    "m176_external_security_review_archive": "/home/ubuntu/agi-kernel/build/m176-external-security-review/faisal-esr-candidate-105f2b85e4c2-8766f1019d80.tar.gz sha256=2256b08fc6c3dd43ff437bc82c0613b14de6243372f9cbbf1a9249b1349c2190",
+    "m176_external_security_review_evidence": "tools/faisal-build/evidence/m176-external-security-review-readiness-validation.json",
+    "m176_release_scope": "review_readiness_pass_external_execution_pending_production_gate_requires_separate_reviewer_key_exact_package_signed_findings_retests_residual_risk_and_final_disposition"
   }
 }
