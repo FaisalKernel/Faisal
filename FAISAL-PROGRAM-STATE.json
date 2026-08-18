@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "1879ff56ca46427ca7fcfe86c00444b6afea0ee9",
-  "current_tag": "FAISAL-M178-EXTERNAL-REPLICATION-QUALIFICATION-READINESS",
+  "current_head": "f4fd7f823c26219e129c05844b9a13dba875cba0",
+  "current_tag": "FAISAL-M179-LIVE-DEPLOYMENT-QUALIFICATION-READINESS",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1570,7 +1570,8 @@
       "deployment_external_orchestrator_multihost_migration_and_operational_rollback_qualification": "partially_resolved_m172_signed_fail_closed_governance_validator_approval_binding_abi_state_compatibility_worker_fence_canary_rollback_recovery_and_m78_qemu_regression_pass_external_orchestrator_multihost_migration_irreversible_side_effect_compensation_and_production_approval_pending",
       "staged_checkpatch_cleanup_and_external_security_review_qualification": "partially_resolved_m176_exact_candidate_review_package_manifest_hash_separate_external_reviewer_key_fingerprint_signed_final_report_and_disposition_contract_validator_and_integration_tests_pass_genuine_independent_qualified_reviewer_external_findings_remediation_retests_residual_risk_acceptance_and_signed_disposition_pending",
       "operator_controlled_production_signing_authority": "partially_resolved_m177_fail_closed_operational_proof_validator_ceremony_template_trusted_distribution_receipts_rotation_revocation_recovery_and_gate_integration_simulation_pass_real_operator_key_ceremony_protected_root_trusted_distribution_and_rotation_revocation_execution_pending",
-      "replication_production_tls_pki_external_multihost_kms_attestation_qualification": "partially_resolved_m178_source_bound_external_handoff_package_fail_closed_validator_production_gate_integration_and_positive_negative_tests_pass_real_three_host_network_production_pki_live_kms_or_vault_tpm_secure_enclave_and_deployment_topology_execution_pending"
+      "replication_production_tls_pki_external_multihost_kms_attestation_qualification": "partially_resolved_m178_source_bound_external_handoff_package_fail_closed_validator_production_gate_integration_and_positive_negative_tests_pass_real_three_host_network_production_pki_live_kms_or_vault_tpm_secure_enclave_and_deployment_topology_execution_pending",
+      "deployment_live_multihost_migration_rollback_compensation_qualification": "partially_resolved_m179_source_bound_live_deployment_handoff_fail_closed_validator_external_gate_integration_and_positive_negative_tests_pass_real_orchestrator_multihost_migration_canary_rollback_restart_recovery_and_irreversible_action_compensation_execution_pending"
     },
     "m154_accelerator_accounting_telemetry_loss": "pass_u64_overflow_admission_event_ring_backpressure_eagain_and_telemetry_lost_status_qemu",
     "m154_tenant_qemu": "pass_m154_telemetry_loss_marker_and_m115_m152_m153_regressions_return_0",
@@ -1725,6 +1726,11 @@
     "m178_external_replication_package": "/home/ubuntu/agi-kernel/build/m178-external-replication/qualification-package.json sha256=3485d1ed60054cd1be921460f74701524e78ce30b48df0340da8d4929a9d2e0b",
     "m178_external_replication_archive": "/home/ubuntu/agi-kernel/build/m178-external-replication/faisal-external-replication-1879ff56ca46.tar.gz sha256=cfc43611fd87cba6d3dc5efcf1ecbe2a8474e5047e63add7fb35105e225e52a4",
     "m178_external_replication_evidence": "tools/faisal-build/evidence/m178-external-replication-qualification-readiness-validation.json",
-    "m178_release_scope": "external_replication_handoff_pass_real_independent_hosts_production_pki_live_kms_or_vault_hardware_attestation_and_deployment_restart_rollback_execution_pending"
+    "m178_release_scope": "external_replication_handoff_pass_real_independent_hosts_production_pki_live_kms_or_vault_hardware_attestation_and_deployment_restart_rollback_execution_pending",
+    "m179_live_deployment_handoff": "pass_exact_candidate_m172_baseline_deployment_controls_live_validator_runbook_and_release_gate_package_generated",
+    "m179_live_deployment_package": "/home/ubuntu/agi-kernel/build/m179-live-deployment/qualification-package.json sha256=21de8af9526c0ac4e0eca04db6ecd5b7b793dd4ca181498a031da667c492ad45",
+    "m179_live_deployment_archive": "/home/ubuntu/agi-kernel/build/m179-live-deployment/faisal-live-deployment-f4fd7f823c26.tar.gz sha256=1293c01b5d9341db74078d81f8f1a9d4c62ba4e1c1b5d29d117641fd51aae986",
+    "m179_live_deployment_evidence": "tools/faisal-build/evidence/m179-live-deployment-qualification-readiness-validation.json",
+    "m179_release_scope": "live_deployment_handoff_pass_real_orchestrator_multihost_migration_canary_rollback_restart_recovery_and_irreversible_action_compensation_execution_pending"
   }
 }

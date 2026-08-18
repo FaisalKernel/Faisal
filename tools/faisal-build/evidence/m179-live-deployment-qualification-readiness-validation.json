@@ -1,0 +1,86 @@
+{
+  "project": "FAISAL",
+  "milestone": "M179-live-deployment-qualification-readiness",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "f4fd7f823c26219e129c05844b9a13dba875cba0",
+  "status": "live_operational_handoff_ready_real_external_execution_pending",
+  "objective": "Close the evidence and handoff gap between bounded software/QEMU deployment governance and real multi-host migration, rollback, recovery, and irreversible-action compensation qualification.",
+  "authoritative_research": {
+    "record": "tools/faisal-build/evidence/deployment-live-qualification-research-2026-08-18.md",
+    "record_sha256": "0eb26fab0d93663c252f9978626f2867f59612761fd0a3c42d128014276e4cfe",
+    "sources": [
+      "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
+      "https://csrc.nist.gov/pubs/sp/800/34/r1/upd1/final",
+      "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-patterns.html",
+      "https://builder.aws.com/content/3F04j2yRAAMBuPSPs50xwXZqg01/ensuring-rollback-safety-during-deployments"
+    ]
+  },
+  "implementation": {
+    "live_validator": "tools/faisal-build/verify_live_deployment_qualification.py",
+    "package_generator": "tools/faisal-build/prepare_live_deployment_qualification_bundle.py",
+    "integration_test": "tools/faisal-build/test_verify_live_deployment_qualification.py",
+    "live_validator_sha256": "3426750f7901f91d21bceedab1c87c880b1170784fe3afa71cdfa6d598e21dfb",
+    "package_generator_sha256": "07d613050d7e8664e7e59497a1cbaed3d59788ff50b9f704d3d42c9846ffea43",
+    "integration_test_sha256": "6ee67a5bf484a3460dd448fd7e53952e556831cb4134767f9d10a3a8fd6a3d11",
+    "production_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "production_gate_sha256": "366c00ba0aea386f6c14e1e7ec242ace9619c942efcc5b38b6dd90739be08727",
+    "runbook": "FAISAL-DEPLOYMENT-GOVERNANCE.md",
+    "runbook_sha256": "3b34b5643f4cba635f4ed0c45a0a33ef94a55bd52d9b4bc4ffb1275d072a8da2",
+    "required_gate_inputs": [
+      "FAISAL_LIVE_DEPLOYMENT_EVIDENCE",
+      "FAISAL_LIVE_DEPLOYMENT_PUBLIC_KEY",
+      "FAISAL_LIVE_DEPLOYMENT_PACKAGE",
+      "FAISAL_EXPECTED_SOURCE_REV"
+    ],
+    "fail_closed_controls": [
+      "three or more distinct non-loopback hosts",
+      "real external orchestrator identity",
+      "live migration handoff receipt",
+      "worker-fence generation advance and stale-worker denial",
+      "live canary health, promotion, and failure rollback",
+      "live rollback to previous active digest",
+      "persistent-state recovery and idempotent replay",
+      "irreversible-action compensation and idempotency receipts",
+      "explicit residual-risk disposition",
+      "exact package and source binding",
+      "model output is not authority"
+    ]
+  },
+  "software_baseline": {
+    "m172_evidence": "/home/ubuntu/agi-kernel/linux/tools/faisal-build/evidence/m172-deployment-governance-validation.json",
+    "classification": "software_qemu_fixture_only",
+    "not_reused_as_live_production_evidence": true
+  },
+  "handoff_package": {
+    "source_revision": "f4fd7f823c26219e129c05844b9a13dba875cba0",
+    "manifest": "/home/ubuntu/agi-kernel/build/m179-live-deployment/qualification-package.json",
+    "manifest_sha256": "21de8af9526c0ac4e0eca04db6ecd5b7b793dd4ca181498a031da667c492ad45",
+    "archive": "/home/ubuntu/agi-kernel/build/m179-live-deployment/faisal-live-deployment-f4fd7f823c26.tar.gz",
+    "archive_sha256": "1293c01b5d9341db74078d81f8f1a9d4c62ba4e1c1b5d29d117641fd51aae986",
+    "template_is_authoritative": false,
+    "contains_production_credentials": false
+  },
+  "tests": {
+    "m172_deployment_governance": "pass_approval_binding_migration_fence_canary_rollback_stale_tamper_denied",
+    "live_validator_positive": "pass_signed_external_multihost_migration_fence_canary_rollback_compensation_shape",
+    "live_validator_negative": "pass_loopback_compensation_fence_pending_denied",
+    "template": "pass_fail_closed_before_signature_and_external_execution",
+    "production_gate_syntax": "pass",
+    "production_gate_status": "blocked_without_live_deployment_evidence"
+  },
+  "production_boundary": {
+    "external_orchestrator": "pending",
+    "live_multihost_migration": "pending",
+    "live_canary_and_rollback": "pending",
+    "persistent_restart_recovery": "pending",
+    "irreversible_action_compensation": "pending",
+    "production_release_gate": "blocked",
+    "claims_not_made": [
+      "No live multi-host migration claim.",
+      "No live canary or rollback claim.",
+      "No irreversible external-action compensation claim.",
+      "No production orchestrator claim.",
+      "No overall production-readiness claim."
+    ]
+  }
+}
