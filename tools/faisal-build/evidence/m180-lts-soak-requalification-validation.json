@@ -1,0 +1,106 @@
+{
+  "project": "FAISAL",
+  "milestone": "M180-lts-soak-requalification",
+  "schema": "org.faisal.lts-soak-requalification.v1",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "recorded_epoch": 1787030032,
+  "repository_parent_commit": "7bd50f0be918a64a2060a346461b89e0990583c0",
+  "status": "representative_lts_soak_requalified",
+  "source_revision": "7bd50f0be918a64a2060a346461b89e0990583c0",
+  "lts_source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+  "bzimage_sha256": "8766f1019d80598c7982d91d89d7df27385a91ca7ea17d114d8869267204870b",
+  "config_sha256": "2c282274f1f716e2b1135b0a1fb819f99525dbe099ea0d31f1b3a2676f980e06",
+  "config": {
+    "CONFIG_CFS_BANDWIDTH": "y",
+    "CONFIG_PREEMPTION": "y",
+    "CONFIG_PREEMPT_RCU": "y",
+    "CONFIG_RCU_STALL_COMMON": "y",
+    "CONFIG_HZ": 1000
+  },
+  "model_output_is_authority": false,
+  "profiles": {
+    "bounded_one_vcpu": {
+      "result": "pass",
+      "qemu_acceleration": "tcg",
+      "qemu_smp": 1,
+      "qemu_acpi": "off",
+      "marker_driven_exit": true,
+      "rounds": 2,
+      "iterations_per_round": 64,
+      "total_ioctl_calls": 256,
+      "summary": "/home/ubuntu/agi-kernel/build/m180-requalification/one-vcpu/summary.tsv",
+      "summary_sha256": "799c40df73156a4c0381ab9941663530cf210f94b2f7a08a53931e28f78b0a53",
+      "diagnostics": []
+    },
+    "representative_two_vcpu": {
+      "result": "pass",
+      "qemu_acceleration": "tcg",
+      "qemu_smp": 2,
+      "qemu_acpi": "off",
+      "marker_driven_exit": true,
+      "rounds": 3,
+      "iterations_per_round": 16384,
+      "total_ioctl_calls": 98304,
+      "summary": "/home/ubuntu/agi-kernel/build/m180-requalification/two-vcpu/summary.tsv",
+      "summary_sha256": "baf3310db4ab6471479e8d3eaf5343c3b92f9baf4ffd0db6382b5b664cf10025",
+      "diagnostics": []
+    }
+  },
+  "rcu_stall_reproduction": {
+    "old_profile": {
+      "qemu_machine": "pc",
+      "qemu_acpi": "on",
+      "qemu_acceleration": "tcg",
+      "qemu_smp": 2,
+      "iterations": 512,
+      "timeout_seconds": 180,
+      "result": "rejected_rcu_preempt_stall",
+      "log": "/home/ubuntu/agi-kernel/upstream/faisal-lts-fuzz-diagnostic.log",
+      "log_sha256": "de088ae993016a5278c3053b8c76a7a615235b4048fc0ff79bc11e85d64efc0f"
+    },
+    "old_profile_rejected": true,
+    "observed_signature": [
+      "AE_AML_LOOP_TIMEOUT",
+      "_SB.PCI0._PRT",
+      "e1000 cannot derive routing",
+      "rcu_preempt stall"
+    ],
+    "mitigation": "qemu_pc_acpi_off_and_marker_driven_exit"
+  },
+  "implementation": {
+    "launcher": "tools/faisal-build/run_lifecycle_uapi_fuzz_qemu.sh",
+    "soak_wrapper": "tools/faisal-build/run_industry_soak_qemu.sh",
+    "validator": "tools/faisal-build/verify_lts_soak_requalification.py",
+    "integration_test": "tools/faisal-build/test_verify_lts_soak_requalification.py",
+    "production_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "runbook": "FAISAL-LTS-REQUALIFICATION.md",
+    "research": "tools/faisal-build/evidence/lts-soak-requalification-research-2026-08-18.md",
+    "launcher_sha256": "27ef64842a33508be2387028a53255eb32b60e44c02b4576522e6c334c968611",
+    "soak_wrapper_sha256": "6e48f61e03eae913c452b488da65510efdfc04a545c8c33f21bb1a7198c84cdf",
+    "validator_sha256": "acbb9c003ceb189ba6c1b9ec3aa5c2c50f803d44db83b9c385cd0142a08469db",
+    "integration_test_sha256": "f2c0a8c86f07ca3bc822624c73f757f0afcb9525c48c1499010d5ce317599645",
+    "production_gate_sha256": "9c201fed0e3db54ce44ee01bebc3530807d0a7e4274582aa6d3adc40c7a4e99f",
+    "runbook_sha256": "e48d0ea5d4f327316fdd02dd2f635cb5e2ae28dc9513ce970999b20bfcf3c73a",
+    "research_sha256": "768b4c4a9cab55c67afaee5303e5714f8ab905c5d656fa693bd544d41d375e3e"
+  },
+  "tests": {
+    "validator": "pass_exact_binding_profiles_rcu_mitigation_and_denials",
+    "bounded_one_vcpu": "pass_two_rounds_64_iterations",
+    "representative_two_vcpu": "pass_three_rounds_16384_iterations",
+    "textual_qemu_diagnostics": "pass_none_in_requalification_logs",
+    "production_gate_syntax": "pass",
+    "production_gate_status": "blocked_by_other_release_requirements"
+  },
+  "production_status": "representative_tcg_qualification_only",
+  "limitations": [
+    "ACPI is disabled in the representative TCG profile because the original ACPI-on profile produced an observed QEMU AML/RCU starvation failure.",
+    "This does not qualify ACPI/firmware behavior, KVM acceleration, physical hardware, or production deployment.",
+    "Other independent builder, signing, physical accelerator, external security review, replication, and live deployment blockers remain open."
+  ],
+  "claims_not_made": [
+    "No ACPI-on two-vCPU pass is claimed.",
+    "No KVM or physical-host soak pass is claimed.",
+    "No overall production-readiness claim is made.",
+    "No model output is treated as authority."
+  ]
+}

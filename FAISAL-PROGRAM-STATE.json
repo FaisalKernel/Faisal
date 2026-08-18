@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "f4fd7f823c26219e129c05844b9a13dba875cba0",
-  "current_tag": "FAISAL-M179-LIVE-DEPLOYMENT-QUALIFICATION-READINESS",
+  "current_head": "7bd50f0be918a64a2060a346461b89e0990583c0",
+  "current_tag": "FAISAL-M180-LTS-SOAK-REQUALIFICATION",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1561,7 +1561,7 @@
       "staged_checkpatch_cleanup_and_external_security_review_qualification"
     ],
     "release_blocker_status": {
-      "stable_or_lts_forward_port_and_upstream_patch_requalification": "partially_resolved_lts_6.18.44_forward_port_build_tenant_and_durable_qemu_pass_bounded_one_vcpu_soak_pass_representative_multivcpu_tcg_soak_pending",
+      "stable_or_lts_forward_port_and_upstream_patch_requalification": "partially_resolved_lts_6.18.44_forward_port_build_tenant_durable_qemu_and_representative_two_vcpu_tcg_soak_pass_using_documented_pc_acpi_off_marker_driven_exit_profile_acpi_on_rcu_stall_rejected_acpi_firmware_kvm_and_physical_requalification_pending",
       "production_release_gate": "blocked_fail_closed_operator_key_independent_builder_physical_accelerator_cve_process_external_security_review_and_operational_governance_remaining",
       "independent_physical_builder_or_attested_build_farm_qualification": "partially_resolved_m174_external_lts_handoff_bundle_slsa_aligned_provenance_source_config_toolchain_and_artifact_subject_verifier_pass_same_sandbox_pair_rejected_external_physical_host_or_attested_farm_signed_evidence_pending",
       "cve_and_upstream_response_process_with_owned_advisory_ledger": "partially_resolved_m169_structured_signed_fail_closed_process_and_tests_pass_real_operator_owned_ledger_live_source_sync_and_external_security_review_pending",
@@ -1731,6 +1731,10 @@
     "m179_live_deployment_package": "/home/ubuntu/agi-kernel/build/m179-live-deployment/qualification-package.json sha256=21de8af9526c0ac4e0eca04db6ecd5b7b793dd4ca181498a031da667c492ad45",
     "m179_live_deployment_archive": "/home/ubuntu/agi-kernel/build/m179-live-deployment/faisal-live-deployment-f4fd7f823c26.tar.gz sha256=1293c01b5d9341db74078d81f8f1a9d4c62ba4e1c1b5d29d117641fd51aae986",
     "m179_live_deployment_evidence": "tools/faisal-build/evidence/m179-live-deployment-qualification-readiness-validation.json",
-    "m179_release_scope": "live_deployment_handoff_pass_real_orchestrator_multihost_migration_canary_rollback_restart_recovery_and_irreversible_action_compensation_execution_pending"
+    "m179_release_scope": "live_deployment_handoff_pass_real_orchestrator_multihost_migration_canary_rollback_restart_recovery_and_irreversible_action_compensation_execution_pending",
+    "m180_lts_soak_requalification": "pass_exact_lts_source_artifact_config_bounded_one_vcpu_and_representative_two_vcpu_tcg_profiles_pass_three_rounds_16384_each_acpi_on_rcu_stall_rejected_acpi_off_marker_driven_exit_requalification_pass",
+    "m180_lts_soak_evidence": "tools/faisal-build/evidence/m180-lts-soak-requalification-validation.json",
+    "m180_lts_soak_signature": "sandbox_only_validation_signature_external_operator_key_required_for_release",
+    "m180_release_scope": "representative_tcg_requalification_pass_acpi_firmware_kvm_physical_hardware_and_other_production_blockers_pending"
   }
 }
