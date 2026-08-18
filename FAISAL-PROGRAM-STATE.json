@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "4d269f9990db823f836663ddee67959aea72e507",
-  "current_tag": "FAISAL-M213-RELEASE-CANDIDATE-BUNDLE",
+  "current_head": "0300498339ebde276f87f3afe5d82cfe001bae92",
+  "current_tag": "FAISAL-M214-RELEASE-CANDIDATE-ARCHIVE",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1881,6 +1881,9 @@
     "m212_candidate_manifest": "/home/ubuntu/agi-kernel/build/m212-candidate/production-candidate.json sha256=464e2569b7ef53cfdb1abd6eebe17a1e877b790a0cf3032743ff2d4a731acf76",
     "m213_release_candidate_bundle": "pass_path_independent_bundle_hash_size_role_tag_and_boundary_validation",
     "m213_release_candidate_bundle_evidence": "tools/faisal-build/evidence/m213-release-candidate-bundle-validation.json",
-    "m213_candidate_manifest": "/home/ubuntu/agi-kernel/build/m213-candidate/production-candidate.json sha256=7e7984cab5e6d9b9e92ab784a5523994379629d03265e1f08dfad9dadd41d417"
+    "m213_candidate_manifest": "/home/ubuntu/agi-kernel/build/m213-candidate/production-candidate.json sha256=7e7984cab5e6d9b9e92ab784a5523994379629d03265e1f08dfad9dadd41d417",
+    "m214_release_candidate_archive": "pass_deterministic_relocatable_archive_safe_extraction_and_payload_tamper_rejection",
+    "m214_release_candidate_archive_evidence": "tools/faisal-build/evidence/m214-release-candidate-archive-validation.json",
+    "m214_candidate_manifest": "/home/ubuntu/agi-kernel/build/m214-candidate/production-candidate.json sha256=cc3cab379907d5fcbdaa2af191571c9a28c7f77ec388427768a566994031f95a"
   }
 }
