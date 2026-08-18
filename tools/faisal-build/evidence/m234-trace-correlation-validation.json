@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M234-cross-subsystem-trace-correlation-contract",
-  "recorded_at": "2026-08-18T16:30:18Z",
+  "recorded_at": "2026-08-18T16:31:27Z",
   "status": "local_contract_qualified_external_telemetry_and_deployment_qualification_pending",
   "objective": "Bind agent, objective, task, model, tool, sandbox, world, recovery, completion, and kernel events into a deterministic tamper-evident causal trace without granting authority.",
   "research": {
