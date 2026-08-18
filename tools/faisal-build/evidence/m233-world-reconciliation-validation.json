@@ -1,0 +1,103 @@
+{
+  "project": "FAISAL",
+  "milestone": "M233-world-state-reconciliation-contract",
+  "recorded_at": "2026-08-18T16:23:10Z",
+  "status": "local_contract_qualified_external_state_store_and_deployment_qualification_pending",
+  "objective": "Compare expected and observed world state deterministically, classify drift, bind snapshots and observations to evidence, and emit a proposal-only receipt without granting model output authority.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://kubernetes.io/docs/concepts/architecture/controller/",
+        "finding": "Kubernetes controllers are non-terminating control loops that watch current state and move it toward desired state, while separating controller observation from the components that perform side effects.",
+        "impact": "M233 adopts observe-compare-classify as a provider-neutral reconciliation primitive and keeps corrective execution outside the contract."
+      },
+      {
+        "url": "https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/",
+        "finding": "Kubernetes documents etcd as consistent highly available backing state with leader heartbeats, odd-member quorum, TLS, backups, snapshots, and fail-closed behavior when quorum is unavailable.",
+        "impact": "M233 binds world generations and observation sequence numbers but does not claim etcd quorum, replication, or production state-store qualification."
+      },
+      {
+        "url": "https://developers.openai.com/api/docs/guides/background",
+        "finding": "OpenAI background responses support asynchronous polling, terminal states, idempotent cancellation, and resumable stream cursors.",
+        "impact": "Provider observations can carry asynchronous status and cursor lineage, but background model output remains evidence rather than authority."
+      },
+      {
+        "url": "https://ai.google.dev/gemini-api/docs/function-calling",
+        "finding": "Gemini function calling is an application-controlled multi-step flow: the model emits a function name and arguments, the application executes the function, and the result is sent back.",
+        "impact": "M233 emits drift and proposal data only; a separate authorized supervisor must execute remediation."
+      },
+      {
+        "url": "https://docs.kernel.org/userspace-api/landlock.html",
+        "finding": "Linux Landlock provides explicit, runtime-discoverable restrictions for unprivileged filesystem and network sandboxing.",
+        "impact": "World observations can include sandbox/provider capability evidence, but M233 does not assume a particular kernel security ABI."
+      },
+      {
+        "url": "https://docs.vllm.ai/en/latest/features/structured_outputs/",
+        "finding": "vLLM supports schema, regex, grammar, choice, and structural-tag constrained outputs.",
+        "impact": "Structured model claims may be parsed into observations but cannot bypass measurement, freshness, generation, or authority policy."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-world-reconcile/faisal_world_reconcile.h",
+    "source": "tools/faisal-world-reconcile/faisal_world_reconcile.c",
+    "selftest": "tools/testing/selftests/faisal_world_reconcile_test.c",
+    "benchmark": "tools/testing/selftests/faisal_world_reconcile_benchmark.c",
+    "runner": "tools/faisal-build/run_world_reconcile_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "expected and observed snapshot identity and world-generation binding",
+      "canonical snapshot sorting and SHA-256 digesting",
+      "missing, unexpected, changed, stale, and in-sync classification",
+      "bounded severity and confidence calculation",
+      "measured-observation requirement",
+      "model-only observation rejection",
+      "monotonic request-sequence replay protection",
+      "observation sequence-gap refusal",
+      "expected/observed generation fencing",
+      "tamper-resistant reconciliation receipt",
+      "proposal-only interface with no corrective side effect",
+      "model-output-is-not-authority boundary"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M233_SELFTEST_EXIT=0",
+    "selftest_cases": 11,
+    "benchmark_rounds": 100000,
+    "benchmark_operations": 400000,
+    "benchmark_ns_per_operation": 2527,
+    "asan_ubsan": true,
+    "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK on ACPI-on one-vCPU 4G; FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256",
+    "regression_m232_m231_m230_m229_m228": "M232 local routing baseline remains passing; M231_RECOVERY_DECISION_VALIDATION_OK; M230_MODEL_ROUTER_VALIDATION_OK; M229_EXPERIENCE_EVIDENCE_VALIDATION_OK; M228_RUNNER_EXIT=0"
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_accelerator": false,
+    "external_security_review": false,
+    "external_state_store": false,
+    "live_multihost_reconciliation": false,
+    "paid_provider_qualification": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "function_call_is_execution": false,
+    "structured_output_is_truth": false,
+    "drift_receipt_applies_fix": false,
+    "model_only_observation_accepted": false,
+    "stale_observation_promoted": false,
+    "sequence_gap_accepted": false,
+    "stale_generation_reused": false,
+    "tampered_receipt_verified": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "M233 is a deterministic userspace reconciliation fixture, not a distributed world database, etcd cluster, Kubernetes controller, or live external remediation system.",
+    "No live OpenAI, Anthropic, Google, vLLM, llama.cpp, or external API call is part of this milestone.",
+    "No physical accelerator, independent builder, independent security review, production PKI, or live multihost migration was qualified.",
+    "Production release remains blocked by the project’s external evidence gate."
+  ]
+}
