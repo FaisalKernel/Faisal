@@ -1,0 +1,52 @@
+{
+  "project": "FAISAL",
+  "milestone": "M203-unqualified-legacy-qemu-fail-closed-guards",
+  "schema": "org.faisal.unqualified-legacy-qemu-guard-validation.v1",
+  "recorded_at": "2026-08-18T09:40:20Z",
+  "status": "three_legacy_entry_points_explicitly_blocked_without_false_pass_markers",
+  "implementation": {
+    "guard": {
+      "path": "tools/faisal-build/run_unqualified_legacy_qemu_guard.sh",
+      "sha256": "b6e7766e15df0c3fd12d6975fdd3357e679846386ec58a733c0ff6d43f26a044"
+    },
+    "persistent_memory": {
+      "path": "tools/faisal-build/run_persistent_memory_qemu.sh",
+      "sha256": "514b996d949ab663ad3be3a3efa969d4aa76a6ce1b9cdaa4fc6bcea7243e6788"
+    },
+    "experience_learning": {
+      "path": "tools/faisal-build/run_experience_learning_qemu.sh",
+      "sha256": "514b996d949ab663ad3be3a3efa969d4aa76a6ce1b9cdaa4fc6bcea7243e6788"
+    },
+    "model_orchestration": {
+      "path": "tools/faisal-build/run_model_orchestration_qemu.sh",
+      "sha256": "514b996d949ab663ad3be3a3efa969d4aa76a6ce1b9cdaa4fc6bcea7243e6788"
+    }
+  },
+  "validation": {
+    "syntax": "pass for guard and all three wrappers",
+    "guard_exit_code": 78,
+    "guard_marker": "FAISAL_LEGACY_QEMU_BLOCKED",
+    "logs": {
+      "persistent_memory": "build/m203-guards/persistent_memory.log",
+      "experience_learning": "build/m203-guards/experience_learning.log",
+      "model_orchestration": "build/m203-guards/model_orchestration.log"
+    },
+    "false_pass_markers": "none observed; no VALIDATION_OK, SELFTEST_EXIT=0, or TEST_RC=0 emitted"
+  },
+  "security_boundary": {
+    "reason": "No current-LTS hardened counterpart exists for these legacy paths; executing recovered-artifact-only runners could create unqualified evidence.",
+    "behavior": "Fail closed with an explicit non-success exit code until a hardened runner is implemented and qualified."
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "the guarded workloads are qualified",
+      "all legacy runners are hardened",
+      "physical accelerator qualification",
+      "independent builder or attested-farm qualification",
+      "independent external security review",
+      "operator-controlled production signing ceremony",
+      "live multihost deployment and rollback qualification"
+    ]
+  }
+}
