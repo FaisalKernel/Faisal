@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "78d1e301ac5087245d3fa29926b77d12552579b9",
-  "current_tag": "FAISAL-M192-WORLD-STATE-HARDENED-QEMU",
+  "current_head": "8ceca691c887d82f9fbe575f13b9d3db79d22d2d",
+  "current_tag": "FAISAL-M193-GRAPH-FAULT-INJECTION",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1426,7 +1426,8 @@
     "FAISAL-M189-WRITE-SIDE-LIFECYCLE-STRESS",
     "FAISAL-M190-WRITE-SIDE-STATE-INVARIANTS",
     "FAISAL-M191-GRAPH-TELEMETRY-QEMU",
-    "FAISAL-M192-WORLD-STATE-HARDENED-QEMU"
+    "FAISAL-M192-WORLD-STATE-HARDENED-QEMU",
+    "FAISAL-M193-GRAPH-FAULT-INJECTION"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1795,6 +1796,10 @@
     "m192_world_state_hardened_qemu": "pass_acpi_off_2vcpu_pass_acpi_on_1vcpu_world_sync_freshness_conflict_temporal_resource_and_malformed_uapi_assertions_acpi_on_2vcpu_rejected_rcu_diagnostic",
     "m192_world_state_evidence": "tools/faisal-build/evidence/m192-world-state-hardened-qemu-validation.json",
     "m192_candidate_manifest": "/home/ubuntu/agi-kernel/build/m192-candidate/production-candidate.json sha256=642af003887c3e14df285428fa05222a0a820f5b96d1fe1bdd3faef81cd51fca",
-    "m192_release_scope": "bounded_world_state_hardened_runner_pass_qualified_profiles_and_explicit_rcu_blocked_profile_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
+    "m192_release_scope": "bounded_world_state_hardened_runner_pass_qualified_profiles_and_explicit_rcu_blocked_profile_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m193_graph_fault_injection": "pass_acpi_off_2vcpu_9_checks_6_expected_rejections_0_unexpected_malformed_duplicate_missing_dependency_stale_and_valid_graph_paths",
+    "m193_graph_fault_evidence": "tools/faisal-build/evidence/m193-graph-fault-qemu-validation.json",
+    "m193_candidate_manifest": "/home/ubuntu/agi-kernel/build/m193-candidate/production-candidate.json sha256=233eafbc59746d34eee4b61aa4c7791ff7327048663fed4e8e507b8205b57116",
+    "m193_release_scope": "bounded_graph_fault_injection_pass_strict_fail_closed_errno_and_state_validation_acpi_on_smp_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
   }
 }
