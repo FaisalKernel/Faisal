@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "c38ec32da63755369f45afc0104c99168ac7c777",
+  "current_head": "9716377c5b5c8ff92fadf525414cbb77c386d3c9",
   "current_tag": "FAISAL-FRONTIER-DETERMINISTIC-PLAN-ADMISSION-2026-08-22",
   "current_abi": 47,
   "operating_loop": [
@@ -2079,5 +2079,10 @@
   "frontier_deterministic_plan_admission_evidence": "tools/faisal-build/evidence/frontier-deterministic-plan-admission-validation-2026-08-22.json",
   "frontier_deterministic_plan_admission_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-2026-08-22.md",
   "frontier_deterministic_plan_admission_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-22",
-  "frontier_plan_authority_boundary": "model_generated_plans_mcp_tasks_skill_instructions_and_tool_metadata_remain_untrusted_data_and_plan_admission_never_executes_or_self_approves_irreversible_work"
+  "frontier_plan_authority_boundary": "model_generated_plans_mcp_tasks_skill_instructions_and_tool_metadata_remain_untrusted_data_and_plan_admission_never_executes_or_self_approves_irreversible_work",
+  "frontier_verified_improvement_evolution": "pass_research_baseline_isolation_validation_metric_policy_promotion_rollback_and_replay_verified_candidate_transaction",
+  "frontier_verified_improvement_evolution_evidence": "tools/faisal-build/evidence/frontier-verified-improvement-evolution-validation-2026-08-23.json",
+  "frontier_verified_improvement_evolution_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-2026-08-23.md",
+  "frontier_verified_improvement_evolution_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-23",
+  "frontier_evolution_authority_boundary": "research_text_model_outputs_generated_code_mcp_metadata_and_benchmark_claims_remain_untrusted_data_and_the_evolution_transaction_never_self_modifies_privileged_kernel_code_or_self_authorizes_promotion"
 }
