@@ -5,9 +5,9 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "deabd24085cf8a47716f327fcd8b44d0881d0dc8",
-  "current_tag": "FAISAL-M239-EVIDENCE-BOUND-KV-TIER-TELEMETRY",
-  "current_abi": 38,
+  "current_head": "dc912ff7efa5f0be4a8b0de3784e98f2d10fc7d8",
+  "current_tag": "FAISAL-M240-ADAPTIVE-RESOURCE-BUDGET",
+  "current_abi": 39,
   "operating_loop": [
     "RESEARCH",
     "DESIGN",
@@ -2005,5 +2005,11 @@
   "m239_research_boundary": "researched_vllm_disaggregated_prefill_sglang_hicache_nvidia_dynamo_kv_aware_routing_linux_sched_ext_and_fsverity",
   "m239_model_authority_boundary": "model_output_provider_metadata_kv_events_route_predictions_and_runtime_telemetry_are_untrusted_and_never_memory_or_execution_authority",
   "m239_validation_boundary": "strict_userspace_selftest_asan_ubsan_100000_round_benchmark_64_mutation_rejections_m237_m238_regressions_linux72_qemu_boot_and_industry_soak_passed",
-  "m239_production_boundary": "production_approval_false_physical_gpu_hbm_vram_npu_iommu_dma_vendor_driver_external_builder_external_security_review_production_pki_multihost_and_independent_evidence_pending"
+  "m239_production_boundary": "production_approval_false_physical_gpu_hbm_vram_npu_iommu_dma_vendor_driver_external_builder_external_security_review_production_pki_multihost_and_independent_evidence_pending",
+  "m240_adaptive_resource_budget": "pass_provider_neutral_cpu_memory_gpu_npu_network_storage_cost_energy_budget_admission_generation_deadline_priority_receipt_and_authority_contract",
+  "m240_adaptive_resource_budget_evidence": "tools/faisal-build/evidence/m240-adaptive-resource-budget-validation.json",
+  "m240_research_boundary": "researched_linux_sched_ext_damon_io_uring_zero_copy_receive_nvidia_dynamo_and_existing_faisal_resource_accounting",
+  "m240_model_authority_boundary": "model_proposals_unverified_usage_provider_metadata_and_runtime_signals_are_untrusted_and_never_budget_or_execution_authority",
+  "m240_validation_boundary": "strict_userspace_selftest_asan_ubsan_100000_round_benchmark_64_mutation_rejections_overflow_capacity_faults_m237_m238_m239_regressions_aios_fixture_linux72_qemu_boot_industry_soak_and_multitenant_fixture_passed",
+  "m240_production_boundary": "production_approval_false_physical_accelerator_energy_measurement_independent_builder_external_security_review_production_pki_multihost_live_rollback_and_cve_operations_pending"
 }
