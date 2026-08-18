@@ -1,0 +1,126 @@
+{
+  "project": "FAISAL",
+  "milestone": "M241-agent-runtime-supervisor",
+  "recorded_at": "2026-08-18T20:30:28Z",
+  "status": "local_platform_contract_qualified_persistent_agent_supervision_and_production_qualification_pending",
+  "objective": "Provide a bounded AI-native userspace supervisor for persistent agent execution, durable objectives, event-driven dispatch, checkpoint and recovery, secure tools and messages, anomaly quarantine, and M240 adaptive budget integration while keeping model inference and high-level reasoning outside kernel authority.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://learn.temporal.io/tutorials/go/background-check/durable-execution/",
+        "finding": "Durable execution depends on event history, deterministic replay, version compatibility, and isolating nondeterministic activities such as LLM calls and external tools from deterministic workflow orchestration.",
+        "impact": "M241 persists tamper-evident supervisor events and binds recovery to checkpoint digests; model/tool execution remains outside the kernel and is represented as untrusted input."
+      },
+      {
+        "url": "https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/",
+        "finding": "Priority and preemption require administrator-controlled policy and resource-quota limits because malicious workloads can request excessive priority; non-preempting priority is a supported alternative.",
+        "impact": "M241 requires policy-verified objective priority and combines it with M240 budgets and authority; agent-provided priority is never execution authority."
+      },
+      {
+        "url": "https://developers.openai.com/api/docs/guides/agents",
+        "finding": "Modern agent runtimes separate agent loops, tools, handoffs, sessions, guardrails, resumable state, and tracing.",
+        "impact": "M241 supplies provider-neutral lifecycle, tool, message, checkpoint, event, and anomaly primitives without embedding a provider-specific model loop."
+      },
+      {
+        "url": "https://openai.github.io/openai-agents-python/guardrails/",
+        "finding": "Input, output, and tool guardrails can block execution with tripwires; tool guardrails run around tool calls, while handoffs have separate semantics.",
+        "impact": "M241 treats tool requests and agent messages as capability- and authority-gated events and adds supervisor-level anomaly quarantine and generation invalidation."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-agent-runtime/faisal_agent_runtime.h",
+    "source": "tools/faisal-agent-runtime/faisal_agent_runtime.c",
+    "selftest": "tools/testing/selftests/faisal_agent_runtime_test.c",
+    "benchmark": "tools/testing/selftests/faisal_agent_runtime_benchmark.c",
+    "concurrency_test": "tools/testing/selftests/faisal_agent_runtime_concurrency_test.c",
+    "runner": "tools/faisal-build/run_agent_runtime_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "persistent agent registration with tenant, generation, capability mask, trust, and identity binding",
+      "durable objective admission with trace, task/session/world/model generation, deadline, priority, provenance, and M240 budget binding",
+      "event-driven queue and dispatch lifecycle",
+      "append-only fixed-format SHA-256 chained event journal",
+      "replay projection with strict sequence, payload digest, previous digest, and event digest checks",
+      "checkpoint digest binding for working, memory, world, and budget state",
+      "checkpoint-first recovery with generation and deadline fencing",
+      "capability- and authority-gated tool requests",
+      "generation- and authority-gated agent messages",
+      "evidence-bound anomaly recording with agent quarantine, objective quarantine, and generation invalidation",
+      "transactional rollback around budget admission, dispatch, checkpoint, recovery, and terminal transitions",
+      "bounded in-memory capacities with explicit scale measurements",
+      "model-output-is-not-authority boundary"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M241_AGENT_RUNTIME_SELFTEST_EXIT=0 cases=38 mutation_rejections=8",
+    "scale_benchmark": {
+      "points": [1, 16, 64, 128, 256, 512],
+      "operations_per_objective": 3,
+      "ns_per_operation": {
+        "1": 341022.67,
+        "16": 237183.69,
+        "64": 218643.11,
+        "128": 208669.62,
+        "256": 237543.41,
+        "512": 217099.66
+      },
+      "scope": "durable userspace admit-dispatch-complete lifecycle including SHA-256 journal events and M240 admission; not model inference or physical accelerator throughput"
+    },
+    "concurrency": "M241_AGENT_RUNTIME_CONCURRENCY_EXIT=0 threads=8 objectives=256 failures=0; journal replay passed",
+    "asan_ubsan": "M241_AGENT_RUNTIME_SANITIZERS_OK; leak detection enabled; halt-on-error enabled",
+    "m240_regression": "M240 validation passed after capacity expansion: selftest cases=22 mutation_rejections=64; benchmark 100000 rounds / 300000 operations / 9800.56 ns per operation",
+    "m237_regression": "M237_SELFTEST_EXIT=0 cases=24 mutation_rejections=64; benchmark 100000 rounds / 400000 operations / 1669.77 ns per operation",
+    "m238_regression": "M238_RETENTION_SELFTEST_EXIT=0 cases=18 mutation_rejections=64; bridge cases=12; benchmark 100000 rounds / 500000 operations / 1950.25 ns per operation",
+    "m239_regression": "M239_KV_TIER_SELFTEST_EXIT=0 cases=16 mutation_rejections=64; benchmark 100000 rounds / 400000 operations / 1011.00 ns per operation",
+    "coordination_regression": "M236_SELFTEST_EXIT=0 cases=29; benchmark 100000 rounds / 1000000 operations / 3150.33 ns per operation",
+    "sandbox_regression": "M228_FSE_SELFTEST_EXIT=0; capability, resource, fuel, deadline, checkpoint, generation, tamper, authority, and cancellation checks passed",
+    "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK using recovered Linux 7.2 artifact, ACPI-on, one vCPU, 4 GiB",
+    "industry_soak": "FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256 total_iterations=1024",
+    "multi_tenant_qemu": "FAISAL_MT_QEMU_LATENCY_VALIDATION_OK tenants=1,2,4,8 with zero reported failures; TCG timing outliers remain fixture-specific",
+    "known_diagnostic_policy": "ACPI-on SMP profiles that produce RCU stalls remain rejected and unsuppressed"
+  },
+  "boundary": {
+    "production_approval": false,
+    "physical_accelerator": false,
+    "gpu_hbm_vram": false,
+    "npu_memory": false,
+    "iommu_dma": false,
+    "vendor_driver": false,
+    "independent_builder": false,
+    "independent_security_review": false,
+    "production_pki": false,
+    "live_kms_attestation": false,
+    "live_multihost_deployment": false,
+    "million_agent_scale": false,
+    "model_retraining_or_consciousness_claim": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "unverified_objective_admitted": false,
+    "unauthorized_model_proposal_admitted": false,
+    "agent_without_capability_used_tool": false,
+    "tool_without_authority_accepted": false,
+    "stale_generation_tool_accepted": false,
+    "unauthorized_message_accepted": false,
+    "tampered_checkpoint_resumed": false,
+    "tampered_event_verified": false,
+    "anomaly_quarantine_bypassed": false,
+    "journal_replay_out_of_order_accepted": false,
+    "budget_capacity_bypass": false,
+    "integer_overflow_accepted": false,
+    "fake_hardware_evidence": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "M241 is a bounded userspace supervisor contract and does not itself run LLM inference, execute tools, grant OS capabilities, program hardware, migrate processes, or provide a distributed consensus service.",
+    "The current implementation has bounded arrays of FAR_MAX_AGENTS=128, FAR_MAX_OBJECTIVES=512, and FAR_MAX_TOOL_REQUESTS=512; thousands or millions of agents require sharding, durable external storage, and independently qualified distributed transport.",
+    "Memory integration is digest-bound at the supervisor boundary; it does not replace the existing persistent memory service or claim semantic learning/retraining.",
+    "The scale benchmark measures control-plane lifecycle overhead only and does not measure tokens/sec, model latency, accelerator utilization, or energy per inference.",
+    "No physical GPU/NPU, HBM/VRAM, IOMMU/DMA, vendor driver, production KMS/PKI, independent builder, or external security review was available.",
+    "Production release remains blocked by independent builder, operator signing, physical accelerator, external security review, production PKI/KMS, live multihost migration/rollback, and operator-owned CVE evidence."
+  ]
+}
