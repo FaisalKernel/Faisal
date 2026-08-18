@@ -1851,6 +1851,6 @@
     "m205_current_lts_provenance_consistency": "pass_current_lts_source_bound_local_manifest_spdx_sbom_artifact_and_config_hashes_three_tamper_rejections_independent_builder_false",
     "m205_current_lts_provenance_evidence": "tools/faisal-build/evidence/m205-current-lts-provenance-consistency-validation.json",
     "m205_release_scope": "bounded_local_provenance_and_sbom_consistency_pass_not_independent_builder_or_external_attestation_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
-    "m205_candidate_manifest": "candidate manifest will be regenerated after final metadata binding"
+    "m205_candidate_manifest": "/home/ubuntu/agi-kernel/build/m205-candidate/production-candidate.json sha256=4047a661a98ed3c2d37c1705d55d7ecabcea7a6673210cc94cc086fc6e6ec5ff"
   }
 }
