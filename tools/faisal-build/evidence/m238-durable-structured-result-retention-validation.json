@@ -1,0 +1,139 @@
+{
+  "project": "FAISAL",
+  "milestone": "M238-durable-structured-result-retention",
+  "recorded_at": "2026-08-18T19:41:39Z",
+  "status": "local_contract_qualified_crash_recovery_and_hardened_boot_qualified_external_production_evidence_pending",
+  "objective": "Retain only M237-verified tool results in an append-only SHA-256 journal, recover projections after restart, replay bounded events with generation fencing, and require independent authority before commitment.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://docs.kernel.org/filesystems/fsverity.html",
+        "finding": "Linux fs-verity provides Merkle-tree-backed read-only file integrity and a digest, while integrity is distinct from authenticity and authorization.",
+        "impact": "M238 binds result, payload, provenance, event, and chain digests but does not confuse byte integrity with semantic truth or authority."
+      },
+      {
+        "url": "https://docs.kernel.org/scheduler/sched-ext.html",
+        "finding": "Linux sched_ext provides a controlled BPF scheduler extension boundary rather than requiring replacement of core scheduling.",
+        "impact": "FAISAL should keep adaptive scheduling policy in controlled policy/runtime layers and use evidence-bound telemetry rather than placing model reasoning in the kernel."
+      },
+      {
+        "url": "https://docs.vllm.ai/en/latest/features/disagg_prefill/",
+        "finding": "vLLM documents disaggregated prefill/decode, KV connectors, scheduling connectors, lookup buffers, and tensor pipes for latency and cache-aware serving.",
+        "impact": "FAISAL should provide provider- and hardware-neutral lineage, generation, memory-tier, and deadline telemetry rather than duplicate the serving runtime."
+      },
+      {
+        "url": "https://docs.sglang.ai/advanced_features/hicache_best_practices.html",
+        "finding": "SGLang HiCache documents hierarchical GPU, host, and storage KV-cache tiers with page-first layout and prefetch policies.",
+        "impact": "M238 preserves durable result lineage and replay semantics; a later memory-tier contract can bind cache residency and eviction evidence to the same objective and generation context."
+      },
+      {
+        "url": "https://developers.openai.com/api/docs/guides/structured-outputs",
+        "finding": "OpenAI Structured Outputs can enforce JSON Schema adherence and distinguishes function calling from structured response formatting.",
+        "impact": "Schema adherence remains an input to M237/M238 verification, never proof of provenance, semantic truth, or authorization."
+      },
+      {
+        "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling",
+        "finding": "Anthropic documents programmatic tool calls inside code execution containers and states allowed_callers is not a hard security boundary.",
+        "impact": "M238 retains caller, tool-call, objective, trace, and agent lineage and requires explicit policy authority instead of trusting provider caller metadata."
+      },
+      {
+        "url": "https://ai.google.dev/gemini-api/docs/structured-output",
+        "finding": "Gemini documents JSON Schema structured outputs, streaming partial results, recursive structures, and combination with built-in tools and grounding.",
+        "impact": "M238 treats streamed or grounded output as evidence requiring complete correlation, freshness, artifact, and replay validation."
+      }
+    ],
+    "provider_catalog": {
+      "retrieved_at": "2026-08-18",
+      "source": "live built-in provider catalog",
+      "count": 10,
+      "ids": [
+        "gpt-5-nano",
+        "gpt-5-mini",
+        "gpt-5",
+        "gpt-5.5",
+        "claude-haiku-4-5",
+        "claude-sonnet-4-6",
+        "claude-opus-4-6",
+        "claude-opus-4-7",
+        "gemini-3-flash-preview",
+        "gemini-3.1-pro-preview"
+      ],
+      "boundary": "The catalog describes the configured sandbox proxy and is not proof of external production availability or model quality."
+    }
+  },
+  "implementation": {
+    "header": "tools/faisal-result-retention/faisal_result_retention.h",
+    "source": "tools/faisal-result-retention/faisal_result_retention.c",
+    "bridge_header": "tools/faisal-result-retention/faisal_result_retention_bridge.h",
+    "bridge_source": "tools/faisal-result-retention/faisal_result_retention_bridge.c",
+    "selftest": "tools/testing/selftests/faisal_result_retention_test.c",
+    "bridge_selftest": "tools/testing/selftests/faisal_result_retention_bridge_test.c",
+    "benchmark": "tools/testing/selftests/faisal_result_retention_benchmark.c",
+    "runner": "tools/faisal-build/run_result_retention_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "append-only structured-result event journal",
+      "tool and tool-call lineage binding",
+      "objective, trace, agent, tenant, task, session, and world-generation binding",
+      "result, payload, provenance, transition, event, and chain SHA-256 digests",
+      "strict sequence and event-ID fencing",
+      "verified-result admission only",
+      "authority and independent-verifier gated commit transitions",
+      "discard transition with state validation",
+      "crash-style journal recovery into a deterministic projection",
+      "bounded replay cursors with task, session, and world-generation fencing",
+      "replay, expiry, state, sequence, and tamper rejection",
+      "M237 verified/promoted result integration bridge"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M238_RETENTION_SELFTEST_EXIT=0 cases=18 mutation_rejections=64",
+    "bridge_selftest": "M238_RETENTION_BRIDGE_SELFTEST_EXIT=0 cases=12",
+    "mutation_cases": 64,
+    "benchmark_rounds": 100000,
+    "benchmark_operations": 500000,
+    "benchmark_ns_per_operation": 1963.27,
+    "asan_ubsan": true,
+    "m237_regression": "M237_SELFTEST_EXIT=0 cases=24 mutation_rejections=64; M237 benchmark 100000 rounds / 400000 operations / 1670.11 ns per operation",
+    "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK using recovered Linux 7.2 artifact, ACPI-on, one vCPU, 4 GiB",
+    "industry_soak": "FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256 total_iterations=1024",
+    "known_diagnostic_policy": "ACPI-on SMP profiles that produce RCU stalls remain rejected and unsuppressed",
+    "kernel_abi_changed": false
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_accelerator": false,
+    "independent_security_review": false,
+    "production_pki": false,
+    "live_kms_attestation": false,
+    "live_provider_qualification": false,
+    "live_multihost_deployment": false,
+    "model_retraining_or_consciousness_claim": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "verified_result_without_retention_provenance_accepted": false,
+    "unverified_result_retained": false,
+    "unpromoted_result_committed": false,
+    "missing_independent_verifier_committed": false,
+    "wrong_generation_replayed": false,
+    "stale_event_replayed": false,
+    "duplicate_event_accepted": false,
+    "tampered_event_verified": false,
+    "tampered_chain_verified": false,
+    "future_or_expired_event_accepted": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "M238 is a deterministic C userspace retention and recovery contract; it is not a filesystem journal driver, distributed replication transport, or durable database implementation.",
+    "The contract consumes canonical digests and policy inputs; it does not parse arbitrary JSON or prove semantic truth of a tool result.",
+    "No external OpenAI, Anthropic, Gemini, MCP, SGLang, vLLM, browser, or tool execution was performed for this milestone.",
+    "No physical GPU/NPU, HBM/VRAM, IOMMU/DMA, vendor driver, independent builder, independent security review, production PKI/KMS/TPM, or external multihost deployment was qualified.",
+    "Production release remains blocked by the project external-evidence gate."
+  ]
+}
