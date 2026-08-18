@@ -1,0 +1,109 @@
+{
+  "project": "FAISAL",
+  "milestone": "M240-adaptive-resource-budget",
+  "recorded_at": "2026-08-18T20:08:00Z",
+  "status": "local_contract_qualified_hardware_neutral_resource_admission_and_production_qualification_pending",
+  "objective": "Provide a provider-neutral adaptive resource-budget contract that binds CPU, memory, GPU, NPU, network, storage, cost, and energy budgets to agent objectives with authority separation, generation fencing, deadline enforcement, receipt integrity, and fail-closed accounting.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://docs.kernel.org/scheduler/sched-ext.html",
+        "finding": "Linux sched_ext provides a dynamically loadable scheduler extension with dispatch queues, diagnostics, and automatic fallback on errors or stalls; its BPF APIs are ABI-unstable.",
+        "impact": "M240 remains a provider-neutral control-plane contract and does not make model output or an unstable scheduler extension an authority source."
+      },
+      {
+        "url": "https://docs.kernel.org/mm/damon/index.html",
+        "finding": "Linux DAMON is designed for accurate, lightweight, scalable, tunable, and automated data-access monitoring.",
+        "impact": "Future memory-placement adapters should consume qualified access observations rather than inventing an unbounded page scanner; M240 only records bounded budget policy."
+      },
+      {
+        "url": "https://docs.kernel.org/networking/iou-zcrx.html",
+        "finding": "io_uring zero-copy receive can remove kernel-to-user copies but requires NIC header/data split, flow steering, RSS, and hardware setup.",
+        "impact": "M240 records network budgets but makes no physical zero-copy, NIC, RDMA, or DMA qualification claim."
+      },
+      {
+        "url": "https://docs.nvidia.com/dynamo/v-0-8-0/design-docs/overall-architecture",
+        "finding": "NVIDIA Dynamo combines disaggregated prefill/decode, dynamic GPU scheduling, KV-aware routing, multi-tier KV offload, and NIXL transfer paths.",
+        "impact": "M240 supplies cross-resource admission and accounting primitives but does not claim to implement or outperform Dynamo’s physical GPU-fleet runtime."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-budget/faisal_budget.h",
+    "source": "tools/faisal-budget/faisal_budget.c",
+    "selftest": "tools/testing/selftests/faisal_budget_test.c",
+    "benchmark": "tools/testing/selftests/faisal_budget_benchmark.c",
+    "runner": "tools/faisal-build/run_budget_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "CPU, memory, GPU, NPU, network, storage, cost, and energy budget vocabulary",
+      "objective, tenant, agent, trace, task, session, world, and model-generation binding",
+      "verified-input and explicit-authority admission requirements",
+      "model-proposal non-authority boundary",
+      "priority and deadline-horizon policy",
+      "budget admission against policy maxima",
+      "generation-fenced consume, complete, and cancel transitions",
+      "saturating-safe accounting with integer-overflow rejection",
+      "SHA-256 request, usage, and receipt integrity",
+      "duplicate, replay, stale-generation, over-budget, expired, and exhausted-state rejection",
+      "bounded receipt and record capacity with fail-closed behavior"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M240_BUDGET_SELFTEST_EXIT=0 cases=22 mutation_rejections=64",
+    "mutation_cases": 64,
+    "benchmark_rounds": 100000,
+    "benchmark_operations": 300000,
+    "benchmark_ns_per_operation": 2443.21,
+    "benchmark_repeat_samples": [2490.99, 2487.18, 2479.73, 2451.41, 2501.10],
+    "asan_ubsan": true,
+    "legacy_tenant_budget_control": "8 threads x 250000 iterations; mutex checked path overhead 296.845 percent in controlled host fixture; not a kernel, QEMU, GPU, NPU, or production-cluster benchmark",
+    "m237_regression": "M237_SELFTEST_EXIT=0 cases=24 mutation_rejections=64; benchmark 100000 rounds / 400000 operations / 1692.11 ns per operation",
+    "m238_regression": "M238_RETENTION_SELFTEST_EXIT=0 cases=18 mutation_rejections=64; bridge cases=12; benchmark 100000 rounds / 500000 operations / 1994.15 ns per operation",
+    "m239_regression": "M239_KV_TIER_SELFTEST_EXIT=0 cases=16 mutation_rejections=64; benchmark 100000 rounds / 400000 operations / 1126.41 ns per operation",
+    "aios_parity_fixture": "M222 selftest passed; reference mean 325 ns, FAISAL durable mean 10034235 ns; transparent reference fixture only and no superiority claim",
+    "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK using recovered Linux 7.2 artifact, ACPI-on, one vCPU, 4 GiB",
+    "industry_soak": "FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256 total_iterations=1024",
+    "multi_tenant_qemu": "FAISAL_MT_QEMU_LATENCY_VALIDATION_OK tenants=1,2,4,8; fixture completed with zero failures; TCG timing outliers remain workload/virtualization-specific",
+    "known_diagnostic_policy": "ACPI-on SMP profiles that produce RCU stalls remain rejected and unsuppressed"
+  },
+  "boundary": {
+    "production_approval": false,
+    "physical_accelerator": false,
+    "gpu_hbm_vram": false,
+    "npu_memory": false,
+    "iommu_dma": false,
+    "vendor_driver": false,
+    "independent_builder": false,
+    "independent_security_review": false,
+    "production_pki": false,
+    "live_kms_attestation": false,
+    "live_multihost_deployment": false,
+    "model_retraining_or_consciousness_claim": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "unverified_input_admitted": false,
+    "unauthorized_model_proposal_admitted": false,
+    "wrong_generation_consumed": false,
+    "expired_request_admitted": false,
+    "over_budget_request_admitted": false,
+    "over_budget_usage_consumed": false,
+    "integer_overflow_accepted": false,
+    "duplicate_objective_accepted": false,
+    "tampered_receipt_verified": false,
+    "capacity_exhaustion_bypassed": false,
+    "fake_hardware_evidence": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "M240 is a bounded deterministic C userspace contract; it does not itself schedule CPU threads, program GPUs or NPUs, move memory, configure NICs, perform DMA, or measure physical energy.",
+    "The contract does not implement predictive scheduling, GPU-fleet routing, prefill/decode disaggregation, a KV-cache engine, or an accelerator driver.",
+    "No physical accelerator, HBM/VRAM, NPU, IOMMU/DMA, vendor driver, or energy-per-inference measurement was available in this environment.",
+    "The multi-tenant and AIOS results are controlled fixtures; they are not equivalent to a production Linux fleet or physical inference workload.",
+    "Production release remains blocked by independent builder, signing, hardware, security review, PKI/KMS, multihost, rollback, and CVE-operation evidence gates."
+  ]
+}

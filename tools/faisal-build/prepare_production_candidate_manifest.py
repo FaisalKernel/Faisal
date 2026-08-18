@@ -97,6 +97,7 @@ def main() -> None:
         'm237-structured-tool-result-verification-validation.json',
         'm238-durable-structured-result-retention-validation.json',
         'm239-evidence-bound-kv-tier-telemetry-validation.json',
+        'm240-adaptive-resource-budget-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:
