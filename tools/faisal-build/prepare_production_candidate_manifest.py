@@ -58,6 +58,7 @@ def main() -> None:
         'm198-world-sync-write-fault-hardened-qemu-validation.json',
         'm199-graph-world-multiop-hardened-qemu-validation.json',
         'm200-world-model-router-profile-classification-validation.json',
+        'm201-legacy-qemu-wrapper-hardening-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:

@@ -1,0 +1,49 @@
+{
+  "project": "FAISAL",
+  "milestone": "M201-legacy-qemu-wrapper-hardening",
+  "schema": "org.faisal.legacy-qemu-wrapper-hardening-validation.v1",
+  "recorded_at": "2026-08-18T09:35:49Z",
+  "status": "world_state_and_self_healing_compatibility_wrappers_qualified_acpi_off_1vcpu",
+  "wrappers": {
+    "world_state": {
+      "path": "tools/faisal-build/run_world_state_qemu.sh",
+      "sha256": "ba384c2839a52a4d9bbfb59d018026de829da6e39e65bc9dac9d2c7f55a2c182",
+      "target": "tools/faisal-build/run_world_state_hardened_qemu.sh",
+      "runner_log": "build/m201-wrappers/world-runner.log",
+      "result": "pass"
+    },
+    "self_healing": {
+      "path": "tools/faisal-build/run_self_healing_qemu.sh",
+      "sha256": "c4c8bf0eaf7256ab3fa84654b7e654317beb2e1f6f78c4170d28449b5bcb5739",
+      "target": "tools/faisal-build/run_self_healing_hardened_qemu.sh",
+      "runner_log": "build/m201-wrappers/heal-runner.log",
+      "result": "pass"
+    }
+  },
+  "profile": {
+    "qemu_acpi": "off",
+    "qemu_smp": 1,
+    "memory": "768M",
+    "timeout_seconds": 180,
+    "syntax_checks": "pass",
+    "diagnostic_policy": "inherited hardened target; kernel diagnostics rejected"
+  },
+  "validated_properties": [
+    "legacy world-state command path now delegates to the hardened configurable runner",
+    "legacy self-healing command path now delegates to the hardened configurable runner",
+    "both wrappers preserve zero exit status in the qualified profile",
+    "stale recovered-artifact-only execution paths are removed from these entry points"
+  ],
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "all legacy QEMU runners are hardened",
+      "ACPI-on SMP is globally qualified",
+      "physical accelerator qualification",
+      "independent builder or attested-farm qualification",
+      "independent external security review",
+      "operator-controlled production signing ceremony",
+      "live multihost deployment and rollback qualification"
+    ]
+  }
+}
