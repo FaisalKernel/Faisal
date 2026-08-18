@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M223-inference-objective-contract",
-  "recorded_at": "2026-08-18T13:56:19Z",
+  "recorded_at": "2026-08-18T14:05:17Z",
   "status": "local_provider_neutral_inference_contract_qualified_external_dynamo_comparison_pending",
   "objective": "Bind inference objectives to fail-closed SLO admission, model routing, prefill/decode phase semantics, KV-tier locality hints, tenant identity, cryptographic provenance, completion verification, and explicit model-output authority checks.",
   "implementation": {
