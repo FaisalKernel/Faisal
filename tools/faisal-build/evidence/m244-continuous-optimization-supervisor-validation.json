@@ -1,0 +1,117 @@
+{
+  "project": "FAISAL",
+  "milestone": "M244-continuous-optimization-supervisor",
+  "recorded_at": "2026-08-18T21:23:06Z",
+  "status": "isolated_continuous_optimization_supervisor_qualified_production_components_unchanged",
+  "objective": "Provide a bounded, deterministic, rollback-safe continuous optimization supervisor that observes verified telemetry, predicts resource actions, validates experimental proposals, deploys approved canaries, monitors outcomes, and automatically rolls back regressions without modifying privileged kernel code.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://docs.kernel.org/accounting/psi.html",
+        "finding": "Linux Pressure Stall Information exposes CPU, memory, and I/O pressure as time-based signals suitable for workload observation and resource-management feedback.",
+        "implementation_impact": "M244 models bounded pressure and health telemetry as validated inputs to deterministic prediction and safety gating rather than embedding a provider-specific scheduler in kernel space."
+      },
+      {
+        "url": "https://kubernetes.io/docs/reference/instrumentation/understand-psi-metrics/",
+        "finding": "Kubernetes documents PSI-derived some and full pressure signals for identifying contention and service degradation.",
+        "implementation_impact": "M244 retains pressure as a bounded control-plane signal and rejects stale, malformed, over-limit, or unverifiable samples before optimization."
+      },
+      {
+        "url": "https://sre.google/workbook/canarying-releases/",
+        "finding": "Google SRE describes canary releases as controlled exposure with comparison against a control population and rollback on regression.",
+        "implementation_impact": "M244 separates proposal, validation, canary deployment, monitoring, and rollback; canary approval remains authority-gated and reversible."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-optimizer/faisal_optimizer.h",
+    "source": "tools/faisal-optimizer/faisal_optimizer.c",
+    "selftest": "tools/testing/selftests/faisal_optimizer_test.c",
+    "benchmark": "tools/testing/selftests/faisal_optimizer_benchmark.c",
+    "concurrency_test": "tools/testing/selftests/faisal_optimizer_concurrency_test.c",
+    "fuzz_test": "tools/testing/selftests/faisal_optimizer_fuzz_test.c",
+    "runner": "tools/faisal-build/run_optimizer_validation.sh",
+    "platform_abi": 43,
+    "kernel_abi_changed": false,
+    "production_path_changed": false,
+    "features": [
+      "bounded telemetry windows with monotonic sequence and policy-generation fencing",
+      "deterministic forecast and risk scoring over latency, throughput, pressure, thermal, health, cache, queue, and deadline signals",
+      "immutable optimization safety bounds and explicit authority, verified-input, and experimental approval gates",
+      "canary/control validation with minimum sample windows and bounded regression thresholds",
+      "automatic rollback through M243 generation-fenced adaptive policy rollback",
+      "append-only SHA-256 chained optimizer journal with replay and tamper rejection",
+      "fail-closed malformed event and telemetry handling",
+      "concurrent read-side snapshots with serialized write-side state transitions",
+      "no privileged kernel self-modification and no model-output authority"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11 -pthread",
+    "selftest": "M244_OPTIMIZER_SELFTEST_EXIT=0 cases=73 mutation_rejections=3",
+    "benchmark": {
+      "rounds": 512,
+      "durable_observe_forecast_ns": 320683104,
+      "durable_ns_per_sample": 626334.19,
+      "static_elapsed_ns": 1042,
+      "static_ns_per_sample": 2.04,
+      "final_admission_permille": 1000,
+      "final_migration_permille": 0,
+      "latency_sum": 53498,
+      "interpretation": "The static loop is intentionally not an apples-to-apples durability comparison. The durable path includes locking, SHA-256 serialization, append, fdatasync, telemetry retention, and forecast processing. M244 exposes a measured durability and control-plane overhead; it does not claim a speedup. The result motivates batched durability as M245."
+    },
+    "concurrency": "M244_OPTIMIZER_CONCURRENCY_EXIT=0 readers=4 samples=256 failures=0; restart replay passed",
+    "fuzzing": "M244_OPTIMIZER_FUZZ_EXIT=0 iterations=10000 rejected=20000 accepted=0",
+    "asan_ubsan": "M244_OPTIMIZER_SANITIZERS_OK; lifecycle, concurrency, and fuzz fixtures passed with leak detection and halt-on-error",
+    "stable_regressions": {
+      "m243": "M243 validation passed: cases=29, mutation_rejections=6, 1024-decision benchmark, 4-reader/512-observation concurrency, 10000 fuzz, sanitizers",
+      "m242": "M242 validation passed: cases=48, mutation_rejections=6, 64-node/256-shard benchmark, 8-thread concurrency, fuzz, sanitizers",
+      "m241": "M241 validation passed: cases=38, 512-objective scale, 8-thread/256-objective concurrency, sanitizers",
+      "m240": "M240 validation passed: cases=22, mutation_rejections=64, 300000-operation benchmark",
+      "m239": "M239 validation passed: cases=16, mutation_rejections=64, 400000-operation benchmark"
+    },
+    "qemu": "FAISAL_M76_QEMU_VALIDATION_OK; Linux 7.2 recovered artifact, ACPI-on, SMP=1, 4 GiB",
+    "industry_soak": "FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256 total_iterations=1024",
+    "runner_marker": "M244_OPTIMIZER_VALIDATION_OK"
+  },
+  "security": {
+    "privileged_kernel_self_modification": false,
+    "model_output_is_authority": false,
+    "external_model_proposal_direct_commit": false,
+    "experimental_flag_required_for_commit": true,
+    "authority_and_verified_input_required": true,
+    "hard_safety_envelope": true,
+    "deterministic_prediction": true,
+    "canary_control_comparison": true,
+    "automatic_rollback_generation_fencing": true,
+    "journal_tamper_rejection": true,
+    "replay_rejection": true,
+    "stale_telemetry_rejection": true,
+    "fake_hardware_evidence": false,
+    "fake_external_evidence": false
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "million_agent_scale": false,
+    "reinforcement_learning_training": false,
+    "model_retraining": false,
+    "kernel_code_learning_or_replacement": false,
+    "physical_gpu_npu": false,
+    "physical_hbm_vram_iommu_dma": false,
+    "zero_copy_tensor_network": false,
+    "tokens_per_second": false,
+    "inference_latency": false,
+    "accelerator_utilization": false,
+    "energy_per_inference": false,
+    "consciousness": false
+  },
+  "qualification_limits": [
+    "M244 is an isolated userspace continuous-optimization supervisor; it does not alter privileged kernel code or replace the Linux scheduler.",
+    "The durable path measured 626334.19 ns per sample in this run versus a 2.04 ns static arithmetic loop; the comparison is not apples-to-apples and is not a performance win.",
+    "Batched durability, distributed journal transport, physical accelerators, real model-serving workloads, power sensors, and energy-per-inference measurements remain future qualification work.",
+    "No physical GPU/NPU, HBM/VRAM, IOMMU/DMA, vendor driver, accelerator reset, or hardware isolation evidence is present.",
+    "Production release remains blocked by independent builder equivalence, operator signing and trusted-key lifecycle, physical accelerator qualification, independent external security review, production PKI/KMS/attestation, live multi-host migration and rollback, and operator-owned CVE response."
+  ]
+}

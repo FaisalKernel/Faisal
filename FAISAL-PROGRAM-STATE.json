@@ -5,9 +5,9 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "2d328d0bd67ba783d72de82732e25bf2f3fa09e3",
-  "current_tag": "FAISAL-M243-FRONTIER-ADAPTIVE-POLICY-LABORATORY",
-  "current_abi": 42,
+  "current_head": "26ce403eb86e1a70464c1873211040a4a2750318",
+  "current_tag": "FAISAL-M244-CONTINUOUS-OPTIMIZATION-SUPERVISOR",
+  "current_abi": 43,
   "operating_loop": [
     "RESEARCH",
     "DESIGN",
@@ -2029,5 +2029,11 @@
   "m243_research_boundary": "researched_linux_sched_ext_fallback_kubernetes_scheduling_framework_safe_cmdp_constraints_and_training_wheels_for_safe_online_rl",
   "m243_model_authority_boundary": "external_model_proposals_and_runtime_hints_are_untrusted_data_experimental_flag_authority_and_verified_input_required_for_commit",
   "m243_validation_boundary": "strict_selftest_29_mutation_rejections_6_1024_decision_benchmark_4_reader_512_observation_concurrency_10000_fuzz_asan_ubsan_m239_m240_m241_m242_regressions_linux72_qemu_soak_multitenant_and_stress_passed",
-  "m243_production_boundary": "production_approval_false_kernel_self_modification_false_reinforcement_training_false_physical_accelerator_inference_power_and_independent_external_evidence_pending"
+  "m243_production_boundary": "production_approval_false_kernel_self_modification_false_reinforcement_training_false_physical_accelerator_inference_power_and_independent_external_evidence_pending",
+  "m244_continuous_optimization_supervisor": "pass_isolated_deterministic_telemetry_forecast_bounded_optimization_canary_monitor_automatic_rollback_and_replay",
+  "m244_continuous_optimization_supervisor_evidence": "tools/faisal-build/evidence/m244-continuous-optimization-supervisor-validation.json",
+  "m244_research_boundary": "researched_linux_psi_kubernetes_psi_metrics_and_google_sre_canary_release_control_comparison",
+  "m244_model_authority_boundary": "telemetry_model_hints_and_optimizer_proposals_are_untrusted_and_never_privileged_kernel_or_execution_authority",
+  "m244_validation_boundary": "strict_selftest_73_mutation_rejections_3_512_sample_durability_benchmark_4_reader_256_sample_concurrency_10000_fuzz_asan_ubsan_m239_m240_m241_m242_m243_regressions_linux72_qemu_soak_passed",
+  "m244_production_boundary": "production_approval_false_kernel_code_self_modification_false_physical_accelerator_independent_builder_external_security_review_production_pki_multihost_live_rollback_and_cve_operations_pending"
 }
