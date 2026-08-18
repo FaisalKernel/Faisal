@@ -116,7 +116,7 @@
   "boundary": {
     "production_approval": false,
     "live_multihost_agent_coordination": false,
-    "external_builder": false,
+    "independent_builder": false,
     "physical_accelerator": false,
     "independent_security_review": false,
     "production_pki": false,
