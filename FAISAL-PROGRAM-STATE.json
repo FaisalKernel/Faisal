@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "399a33a3826ae5ede44f7059c27adf423b8f9338",
+  "current_head": "6b82481a7f5a61f923fe8500bc5939797745aa8f",
   "current_tag": "FAISAL-M248-FINAL-INTEGRATION-READINESS-GATE",
   "current_abi": 47,
   "operating_loop": [
@@ -2058,5 +2058,10 @@
   "m248_final_integration_readiness_gate_evidence": "tools/faisal-build/evidence/m248-final-integration-validation.json",
   "m248_validation_boundary": "strict_runner_provenance_candidate_manifest_spdx23_sbom_m239_m247_regressions_qemu_lts_and_current_21_harness_audit_passed_local_gate_checks_21_external_blockers_12",
   "m248_production_boundary": "production_approval_false_independent_builder_operator_signing_physical_accelerator_iommu_dma_live_rdma_cxl_nvme_power_thermal_secure_boot_external_security_review_multihost_migration_and_cve_operations_pending",
-  "next_dependency": "external-independent-builder-signing-hardware-security-review-and-live-operations-qualification"
+  "next_dependency": "external-independent-builder-signing-hardware-security-review-and-live-operations-qualification",
+  "frontier_tool_context_admission": "pass_bounded_progressive_capability_trust_and_byte_budget_admission_with_generation_fenced_sha256_receipts_and_metadata_only_result_projection",
+  "frontier_tool_context_admission_evidence": "tools/faisal-build/evidence/frontier-tool-context-admission-validation-2026-08-19.json",
+  "frontier_tool_context_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-2026-08-19.md",
+  "frontier_tool_context_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-19",
+  "frontier_model_authority_boundary": "model_output_provider_metadata_tool_descriptions_and_browser_content_remain_untrusted_data_and_never_privileged_authority"
 }
