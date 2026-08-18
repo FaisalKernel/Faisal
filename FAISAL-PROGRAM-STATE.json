@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "0209628f542aa182f0b723848588d6919ba48761",
-  "current_tag": "FAISAL-M195-SELF-HEALING-HARDENED-QEMU",
+  "current_head": "cb4278876b092deb8cb2d74c59e89a57809e9005",
+  "current_tag": "FAISAL-M196-CONCURRENT-IPC-HARDENED-QEMU",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1429,7 +1429,8 @@
     "FAISAL-M192-WORLD-STATE-HARDENED-QEMU",
     "FAISAL-M193-GRAPH-FAULT-INJECTION",
     "FAISAL-M194-DURABLE-RECOVERY-QEMU",
-    "FAISAL-M195-SELF-HEALING-HARDENED-QEMU"
+    "FAISAL-M195-SELF-HEALING-HARDENED-QEMU",
+    "FAISAL-M196-CONCURRENT-IPC-HARDENED-QEMU"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1810,6 +1811,10 @@
     "m195_self_healing_hardened_qemu": "pass_acpi_off_1vcpu_automatic_rollback_audit_retention_approved_repair_canary_canary_rollback_security_quarantine_and_retry_limit_quarantine_acpi_on_smp_and_external_enterprise_blockers_pending",
     "m195_self_healing_evidence": "tools/faisal-build/evidence/m195-self-healing-hardened-qemu-validation.json",
     "m195_candidate_manifest": "/home/ubuntu/agi-kernel/build/m195-candidate/production-candidate.json sha256=3d55960b4e2b7cb2136c277bdff4178c2edc3aaa32eb544a3871e0c347082365",
-    "m195_release_scope": "bounded_self_healing_runner_and_policy_gated_recovery_qualification_pass_in_qualified_profile_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
+    "m195_release_scope": "bounded_self_healing_runner_and_policy_gated_recovery_qualification_pass_in_qualified_profile_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m196_concurrent_ipc_hardened_qemu": "pass_acpi_off_2vcpu_8_workers_512_malformed_rejections_16_capability_denials_48_cancellations_768_ipc_roundtrips_872_randomized_cases_acpi_on_2vcpu_rejected_rcu_diagnostic",
+    "m196_concurrent_ipc_evidence": "tools/faisal-build/evidence/m196-concurrent-ipc-hardened-qemu-validation.json",
+    "m196_candidate_manifest": "/home/ubuntu/agi-kernel/build/m196-candidate/production-candidate.json sha256=1294d9385140f9d78d3cc1394ba479a579cf900fd946c953eb7b1d2f7f0896d6",
+    "m196_release_scope": "bounded_concurrent_multi_agent_ipc_qualification_pass_in_acpi_off_profile_explicit_acpi_on_smp_rcu_block_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
   }
 }
