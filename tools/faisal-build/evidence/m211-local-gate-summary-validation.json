@@ -1,0 +1,43 @@
+{
+  "project": "FAISAL",
+  "milestone": "M211-local-gate-summary",
+  "schema": "org.faisal.local-gate-summary-validation.v1",
+  "recorded_at": "2026-08-18T10:17:40Z",
+  "status": "local_gate_summary_generated_verified_identity_rejections_pass",
+  "implementation": {
+    "generator": "tools/faisal-build/generate_local_gate_summary.py",
+    "generator_sha256": "d15eff2663abf24d968ec7670c1629f36a2dfc5c9e8ae48d41aa9ce32f3e9533",
+    "verifier": "tools/faisal-build/verify_local_gate_summary.py",
+    "verifier_sha256": "9851802e7df8f6c99ec0824766c735636ca5a03abae7b410784289188a2e1f50",
+    "negative_test": "build/test_m211_summary_negative.py",
+    "negative_test_sha256": "75b4c5b137cc937537df1b43cedfc99588ec006e989203c97c798d6ae3b0c98b",
+    "summary_sha256": "8acb04d0c36aa8cf32b4f3b4f4bcb0830f71d0768bca32d48ecbc43b10e1b796",
+    "checks": [
+      "candidate identity and hash binding",
+      "provenance source and hash binding",
+      "program-state tag and head binding",
+      "evidence and report hash binding",
+      "all seven local gate marker bindings",
+      "explicit non-authority boundary flags"
+    ]
+  },
+  "validation": {
+    "positive": "FAISAL_LOCAL_GATE_SUMMARY_OK checks=15",
+    "negative": [
+      "M211_NEGATIVE_CANDIDATE_HASH_REJECT_OK",
+      "M211_NEGATIVE_STATE_IDENTITY_REJECT_OK",
+      "M211_NEGATIVE_BOUNDARY_REJECT_OK",
+      "M211_NEGATIVE_TEST_EXIT=0"
+    ]
+  },
+  "boundary": {
+    "local_summary_only": true,
+    "independent_builder": false,
+    "operator_signature": false,
+    "physical_hardware": false,
+    "external_security_review": false,
+    "production_approval": false,
+    "model_output_is_authority": false,
+    "note": "The summary binds local artifacts and declared checks; it is not a signature, independent review, hardware qualification, or production approval."
+  }
+}
