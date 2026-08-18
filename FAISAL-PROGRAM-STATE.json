@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "50bf8615a26ebf644f4ad960eaef350bec9619a6",
-  "current_tag": "FAISAL-M206-CANDIDATE-PROVENANCE-ALIGNMENT",
+  "current_head": "e390aa67c0ea5725df93bfb4f46b91df2d5d26e6",
+  "current_tag": "FAISAL-M207-CANDIDATE-EVIDENCE-FRESHNESS",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1855,6 +1855,10 @@
     "m206_candidate_provenance_alignment": "pass_current_lts_candidate_and_local_provenance_alignment_checks_11_source_artifact_config_and_lineage_drift_rejections_pass",
     "m206_candidate_provenance_evidence": "tools/faisal-build/evidence/m206-candidate-provenance-alignment-validation.json",
     "m206_release_scope": "bounded_candidate_to_local_provenance_drift_detection_independent_builder_external_attestation_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
-    "m206_candidate_manifest": "/home/ubuntu/agi-kernel/build/m206-candidate/production-candidate.json sha256=90c814ff9272421a9d7c491bc7cce0610f218702459c60b7d5c6ecb6146abfda"
+    "m206_candidate_manifest": "/home/ubuntu/agi-kernel/build/m206-candidate/production-candidate.json sha256=90c814ff9272421a9d7c491bc7cce0610f218702459c60b7d5c6ecb6146abfda",
+    "m207_candidate_evidence_freshness": "pass_freshness_and_bounded_lineage_checks_15_future_timestamp_stale_lineage_and_evidence_order_rejections_pass",
+    "m207_candidate_evidence_freshness_evidence": "tools/faisal-build/evidence/m207-candidate-evidence-freshness-validation.json",
+    "m207_release_scope": "bounded_local_evidence_freshness_and_lineage_pass_independent_builder_external_attestation_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m207_candidate_manifest": "/home/ubuntu/agi-kernel/build/m207-candidate/production-candidate.json sha256=17547ef56e58a6c6a379322f469abf2a154b60ffa063399c210b74e81e423533"
   }
 }
