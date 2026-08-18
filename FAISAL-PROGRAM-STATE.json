@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "a01d1d449cd046948e0fcef917b3d829600e288a",
+  "current_head": "9e3b75d091ec62f195fd9e10410cad04aaf06fce",
   "current_tag": "FAISAL-M204-PRODUCTION-CANDIDATE-CONSISTENCY-AUDIT",
   "current_abi": 38,
   "operating_loop": [
@@ -1846,6 +1846,7 @@
     "m203_candidate_manifest": "/home/ubuntu/agi-kernel/build/m203-candidate/production-candidate.json sha256=0e9540fc5b337252f2e8e8d908e366a05da77f6e0c1cec9695a6f1e110e9d98b",
     "m204_production_candidate_consistency_audit": "pass_positive_46_check_audit_negative_manifest_head_rejection_negative_state_head_rejection_stale_m203_binding_detected_and_corrected",
     "m204_production_candidate_consistency_evidence": "tools/faisal-build/evidence/m204-production-candidate-consistency-validation.json",
-    "m204_release_scope": "bounded_evidence_integrity_and_fail_closed_consistency_audit_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
+    "m204_release_scope": "bounded_evidence_integrity_and_fail_closed_consistency_audit_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m204_candidate_manifest": "/home/ubuntu/agi-kernel/build/m204-candidate/production-candidate.json sha256=59c5b8779de5e6793c2f425be21a768c8ff9a4aeef45c1858143d21efa0f57ac"
   }
 }
