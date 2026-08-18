@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "381dc2d76c62ee3469b9c0d4d3cf1867863d8bcc",
+  "current_head": "f0cfba7fe6c81175b2072fb035d390456a5b1e51",
   "current_tag": "FAISAL-FRONTIER-TOOL-CONTEXT-ADMISSION-2026-08-19",
   "current_abi": 47,
   "operating_loop": [
@@ -2063,5 +2063,10 @@
   "frontier_tool_context_admission_evidence": "tools/faisal-build/evidence/frontier-tool-context-admission-validation-2026-08-19.json",
   "frontier_tool_context_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-2026-08-19.md",
   "frontier_tool_context_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-19",
-  "frontier_model_authority_boundary": "model_output_provider_metadata_tool_descriptions_and_browser_content_remain_untrusted_data_and_never_privileged_authority"
+  "frontier_model_authority_boundary": "model_output_provider_metadata_tool_descriptions_and_browser_content_remain_untrusted_data_and_never_privileged_authority",
+  "frontier_execution_memory_snapshot_index": "pass_durable_generation_fenced_retention_aware_snapshot_journal_with_replay_expiry_compaction_active_index_and_attestable_chain",
+  "frontier_execution_memory_snapshot_index_evidence": "tools/faisal-build/evidence/frontier-execution-memory-snapshot-index-validation-2026-08-20.json",
+  "frontier_execution_memory_snapshot_index_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-2026-08-20.md",
+  "frontier_execution_memory_snapshot_index_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-20",
+  "frontier_execution_memory_authority_boundary": "snapshot_payloads_model_proposals_and_robotics_action_proposals_remain_untrusted_data_and_never_privileged_authority"
 }
