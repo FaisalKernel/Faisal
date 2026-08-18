@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M214-release-candidate-archive",
-  "recorded_at": "2026-08-18T10:32:30Z",
+  "recorded_at": "2026-08-18T10:34:50Z",
   "status": "deterministic_relocatable_release_candidate_archive_verified",
   "implementation": {
     "archive_generator": "tools/faisal-build/archive_release_candidate_bundle.py",
