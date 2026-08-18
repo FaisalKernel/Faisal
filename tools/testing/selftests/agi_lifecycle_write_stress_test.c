@@ -35,23 +35,28 @@ static int expected_overflow_errno(int error)
 }
 
 static int graph_call(int fd, struct agi_lc_graph_node *node,
-			      struct write_result *result)
+			      __u32 expected_state, struct write_result *result)
 {
 	int rc;
 
 	errno = 0;
 	rc = ioctl(fd, AGI_LC_GRAPH_NODE, node);
 	result->calls++;
-	if (rc == 0) {
+	if (rc == 0)
 		result->accepted++;
-		return 0;
-	}
-	if (expected_overflow_errno(errno)) {
+	else if (expected_overflow_errno(errno))
 		result->expected_rejected++;
-		return 0;
+	else {
+		result->unexpected_errors++;
+		return -1;
 	}
-	result->unexpected_errors++;
-	return -1;
+	if (node->state != expected_state) {
+		fprintf(stderr, "graph state mismatch: operation=%u state=%u expected=%u errno=%d\\n",
+			node->operation, node->state, expected_state, errno);
+		result->unexpected_errors++;
+		return -1;
+	}
+	return 0;
 }
 
 static void graph_node_init(struct agi_lc_graph_node *node, __u32 operation,
@@ -123,7 +128,7 @@ int main(int argc, char **argv)
 		struct agi_lc_graph_node node;
 
 		graph_node_init(&node, AGI_LC_GRAPH_NODE_CREATE, i);
-		if (graph_call(fd, &node, &result) < 0)
+		if (graph_call(fd, &node, AGI_LC_GRAPH_STATE_READY, &result) < 0)
 			goto fail;
 	}
 
@@ -131,7 +136,7 @@ int main(int argc, char **argv)
 		struct agi_lc_graph_node node;
 
 		graph_node_init(&node, AGI_LC_GRAPH_NODE_CANCEL, i);
-		if (graph_call(fd, &node, &result) < 0)
+		if (graph_call(fd, &node, AGI_LC_GRAPH_STATE_CANCELLED, &result) < 0)
 			goto fail;
 	}
 
