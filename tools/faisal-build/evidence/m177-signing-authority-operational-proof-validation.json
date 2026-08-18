@@ -1,0 +1,108 @@
+{
+  "project": "FAISAL",
+  "milestone": "M177-signing-authority-operational-proof",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "254b305a03eef696bd65e5842643a6c8d58bf1f3",
+  "status": "operational-proof_implementation_qualified_real_operator_ceremony_pending",
+  "objective": "Prove the operational controls around production signing authority without confusing cryptographic signature validity with real operator custody, trusted distribution, or production approval.",
+  "authoritative_research": {
+    "record": "tools/faisal-build/evidence/signing-authority-research-2026-08-18.md",
+    "record_sha256": "13caa05ec0362b5c85f298b9cf7ff406663da1f359965b2752db1d5e79c1614c",
+    "sources": [
+      {
+        "url": "https://csrc.nist.gov/pubs/sp/800/57/pt1/r5/final",
+        "conclusion": "Key management requires lifecycle, protection, inventory, trust-anchor, split-knowledge, compromise, and revocation controls."
+      },
+      {
+        "url": "https://theupdateframework.github.io/specification/latest/",
+        "conclusion": "Root keys should be kept offline; trust delegation, threshold protection, safe key replacement, revocation, rollback resistance, and signed target metadata are required design considerations."
+      },
+      {
+        "url": "https://slsa.dev/spec/v1.0/distributing-provenance",
+        "conclusion": "Provenance should be bound to artifact digests, distributed with artifacts, and treated as immutable after publication."
+      },
+      {
+        "url": "https://slsa.dev/spec/v1.0/requirements",
+        "conclusion": "Authentic and unforgeable provenance requires verifiable signatures and secure protection of signing secrets outside user-controlled build steps."
+      }
+    ]
+  },
+  "implementation": {
+    "existing_authority": "tools/faisal-build/faisal_release_authority.py",
+    "operational_validator": "tools/faisal-build/verify_signing_authority_operational_proof.py",
+    "operational_proof_bundle_generator": "tools/faisal-build/prepare_signing_authority_operational_proof_bundle.py",
+    "release_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "release_gate_sha256": "e90e701f1f0468c1f3c3fbd01d0475624bfdbd6660987ae6f46b26f99a823856",
+    "operational_validator_sha256": "fc43da1085bd0c7146a2789558d9ccc58d15a52668239e3cf8ed8600143574f1",
+    "package_generator_sha256": "4b49c46b538cade83ed7a6f922e796778c6bb2ec37fbf2d0a801b8800f1c21b5",
+    "operational_test_sha256": "da11fffd6d0d6e698ab304f4db7fe46b46751a51b68d5da85403e8dae21e202e",
+    "runbook": "FAISAL-SIGNING-AUTHORITY.md",
+    "runbook_sha256": "6aa109ad250c84034a0275d8f4d83dd43ea32105e77b0cbe397c1c3666b1e3ed",
+    "required_gate_inputs": [
+      "FAISAL_SIGNING_AUTHORITY_OPERATIONAL_PROOF",
+      "FAISAL_SIGNING_AUTHORITY_ROOT_DISTRIBUTION",
+      "FAISAL_SIGNING_AUTHORITY_KEYRING",
+      "FAISAL_SIGNING_AUTHORITY_SOURCE_REVISION"
+    ],
+    "required_controls": [
+      "protected offline root custody declaration",
+      "two distinct operator witness acknowledgements",
+      "two trusted distribution channels",
+      "recipient-specific root/keyring digest verification receipts",
+      "signed root ceremony proof",
+      "tested key rotation with explicit old-key revocation",
+      "old-key rejection evidence",
+      "recovery evidence with the replacement key",
+      "exact release source and attestation binding",
+      "private-key material denial",
+      "model-output non-authority"
+    ]
+  },
+  "simulation_candidate": {
+    "source_revision": "41ae99377d76cf4e0aa542b0d9566d680ebbbed5",
+    "root_distribution": "/home/ubuntu/agi-kernel/build/m177-signing-authority/trusted-root.json",
+    "root_distribution_sha256": "bae4a66c8bc293a169b1284158e78ac5bdd27ede342d678b9d445b59b50257fa",
+    "keyring": "/home/ubuntu/agi-kernel/build/m177-signing-authority/trusted-keyring.json",
+    "keyring_sha256": "19e3e92ef033467f2f84b11fcbec24f4e1b4916809807efb8862ffb0c5135bd2",
+    "keyring_signature_sha256": "ed40751422465f33d76c4451d0cd6bcb81d9180639cf82a918e83e108305a27b",
+    "release_attestation_sha256": "e97a1e79eae4f3ee44218e3d98eaee4531c6c4455e2ebdd4ba196a1684df6bff",
+    "classification": "sandbox_simulation_only_temporary_keys_destroyed_after_generation"
+  },
+  "handoff_package": {
+    "manifest": "/home/ubuntu/agi-kernel/build/m177-signing-authority/package/operational-proof-package.json",
+    "manifest_sha256": "3733ea2831258200d9f380fe0f23bb319ca00c0eaf021cc895f74e21f21f3117",
+    "archive": "/home/ubuntu/agi-kernel/build/m177-signing-authority/package/faisal-signing-authority-41ae99377d76.tar.gz",
+    "archive_sha256": "33907c5dfe5fba6666812a3695d65eee3bf3931cb2c57de97711a3cb130c9727",
+    "status": "operator_ceremony_required",
+    "contains_private_keys": false,
+    "template_is_authoritative": false
+  },
+  "tests": {
+    "existing_release_authority": "pass_valid_tamper_revocation_stale_approval_unauthorized_root",
+    "operational_proof_simulation": "pass_ceremony_distribution_rotation_revocation_recovery_tamper_denied",
+    "temporary_private_keys": "destroyed_after_simulation",
+    "production_gate": "updated_fail_closed_operational_proof_required"
+  },
+  "production_boundary": {
+    "implementation_readiness": "pass",
+    "real_operator_key_ceremony": "pending",
+    "protected_production_root": "not_proven_in_sandbox",
+    "trusted_external_distribution": "not_proven_in_sandbox",
+    "operator_rotation_and_revocation": "simulation_only",
+    "production_release_gate": "blocked",
+    "limitations": [
+      "No real operator witnesses were present in the sandbox.",
+      "No offline HSM, air-gapped root, or MPC custody was demonstrated.",
+      "No independent trusted distribution channels or recipient receipts exist.",
+      "Temporary simulation keys were not production keys and were destroyed after testing.",
+      "No production approval or signing-authority operational qualification is claimed."
+    ],
+    "claims_not_made": [
+      "No protected production-root claim.",
+      "No real key-ceremony claim.",
+      "No trusted-distribution claim.",
+      "No production signing-authority approval claim.",
+      "No model-output authorization claim."
+    ]
+  }
+}

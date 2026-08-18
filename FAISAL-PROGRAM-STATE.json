@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "c520b5814ab90fb09fc11844e425c8ac55703d79",
-  "current_tag": "FAISAL-M176-EXTERNAL-SECURITY-REVIEW-READINESS",
+  "current_head": "254b305a03eef696bd65e5842643a6c8d58bf1f3",
+  "current_tag": "FAISAL-M177-SIGNING-AUTHORITY-OPERATIONAL-PROOF",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1568,7 +1568,8 @@
       "physical_gpu_npu_vram_iommu_dma_vendor_driver_qualification": "partially_resolved_m175_physical_hardware_handoff_bundle_exact_lts_source_config_bzimage_inventory_collector_validator_and_operator_runbook_ready_synthetic_gate_pass_sandbox_inventory_zero_accelerators_zero_iommu_groups_physical_gpu_npu_vram_iommu_dma_vendor_driver_evidence_pending",
       "replication_production_tls_pki_and_external_multihost_fixture_qualification": "partially_resolved_m171_actual_three_node_grpc_mtls_fixture_signed_quorum_commit_minority_denial_recovery_durable_reload_and_negative_paths_pass_production_pki_external_multihost_and_live_kms_pending",
       "deployment_external_orchestrator_multihost_migration_and_operational_rollback_qualification": "partially_resolved_m172_signed_fail_closed_governance_validator_approval_binding_abi_state_compatibility_worker_fence_canary_rollback_recovery_and_m78_qemu_regression_pass_external_orchestrator_multihost_migration_irreversible_side_effect_compensation_and_production_approval_pending",
-      "staged_checkpatch_cleanup_and_external_security_review_qualification": "partially_resolved_m176_exact_candidate_review_package_manifest_hash_separate_external_reviewer_key_fingerprint_signed_final_report_and_disposition_contract_validator_and_integration_tests_pass_genuine_independent_qualified_reviewer_external_findings_remediation_retests_residual_risk_acceptance_and_signed_disposition_pending"
+      "staged_checkpatch_cleanup_and_external_security_review_qualification": "partially_resolved_m176_exact_candidate_review_package_manifest_hash_separate_external_reviewer_key_fingerprint_signed_final_report_and_disposition_contract_validator_and_integration_tests_pass_genuine_independent_qualified_reviewer_external_findings_remediation_retests_residual_risk_acceptance_and_signed_disposition_pending",
+      "operator_controlled_production_signing_authority": "partially_resolved_m177_fail_closed_operational_proof_validator_ceremony_template_trusted_distribution_receipts_rotation_revocation_recovery_and_gate_integration_simulation_pass_real_operator_key_ceremony_protected_root_trusted_distribution_and_rotation_revocation_execution_pending"
     },
     "m154_accelerator_accounting_telemetry_loss": "pass_u64_overflow_admission_event_ring_backpressure_eagain_and_telemetry_lost_status_qemu",
     "m154_tenant_qemu": "pass_m154_telemetry_loss_marker_and_m115_m152_m153_regressions_return_0",
@@ -1712,6 +1713,12 @@
     "m176_external_security_review_package": "/home/ubuntu/agi-kernel/build/m176-external-security-review/review-package.json sha256=6ce9af194329237a938dab63cfb6caf32b914a38f5b36f29f844027338cc4b1d",
     "m176_external_security_review_archive": "/home/ubuntu/agi-kernel/build/m176-external-security-review/faisal-esr-candidate-105f2b85e4c2-8766f1019d80.tar.gz sha256=6b905831fcd9e76e97a09223aefc248dff7edac00858f6b7051ee26ef43fbdd4",
     "m176_external_security_review_evidence": "tools/faisal-build/evidence/m176-external-security-review-readiness-validation.json",
-    "m176_release_scope": "review_readiness_pass_external_execution_pending_production_gate_requires_separate_reviewer_key_exact_package_signed_findings_retests_residual_risk_and_final_disposition"
+    "m176_release_scope": "review_readiness_pass_external_execution_pending_production_gate_requires_separate_reviewer_key_exact_package_signed_findings_retests_residual_risk_and_final_disposition",
+    "m177_signing_authority_operational_proof": "pass_fail_closed_proof_requires_protected_root_custody_two_operator_witnesses_two_distribution_channels_digest_receipts_rotation_revocation_recovery_and_exact_release_binding",
+    "m177_signing_authority_simulation": "pass_temporary_root_and_release_keys_created_rotated_revoked_and_destroyed_after_simulation_old_key_rejected_new_key_recovery_verified",
+    "m177_signing_authority_package": "/home/ubuntu/agi-kernel/build/m177-signing-authority/package/operational-proof-package.json sha256=3733ea2831258200d9f380fe0f23bb319ca00c0eaf021cc895f74e21f21f3117",
+    "m177_signing_authority_archive": "/home/ubuntu/agi-kernel/build/m177-signing-authority/package/faisal-signing-authority-41ae99377d76.tar.gz sha256=33907c5dfe5fba6666812a3695d65eee3bf3931cb2c57de97711a3cb130c9727",
+    "m177_signing_authority_evidence": "tools/faisal-build/evidence/m177-signing-authority-operational-proof-validation.json",
+    "m177_release_scope": "operational_proof_implementation_pass_real_operator_key_ceremony_protected_production_root_trusted_distribution_operator_witnesses_rotation_revocation_and_recovery_execution_pending"
   }
 }
