@@ -1,0 +1,144 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-verified-improvement-evolution-2026-08-23",
+  "recorded_at": "2026-08-18T23:57:08Z",
+  "status": "bounded_verified_improvement_evolution_qualified",
+  "objective": "Operationalize the attached every-run autonomous improvement loop with research, baseline, isolated candidate, validation, measured promotion, explicit rollback, and fail-closed authority boundaries.",
+  "attachment": {
+    "source": "/home/ubuntu/upload/pasted_content.txt",
+    "requirements_read": 31,
+    "requirement_families": [
+      "every-run repository inspection and baseline",
+      "current open-source and commercial ecosystem research",
+      "universal provider-neutral model layer",
+      "reasoning, planning, decomposition, reflection, verification, and long-horizon execution",
+      "autonomous coding, sandboxing, testing, checkpoints, rollback, and recovery",
+      "filesystem/web/browser/computer/API/database/code/MCP tools with permission control",
+      "working/episodic/semantic/procedural memory and experience learning",
+      "multimodal text/image/audio/video/document/UI/real-world interaction",
+      "self-improvement candidate isolation, benchmark, comparison, promotion, and rollback",
+      "skill evolution and meta-learning",
+      "reliability, adversarial checking, security, graceful failure, and performance",
+      "AGI-oriented generalization and continuous knowledge acquisition without unsupported AGI claims"
+    ],
+    "implementation_decision": "Existing FAISAL subsystems cover most capability families; the missing cross-cutting mechanism was a durable evidence-bound improvement candidate lifecycle."
+  },
+  "research": [
+    {
+      "source": "https://developers.openai.com/api/docs/guides/agents",
+      "conclusion": "Agents plan, call tools, collaborate across specialists, maintain state, use handoffs, guardrails, approvals, tracing, sessions, and resumable results.",
+      "implementation_impact": "Evolution candidates require explicit isolation, validation, approval evidence when configured, promotion, and rollback rather than trusting model-generated upgrade proposals."
+    },
+    {
+      "source": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "conclusion": "MCP standardizes resources, prompts, tools, capability negotiation, asynchronous Tasks, progress/cancellation, and explicit consent/tool-safety guidance; tool descriptions and annotations are untrusted unless obtained from a trusted server.",
+      "implementation_impact": "Research, MCP metadata, tool descriptions, and model outputs are recorded as digests/data and never become promotion authority."
+    },
+    {
+      "source": "https://docs.vllm.ai/en/latest/",
+      "conclusion": "Current vLLM supports continuous batching, prefix/KV caching, speculative decoding, multimodal processing, tool/reasoning parsers, fault tolerance, and broad hardware integrations.",
+      "implementation_impact": "Provider-specific runtime improvements remain user-space candidates and must pass the same evidence/promotion/rollback transaction."
+    },
+    {
+      "source": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "conclusion": "Durable checkpointers support short-term thread recovery while stores support long-term cross-thread memory; retention and production persistence require explicit policy.",
+      "implementation_impact": "The evolution journal binds improvement evidence and rollback state separately from execution snapshots and long-term memory."
+    }
+  ],
+  "implementation": {
+    "header": "tools/faisal-evolution/faisal_evolution.h",
+    "source": "tools/faisal-evolution/faisal_evolution.c",
+    "design": "tools/faisal-evolution/FAISAL-EVOLUTION-DESIGN.md",
+    "selftest": "tools/testing/selftests/faisal_evolution_test.c",
+    "benchmark": "tools/testing/selftests/faisal_evolution_benchmark.c",
+    "fuzz_test": "tools/testing/selftests/faisal_evolution_fuzz_test.c",
+    "runner": "tools/faisal-build/run_evolution_validation.sh",
+    "abi": 1,
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "state_machine": "DRAFT -> ISOLATED -> VALIDATED -> PROMOTED; VALIDATED -> REJECTED; PROMOTED -> ROLLED_BACK",
+    "features": [
+      "research digest binding",
+      "parent/source repository head binding",
+      "baseline and candidate artifact digest binding",
+      "evidence digest binding",
+      "lower-better and higher-better metric comparison",
+      "minimum improvement and maximum regression policy",
+      "reproducibility requirement",
+      "rollback checkpoint requirement",
+      "external approval requirement",
+      "model-proposal self-authority denial",
+      "append-only fsync journal",
+      "SHA-256 journal continuity and replay verification",
+      "promotion and rollback receipts",
+      "fail-closed corruption and duplicate-candidate rejection"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11 -pthread",
+    "selftest": "FEV_EVOLUTION_SELFTEST_OK cases=29 promoted=1 rolled_back=1 rejected=2 replay=verified model_authority=denied",
+    "fuzzing": "FEV_EVOLUTION_FUZZ_OK iterations=10000 rejected=8750 promoted=1250",
+    "asan_ubsan": "FEV_EVOLUTION_ASAN_UBSAN_OK",
+    "thread_sanitizer": "FEV_EVOLUTION_TSAN_OK",
+    "benchmark": {
+      "marker": "FEV_EVOLUTION_BENCHMARK_OK",
+      "rounds": 32,
+      "lifecycle_transitions": 128,
+      "lifecycle_elapsed_ns": 27416113,
+      "raw_metric_compare_ns": 216,
+      "lifecycle_ns_per_transition": 214188.38,
+      "raw_ns_per_round": 6.75,
+      "durability": "fsync_per_transition",
+      "interpretation": "The full lifecycle is intentionally slower than raw metric comparison because it performs durable journal writes, SHA-256 digests, policy checks, approval gating, and receipts. This is control-plane safety overhead, not an end-to-end AI performance claim."
+    },
+    "real_tasks_and_regressions": {
+      "m95_durable_task_qemu": "FAISAL_M95_DURABLE_TASK_QEMU_PASS",
+      "m104_autonomy_control_qemu": "M104_AUTONOMY_CONTROL_QEMU_VALIDATION_OK",
+      "m98_mission_autonomy_qemu": "FAISAL_M98_MISSION_AUTONOMY_QEMU_PASS",
+      "combined_runner": "FEV_EVOLUTION_VALIDATION_OK"
+    },
+    "live_model_catalog": {
+      "captured": true,
+      "model_count": 10,
+      "archive": "/home/ubuntu/agi-kernel/build/frontier/live-model-catalog-2026-08-23.json",
+      "sha256": "40054874a368d65dc021b80b2849ea92eb0398dcdac50e608280562bc286829f",
+      "interpretation": "The catalog was researched for provider-neutral ecosystem analysis only. No model output, model ID, price, or provider metadata grants authority."
+    }
+  },
+  "boundary": {
+    "production_approval": false,
+    "physical_hardware_qualification": false,
+    "live_robotics_qualification": false,
+    "live_model_execution": false,
+    "independent_external_security_review": false,
+    "independent_builder": false,
+    "model_output_is_authority": false,
+    "mcp_metadata_is_authority": false,
+    "research_text_is_authority": false,
+    "generated_code_is_authority": false,
+    "promotion_is_deployment": false,
+    "unrestricted_privileged_kernel_self_modification": false
+  },
+  "security_boundaries": {
+    "missing_research_rejected": true,
+    "missing_baseline_digest_rejected": true,
+    "missing_candidate_digest_rejected": true,
+    "failed_validation_rejected": true,
+    "non_reproducible_candidate_rejected_when_required": true,
+    "below_threshold_improvement_rejected": true,
+    "excessive_regression_rejected": true,
+    "model_proposal_without_external_approval_rejected": true,
+    "duplicate_candidate_id_rejected": true,
+    "journal_corruption_rejected": true,
+    "rollback_receipt_verified": true
+  },
+  "qualification_limits": [
+    "The evolution transaction governs bounded evidence and release decisions; it does not autonomously edit privileged kernel code or deploy software.",
+    "The benchmark measures control-plane durability and policy overhead, not inference quality, tokens/sec, general intelligence, or overall system productivity.",
+    "No live paid-model call, MCP server, browser session, robotics device, physical accelerator, production cluster, or independent operator approval ceremony was used.",
+    "Skill extraction, meta-learning, model routing, memory, browser, multimodal, and robotics capabilities remain implemented in their existing provider-neutral subsystems; this iteration supplies the missing cross-cutting improvement-governance transaction rather than claiming all ecosystems are equivalent.",
+    "Production approval remains blocked by the established independent builder, signing, physical hardware, secure boot/TPM, live multihost, independent security review, and CVE-ownership requirements."
+  ]
+}
