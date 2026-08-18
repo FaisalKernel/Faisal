@@ -2,7 +2,7 @@
   "project": "FAISAL",
   "milestone": "M209-production-gate-local-preflight-integration",
   "schema": "org.faisal.production-gate-local-preflight-validation.v1",
-  "recorded_at": "2026-08-18T10:10:06Z",
+  "recorded_at": "2026-08-18T10:11:07Z",
   "status": "production_gate_requires_unified_local_preflight",
   "implementation": {
     "production_gate": "tools/faisal-build/run_production_release_gate.sh",
@@ -13,7 +13,11 @@
       "FAISAL_CANDIDATE_PROVENANCE_MANIFEST",
       "FAISAL_CANDIDATE_EVIDENCE",
       "FAISAL_PROGRAM_STATE"
-    ]
+    ],
+    "candidate_manifest": "build/m209-candidate/production-candidate.json",
+    "candidate_manifest_sha256": "afe7d98b503d0a010fc2e30010c41df88888e7a88d4d58cc7fc0341c5f71e7b5",
+    "provenance_manifest": "build/m209-provenance/FAISAL-build-manifest.json",
+    "provenance_manifest_sha256": "3cc9e3cea38d19de729d2528576af4ef8f6fbdc8fd373df30c9f2161b1936d08"
   },
   "validation": {
     "shell_syntax": "shell_syntax=ok",
@@ -22,7 +26,8 @@
       "gate_rc=1",
       "expected_marker_rc=0"
     ],
-    "ordering": "local preflight executes after candidate manifest validation and before production-line, security, CVE, accelerator, replication, deployment, signing, and external-review gates."
+    "ordering": "local preflight executes after candidate manifest validation and before production-line, security, CVE, accelerator, replication, deployment, signing, and external-review gates.",
+    "positive_head": "9509667c8fcb80de9710a8f5eef633c3d69dc500"
   },
   "boundary": {
     "gate_integration_only": true,

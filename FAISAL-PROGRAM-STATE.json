@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "ee6e98b425f486801451d754dc95a9b7e3b5b583",
-  "current_tag": "FAISAL-M208-UNIFIED-LOCAL-CANDIDATE-PREFLIGHT",
+  "current_head": "9509667c8fcb80de9710a8f5eef633c3d69dc500",
+  "current_tag": "FAISAL-M209-PRODUCTION-GATE-LOCAL-PREFLIGHT",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1863,6 +1863,10 @@
     "m208_unified_local_preflight": "pass_five_local_gates_agree_candidate_drift_and_evidence_drift_blocked",
     "m208_unified_local_preflight_evidence": "tools/faisal-build/evidence/m208-unified-local-candidate-preflight-validation.json",
     "m208_release_scope": "bounded_local_preflight_only_independent_builder_external_attestation_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
-    "m208_candidate_manifest": "/home/ubuntu/agi-kernel/build/m208-candidate/production-candidate.json sha256=2f9bbee22bdec9d1dc0d6f0796dea5a7e78b537418d786ea14085a960a18e963"
+    "m208_candidate_manifest": "/home/ubuntu/agi-kernel/build/m208-candidate/production-candidate.json sha256=2f9bbee22bdec9d1dc0d6f0796dea5a7e78b537418d786ea14085a960a18e963",
+    "m209_production_gate_local_preflight": "pass_production_gate_requires_unified_local_preflight_shell_syntax_and_missing_input_fail_closed",
+    "m209_production_gate_local_preflight_evidence": "tools/faisal-build/evidence/m209-production-gate-local-preflight-validation.json",
+    "m209_release_scope": "production_gate_local_preflight_integrated_external_builder_attestation_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m209_candidate_manifest": "/home/ubuntu/agi-kernel/build/m209-candidate/production-candidate.json sha256=15357fbf186efbe82c5b6b1d479446c164a2aebe92a7037c18afd5fde94938f8"
   }
 }
