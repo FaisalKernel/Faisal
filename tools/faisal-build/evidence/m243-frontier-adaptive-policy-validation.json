@@ -1,0 +1,118 @@
+{
+  "project": "FAISAL",
+  "milestone": "M243-frontier-adaptive-policy-laboratory",
+  "recorded_at": "2026-08-18T21:02:53Z",
+  "status": "isolated_frontier_research_prototype_qualified_production_components_unchanged",
+  "objective": "Provide a bounded userspace experimental interface that learns from verified workload observations and emits rollback-safe adaptive resource recommendations without modifying privileged kernel code or treating model output as authority.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://docs.kernel.org/scheduler/sched-ext.html",
+        "finding": "sched_ext permits dynamically loaded BPF scheduling behavior while restoring default scheduling when errors or runnable-task stalls occur; its BPF API is ABI-unstable.",
+        "implementation_impact": "M243 uses the same fallback principle but remains a userspace policy laboratory and never replaces the deterministic kernel scheduler."
+      },
+      {
+        "url": "https://kubernetes.io/docs/concepts/scheduling-eviction/scheduling-framework/",
+        "finding": "Kubernetes keeps scheduling core lightweight and uses extension points for filter, score, reserve, permit, binding, and idempotent unreserve behavior.",
+        "implementation_impact": "M243 separates observation, recommendation, commit, and rollback and treats reservation/commit as authority-gated transitions."
+      },
+      {
+        "url": "https://arxiv.org/html/2505.17342v2",
+        "finding": "Safe-RL and constrained MDPs distinguish performance objectives from explicit cumulative and instantaneous safety constraints.",
+        "implementation_impact": "M243 stores immutable hard envelopes for pressure, thermal, health, queue, action bounds, and generation; the adaptive objective cannot override them."
+      },
+      {
+        "url": "https://mlforsystems.org/assets/papers/neurips2019/towards_mao_2019.pdf",
+        "finding": "Training wheels constrain online learning with a deterministic fallback policy that takes over in unsafe states and provides a feedback signal.",
+        "implementation_impact": "M243 emits deterministic fallback actions, records fallback activations, fences stale recommendations, and supports explicit rollback."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-adaptive/faisal_adaptive.h",
+    "source": "tools/faisal-adaptive/faisal_adaptive.c",
+    "selftest": "tools/testing/selftests/faisal_adaptive_test.c",
+    "benchmark": "tools/testing/selftests/faisal_adaptive_benchmark.c",
+    "concurrency_test": "tools/testing/selftests/faisal_adaptive_concurrency_test.c",
+    "fuzz_test": "tools/testing/selftests/faisal_adaptive_fuzz_test.c",
+    "runner": "tools/faisal-build/run_adaptive_validation.sh",
+    "platform_abi": 42,
+    "kernel_abi_changed": false,
+    "production_path_changed": false,
+    "features": [
+      "verified monotonic workload observations with source/provenance digests and policy generation",
+      "deterministic adaptive controller using queue, latency, throughput, cache-hit, pressure, thermal, health, and deadline signals",
+      "immutable minimum/maximum action safety envelope and per-step delta limit",
+      "deterministic training-wheel fallback for deadline, health, pressure, thermal, and queue safety violations",
+      "explicit authority, verified-input, and experimental-only commit flags",
+      "external model-proposal boundary that cannot commit directly and cannot bypass bounded validation",
+      "append-only SHA-256 event journal with observation, proposal, commit, rollback, chain continuity, and replay",
+      "rollback increments policy generation and fences stale observations and recommendations",
+      "transactional proposal identifier restoration on validation or append failure",
+      "ASan/UBSan and deterministic mutation campaign"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M243_ADAPTIVE_SELFTEST_EXIT=0 cases=29 mutation_rejections=6",
+    "benchmark": {
+      "rounds": 1024,
+      "durable_adaptive_elapsed_ns": 491832215,
+      "durable_adaptive_ns_per_decision": 480304.90,
+      "fixed_in_memory_elapsed_ns": 1984,
+      "fixed_in_memory_ns_per_decision": 1.94,
+      "interpretation": "The fixed baseline is intentionally not an apples-to-apples durability comparison. The adaptive path includes SHA-256 serialization, append, and fdatasync for observation and commit events. This result exposes a real durability-overhead bottleneck rather than proving a speedup."
+    },
+    "concurrency": "M243_ADAPTIVE_CONCURRENCY_EXIT=0 readers=4 observations=512 failures=0; restart replay passed",
+    "fuzzing": "M243_ADAPTIVE_FUZZ_EXIT=0 iterations=10000 rejected=10000 accepted=0",
+    "asan_ubsan": "M243_ADAPTIVE_SANITIZERS_OK; lifecycle, concurrency, and fuzz fixtures passed with leak detection and halt-on-error",
+    "stable_regressions": {
+      "m242": "M242 fabric validation passed: cases=48, mutation_rejections=6, 64-node/256-shard benchmark, 8-thread concurrency, fuzz, sanitizers",
+      "m241": "M241 validation passed: cases=38, 512-objective scale, 8-thread/256-objective concurrency, sanitizers",
+      "m240": "M240 validation passed: cases=22, mutation_rejections=64, 9710.25 ns/op",
+      "m239": "M239 validation passed: cases=16, mutation_rejections=64, 1037.53 ns/op"
+    },
+    "qemu": "FAISAL_M76_QEMU_VALIDATION_OK; Linux 7.2 recovered artifact, ACPI-on, one vCPU, 4 GiB",
+    "industry_soak": "FAISAL_INDUSTRY_SOAK_OK with two rounds and 1024 total iterations",
+    "multi_tenant": "FAISAL_MT_QEMU_LATENCY_VALIDATION_OK tenants=1,2,4,8 with zero reported failures; high-load TCG timing outliers remain explicitly reported",
+    "broad_stress": "FAISAL_M80_QEMU_VALIDATION_OK and cross-subsystem stress passed"
+  },
+  "security": {
+    "privileged_kernel_self_modification": false,
+    "model_output_is_authority": false,
+    "external_model_proposal_direct_commit": false,
+    "experimental_flag_required_for_commit": true,
+    "authority_and_verified_input_required": true,
+    "hard_safety_envelope": true,
+    "deterministic_fallback": true,
+    "rollback_generation_fencing": true,
+    "journal_tamper_rejection": true,
+    "replay_rejection": true,
+    "action_delta_overflow_rejection": true,
+    "fake_hardware_evidence": false,
+    "fake_external_evidence": false
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "million_agent_scale": false,
+    "reinforcement_learning_training": false,
+    "model_retraining": false,
+    "kernel_code_learning_or_replacement": false,
+    "physical_gpu_npu": false,
+    "zero_copy_tensor_network": false,
+    "tokens_per_second": false,
+    "inference_latency": false,
+    "accelerator_utilization": false,
+    "energy_per_inference": false,
+    "consciousness": false
+  },
+  "qualification_limits": [
+    "M243 is a bounded userspace adaptive-policy laboratory and does not alter privileged kernel code or production scheduler behavior.",
+    "The durable adaptive path is currently dominated by synchronous journal persistence; 480304.90 ns per decision is measured and not presented as a performance win.",
+    "The fixed baseline is a non-durable arithmetic loop and is not an apples-to-apples competitor; the comparison demonstrates overhead rather than superiority.",
+    "No physical GPU/NPU, HBM/VRAM, IOMMU/DMA, vendor driver, power sensor, thermal controller, or real model-serving workload was available.",
+    "Production release remains blocked by independent builder equivalence, operator signing and trusted-key lifecycle, physical accelerator qualification, independent external security review, production PKI/KMS/attestation, live multi-host migration/rollback, and operator-owned CVE response."
+  ]
+}
