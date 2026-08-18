@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "bfa5d1034f161f535dd8c12eec7b927e1e8f276e",
-  "current_tag": "FAISAL-M215-RELEASE-ATTESTATION",
+  "current_head": "1439e6444801247be2f3efd0aeaa789a9210076a",
+  "current_tag": "FAISAL-M216-RELEASE-GATE-ATTESTATION",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1887,6 +1887,9 @@
     "m214_candidate_manifest": "/home/ubuntu/agi-kernel/build/m214-candidate/production-candidate.json sha256=b60b8ac53867574d017a58d831034626ddbd9033aeca0a49e4430deae249393f",
     "m215_release_attestation": "pass_ed25519_signed_payload_binding_trust_expiry_tamper_and_production_boundary_rejections",
     "m215_release_attestation_evidence": "tools/faisal-build/evidence/m215-release-attestation-validation.json",
-    "m215_candidate_manifest": "/home/ubuntu/agi-kernel/build/m215-candidate/production-candidate.json sha256=95a0204c579faa9c79f9ac30dd736ac6b6d6c1d77aa68fc288066686c5757548"
+    "m215_candidate_manifest": "/home/ubuntu/agi-kernel/build/m215-candidate/production-candidate.json sha256=95a0204c579faa9c79f9ac30dd736ac6b6d6c1d77aa68fc288066686c5757548",
+    "m216_release_gate_attestation_integration": "pass_production_mode_signed_attestation_enforcement_local_mode_marker_and_report_contract_regression",
+    "m216_release_gate_attestation_integration_evidence": "tools/faisal-build/evidence/m216-release-gate-attestation-integration-validation.json",
+    "m216_candidate_manifest": "/home/ubuntu/agi-kernel/build/m216-candidate/production-candidate.json sha256=a542faf177e0f3fa398d8b03c6f71271da49e37b4311c891559a4dbd061950a6"
   }
 }
