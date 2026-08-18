@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "7f3c02e238a199b5d8088d9f5e962461f32f1fcb",
-  "current_tag": "FAISAL-M203-UNQUALIFIED-LEGACY-QEMU-FAIL-CLOSED",
+  "current_head": "cb77da927e05c3bb57cebe06662681fcb9f0ace5",
+  "current_tag": "FAISAL-M204-PRODUCTION-CANDIDATE-CONSISTENCY-AUDIT",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1843,6 +1843,9 @@
     "m203_unqualified_legacy_qemu_guards": "pass_three_stale_entry_points_persistent_memory_experience_learning_model_orchestration_syntax_pass_exit_78_explicit_block_marker_no_false_pass_markers",
     "m203_unqualified_legacy_qemu_evidence": "tools/faisal-build/evidence/m203-unqualified-legacy-qemu-fail-closed-validation.json",
     "m203_release_scope": "bounded_fail_closed_deprecation_of_three_unqualified_legacy_qemu_paths_no_qualification_claim_for_guarded_workloads_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
-    "m203_candidate_manifest": "/home/ubuntu/agi-kernel/build/m203-candidate/production-candidate.json sha256=0e9540fc5b337252f2e8e8d908e366a05da77f6e0c1cec9695a6f1e110e9d98b"
+    "m203_candidate_manifest": "/home/ubuntu/agi-kernel/build/m203-candidate/production-candidate.json sha256=0e9540fc5b337252f2e8e8d908e366a05da77f6e0c1cec9695a6f1e110e9d98b",
+    "m204_production_candidate_consistency_audit": "pass_positive_46_check_audit_negative_manifest_head_rejection_negative_state_head_rejection_stale_m203_binding_detected_and_corrected",
+    "m204_production_candidate_consistency_evidence": "tools/faisal-build/evidence/m204-production-candidate-consistency-validation.json",
+    "m204_release_scope": "bounded_evidence_integrity_and_fail_closed_consistency_audit_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
   }
 }
