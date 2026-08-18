@@ -1,0 +1,125 @@
+{
+  "project": "FAISAL",
+  "milestone": "M239-evidence-bound-kv-tier-telemetry",
+  "recorded_at": "2026-08-18T19:49:12Z",
+  "status": "local_contract_qualified_hardware_neutral_telemetry_and_hardware_qualification_pending",
+  "objective": "Provide a provider-neutral contract for model KV-cache residency and memory-tier transitions with locality, generation, freshness, capacity, provenance, and authority enforcement.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://docs.vllm.ai/en/latest/features/disagg_prefill/",
+        "finding": "vLLM documents disaggregated prefill and decode, scheduler and worker connectors, KV-cache connectors, lookup buffers, and tensor pipes.",
+        "impact": "M239 records provider-neutral model, objective, trace, generation, locality, tier, bandwidth, latency, and transition evidence without reimplementing a serving runtime."
+      },
+      {
+        "url": "https://docs.sglang.ai/advanced_features/hicache_best_practices.html",
+        "finding": "SGLang HiCache provides hierarchical GPU, host, and storage KV-cache tiers, page-first layout, prefetch policies, and heterogeneous tensor-parallel sharing.",
+        "impact": "M239 makes tier and locality state explicit and generation-fenced, leaving actual HBM/DDR/NVMe/remote movement to qualified runtime and hardware adapters."
+      },
+      {
+        "url": "https://docs.nvidia.com/dynamo/dev/kubernetes/kv-aware-routing/overview",
+        "finding": "NVIDIA Dynamo routes requests using worker and KV state, topology, and predicted or published KV events.",
+        "impact": "M239 provides an accelerator-neutral evidence envelope for KV state and transition telemetry that can feed routing without granting routing or model metadata authority."
+      },
+      {
+        "url": "https://docs.kernel.org/scheduler/sched-ext.html",
+        "finding": "Linux sched_ext provides a controlled runtime scheduling extension point.",
+        "impact": "M239 remains a control-plane telemetry contract; adaptive scheduling policy is not placed in the kernel without workload evidence and a justified stable interface."
+      },
+      {
+        "url": "https://docs.kernel.org/filesystems/fsverity.html",
+        "finding": "Linux fs-verity provides read-only file content verification and a digest, but integrity is distinct from authenticity and authorization.",
+        "impact": "M239 binds content, metadata, provenance, request, transfer, and receipt digests without equating bytes with semantic truth or authority."
+      }
+    ],
+    "provider_catalog": {
+      "retrieved_at": "2026-08-18",
+      "source": "live built-in provider catalog",
+      "count": 10,
+      "ids": [
+        "gpt-5-nano",
+        "gpt-5-mini",
+        "gpt-5",
+        "gpt-5.5",
+        "claude-haiku-4-5",
+        "claude-sonnet-4-6",
+        "claude-opus-4-6",
+        "claude-opus-4-7",
+        "gemini-3-flash-preview",
+        "gemini-3.1-pro-preview"
+      ],
+      "boundary": "This is configured sandbox catalog evidence, not external production availability or quality qualification."
+    }
+  },
+  "implementation": {
+    "header": "tools/faisal-kv-tier/faisal_kv_tier.h",
+    "source": "tools/faisal-kv-tier/faisal_kv_tier.c",
+    "selftest": "tools/testing/selftests/faisal_kv_tier_test.c",
+    "benchmark": "tools/testing/selftests/faisal_kv_tier_benchmark.c",
+    "runner": "tools/faisal-build/run_kv_tier_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "HBM, DDR, NVMe, and network tier vocabulary",
+      "model, objective, trace, agent, tenant, task, session, world, and model-generation binding",
+      "KV-cache content, metadata, and provenance digest requirements",
+      "source/target tier and locality-domain binding",
+      "bytes, pages, bandwidth, latency, pressure, deadline, and freshness telemetry",
+      "allowed-tier admission policy",
+      "authority-gated residency transition",
+      "model-generation and request-sequence fencing",
+      "SHA-256 request and receipt integrity",
+      "receipt replay/tamper rejection"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M239_KV_TIER_SELFTEST_EXIT=0 cases=16 mutation_rejections=64",
+    "mutation_cases": 64,
+    "benchmark_rounds": 100000,
+    "benchmark_operations": 400000,
+    "benchmark_ns_per_operation": 1021.99,
+    "asan_ubsan": true,
+    "m238_regression": "M238_RETENTION_SELFTEST_EXIT=0 cases=18 mutation_rejections=64; bridge cases=12; benchmark 100000 rounds / 500000 operations / 1988.29 ns per operation",
+    "m237_regression": "M237_SELFTEST_EXIT=0 cases=24 mutation_rejections=64; benchmark 100000 rounds / 400000 operations / 1711.32 ns per operation",
+    "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK using recovered Linux 7.2 artifact, ACPI-on, one vCPU, 4 GiB",
+    "industry_soak": "FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256 total_iterations=1024",
+    "known_diagnostic_policy": "ACPI-on SMP profiles that produce RCU stalls remain rejected and unsuppressed"
+  },
+  "boundary": {
+    "production_approval": false,
+    "physical_accelerator": false,
+    "gpu_hbm_vram": false,
+    "npu_memory": false,
+    "iommu_dma": false,
+    "vendor_driver": false,
+    "independent_builder": false,
+    "independent_security_review": false,
+    "production_pki": false,
+    "live_kms_attestation": false,
+    "live_multihost_deployment": false,
+    "model_retraining_or_consciousness_claim": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "unverified_cache_admitted": false,
+    "unprovenanced_cache_admitted": false,
+    "wrong_generation_transition_accepted": false,
+    "disallowed_tier_transition_accepted": false,
+    "unauthorized_transition_accepted": false,
+    "oversized_transition_accepted": false,
+    "duplicate_cache_accepted": false,
+    "tampered_receipt_verified": false,
+    "fake_hardware_evidence": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "M239 is a deterministic C userspace telemetry and policy contract; it does not allocate HBM, VRAM, DDR, NVMe, or network memory and does not perform DMA.",
+    "The contract does not implement a GPU/NPU driver, KV-cache engine, prefill/decode scheduler, collective transport, or physical migration path.",
+    "No physical accelerator, HBM/VRAM, NPU, IOMMU/DMA, vendor driver, or energy-per-inference measurement was available in this environment.",
+    "No external provider, vLLM, SGLang, Dynamo, MCP, or model execution was performed for this milestone.",
+    "Production release remains blocked by independent builder, signing, hardware, security review, PKI/KMS, multihost, rollback, and CVE-operation evidence gates."
+  ]
+}
