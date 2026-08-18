@@ -140,12 +140,22 @@ def command_record_local(args: argparse.Namespace) -> int:
     require(source.exists(), f"source does not exist: {source}")
     require(artifact.exists(), f"artifact does not exist: {artifact}")
     machine_id = Path("/etc/machine-id").read_text().strip()
+    toolchain_digest = hashlib.sha256(subprocess.check_output(["gcc", "--version"])).hexdigest()
     payload = {
         "schema_version": 1,
         "builder_role": args.role,
         "builder_id": args.builder_id,
         "source_revision": args.source_revision,
         "config_sha256": args.config_sha256,
+        "provenance": {
+            "builder_id": f"local:{args.builder_id}",
+            "signer_id": "local:validation-key",
+            "source_uri": f"git+file://{source}",
+            "build_type": "https://faisal.example/build/linux-kernel/local/v1",
+            "source_revision": args.source_revision,
+            "config_sha256": args.config_sha256,
+            "toolchain_digest": toolchain_digest,
+        },
         "builder_identity": {
             "evidence_type": "container_machine_id",
             "issuer": "local-sandbox-self-report",
