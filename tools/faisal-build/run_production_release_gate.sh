@@ -21,6 +21,9 @@ EXTERNAL_REPLICATION_EVIDENCE=${FAISAL_EXTERNAL_REPLICATION_EVIDENCE:-}
 EXTERNAL_REPLICATION_PUBLIC_KEY=${FAISAL_EXTERNAL_REPLICATION_PUBLIC_KEY:-$PUBLIC_KEY}
 EXTERNAL_REPLICATION_PACKAGE=${FAISAL_EXTERNAL_REPLICATION_PACKAGE:-}
 DEPLOYMENT_EVIDENCE=${FAISAL_DEPLOYMENT_EVIDENCE:-}
+LIVE_DEPLOYMENT_EVIDENCE=${FAISAL_LIVE_DEPLOYMENT_EVIDENCE:-}
+LIVE_DEPLOYMENT_PUBLIC_KEY=${FAISAL_LIVE_DEPLOYMENT_PUBLIC_KEY:-$PUBLIC_KEY}
+LIVE_DEPLOYMENT_PACKAGE=${FAISAL_LIVE_DEPLOYMENT_PACKAGE:-}
 EXTERNAL_SECURITY_REVIEW=${FAISAL_EXTERNAL_SECURITY_REVIEW:-}
 EXTERNAL_SECURITY_REVIEW_PACKAGE=${FAISAL_EXTERNAL_SECURITY_REVIEW_PACKAGE:-}
 EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY=${FAISAL_EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY:-}
@@ -87,6 +90,15 @@ case "$REPLICATION_EVIDENCE" in
   *) fail "structured JSON replication qualification evidence is required for production qualification" ;;
 esac
 [ -n "$DEPLOYMENT_EVIDENCE" ] || fail "FAISAL_DEPLOYMENT_EVIDENCE is required"
+[ -n "$LIVE_DEPLOYMENT_EVIDENCE" ] || fail "FAISAL_LIVE_DEPLOYMENT_EVIDENCE is required"
+case "$LIVE_DEPLOYMENT_EVIDENCE" in
+  *.json) : ;;
+  *) fail "structured JSON live deployment qualification evidence is required for production qualification" ;;
+esac
+[ -r "$LIVE_DEPLOYMENT_EVIDENCE" ] || fail "live deployment qualification evidence is unreadable"
+[ -n "$LIVE_DEPLOYMENT_PACKAGE" ] || fail "FAISAL_LIVE_DEPLOYMENT_PACKAGE is required"
+[ -r "$LIVE_DEPLOYMENT_PACKAGE" ] || fail "live deployment qualification package is unreadable"
+[ -r "$LIVE_DEPLOYMENT_PUBLIC_KEY" ] || fail "live deployment validation public key is unreadable"
 case "$DEPLOYMENT_EVIDENCE" in
   *.json) : ;;
   *) fail "structured JSON deployment governance evidence is required for production qualification" ;;
@@ -109,6 +121,7 @@ esac
 [ -x "$LINUX/tools/faisal-build/verify_replication_qualification.py" ] || fail "replication verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_external_replication_qualification.py" ] || fail "external replication verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_deployment_governance.py" ] || fail "deployment governance verifier unavailable"
+[ -x "$LINUX/tools/faisal-build/verify_live_deployment_qualification.py" ] || fail "live deployment verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_external_security_review.py" ] || fail "external security-review verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_advisory_ledger.sh" ] || fail "advisory ledger verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
@@ -231,6 +244,16 @@ FAISAL_DEPLOYMENT_VERIFY_REPORT="${REPORT}.deployment.tsv" \
   fail "deployment governance verification"
 }
 printf 'deployment_governance\tpass\t%s\n' "$DEPLOYMENT_EVIDENCE" >> "$REPORT"
+FAISAL_LIVE_DEPLOYMENT_EVIDENCE="$LIVE_DEPLOYMENT_EVIDENCE" \
+FAISAL_LIVE_DEPLOYMENT_PUBLIC_KEY="$LIVE_DEPLOYMENT_PUBLIC_KEY" \
+FAISAL_LIVE_DEPLOYMENT_PACKAGE="$LIVE_DEPLOYMENT_PACKAGE" \
+FAISAL_EXPECTED_SOURCE_REV="$expected_source_revision" \
+FAISAL_LIVE_DEPLOYMENT_VERIFY_REPORT="${REPORT}.live-deployment.tsv" \
+  python3 "$LINUX/tools/faisal-build/verify_live_deployment_qualification.py" >/tmp/faisal-release-live-deployment-gate.log 2>&1 || {
+  cat /tmp/faisal-release-live-deployment-gate.log >&2
+  fail "live multi-host deployment qualification verification"
+}
+printf 'live_deployment_qualification\tpass\t%s\n' "$LIVE_DEPLOYMENT_EVIDENCE" >> "$REPORT"
 FAISAL_EXTERNAL_SECURITY_REVIEW="$EXTERNAL_SECURITY_REVIEW" \
 FAISAL_EXTERNAL_SECURITY_REVIEW_PACKAGE="$EXTERNAL_SECURITY_REVIEW_PACKAGE" \
 FAISAL_SECURITY_REVIEW_PUBLIC_KEY="$EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY" \
