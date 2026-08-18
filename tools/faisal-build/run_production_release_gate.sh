@@ -14,6 +14,7 @@ RELEASE_KEYRING=${FAISAL_RELEASE_KEYRING:-}
 RELEASE_ATTESTATION=${FAISAL_RELEASE_ATTESTATION:-}
 RELEASE_AUTHORITY_REPORT=${FAISAL_RELEASE_AUTHORITY_REPORT:-${ARTIFACT_OUT:-/tmp}/FAISAL-release-authority.tsv}
 SECURITY_MANIFEST=${FAISAL_SECURITY_MANIFEST:-}
+PRODUCTION_CANDIDATE_MANIFEST=${FAISAL_PRODUCTION_CANDIDATE_MANIFEST:-}
 ADVISORY_LEDGER=${FAISAL_ADVISORY_LEDGER:-}
 CVE_OPERATIONS_EVIDENCE=${FAISAL_CVE_OPERATIONS_EVIDENCE:-}
 CVE_OPERATIONS_PUBLIC_KEY=${FAISAL_CVE_OPERATIONS_PUBLIC_KEY:-$PUBLIC_KEY}
@@ -68,6 +69,12 @@ esac
 [ -r "$SIGNING_KEYRING.sig" ] || fail "signing-authority keyring signature is missing"
 [ -n "$SIGNING_SOURCE_REVISION" ] || fail "FAISAL_SIGNING_AUTHORITY_SOURCE_REVISION is required"
 [ -n "$SECURITY_MANIFEST" ] || fail "FAISAL_SECURITY_MANIFEST is required"
+[ -n "$PRODUCTION_CANDIDATE_MANIFEST" ] || fail "FAISAL_PRODUCTION_CANDIDATE_MANIFEST is required"
+case "$PRODUCTION_CANDIDATE_MANIFEST" in
+  *.json) : ;;
+  *) fail "structured JSON production candidate manifest is required" ;;
+esac
+[ -r "$PRODUCTION_CANDIDATE_MANIFEST" ] || fail "production candidate manifest is unreadable"
 [ -n "$ADVISORY_LEDGER" ] || fail "FAISAL_ADVISORY_LEDGER is required"
 [ -n "$CVE_OPERATIONS_EVIDENCE" ] || fail "FAISAL_CVE_OPERATIONS_EVIDENCE is required"
 case "$CVE_OPERATIONS_EVIDENCE" in
@@ -144,6 +151,7 @@ esac
 [ -x "$LINUX/tools/faisal-build/verify_cve_operations.py" ] || fail "CVE operations verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_security_release_evidence.sh" ] || fail "security evidence verifier unavailable"
+[ -x "$LINUX/tools/faisal-build/verify_production_candidate_manifest.py" ] || fail "production candidate manifest verifier unavailable"
 [ -r "$LINUX/tools/faisal-build/faisal_release_authority.py" ] || fail "release authority verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_signing_authority_operational_proof.py" ] || fail "signing-authority operational-proof verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/compare_reproducible_builds.sh" ] || fail "reproducibility comparator unavailable"
@@ -176,6 +184,12 @@ FAISAL_VERIFY_REPORT="${REPORT}.artifacts.tsv" \
   fail "signed artifact verification"
 }
 printf 'signed_artifacts\tpass\t%s\n' "$ARTIFACT_OUT" >> "$REPORT"
+FAISAL_PRODUCTION_CANDIDATE_MANIFEST="$PRODUCTION_CANDIDATE_MANIFEST" \
+  python3 "$LINUX/tools/faisal-build/verify_production_candidate_manifest.py" >/tmp/faisal-release-candidate-manifest.log 2>&1 || {
+  cat /tmp/faisal-release-candidate-manifest.log >&2
+  fail "unified production candidate manifest verification"
+}
+printf 'production_candidate_manifest\tpass\t%s\n' "$PRODUCTION_CANDIDATE_MANIFEST" >> "$REPORT"
 
 if [ "$REQUIRE_PRODUCTION_LINE" = 1 ]; then
   [ -n "$REQUIRED_KERNEL_LINE" ] || fail "FAISAL_REQUIRED_KERNEL_LINE is required for production release"
