@@ -92,6 +92,7 @@ def main() -> None:
         'm232-verified-research-consensus-validation.json',
         'm233-world-reconciliation-validation.json',
         'm234-trace-correlation-validation.json',
+        'm235-browser-interaction-verification-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:

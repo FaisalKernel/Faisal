@@ -1,0 +1,98 @@
+{
+  "project": "FAISAL",
+  "milestone": "M235-provider-neutral-browser-interaction-verification",
+  "recorded_at": "2026-08-18T16:42:36Z",
+  "status": "local_contract_qualified_live_browser_and_external_deployment_qualification_pending",
+  "objective": "Verify semantic browser actions against fresh page state, accessibility/DOM evidence, postconditions, and artifact digests without allowing model output or provider protocol messages to become authority.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://www.w3.org/TR/webdriver-bidi/",
+        "finding": "WebDriver BiDi defines bidirectional browser control with asynchronous commands, streamed events, modular browsing-context/input/network/script/session capabilities, and commands that may complete out of order.",
+        "impact": "M235 binds actions to page/session generations, pre-state evidence, action sequence, and post-state evidence rather than trusting command response order."
+      },
+      {
+        "url": "https://chromedevtools.github.io/devtools-protocol/",
+        "finding": "Chrome DevTools Protocol exposes DOM, input, network, debugger, and other browser instrumentation domains; its tip-of-tree protocol changes frequently without backward compatibility guarantees.",
+        "impact": "M235 treats DOM, accessibility, screenshot, network, download, and upload data as versioned evidence and keeps the contract vendor-neutral."
+      },
+      {
+        "url": "https://playwright.dev/docs/locators",
+        "finding": "Playwright recommends role, label, text, placeholder, alt-text, title, and explicit test-ID locators, with auto-waiting and strictness; brittle CSS/XPath chains are discouraged.",
+        "impact": "M235 prioritizes semantic locators, requires unique matches and confidence, and policy-gates coordinate fallback."
+      },
+      {
+        "url": "https://playwright.dev/docs/accessibility-testing",
+        "finding": "Automated accessibility checks can identify some issues but do not replace manual or inclusive assessment.",
+        "impact": "M235 accepts accessibility-tree evidence as a verification signal but does not treat it as a complete safety or accessibility guarantee."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-browser-verify/faisal_browser_verify.h",
+    "source": "tools/faisal-browser-verify/faisal_browser_verify.c",
+    "selftest": "tools/testing/selftests/faisal_browser_verify_test.c",
+    "benchmark": "tools/testing/selftests/faisal_browser_verify_benchmark.c",
+    "runner": "tools/faisal-build/run_browser_verify_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "semantic locator kind and confidence metadata",
+      "strict unique-match admission",
+      "explicit coordinate-fallback policy gate",
+      "session and page generation fencing",
+      "freshness validation against an explicit policy clock",
+      "pre-action origin, URL, DOM, accessibility, and screenshot evidence binding",
+      "post-action observation and expected DOM digest binding",
+      "download/upload artifact digest binding",
+      "action sequence replay protection",
+      "SHA-256 request and receipt integrity",
+      "tamper and stale receipt rejection",
+      "receipt query by action sequence",
+      "model proposal and browser authority separation"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M235_SELFTEST_EXIT=0",
+    "selftest_cases": 11,
+    "benchmark_rounds": 100000,
+    "benchmark_operations": 400000,
+    "benchmark_ns_per_operation": 1116,
+    "asan_ubsan": true,
+    "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK on ACPI-on one-vCPU 4G; FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256",
+    "regression_m234_m233_m232_m231_m230_m229_m228": "M234_TRACE_CORRELATION_VALIDATION_OK; M233_WORLD_RECONCILE_VALIDATION_OK; M231_RECOVERY_DECISION_VALIDATION_OK; M230_MODEL_ROUTER_VALIDATION_OK; M229_EXPERIENCE_EVIDENCE_VALIDATION_OK; M228_RUNNER_EXIT=0"
+  },
+  "boundary": {
+    "production_approval": false,
+    "live_browser": false,
+    "webdriver_bidi_qualification": false,
+    "chrome_devtools_protocol_qualification": false,
+    "physical_accelerator": false,
+    "independent_builder": false,
+    "external_security_review": false,
+    "live_multihost_deployment": false,
+    "paid_provider_qualification": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "tool_call_is_execution": false,
+    "browser_command_response_is_sufficient": false,
+    "coordinate_fallback_is_unconditionally_allowed": false,
+    "ambiguous_locator_accepted": false,
+    "stale_observation_accepted": false,
+    "page_generation_mismatch_accepted": false,
+    "tampered_receipt_verified": false,
+    "replayed_action_accepted": false,
+    "artifact_mismatch_accepted": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "M235 is a deterministic userspace browser-policy and receipt fixture, not a browser automation backend or live WebDriver BiDi/CDP client.",
+    "No live DOM, accessibility tree, screenshot, download, upload, or browser navigation was exercised in this milestone.",
+    "No live OpenAI, Anthropic, Google, vLLM, Playwright, Chromium, or external browser-provider call is part of this validation.",
+    "No physical accelerator, independent builder, independent security review, production PKI, or live multihost qualification was performed.",
+    "Production release remains blocked by the project’s external evidence gate."
+  ]
+}
