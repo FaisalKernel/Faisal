@@ -15,6 +15,8 @@ RELEASE_ATTESTATION=${FAISAL_RELEASE_ATTESTATION:-}
 RELEASE_AUTHORITY_REPORT=${FAISAL_RELEASE_AUTHORITY_REPORT:-${ARTIFACT_OUT:-/tmp}/FAISAL-release-authority.tsv}
 SECURITY_MANIFEST=${FAISAL_SECURITY_MANIFEST:-}
 ADVISORY_LEDGER=${FAISAL_ADVISORY_LEDGER:-}
+CVE_OPERATIONS_EVIDENCE=${FAISAL_CVE_OPERATIONS_EVIDENCE:-}
+CVE_OPERATIONS_PUBLIC_KEY=${FAISAL_CVE_OPERATIONS_PUBLIC_KEY:-$PUBLIC_KEY}
 ACCELERATOR_EVIDENCE=${FAISAL_ACCELERATOR_EVIDENCE:-}
 REPLICATION_EVIDENCE=${FAISAL_REPLICATION_EVIDENCE:-}
 EXTERNAL_REPLICATION_EVIDENCE=${FAISAL_EXTERNAL_REPLICATION_EVIDENCE:-}
@@ -67,6 +69,13 @@ esac
 [ -n "$SIGNING_SOURCE_REVISION" ] || fail "FAISAL_SIGNING_AUTHORITY_SOURCE_REVISION is required"
 [ -n "$SECURITY_MANIFEST" ] || fail "FAISAL_SECURITY_MANIFEST is required"
 [ -n "$ADVISORY_LEDGER" ] || fail "FAISAL_ADVISORY_LEDGER is required"
+[ -n "$CVE_OPERATIONS_EVIDENCE" ] || fail "FAISAL_CVE_OPERATIONS_EVIDENCE is required"
+case "$CVE_OPERATIONS_EVIDENCE" in
+  *.json) : ;;
+  *) fail "structured JSON CVE operations evidence is required for production qualification" ;;
+esac
+[ -r "$CVE_OPERATIONS_EVIDENCE" ] || fail "CVE operations evidence is unreadable"
+[ -r "$CVE_OPERATIONS_PUBLIC_KEY" ] || fail "CVE operations public key is unreadable"
 case "$ADVISORY_LEDGER" in
   *.json) : ;;
   *) fail "structured JSON advisory ledger is required for production qualification" ;;
@@ -132,6 +141,7 @@ esac
 [ -x "$LINUX/tools/faisal-build/verify_live_deployment_qualification.py" ] || fail "live deployment verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_external_security_review.py" ] || fail "external security-review verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_advisory_ledger.sh" ] || fail "advisory ledger verifier unavailable"
+[ -x "$LINUX/tools/faisal-build/verify_cve_operations.py" ] || fail "CVE operations verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_security_release_evidence.sh" ] || fail "security evidence verifier unavailable"
 [ -r "$LINUX/tools/faisal-build/faisal_release_authority.py" ] || fail "release authority verifier unavailable"
@@ -223,6 +233,16 @@ FAISAL_ADVISORY_VERIFY_REPORT="${REPORT}.advisory.tsv" \
   fail "advisory ledger verification"
 }
 printf 'advisory_ledger\tpass\t%s\n' "$ADVISORY_LEDGER" >> "$REPORT"
+FAISAL_CVE_OPERATIONS_EVIDENCE="$CVE_OPERATIONS_EVIDENCE" \
+FAISAL_CVE_OPERATIONS_PUBLIC_KEY="$CVE_OPERATIONS_PUBLIC_KEY" \
+FAISAL_PUBLIC_KEY="$CVE_OPERATIONS_PUBLIC_KEY" \
+FAISAL_EXPECTED_SOURCE_REV="$expected_source_revision" \
+FAISAL_CVE_OPERATIONS_VERIFY_REPORT="${REPORT}.cve-operations.tsv" \
+  python3 "$LINUX/tools/faisal-build/verify_cve_operations.py" >/tmp/faisal-release-cve-operations-gate.log 2>&1 || {
+  cat /tmp/faisal-release-cve-operations-gate.log >&2
+  fail "operator-owned CVE operations verification"
+}
+printf 'cve_operations\tpass\t%s\n' "$CVE_OPERATIONS_EVIDENCE" >> "$REPORT"
 FAISAL_ACCELERATOR_EVIDENCE="$ACCELERATOR_EVIDENCE" \
 FAISAL_PUBLIC_KEY="$PUBLIC_KEY" \
 FAISAL_EXPECTED_SOURCE_REV="$expected_source_revision" \
