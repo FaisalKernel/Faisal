@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "fa8ad67ac7ba98f9f1668b94db81b66dd1b6cf65",
-  "current_tag": "FAISAL-M187-WORLD-QUEUE-DROP-HELPER",
+  "current_head": "c8b31f2f2d948b276a753ccaae71a5f2f8cc2431",
+  "current_tag": "FAISAL-M188-QUEUE-OVERFLOW-HARDENING",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1421,7 +1421,8 @@
     "FAISAL-M184-DRIVER-CHECKPATCH-CLEANUP",
     "FAISAL-M185-QEMU-REGRESSION-QUALIFICATION",
     "FAISAL-M186-DRIVER-WARNING-CLEANUP",
-    "FAISAL-M187-WORLD-QUEUE-DROP-HELPER"
+    "FAISAL-M187-WORLD-QUEUE-DROP-HELPER",
+    "FAISAL-M188-QUEUE-OVERFLOW-HARDENING"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1770,6 +1771,10 @@
     "m187_world_queue_drop_helper": "pass_lowest_priority_ring_selection_extracted_compile_pass_zero_checkpatch_errors_two_deep_nesting_warnings_semantic_invariants_recorded",
     "m187_world_queue_drop_evidence": "tools/faisal-build/evidence/m187-world-queue-helper-validation.json",
     "m187_candidate_manifest": "/home/ubuntu/agi-kernel/build/m187-candidate/production-candidate.json sha256=bd8e5772276a57772f9941e8f234301c9982495fc69f5bff216eeecbf6a12bf1",
-    "m187_release_scope": "bounded_world_queue_overflow_quality_and_compile_pass_qemu_acpi_on_smp_rcu_stall_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
+    "m187_release_scope": "bounded_world_queue_overflow_quality_and_compile_pass_qemu_acpi_on_smp_rcu_stall_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m188_queue_overflow_helper": "pass_queue_full_and_world_drop_handling_extracted_zero_checkpatch_errors_zero_warnings_compile_pass",
+    "m188_queue_overflow_evidence": "tools/faisal-build/evidence/m188-queue-overflow-validation.json",
+    "m188_candidate_manifest": "/home/ubuntu/agi-kernel/build/m188-candidate/production-candidate.json sha256=1ba1e03e99690975275f77ac7a4a334516962e4b49af0ff425b3e76e1c746916",
+    "m188_release_scope": "bounded_queue_overflow_quality_and_compile_pass_write_side_runtime_stress_and_qemu_acpi_on_smp_rcu_stall_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
   }
 }
