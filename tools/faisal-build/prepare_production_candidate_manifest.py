@@ -62,6 +62,7 @@ def main() -> None:
         'm202-end-to-end-hardened-qemu-validation.json',
         'm203-unqualified-legacy-qemu-fail-closed-validation.json',
         'm204-production-candidate-consistency-validation.json',
+        'm205-current-lts-provenance-consistency-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:

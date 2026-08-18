@@ -1,0 +1,41 @@
+{
+  "project": "FAISAL",
+  "milestone": "M205-current-lts-provenance-consistency",
+  "schema": "org.faisal.current-lts-provenance-consistency-validation.v1",
+  "recorded_at": "2026-08-18T09:47:48Z",
+  "status": "current_lts_local_provenance_and_sbom_verified_tamper_rejections_pass",
+  "implementation": {
+    "generator": "tools/faisal-build/generate_candidate_provenance.py",
+    "generator_sha256": "2d871e04fa6b79c7a789aa7d3d87a394ce63ac91d87f9a139fe26ad1f965e197",
+    "verifier": "tools/faisal-build/verify_candidate_provenance.py",
+    "verifier_sha256": "f94f5261e83bb441b6fd56ed5c64a71d172dcc8abadcde91e62854a352ca4b6e",
+    "negative_test": "build/test_m205_provenance_negative.py",
+    "negative_test_sha256": "896073b9a0b0ead0a49d93f3d2b4e53b2704886d6f4d1e4d12be8fcfc6bddf63",
+    "bundle": {
+      "build_manifest": "build/m205-provenance/FAISAL-build-manifest.json",
+      "build_manifest_sha256": "b1cac23d641d0f6b424b91cbb7c787879eb2d35a87f26f858d1eebaad20e22d8",
+      "sbom": "build/m205-provenance/FAISAL-SBOM.spdx",
+      "sbom_sha256": "29aca668e154596c266df79121304a95c06d38df90c4f51c2cc5c9ce87f65d11"
+    }
+  },
+  "validation": {
+    "positive": "FAISAL_CANDIDATE_PROVENANCE_OK",
+    "standard_candidate_validator": "FAISAL_PRODUCTION_CANDIDATE_MANIFEST_OK",
+    "negative": [
+      "M205_NEGATIVE_SOURCE_REJECT_OK",
+      "M205_NEGATIVE_ARTIFACT_HASH_REJECT_OK",
+      "M205_NEGATIVE_SBOM_REJECT_OK",
+      "M205_NEGATIVE_TEST_EXIT=0"
+    ],
+    "source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+    "artifact_sha256": "8766f1019d80598c7982d91d89d7df27385a91ca7ea17d114d8869267204870b",
+    "config_sha256": "2c282274f1f716e2b1135b0a1fb819f99525dbe099ea0d31f1b3a2676f980e06"
+  },
+  "boundary": {
+    "local_provenance_only": true,
+    "independent_builder": false,
+    "operator_signature": false,
+    "production_approval": false,
+    "note": "The bundle detects local source, artifact, configuration, and SBOM drift but does not create independent-builder or external attestation evidence."
+  }
+}
