@@ -1,0 +1,87 @@
+{
+  "project": "FAISAL",
+  "milestone": "M178-external-replication-qualification-readiness",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "1879ff56ca46427ca7fcfe86c00444b6afea0ee9",
+  "status": "external_qualification_handoff_ready_real_external_execution_pending",
+  "objective": "Close the evidence and handoff gap between software-fixture replication qualification and real production PKI, multi-host, KMS/Vault, hardware-attestation, and deployment qualification.",
+  "authoritative_research": {
+    "record": "tools/faisal-build/evidence/replication-production-qualification-research-2026-08-18.md",
+    "record_sha256": "3b538d8ad56832c14710292914d280d6119db7fcc2029094799f311af0715634",
+    "sources": [
+      "https://grpc.io/docs/guides/auth/",
+      "https://csrc.nist.gov/pubs/sp/800/57/pt1/r5/final",
+      "https://docs.aws.amazon.com/kms/latest/developerguide/keystore-external.html",
+      "https://developer.hashicorp.com/vault/docs/secrets/transit",
+      "https://theupdateframework.github.io/specification/latest/"
+    ]
+  },
+  "implementation": {
+    "external_validator": "tools/faisal-build/verify_external_replication_qualification.py",
+    "package_generator": "tools/faisal-build/prepare_external_replication_qualification_bundle.py",
+    "integration_test": "tools/faisal-build/test_verify_external_replication_qualification.py",
+    "external_validator_sha256": "01f15f72bae8aa7901f818eaae642366e0d9b1f8a93db3aa1a3e56d5826a4b4f",
+    "package_generator_sha256": "8ed2b52459b0a7770e733b5da0adb1108204a22fe9bb09522a8d70af50c5064f",
+    "integration_test_sha256": "350ffe047b678984039c42611502287682ba7c5e7e670f04063bbd1207e4c55b",
+    "production_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "production_gate_sha256": "d333dc1fedbf64033dae497affcedf0fb49c75f678c9f82847c0923f45f7260c",
+    "runbook": "FAISAL-REPLICATION-QUALIFICATION.md",
+    "runbook_sha256": "a9a6bc04638e5fa160daa4b814e715e32152723a47c5c11645e091ff1aaa4879",
+    "required_gate_inputs": [
+      "FAISAL_EXTERNAL_REPLICATION_EVIDENCE",
+      "FAISAL_EXTERNAL_REPLICATION_PUBLIC_KEY",
+      "FAISAL_EXTERNAL_REPLICATION_PACKAGE",
+      "FAISAL_EXPECTED_SOURCE_REV"
+    ],
+    "fail_closed_controls": [
+      "minimum three distinct non-loopback hosts",
+      "production CA chain, node identity, expiry, revocation, and rotation",
+      "live AWS KMS/XKS, Vault Transit, or external-HSM sign/verify",
+      "KMS/Vault rotation and failure denial",
+      "live TPM2, secure-enclave, or approved remote-attestation quote",
+      "live cross-host partition, quorum, heal, durable recovery",
+      "external deployment restart and rollback",
+      "exact package and source binding",
+      "no simulation or pending limitations in completed evidence",
+      "model output is not authority"
+    ]
+  },
+  "software_baseline": {
+    "m171_evidence": "/home/ubuntu/agi-kernel/linux/tools/faisal-build/evidence/m171-full-tls-replication-qualification-validation.json",
+    "classification": "software_fixture_only",
+    "not_reused_as_production_evidence": true
+  },
+  "handoff_package": {
+    "source_revision": "1879ff56ca46427ca7fcfe86c00444b6afea0ee9",
+    "manifest": "/home/ubuntu/agi-kernel/build/m178-external-replication/qualification-package.json",
+    "manifest_sha256": "3485d1ed60054cd1be921460f74701524e78ce30b48df0340da8d4929a9d2e0b",
+    "archive": "/home/ubuntu/agi-kernel/build/m178-external-replication/faisal-external-replication-1879ff56ca46.tar.gz",
+    "archive_sha256": "cfc43611fd87cba6d3dc5efcf1ecbe2a8474e5047e63add7fb35105e225e52a4",
+    "template_is_authoritative": false,
+    "contains_production_credentials": false
+  },
+  "tests": {
+    "m171_replication_validator": "pass",
+    "external_validator_positive": "pass_complete_signed_three_host_production_shape",
+    "external_validator_negative": "pass_loopback_kms_pending_package_mismatch_denied",
+    "template": "pass_fail_closed_before_signature_and_external_execution",
+    "production_gate_syntax": "pass",
+    "production_gate_status": "blocked_without_external_evidence"
+  },
+  "production_boundary": {
+    "external_multi_host_network": "pending",
+    "production_pki": "pending",
+    "live_aws_kms_or_vault": "pending",
+    "tpm_or_secure_enclave": "pending",
+    "real_deployment_topology_restart_rollback": "pending",
+    "production_release_gate": "blocked",
+    "claims_not_made": [
+      "No independent multi-host qualification claim.",
+      "No production PKI claim.",
+      "No live AWS KMS, XKS, or Vault Transit claim.",
+      "No TPM or secure-enclave claim.",
+      "No production deployment topology claim.",
+      "No overall production-readiness claim."
+    ]
+  }
+}
