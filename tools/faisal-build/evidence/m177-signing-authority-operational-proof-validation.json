@@ -70,9 +70,9 @@
   },
   "handoff_package": {
     "manifest": "/home/ubuntu/agi-kernel/build/m177-signing-authority/package/operational-proof-package.json",
-    "manifest_sha256": "3733ea2831258200d9f380fe0f23bb319ca00c0eaf021cc895f74e21f21f3117",
+    "manifest_sha256": "011dda04d32c21edf1da6703523867d256aa9d1b1b20026886334e9dee1fb64f",
     "archive": "/home/ubuntu/agi-kernel/build/m177-signing-authority/package/faisal-signing-authority-41ae99377d76.tar.gz",
-    "archive_sha256": "33907c5dfe5fba6666812a3695d65eee3bf3931cb2c57de97711a3cb130c9727",
+    "archive_sha256": "54a9715ef57f11055694bd025db5612fb70c2ed86702580b5746b16efbaf5882",
     "status": "operator_ceremony_required",
     "contains_private_keys": false,
     "template_is_authoritative": false

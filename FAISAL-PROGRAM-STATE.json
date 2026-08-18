@@ -1716,8 +1716,8 @@
     "m176_release_scope": "review_readiness_pass_external_execution_pending_production_gate_requires_separate_reviewer_key_exact_package_signed_findings_retests_residual_risk_and_final_disposition",
     "m177_signing_authority_operational_proof": "pass_fail_closed_proof_requires_protected_root_custody_two_operator_witnesses_two_distribution_channels_digest_receipts_rotation_revocation_recovery_and_exact_release_binding",
     "m177_signing_authority_simulation": "pass_temporary_root_and_release_keys_created_rotated_revoked_and_destroyed_after_simulation_old_key_rejected_new_key_recovery_verified",
-    "m177_signing_authority_package": "/home/ubuntu/agi-kernel/build/m177-signing-authority/package/operational-proof-package.json sha256=3733ea2831258200d9f380fe0f23bb319ca00c0eaf021cc895f74e21f21f3117",
-    "m177_signing_authority_archive": "/home/ubuntu/agi-kernel/build/m177-signing-authority/package/faisal-signing-authority-41ae99377d76.tar.gz sha256=33907c5dfe5fba6666812a3695d65eee3bf3931cb2c57de97711a3cb130c9727",
+    "m177_signing_authority_package": "/home/ubuntu/agi-kernel/build/m177-signing-authority/package/operational-proof-package.json sha256=011dda04d32c21edf1da6703523867d256aa9d1b1b20026886334e9dee1fb64f",
+    "m177_signing_authority_archive": "/home/ubuntu/agi-kernel/build/m177-signing-authority/package/faisal-signing-authority-41ae99377d76.tar.gz sha256=54a9715ef57f11055694bd025db5612fb70c2ed86702580b5746b16efbaf5882",
     "m177_signing_authority_evidence": "tools/faisal-build/evidence/m177-signing-authority-operational-proof-validation.json",
     "m177_release_scope": "operational_proof_implementation_pass_real_operator_key_ceremony_protected_production_root_trusted_distribution_operator_witnesses_rotation_revocation_and_recovery_execution_pending"
   }
