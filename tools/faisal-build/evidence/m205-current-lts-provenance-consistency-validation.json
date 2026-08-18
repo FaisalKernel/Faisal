@@ -2,7 +2,7 @@
   "project": "FAISAL",
   "milestone": "M205-current-lts-provenance-consistency",
   "schema": "org.faisal.current-lts-provenance-consistency-validation.v1",
-  "recorded_at": "2026-08-18T09:51:20Z",
+  "recorded_at": "2026-08-18T09:52:30Z",
   "status": "current_lts_local_provenance_and_sbom_verified_tamper_rejections_pass",
   "implementation": {
     "generator": "tools/faisal-build/generate_candidate_provenance.py",
@@ -13,9 +13,9 @@
     "negative_test_sha256": "896073b9a0b0ead0a49d93f3d2b4e53b2704886d6f4d1e4d12be8fcfc6bddf63",
     "bundle": {
       "build_manifest": "build/m205-provenance/FAISAL-build-manifest.json",
-      "build_manifest_sha256": "0f325c7459b43d6c908396676605c6797645d9d6977cec97e7006d76fb51c7c0",
+      "build_manifest_sha256": "9967fb7b7025dd4b4139192f36475244d0ca8ee2b94a24415f7476a0a9d66efd",
       "sbom": "build/m205-provenance/FAISAL-SBOM.spdx",
-      "sbom_sha256": "6e9ee7fd84f71b45c592e52256d66083ee0425a9aa4c89dbba83885d579d7d99"
+      "sbom_sha256": "46be8153ce0ed2418f20e835c2145d958ae12190654143724a1a5c4cd11330a4"
     }
   },
   "validation": {
