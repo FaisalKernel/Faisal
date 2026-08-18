@@ -1033,15 +1033,14 @@ static int agi_lc_get_experience(struct agi_lc_session *session,
 			if (i + 1 < session->experience_count) {
 				u32 next_index = (session->experience_head + i + 1) %
 					AGI_LC_EXPERIENCE_RECORDS;
-				query.next_sequence = session->experiences[next_index].record.
-					experience_sequence;
+				query.next_sequence = session->experiences[next_index].record.experience_sequence;
 			}
 			goto out_unlock;
 		}
 	}
 	ret = session->experience_dropped && query.experience_sequence <
-		session->experiences[session->experience_head].record.
-		experience_sequence ? -ERANGE : -ENOENT;
+		session->experiences[session->experience_head].record.experience_sequence ?
+		-ERANGE : -ENOENT;
 out_unlock:
 	spin_unlock_irqrestore(&session->queue_lock, irqflags);
 	if (ret)
@@ -1389,6 +1388,7 @@ static struct agi_lc_persistent_memory_record *
 agi_lc_persistent_memory_find(struct agi_lc_session *session, u64 record_id)
 {
 	u32 i;
+
 	for (i = 0; i < AGI_LC_PERSISTENT_MEMORY_RECORDS_LOCAL; i++)
 		if (session->persistent_memory_records[i].valid &&
 		    session->persistent_memory_records[i].memory.record_id == record_id)
@@ -1517,21 +1517,21 @@ static int agi_lc_persistent_memory_control(struct agi_lc_session *session,
 			agi_lc_persistent_memory_expire_if_needed(candidate, now);
 			if (candidate->state == AGI_LC_MEMORY_STATE_EXPIRED)
 				continue;
-							if (agi_lc_persistent_memory_digest_equal(candidate->content_digest,
-								 request.content_digest)) {
-					candidate->dedup_count++;
-					candidate->generation++;
-					candidate->updated_realtime_ns = now;
-					request = *candidate;
-					request.operation = AGI_LC_MEMORY_RECORD_DEDUP;
-					request.correlation = candidate->correlation;
-					ret = agi_lc_push_record(session, AGI_LC_EVENT_MEMORY_RECORD,
-									0, request.correlation, candidate->record_id);
-					if (ret)
-						return ret;
-					return copy_to_user((void __user *)arg, &request,
-									 sizeof(request)) ? -EFAULT : 0;
-				}
+			if (agi_lc_persistent_memory_digest_equal(candidate->content_digest,
+							 request.content_digest)) {
+				candidate->dedup_count++;
+				candidate->generation++;
+				candidate->updated_realtime_ns = now;
+				request = *candidate;
+				request.operation = AGI_LC_MEMORY_RECORD_DEDUP;
+				request.correlation = candidate->correlation;
+				ret = agi_lc_push_record(session, AGI_LC_EVENT_MEMORY_RECORD,
+								0, request.correlation, candidate->record_id);
+				if (ret)
+					return ret;
+				return copy_to_user((void __user *)arg, &request,
+								 sizeof(request)) ? -EFAULT : 0;
+			}
 				if (!conflict_id)
 					conflict_id = candidate->record_id;
 
@@ -2124,8 +2124,8 @@ static int agi_lc_tensor_policy_control(struct agi_lc_session *session,
 	if (!record || !agi_lc_memory_authorized_locked(session, record,
 								 policy.capability,
 								 AGI_LC_MEMORY_ACCESS_READ)) {
-			ret = -EACCES;
-			goto out_unlock;
+		ret = -EACCES;
+		goto out_unlock;
 	}
 	if (policy.operation == AGI_LC_TENSOR_POLICY_GET) {
 		if (!record->tensor_valid) {
@@ -3315,18 +3315,18 @@ static int agi_lc_push_record_ex(struct agi_lc_session *session, u16 type,
 				session->world_resync_required = true;
 				agi_lc_remove_record_locked(session, drop_index);
 			} else {
-					session->dropped_records++;
-					if (observability_sampled_event)
-						session->observability_dropped++;
-					if (world_event) {
-						session->world_dropped++;
-						session->world_last_loss_sequence = event_sequence;
-						session->world_resync_required = true;
-					}
-					if (sequence_out)
-						*sequence_out = event_sequence;
-					ret = -EAGAIN;
-					goto out_unlock;
+				session->dropped_records++;
+				if (observability_sampled_event)
+					session->observability_dropped++;
+			if (world_event) {
+				session->world_dropped++;
+				session->world_last_loss_sequence = event_sequence;
+				session->world_resync_required = true;
+			}
+			if (sequence_out)
+				*sequence_out = event_sequence;
+			ret = -EAGAIN;
+			goto out_unlock;
 
 			}
 		}
@@ -5108,13 +5108,13 @@ static int agi_lc_graph_telemetry_control(struct agi_lc_session *s, unsigned lon
 		return -EINVAL;
 	}
 	if (p.operation != AGI_LC_GRAPH_TELEMETRY_BEGIN) {
-			r = agi_lc_graph_telemetry_find_locked(s, p.telemetry_id,
-								p.telemetry_capability);
-			if (!r) {
+		r = agi_lc_graph_telemetry_find_locked(s, p.telemetry_id,
+							p.telemetry_capability);
+		if (!r) {
 			mutex_unlock(&s->graph_lock);
 			return -EACCES;
 		}
-			if (r->telemetry.agent_id != faisal_task_get_agent(current)) {
+		if (r->telemetry.agent_id != faisal_task_get_agent(current)) {
 			mutex_unlock(&s->graph_lock);
 			return -EACCES;
 		}
@@ -5132,6 +5132,7 @@ static int agi_lc_graph_telemetry_control(struct agi_lc_session *s, unsigned lon
 	}
 	if (p.context_id || p.context_capability) {
 		struct agi_lc_compute_context_record *context;
+
 		if (!p.context_id || !p.context_capability) {
 			mutex_unlock(&s->graph_lock);
 			return -EINVAL;
@@ -5167,6 +5168,7 @@ static int agi_lc_graph_telemetry_control(struct agi_lc_session *s, unsigned lon
 	}
 	if (p.transport_id || p.transport_capability) {
 		bool transport_ok = false;
+
 		if (!p.transport_id || !p.transport_capability) {
 			mutex_unlock(&s->graph_lock);
 			return -EINVAL;
@@ -5186,6 +5188,7 @@ static int agi_lc_graph_telemetry_control(struct agi_lc_session *s, unsigned lon
 	}
 	if (p.provenance_id || p.provenance_sequence) {
 		bool provenance_ok = false;
+
 		if (!p.provenance_id || !p.provenance_sequence) {
 			mutex_unlock(&s->graph_lock);
 			return -EINVAL;
@@ -5324,6 +5327,7 @@ static u64 agi_lc_power_policy_available_features(u64 device_id)
 #endif
 	if (device_id) {
 		struct agi_lc_accel_record *device;
+
 		mutex_lock(&agi_lc_accel_lock);
 		device = agi_lc_find_accel_locked(device_id);
 		if (device && (device->device.capabilities & AGI_LC_ACCEL_CAP_POWER_CONTROL))
@@ -6587,8 +6591,9 @@ static int agi_lc_light_wait(struct agi_lc_session *session, unsigned long arg)
 	timeout = wait.timeout_ns ? nsecs_to_jiffies(wait.timeout_ns) :
 				  MAX_SCHEDULE_TIMEOUT;
 	ret = wait_event_interruptible_timeout(session->light_wait, ({
-			bool changed;
-			spin_lock_irqsave(&session->queue_lock, flags);
+				bool changed;
+
+				spin_lock_irqsave(&session->queue_lock, flags);
 			record = agi_lc_find_light_agent(session, wait.agent_id,
 							wait.capability);
 			changed = record && record->generation != wait.expected_generation;
