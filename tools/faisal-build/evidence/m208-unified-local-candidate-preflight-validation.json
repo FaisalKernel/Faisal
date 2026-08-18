@@ -1,0 +1,42 @@
+{
+  "project": "FAISAL",
+  "milestone": "M208-unified-local-candidate-preflight",
+  "schema": "org.faisal.unified-local-candidate-preflight-validation.v1",
+  "recorded_at": "2026-08-18T10:07:45Z",
+  "status": "all_local_candidate_gates_agree_drift_blocks_pass",
+  "implementation": {
+    "preflight": "tools/faisal-build/run_candidate_local_preflight.py",
+    "preflight_sha256": "a20aac5928e9211dd284c97a3bebbf26bddbddbcd440b85afaf07182fb1ec87e",
+    "negative_test": "build/test_m208_preflight_negative.py",
+    "negative_test_sha256": "27e4d90280cc1e8a721dc2e5eb1d9c07aad9b2e4ffb8754a8590295951b10d1f",
+    "checks": [
+      "production candidate manifest validator",
+      "local provenance verifier",
+      "candidate/provenance alignment verifier",
+      "production candidate consistency auditor",
+      "candidate evidence freshness auditor"
+    ]
+  },
+  "validation": {
+    "positive": [
+      "FAISAL_PRODUCTION_CANDIDATE_MANIFEST_OK",
+      "FAISAL_CANDIDATE_PROVENANCE_OK",
+      "FAISAL_CANDIDATE_PROVENANCE_ALIGNMENT_OK checks=11",
+      "FAISAL_EVIDENCE_CONSISTENCY_AUDIT_OK checks=50",
+      "FAISAL_CANDIDATE_EVIDENCE_FRESHNESS_OK checks=15",
+      "FAISAL_LOCAL_PREFLIGHT_OK checks=5"
+    ],
+    "negative": [
+      "M208_NEGATIVE_CANDIDATE_DRIFT_BLOCK_OK",
+      "M208_NEGATIVE_EVIDENCE_DRIFT_BLOCK_OK",
+      "M208_NEGATIVE_TEST_EXIT=0"
+    ]
+  },
+  "boundary": {
+    "local_preflight_only": true,
+    "independent_builder": false,
+    "operator_signature": false,
+    "production_approval": false,
+    "note": "Unified local agreement is a consistency gate; it cannot satisfy independent builder, physical hardware, external security review, operator signing, or live deployment evidence."
+  }
+}
