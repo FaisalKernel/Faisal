@@ -6,6 +6,8 @@
   "implementation": {
     "archive_generator": "tools/faisal-build/archive_release_candidate_bundle.py",
     "archive_generator_sha256": "861033c3f64afc0794bdc2626bb1908d6c569f60f4cf886db36b16208db23e9d",
+    "bundle_verifier": "tools/faisal-build/verify_release_candidate_bundle.py",
+    "bundle_verifier_sha256": "703e275c6125c2ebbf94d7a962bee43b7c6edd6dfbef505976160222154441f8",
     "archive_verifier": "tools/faisal-build/verify_release_candidate_archive.py",
     "archive_verifier_sha256": "c3ac44d13b1cc17152722493a04c7eca458e00f0a78592e38422bc46db0687cb",
     "negative_test": "build/test_m214_release_archive.py",

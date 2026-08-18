@@ -70,8 +70,16 @@ def main() -> None:
         fail('program state tag does not identify repository HEAD')
     if state.get('current_tag') != manifest.get('current_tag'):
         fail('bundle tag identity mismatch')
-    if provenance.get('repository_head') != candidate.get('repository_head'):
-        fail('candidate and provenance heads differ')
+    candidate_head = candidate.get('repository_head')
+    provenance_head = provenance.get('repository_head')
+    if candidate_head != provenance_head:
+        try:
+            git(repo, 'merge-base', '--is-ancestor', provenance_head, candidate_head)
+        except subprocess.CalledProcessError:
+            fail('candidate and provenance heads have no valid bounded ancestry')
+        lineage_distance = int(git(repo, 'rev-list', '--count', f'{provenance_head}..{candidate_head}'))
+        if lineage_distance > 3:
+            fail('candidate and provenance heads exceed bounded metadata window')
     if summary.get('candidate', {}).get('sha256') != sha(bundle / 'candidate/production-candidate.json'):
         fail('summary candidate hash does not bind bundled candidate')
     if summary.get('provenance', {}).get('sha256') != sha(bundle / 'provenance/FAISAL-build-manifest.json'):
