@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M229-provenance-bound-experience-evidence-contract",
-  "recorded_at": "2026-08-18T15:47:21Z",
+  "recorded_at": "2026-08-18T15:50:08Z",
   "status": "local_contract_qualified_external_and_physical_backend_qualification_pending",
   "objective": "Extend FAISAL persistent experience learning with deterministic provenance-bound promotion, conflict detection, correction, expiry, replay protection, reusable retrieval, and evidence verification.",
   "research": {
