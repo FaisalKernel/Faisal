@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "9af48eebcf013355279936fadbdfd9e289df5656",
-  "current_tag": "FAISAL-M224-PREEMPT-RT-AWARE-DETERMINISTIC-CONTRACT",
+  "current_head": "809596cd8867011612f0495809c978fe8727339a",
+  "current_tag": "FAISAL-M225-KUBERNETES-FLEET-INTENT",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1918,5 +1918,9 @@
   "m224_preempt_rt_contract": "pass_dependency_aware_priority_inheritance_deadline_budget_cpu_affinity_authority_and_fail_closed_rt_profile_contract",
   "m224_preempt_rt_contract_evidence": "tools/faisal-build/evidence/m224-preempt-rt-contract-validation.json",
   "m224_preempt_rt_boundary": "current_industry_config_missing_config_preempt_rt_physical_latency_tools_and_hardware_qualification_pending",
-  "m224_comparison_boundary": "FAISAL_adds_agent_workload_semantics_above_preempt_rt_without_claiming_kernel_irq_or_hard_latency_superiority"
+  "m224_comparison_boundary": "FAISAL_adds_agent_workload_semantics_above_preempt_rt_without_claiming_kernel_irq_or_hard_latency_superiority",
+  "m225_kubernetes_fleet_intent": "pass_agent_lineage_authority_topology_resource_gang_placement_stale_generation_fencing_and_node_failure_recovery",
+  "m225_kubernetes_fleet_intent_evidence": "tools/faisal-build/evidence/m225-kubernetes-fleet-intent-validation.json",
+  "m225_comparison_boundary": "FAISAL_control_plane_fixture_complements_kubernetes_dra_kueue_gpu_operator_and_physical_fleet_without_replacing_or_beating_live_fleet_operations",
+  "m225_production_boundary": "production_approval_false_kubernetes_qualification_false_physical_accelerator_external_multinode_and_independent_evidence_pending"
 }
