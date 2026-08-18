@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "6b86c83acb177f754f598e4ab1fca5dc51a3e32e",
+  "current_head": "1bb9f4501264eb1bccc2ff5bc1fcb62e14bb3005",
   "current_tag": "FAISAL-M205-CURRENT-LTS-PROVENANCE-CONSISTENCY",
   "current_abi": 38,
   "operating_loop": [
@@ -1851,6 +1851,6 @@
     "m205_current_lts_provenance_consistency": "pass_current_lts_source_bound_local_manifest_spdx_sbom_artifact_and_config_hashes_three_tamper_rejections_independent_builder_false",
     "m205_current_lts_provenance_evidence": "tools/faisal-build/evidence/m205-current-lts-provenance-consistency-validation.json",
     "m205_release_scope": "bounded_local_provenance_and_sbom_consistency_pass_not_independent_builder_or_external_attestation_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
-    "m205_candidate_manifest": "/home/ubuntu/agi-kernel/build/m205-candidate/production-candidate.json sha256=f4726f56440d256039bdb66648ee984aae1956fc88b5bc199e645766b8072901"
+    "m205_candidate_manifest": "candidate manifest will be regenerated after final metadata binding"
   }
 }
