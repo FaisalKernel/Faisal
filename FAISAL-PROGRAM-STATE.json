@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "dcdb5090f92ea65a66e6c47a8d3758964948ac0a",
+  "current_head": "a9a26102a7e4e6d4eb8f2b8a3fb4cfcb78086ac8",
   "current_tag": "FAISAL-M198-WORLD-SYNC-WRITE-FAULT-HARDENED-QEMU",
   "current_abi": 38,
   "operating_loop": [
@@ -1822,6 +1822,7 @@
     "m197_release_scope": "bounded_cross_subsystem_recovery_qualification_pass_in_acpi_off_profile_explicit_acpi_on_smp_rcu_block_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
     "m198_world_sync_write_fault_hardened_qemu": "pass_strict_static_compile_acpi_off_1vcpu_subscription_write_rejections_policy_readback_ack_monotonicity_resync_guard_acpi_on_2vcpu_rejected_rcu_diagnostic",
     "m198_world_sync_write_fault_evidence": "tools/faisal-build/evidence/m198-world-sync-write-fault-hardened-qemu-validation.json",
-    "m198_release_scope": "bounded_world_sync_write_side_fault_qualification_pass_in_acpi_off_profile_explicit_acpi_on_smp_rcu_block_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
+    "m198_release_scope": "bounded_world_sync_write_side_fault_qualification_pass_in_acpi_off_profile_explicit_acpi_on_smp_rcu_block_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m198_candidate_manifest": "/home/ubuntu/agi-kernel/build/m198-candidate/production-candidate.json sha256=36e2c89a8f8cf3b494dee8e21e17cdbea2e67d17e95bfb162e0f285baf1ddc63"
   }
 }
