@@ -1,0 +1,44 @@
+{
+  "project": "FAISAL",
+  "milestone": "M185-qemu-regression-harness-qualification",
+  "schema": "org.faisal.qemu-regression-validation.v1",
+  "recorded_at": "2026-08-18T06:18:37Z",
+  "repository_parent_commit": "b129f52875639f114f31dbcee54a353c379b9058",
+  "status": "success_marker_harness_fixed_acpi_off_smp_and_one_cpu_pass_acpi_on_smp_rcu_stall_open",
+  "change": {
+    "file": "tools/faisal-build/run_lifecycle_uapi_fuzz_qemu.sh",
+    "file_sha256": "e5595c19f14f895c42ef478f3ee7c60bdde2c783d498e2645025639b88dc7e75",
+    "description": "Default QEMU mode now terminates on the explicit FAISAL_UAPI_FUZZ_RC=0 marker; guest poweroff may halt rather than terminate QEMU.",
+    "security_boundary": "Diagnostic scanning remains active and rejects kernel stalls, panics, warnings, and memory-safety markers."
+  },
+  "profiles": {
+    "acpi_off_2vcpu_16384": {
+      "result": "pass",
+      "log": "build/m185-qemu-fixed-16k/run.log",
+      "markers": "FAISAL_UAPI_FUZZ_BOOT_OK, FAISAL_UAPI_FUZZ_OK calls=32768, FAISAL_UAPI_FUZZ_RC=0, FAISAL_UAPI_FUZZ_QEMU_RC=0",
+      "log_sha256": "24637dd5cee594fdbf4d94aed3509ee4eca23eec94084e1cbb9014d20ab8a981"
+    },
+    "acpi_on_1vcpu_4096": {
+      "result": "pass",
+      "log": "build/m185-qemu-1vcpu-acpi-on/run.log",
+      "markers": "FAISAL_UAPI_FUZZ_BOOT_OK, FAISAL_UAPI_FUZZ_OK calls=8192, FAISAL_UAPI_FUZZ_RC=0, FAISAL_UAPI_FUZZ_QEMU_RC=0",
+      "log_sha256": "24637dd5cee594fdbf4d94aed3509ee4eca23eec94084e1cbb9014d20ab8a981"
+    },
+    "acpi_on_2vcpu_4096": {
+      "result": "blocked_by_kernel_diagnostic",
+      "log": "build/m185-qemu-fixed-acpi-on/run.log",
+      "markers": "fuzz completion markers present, but repeated rcu_preempt stalls detected; harness returned FAISAL_UAPI_FUZZ_KERNEL_DIAGNOSTIC_FOUND",
+      "log_sha256": "13913e1fd08609042afaec20bfe1488e11315b1eee7bbe5be755d2f60d47e653"
+    }
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "ACPI-on SMP qualification passed.",
+      "The RCU stall is harmless.",
+      "FAISAL is production-approved.",
+      "Physical hardware or external operational qualification occurred."
+    ],
+    "remaining_action": "Investigate and remediate or formally bound the ACPI-on SMP RCU-preempt stall under the LTS qualification policy; then repeat soak, sanitizer, and workload regression profiles."
+  }
+}
