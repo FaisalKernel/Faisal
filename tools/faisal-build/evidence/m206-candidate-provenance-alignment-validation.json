@@ -2,7 +2,7 @@
   "project": "FAISAL",
   "milestone": "M206-candidate-provenance-alignment",
   "schema": "org.faisal.candidate-provenance-alignment-validation.v1",
-  "recorded_at": "2026-08-18T09:56:53Z",
+  "recorded_at": "2026-08-18T09:57:53Z",
   "status": "candidate_and_local_provenance_aligned_drift_rejections_pass",
   "implementation": {
     "alignment_verifier": "tools/faisal-build/verify_candidate_provenance_alignment.py",
@@ -10,11 +10,11 @@
     "negative_test": "build/test_m206_alignment_negative.py",
     "negative_test_sha256": "0d12d3a535946147709bf6b678b0926932176e53fe91e113c1127b622ff79a38",
     "candidate_manifest": "build/m206-candidate/production-candidate.json",
-    "candidate_manifest_sha256": "27a877d0e0bf0d88d043928619a9b9d8ddca4ddc744e0ec4e983c4db99f94d5e",
+    "candidate_manifest_sha256": "400651b7dac1e62d736e443b9e3eb0f10d279db18f54e74ba804489111a87674",
     "provenance_manifest": "build/m206-provenance/FAISAL-build-manifest.json",
-    "provenance_manifest_sha256": "ec8794088b507042b9c12bd95379b31d2eaa6c850e7f685f631b13eefaa591a4",
+    "provenance_manifest_sha256": "6bc10b85aa2bf918efec583dc969ed48eae788e6e30dcfb2a8e3d09310310cdd",
     "provenance_sbom": "build/m206-provenance/FAISAL-SBOM.spdx",
-    "provenance_sbom_sha256": "3f021e68956510c21aaf78e9b0497e9fb39477868c4cb64f51b3811807f5773f",
+    "provenance_sbom_sha256": "7c0dad0c1e9a1a0b5f293a16b1dd96bf52372a4175e9535bc52efa4bb731755a",
     "checks": [
       "candidate repository HEAD is current HEAD",
       "provenance repository HEAD is current HEAD or immediate parent",
@@ -25,7 +25,7 @@
     ]
   },
   "validation": {
-    "positive": "FAISAL_CANDIDATE_PROVENANCE_ALIGNMENT_OK checks=11 head=9dd609d47961544e71df927b845e0a051e6e16df",
+    "positive": "FAISAL_CANDIDATE_PROVENANCE_ALIGNMENT_OK checks=11 head=14fd3e91f5fb0e1ff5e1e2cda5d4770369982a37",
     "negative": [
       "M206_NEGATIVE_SOURCE_DRIFT_REJECT_OK",
       "M206_NEGATIVE_ARTIFACT_DRIFT_REJECT_OK",
