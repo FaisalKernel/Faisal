@@ -2,7 +2,7 @@
   "project": "FAISAL",
   "milestone": "M210-release-gate-report-integrity",
   "schema": "org.faisal.release-gate-report-integrity-validation.v1",
-  "recorded_at": "2026-08-18T10:14:42Z",
+  "recorded_at": "2026-08-18T10:15:46Z",
   "status": "report_integrity_checker_pass_self_consistency_integrated",
   "implementation": {
     "checker": "tools/faisal-build/verify_release_gate_report.py",
@@ -19,7 +19,11 @@
       "non-empty trustworthy pass details",
       "required-check presence",
       "final report_integrity self-check integration"
-    ]
+    ],
+    "candidate_manifest": "build/m210-candidate/production-candidate.json",
+    "candidate_manifest_sha256": "ad225de6f7eb85a8d32134736a6dd1b8b9877e033065737c194bde531441dee8",
+    "provenance_manifest": "build/m210-provenance/FAISAL-build-manifest.json",
+    "provenance_manifest_sha256": "9d258ca2545e7a66065577a7609cf31da8c12b1099385d9e31f61064792221dc"
   },
   "validation": {
     "positive": "FAISAL_RELEASE_GATE_REPORT_OK checks=3",
