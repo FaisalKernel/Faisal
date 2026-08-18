@@ -1,0 +1,120 @@
+{
+  "project": "FAISAL",
+  "milestone": "M248-final-integration-readiness-gate",
+  "recorded_at": "2026-08-18T22:47:34Z",
+  "status": "final_integration_local_qualification_passed_production_approval_blocked",
+  "objective": "Unify the bounded FAISAL control-plane work through M247, generate reproducible provenance and SPDX 2.3 software inventory, execute the M239-M247 regression matrix, run the current 21-harness QEMU audit, and enforce a fail-closed readiness gate without converting local evidence into production approval.",
+  "implementation": {
+    "readiness_gate": "tools/faisal-build/faisal_readiness_gate.py",
+    "sbom_generator": "tools/faisal-build/generate_faisal_sbom.py",
+    "current_audit_runner": "tools/faisal-build/run_full_faisal_current_audit.sh",
+    "final_integration_runner": "tools/faisal-build/run_final_integration_validation.sh",
+    "readiness_policy": "AGI-KERNEL-READINESS-GATE.md",
+    "release_maintenance": "AGI-KERNEL-RELEASE-MAINTENANCE.md",
+    "source_head": "d679883573acf2bd7051cf8326cfa168922dd12c",
+    "source_tag_before_m248": "FAISAL-M247-PORTABLE-HARDWARE-PERFORMANCE-EVOLUTION",
+    "target_platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "artifacts": {
+      "candidate_manifest": "/home/ubuntu/agi-kernel/build/final-integration-m248-final/artifacts/FAISAL-production-candidate-manifest.json",
+      "candidate_manifest_sha256": "bab192c2a5cd0ceb90561ad04df14a669abc717397ae42b84bb979f6684ddd03",
+      "provenance_manifest": "/home/ubuntu/agi-kernel/build/final-integration-m248-final/artifacts/provenance/FAISAL-build-manifest.json",
+      "provenance_manifest_sha256": "16ecab6ec65ab4869d7a1bac4900b7a21a8311476a52620a9a58b4e481db0e7d",
+      "provenance_generated_at": "2026-08-18T22:36:07Z",
+      "spdx_sbom": "/home/ubuntu/agi-kernel/build/final-integration-m248-final/artifacts/FAISAL-SBOM.spdx.json",
+      "spdx_sbom_sha256": "0e9dac82ac0455e0bcd2352d7055001bf62a02efd04a419f0f5062495fb7591f",
+      "local_readiness_gate": "/home/ubuntu/agi-kernel/build/final-integration-m248-final/FAISAL-readiness-gate-local.json",
+      "local_readiness_gate_sha256": "f19ceb426b384e4902fc0d6d50019f17224971299eb89d8533491b2efe4b9dce",
+      "production_readiness_gate": "/home/ubuntu/agi-kernel/build/final-integration-m248-final/FAISAL-readiness-gate-production.json",
+      "production_readiness_gate_sha256": "455ec9ab332b6ad3221249f737832641f0ced0a5fb5fe5b6ab96898f6e748655"
+    }
+  },
+  "validation": {
+    "final_runner": "FAISAL_FINAL_INTEGRATION_VALIDATION_OK",
+    "local_readiness_gate": "FAISAL_READINESS_GATE_OK mode=local checks=21 blockers=12",
+    "local_readiness_checks": 21,
+    "external_blockers": 12,
+    "current_full_system_audit": "FAISAL_FULL_CURRENT_AUDIT_OK count=21",
+    "current_full_system_audit_harnesses": 21,
+    "sbom": {
+      "format": "SPDX-2.3",
+      "file_digest_binding": true,
+      "source_head_binding": true,
+      "status": "generated_and_json_validated"
+    },
+    "regression_matrix": {
+      "m239_kv_tier": "M239_KV_TIER_VALIDATION_OK; selftest cases=16; benchmark operations=400000; ns_per_operation=1045.96",
+      "m240_budget": "M240_BUDGET_VALIDATION_OK; selftest cases=22; benchmark operations=300000; ns_per_operation=9816.87",
+      "m241_agent_runtime": "M241_AGENT_RUNTIME_VALIDATION_OK; selftest cases=38; concurrency threads=8 objectives=256 failures=0",
+      "m242_control_plane_fabric": "M242_FABRIC_VALIDATION_OK; concurrency threads=8 shards=256 failures=0; fuzz iterations=10000",
+      "m244_continuous_optimizer": "M244_OPTIMIZER_VALIDATION_OK; selftest cases=73; concurrency readers=4 samples=256 failures=0; fuzz iterations=10000",
+      "m245_platform_coordinator": "M245_PLATFORM_VALIDATION_OK; selftest cases=86; concurrency readers=4 workloads=32 failures=0; fuzz iterations=10000",
+      "m246_safety_control_plane": "M246_SAFETY_VALIDATION_OK; selftest cases=112; concurrency readers=4 read_rounds=256 writer_rounds=256 failures=0; fuzz iterations=10000",
+      "m247_hardware_evolution": "M247_HARDWARE_VALIDATION_OK; selftest cases=128; concurrency readers=4 read_rounds=256 writer_rounds=256 failures=0; fuzz iterations=10000"
+    },
+    "host_hardware_observation": {
+      "marker": "M247_HARDWARE_DISCOVERY_EXIT=0",
+      "online_cpus": 6,
+      "vector_features_mask": 39,
+      "memory_total_bytes": 25604468736,
+      "drm_devices_observed": 0,
+      "rdma_devices_observed": 0,
+      "nvme_devices_observed": 0,
+      "cxl_devices_observed": 0,
+      "power_telemetry_entries": 0,
+      "thermal_telemetry_entries": 0,
+      "attestation_devices_observed": 0,
+      "interpretation": "Host procfs/sysfs observations only; zero device counts are not hardware-qualification evidence."
+    },
+    "qemu": {
+      "linux_7_2_profiles": "FAISAL_M76_QEMU_VALIDATION_OK",
+      "industry_soak": "FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256 total_iterations=1024",
+      "linux_6_18_44_lts_profile": "FAISAL_M76_QEMU_VALIDATION_OK",
+      "diagnostic_policy": "strict completion markers and kernel diagnostic rejection"
+    },
+    "production_gate_behavior": {
+      "status": "blocked",
+      "production_approval": false,
+      "exit_code": 1,
+      "reason": "External evidence remains absent for independent builder, operator signing ceremony, physical accelerator and DMA/IOMMU qualification, live multihost/PKI/KMS/TPM qualification, independent security review, live migration rollback, power/thermal qualification, and operator-owned CVE operations."
+    }
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_gpu_npu": false,
+    "physical_hbm_vram_iommu_dma": false,
+    "live_rdma": false,
+    "live_cxl": false,
+    "live_nvme": false,
+    "live_multihost_hardware": false,
+    "physical_power_thermal": false,
+    "secure_boot_tpm_measured_here": false,
+    "independent_external_security_review": false,
+    "operator_signing_ceremony": false,
+    "cve_operations_owner": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "optimizer_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "hardware_discovery_is_authority": false,
+    "unrestricted_kernel_self_modification": false,
+    "unsafe_fallback_without_explicit_policy": false,
+    "fake_hardware_evidence": false,
+    "fake_external_review": false,
+    "production_approval": false,
+    "fail_closed_production_gate": true,
+    "evidence_hash_binding": true,
+    "provenance_head_binding": true,
+    "protected_files_staged": false
+  },
+  "qualification_limits": [
+    "M248 demonstrates bounded local integration and reproducible software/QEMU evidence only; it does not establish production approval.",
+    "The local gate passed 21 checks and reported 12 external blockers. Production mode was separately executed and returned a nonzero blocked result.",
+    "The SBOM records repository files and digests; it is not a signed supply-chain attestation and does not replace an operator key ceremony or independent builder equivalence.",
+    "QEMU profiles and the industry soak do not qualify physical GPU/NPU/TPU/FPGA devices, VRAM/HBM, IOMMU/DMA isolation, firmware, driver reset, RDMA, CXL, NVMe, power, thermal, secure boot, or multihost behavior.",
+    "No independent external security review, independent attested builder, production signing authority, live production PKI/KMS/TPM, physical accelerator test, live migration rollback, or operator-owned CVE response workflow is claimed."
+  ]
+}
