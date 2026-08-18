@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "eecc8d6a59004914c23126bb977a894c2cd5e2ae",
-  "current_tag": "FAISAL-M197-CROSS-SUBSYSTEM-STRESS-HARDENED-QEMU",
+  "current_head": "dcdb5090f92ea65a66e6c47a8d3758964948ac0a",
+  "current_tag": "FAISAL-M198-WORLD-SYNC-WRITE-FAULT-HARDENED-QEMU",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1819,6 +1819,9 @@
     "m197_cross_subsystem_stress_hardened_qemu": "pass_strict_static_compile_all_ten_services_acpi_off_2vcpu_m80_composition_cancellation_rollback_audit_markers_pass_acpi_on_2vcpu_rejected_rcu_diagnostic",
     "m197_cross_subsystem_evidence": "tools/faisal-build/evidence/m197-cross-subsystem-hardened-qemu-validation.json",
     "m197_candidate_manifest": "/home/ubuntu/agi-kernel/build/m197-candidate/production-candidate.json sha256=8f0159618e3f91682f07d417272bf029f76528449515e31b871c2511a1590353",
-    "m197_release_scope": "bounded_cross_subsystem_recovery_qualification_pass_in_acpi_off_profile_explicit_acpi_on_smp_rcu_block_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
+    "m197_release_scope": "bounded_cross_subsystem_recovery_qualification_pass_in_acpi_off_profile_explicit_acpi_on_smp_rcu_block_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m198_world_sync_write_fault_hardened_qemu": "pass_strict_static_compile_acpi_off_1vcpu_subscription_write_rejections_policy_readback_ack_monotonicity_resync_guard_acpi_on_2vcpu_rejected_rcu_diagnostic",
+    "m198_world_sync_write_fault_evidence": "tools/faisal-build/evidence/m198-world-sync-write-fault-hardened-qemu-validation.json",
+    "m198_release_scope": "bounded_world_sync_write_side_fault_qualification_pass_in_acpi_off_profile_explicit_acpi_on_smp_rcu_block_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
   }
 }
