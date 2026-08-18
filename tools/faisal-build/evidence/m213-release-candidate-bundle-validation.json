@@ -1,0 +1,45 @@
+{
+  "project": "FAISAL",
+  "milestone": "M213-release-candidate-bundle",
+  "recorded_at": "2026-08-18T10:29:30Z",
+  "status": "path_independent_release_candidate_bundle_verified_fault_injection_rejections_pass",
+  "implementation": {
+    "generator": "tools/faisal-build/generate_release_candidate_bundle.py",
+    "generator_sha256": "8e583b91fb3f40728f1aa333a58f381bf964cc49c051db24e80a2eed1af87e66",
+    "verifier": "tools/faisal-build/verify_release_candidate_bundle.py",
+    "verifier_sha256": "9d0685eccf5a3f312aa16c0ae22c06496bac0490361e98dbf28e60a3f6349717",
+    "negative_test": "build/test_m213_release_bundle.py",
+    "negative_test_sha256": "5a18dc81e8fd49a80b5eb4fbabae15a50e72403764e32f853aa0a26e1ad98a91",
+    "checks": [
+      "relative path manifest and traversal rejection",
+      "SHA-256 and size binding for every bundled file",
+      "candidate, provenance, state, summary, report, and tag identity binding",
+      "bounded three-commit metadata window enforcement",
+      "explicit non-authority boundary enforcement"
+    ]
+  },
+  "validation": {
+    "positive": "FAISAL_RELEASE_CANDIDATE_BUNDLE_OK checks=24",
+    "negative": [
+      "M213_NEGATIVE_FILE_HASH_REJECT_OK",
+      "M213_NEGATIVE_TRAVERSAL_PATH_REJECT_OK",
+      "M213_NEGATIVE_BOUNDARY_REJECT_OK",
+      "M213_NEGATIVE_TEST_EXIT=0"
+    ]
+  },
+  "bundle": {
+    "path": "/home/ubuntu/agi-kernel/build/m213-bundle",
+    "bundle_manifest_sha256": "1364c90ca427db7db97f705a7734c06a77d29fdbeb2fcf028a308e3cff6dbcc6",
+    "file_count": 53
+  },
+  "boundary": {
+    "path_independent_local_bundle_only": true,
+    "independent_builder": false,
+    "operator_signature": false,
+    "physical_hardware": false,
+    "external_security_review": false,
+    "production_approval": false,
+    "model_output_is_authority": false,
+    "note": "The bundle improves auditable handoff and transport integrity; it does not create independent build, signing, hardware, external review, or production approval evidence."
+  }
+}
