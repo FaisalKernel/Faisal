@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "15ede17bb125e465884c759daf491e8eb3c707ca",
+  "current_head": "dfbb2289c0900abf91b6ac2eba22c25da34f4bce",
   "current_tag": "FAISAL-FRONTIER-HANDOFF-APPROVAL-LEASE-2026-08-21",
   "current_abi": 47,
   "operating_loop": [
@@ -2074,5 +2074,10 @@
   "frontier_handoff_approval_lease_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-2026-08-21.md",
   "frontier_handoff_approval_lease_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-21",
   "frontier_handoff_authority_boundary": "handoff_reasons_model_outputs_mcp_metadata_and_skill_instructions_remain_untrusted_data_and_never_self_authorize_agent_capabilities_or_irreversible_actions",
-  "frontier_inference_contract_fixture_repair": "pass_request_sequence_and_deterministic_logical_now_ns_seeded_before_model_router_admission"
+  "frontier_inference_contract_fixture_repair": "pass_request_sequence_and_deterministic_logical_now_ns_seeded_before_model_router_admission",
+  "frontier_deterministic_plan_admission": "pass_bounded_dag_validation_topological_order_critical_path_slack_budget_capability_and_approval_barrier_analysis_with_plan_digest",
+  "frontier_deterministic_plan_admission_evidence": "tools/faisal-build/evidence/frontier-deterministic-plan-admission-validation-2026-08-22.json",
+  "frontier_deterministic_plan_admission_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-2026-08-22.md",
+  "frontier_deterministic_plan_admission_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-22",
+  "frontier_plan_authority_boundary": "model_generated_plans_mcp_tasks_skill_instructions_and_tool_metadata_remain_untrusted_data_and_plan_admission_never_executes_or_self_approves_irreversible_work"
 }
