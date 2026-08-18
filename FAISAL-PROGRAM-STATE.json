@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "d6b8634299f753f1b1015594e2acd6c6973a18e6",
-  "current_tag": "FAISAL-M221-EXTERNAL-BLOCKER-COVERAGE",
+  "current_head": "a1e20135d393feee4dd0d9d8442a8d760ccdebbf",
+  "current_tag": "FAISAL-M222-AIOS-PARITY-URGENCY-SCHEDULING",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1906,5 +1906,9 @@
     "m221_external_blocker_coverage": "pass_require_m170_m181_blocker_evidence_and_reject_qualification_overstatement",
     "m221_external_blocker_coverage_evidence": "tools/faisal-build/evidence/m221-external-blocker-coverage-validation.json",
     "m221_candidate_manifest": "/home/ubuntu/agi-kernel/build/m221-candidate/production-candidate.json sha256=dcf7cbb8e85f86465614409e6a6b73a51a7c5bfb8eea1d1ccf97a0138ac7fcd6"
-  }
+  },
+  "m222_aios_parity_urgency_scheduling": "pass_local_urgency_aware_durable_dispatch_and_reproducible_aios_style_parity_fixture_external_aios_comparison_pending",
+  "m222_aios_parity_urgency_scheduling_evidence": "tools/faisal-build/evidence/m222-aios-parity-urgency-scheduling-validation.json",
+  "m222_comparison_boundary": "transparent_reference_fixture_not_actual_aios_implementation_same_hardware_and_workload_comparison_pending",
+  "m222_candidate_manifest": "/home/ubuntu/agi-kernel/build/m222-candidate/production-candidate.json sha256=6bc657d681962b7e3af12ffe137d1f88a31a6e22d337ebe88917926decb85645"
 }
