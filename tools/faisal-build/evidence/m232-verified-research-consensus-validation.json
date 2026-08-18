@@ -1,0 +1,109 @@
+{
+  "project": "FAISAL",
+  "milestone": "M232-verified-research-consensus-contract",
+  "recorded_at": "2026-08-18T16:13:51Z",
+  "status": "local_contract_qualified_external_web_provider_and_kernel_sandbox_qualification_pending",
+  "objective": "Prevent unverified or model-only web research from becoming durable world knowledge by enforcing source diversity, freshness, citation binding, conflict scoring, provenance, replay protection, and generation fencing.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://docs.kernel.org/userspace-api/landlock.html",
+        "finding": "Landlock is an unprivileged stackable LSM for restricting ambient filesystem and network rights, with explicit handled rights, runtime ABI discovery, no-new-privileges, inherited restrictions, and policies that can only become more restrictive.",
+        "impact": "M232 treats sandbox/backend ABI and source-fetch permissions as evidence and does not assume every Landlock right exists on every kernel."
+      },
+      {
+        "url": "https://docs.vllm.ai/en/latest/features/structured_outputs/",
+        "finding": "vLLM supports structured outputs through JSON schema, choice, regex, grammar, and structural tags with xgrammar or guidance backends.",
+        "impact": "Structured model output is treated as parseable data only; schema validity does not prove factual truth or authorize promotion."
+      },
+      {
+        "url": "https://ai.google.dev/gemini-api/docs/google-search",
+        "finding": "Gemini Search grounding records search calls/results and returns inline URL annotations connecting text spans to cited sources; it can combine search with URL context and function calling.",
+        "impact": "M232 binds citation spans and citation digests to source/content evidence and preserves the query/result/citation lineage."
+      },
+      {
+        "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool",
+        "finding": "Anthropic web search provides cited sources, max-use budgets, domain allow/block lists, page age, dynamic filtering on newer tool versions, and response citation blocks.",
+        "impact": "M232 represents search budget, source-domain identity, page age, tool provenance, and citation binding as explicit evidence rather than implicit trust."
+      },
+      {
+        "url": "https://docs.opentelemetry.io/docs/concepts/context-propagation/",
+        "finding": "OpenTelemetry context propagation correlates trace and span context across service boundaries.",
+        "impact": "Research requests can bind claim, source, tool, provider, and generation lineage without turning context into authority."
+      },
+      {
+        "url": "https://docs.vllm.ai/en/latest/",
+        "finding": "vLLM documents broad model/runtime capabilities including structured output, tools, multimodality, tracing, and KV-cache features.",
+        "impact": "M232 remains runtime-neutral and records provider/runtime metadata as evidence only."
+      },
+      {
+        "url": "https://github.com/ggerganov/llama.cpp",
+        "finding": "llama.cpp provides a portable local inference runtime with broad quantized model support and server interfaces.",
+        "impact": "Local runtimes can be first-class research providers, but their outputs still require source evidence and independent verification."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-research-verify/faisal_research_verify.h",
+    "source": "tools/faisal-research-verify/faisal_research_verify.c",
+    "selftest": "tools/testing/selftests/faisal_research_verify_test.c",
+    "benchmark": "tools/testing/selftests/faisal_research_verify_benchmark.c",
+    "runner": "tools/faisal-build/run_research_verify_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "source observation admission with claim request and generation binding",
+      "source kind and confidence policy",
+      "citation-span and citation-digest binding",
+      "model-only rejection unless search and verified URL evidence exist",
+      "freshness TTL and maximum source age enforcement",
+      "agreement-group consensus and independent-domain counting",
+      "weighted confidence and disagreement scoring",
+      "conflict and insufficient-evidence refusal",
+      "SHA-256 consensus receipt binding request sources and selected group",
+      "receipt tamper rejection",
+      "research request replay rejection",
+      "research-generation fencing",
+      "model-output-is-not-authority boundary"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M232_SELFTEST_EXIT=0",
+    "selftest_cases": 11,
+    "benchmark_rounds": 100000,
+    "benchmark_operations": 400000,
+    "benchmark_ns_per_operation": 698,
+    "asan_ubsan": true,
+    "qemu_kernel_boot": "pending final integrated run",
+    "regression_m231": "pending final integrated run"
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_accelerator": false,
+    "external_security_review": false,
+    "live_web_provider": false,
+    "paid_provider_qualification": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "structured_output_is_truth": false,
+    "citation_is_authority": false,
+    "single_source_promoted_without_policy": false,
+    "same_domain_duplicates_counted_as_independent": false,
+    "stale_source_promoted": false,
+    "model_only_source_promoted": false,
+    "tampered_consensus_reused": false,
+    "replayed_request_allowed": false,
+    "stale_generation_reused": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "This is a provider-neutral userspace research-verification contract, not a web crawler, search engine, or model-serving runtime.",
+    "It does not perform live Google, Anthropic, OpenAI, or local-model calls in this milestone; adapters must provide source evidence through the contract.",
+    "No physical accelerator, Landlock ABI qualification on the FAISAL QEMU image, independent builder, independent security review, or production deployment was established.",
+    "Production release remains blocked by the project’s external evidence gate."
+  ]
+}
