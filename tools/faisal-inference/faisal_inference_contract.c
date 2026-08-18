@@ -109,6 +109,9 @@ int fic_admit_and_route(struct fic_service *service,
 	if (!kv_tier)
 		return FIC_ERR_POLICY;
 	memset(&request, 0, sizeof(request));
+	/* The contract uses a deterministic logical clock for router cooldowns. */
+	request.request_sequence = service->next_sequence;
+	request.now_ns = service->next_sequence;
 	request.difficulty = o->difficulty;
 	request.required_modalities = o->required_modalities;
 	request.privacy_level = o->privacy_level;

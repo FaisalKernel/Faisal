@@ -1,0 +1,131 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-handoff-approval-lease-2026-08-21",
+  "recorded_at": "2026-08-18T23:38:39Z",
+  "status": "bounded_handoff_approval_lease_qualified",
+  "objective": "Provide a provider-neutral, durable, capability-scoped handoff lease that separates proposal, approval, and consumption for autonomous multi-agent execution.",
+  "research": [
+    {
+      "source": "https://developers.openai.com/api/docs/guides/agents",
+      "conclusion": "The current Agents SDK documentation emphasizes agents, handoffs, agents-as-tools, guardrails, approvals, sessions, sandbox workspaces, tracing, and resumable state.",
+      "implementation_impact": "FAISAL adds explicit proposal/approval/consume transitions and generation-fenced resumability without depending on a provider SDK."
+    },
+    {
+      "source": "https://openai.github.io/openai-agents-python/",
+      "conclusion": "The SDK exposes handoffs, guardrails, sessions, MCP tool calling, sandbox capabilities, tracing, and resumable run state as composable agent-runtime primitives.",
+      "implementation_impact": "FAISAL records handoff ownership, capability masks, expiry, approval evidence, and consume receipts as auditable control-plane state."
+    },
+    {
+      "source": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "conclusion": "MCP defines capability negotiation, asynchronous Tasks, Skills-over-MCP, progress, cancellation, and explicit trust/safety requirements; tool descriptions and annotations are not automatically authority.",
+      "implementation_impact": "The lease treats model output, MCP metadata, tool descriptions, and external content as untrusted data and requires explicit capability and approval checks before consumption."
+    },
+    {
+      "source": "https://modelcontextprotocol.io/docs/2026-07-28/develop/build-with-agent-skills",
+      "conclusion": "MCP Skills are portable instruction sets with progressive discovery and explicit deployment/auth/tool-design decisions.",
+      "implementation_impact": "Skill- or MCP-originated handoff proposals must still pass the same lease state machine and cannot self-authorize capabilities or irreversible actions."
+    },
+    {
+      "source": "https://developers.openai.com/api/docs/models",
+      "conclusion": "The live provider model catalog remains a changing capability/cost metadata source and is not privileged authority.",
+      "implementation_impact": "The handoff contract contains no hard-coded provider/model privilege and records provider metadata only outside the authorization boundary."
+    }
+  ],
+  "implementation": {
+    "header": "tools/faisal-handoff-lease/faisal_handoff_lease.h",
+    "source": "tools/faisal-handoff-lease/faisal_handoff_lease.c",
+    "design": "tools/faisal-handoff-lease/FAISAL-HANDOFF-LEASE-DESIGN.md",
+    "selftest": "tools/testing/selftests/faisal_handoff_lease_test.c",
+    "benchmark": "tools/testing/selftests/faisal_handoff_lease_benchmark.c",
+    "fuzz_test": "tools/testing/selftests/faisal_handoff_lease_fuzz_test.c",
+    "runner": "tools/faisal-build/run_handoff_lease_validation.sh",
+    "abi": 1,
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "proposal, approval, consume, revoke, and expiry state machine",
+      "objective/task/source-agent/target-agent identity binding",
+      "source and target generation fencing",
+      "source and target capability-mask admission",
+      "explicit approval policy and approval digest",
+      "nonce replay protection",
+      "expiry and state-transition fail-closed checks",
+      "append-only fsync-backed journal",
+      "SHA-256 lease, record, continuity, and receipt digests",
+      "replay and corruption rejection",
+      "model-proposal, verified-context, and operator-approval provenance flags"
+    ],
+    "state_machine": "PROPOSED -> APPROVED -> CONSUMED; PROPOSED/APPROVED -> REVOKED or EXPIRED"
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11 -pthread",
+    "selftest": "FHL_HANDOFF_LEASE_SELFTEST_OK cases=31 consumed=2 expired=1 revoked=1 replay=verified",
+    "fuzzing": "FHL_HANDOFF_LEASE_FUZZ_OK iterations=10000 rejected=9936 accepted=64",
+    "asan_ubsan": "FHL_HANDOFF_LEASE_ASAN_UBSAN_OK",
+    "thread_sanitizer": "FHL_HANDOFF_LEASE_TSAN_OK",
+    "runner": "FHL_HANDOFF_LEASE_VALIDATION_OK",
+    "benchmark": {
+      "marker": "FHL_HANDOFF_LEASE_BENCHMARK_OK",
+      "rounds": 100,
+      "transitions": 300,
+      "elapsed_ns": 68946270,
+      "ns_per_transition": 229820.90,
+      "durability": "fsync_per_transition",
+      "comparison_baseline": {
+        "source": "M236 existing in-memory coordination benchmark",
+        "marker": "M236_BENCHMARK_EXIT=0",
+        "rounds": 100000,
+        "operations": 1000000,
+        "ns_per_operation": 3200.53
+      },
+      "interpretation": "The durable handoff lease is intentionally slower than the prior in-memory coordination microbenchmark because every transition is journaled and fsynced. The result measures durability overhead and is not a claim of end-to-end agent latency or throughput superiority."
+    },
+    "adjacent_regressions": {
+      "m223_inference_contract": "FIC_SELFTEST_EXIT=0; fixture repaired to seed request_sequence and deterministic logical now_ns",
+      "m230_adaptive_model_router": "M230_MODEL_ROUTER_VALIDATION_OK",
+      "m236_coordination": "M236_COORDINATION_VALIDATION_OK",
+      "m241_agent_runtime": "M241_AGENT_RUNTIME_VALIDATION_OK",
+      "legacy_model_orchestration_wrapper": "intentionally_blocked_by_unqualified_legacy_guard; not used as qualification evidence"
+    },
+    "live_model_catalog": {
+      "captured": true,
+      "model_count": 10,
+      "archive": "/home/ubuntu/agi-kernel/build/frontier/live-model-catalog-2026-08-21.json",
+      "sha256": "40054874a368d65dc021b80b2849ea92eb0398dcdac50e608280562bc286829f",
+      "interpretation": "The catalog was researched for provider-neutral adapter and routing design only. No model output, model ID, price, or provider metadata grants authority."
+    }
+  },
+  "boundary": {
+    "production_approval": false,
+    "physical_hardware_qualification": false,
+    "live_robotics_qualification": false,
+    "live_model_execution": false,
+    "independent_external_security_review": false,
+    "independent_builder": false,
+    "model_output_is_authority": false,
+    "mcp_metadata_is_authority": false,
+    "handoff_reason_is_authority": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "security_boundaries": {
+    "unapproved_handoff_consumption": false,
+    "wrong_target_generation_consumption": false,
+    "missing_target_capability_consumption": false,
+    "nonce_replay": false,
+    "expired_lease_consumption": false,
+    "revoked_lease_reuse": false,
+    "tampered_journal_replay": false,
+    "model_self_approval": false,
+    "tool_execution": false,
+    "privileged_kernel_code_changed": false
+  },
+  "qualification_limits": [
+    "The handoff lease is a bounded userspace/control-plane primitive and does not replace the existing coordination, task, agent-runtime, capability, safety, or distributed replication services.",
+    "The durable benchmark is intentionally not compared as if it were equivalent to the prior in-memory coordination benchmark; fsync durability adds substantial overhead and the measurements are reported separately.",
+    "No live paid-model call, MCP server, browser session, robotics device, physical accelerator, production cluster, or operator approval ceremony was used.",
+    "The legacy model-orchestration wrapper remains intentionally blocked by the repository’s unqualified-legacy guard; current M223, M230, M236, and M241 validations passed and are the valid adjacent paths.",
+    "Production approval remains blocked by the existing external builder, signing, physical hardware, secure boot/TPM, live multihost, independent security review, and CVE-ownership requirements."
+  ]
+}
