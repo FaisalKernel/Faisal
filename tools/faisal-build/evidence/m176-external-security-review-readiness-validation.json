@@ -33,9 +33,9 @@
   },
   "review_package": {
     "manifest": "/home/ubuntu/agi-kernel/build/m176-external-security-review/review-package.json",
-    "manifest_sha256": "2bea1a50d6a7d67b6df1490079c7d8953ecefe8c39ac4f41e36cbc660bcc0cbf",
+    "manifest_sha256": "6ce9af194329237a938dab63cfb6caf32b914a38f5b36f29f844027338cc4b1d",
     "archive": "/home/ubuntu/agi-kernel/build/m176-external-security-review/faisal-esr-candidate-105f2b85e4c2-8766f1019d80.tar.gz",
-    "archive_sha256": "2256b08fc6c3dd43ff437bc82c0613b14de6243372f9cbbf1a9249b1349c2190",
+    "archive_sha256": "6b905831fcd9e76e97a09223aefc248dff7edac00858f6b7051ee26ef43fbdd4",
     "status": "handoff_ready_external_execution_required",
     "contains": [
       "exact LTS kernel artifact",

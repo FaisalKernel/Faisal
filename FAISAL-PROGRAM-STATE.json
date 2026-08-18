@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "1deba0d4a7839e3e3f6f0d963fa2a10f81d8c8de",
+  "current_head": "c520b5814ab90fb09fc11844e425c8ac55703d79",
   "current_tag": "FAISAL-M176-EXTERNAL-SECURITY-REVIEW-READINESS",
   "current_abi": 38,
   "operating_loop": [
@@ -1709,8 +1709,8 @@
     "m175_physical_accelerator_evidence": "tools/faisal-build/evidence/m175-physical-accelerator-handoff-validation.json",
     "m175_release_scope": "physical_gpu_npu_vram_iommu_dma_vendor_driver_and_hardware_workload_evidence_pending_on_real_operator_controlled_device_host",
     "m176_external_security_review_readiness": "pass_exact_candidate_lts_artifact_config_source_provenance_accelerator_handoff_manifest_runbook_validator_tests_and_program_state_package_generated",
-    "m176_external_security_review_package": "/home/ubuntu/agi-kernel/build/m176-external-security-review/review-package.json sha256=2bea1a50d6a7d67b6df1490079c7d8953ecefe8c39ac4f41e36cbc660bcc0cbf",
-    "m176_external_security_review_archive": "/home/ubuntu/agi-kernel/build/m176-external-security-review/faisal-esr-candidate-105f2b85e4c2-8766f1019d80.tar.gz sha256=2256b08fc6c3dd43ff437bc82c0613b14de6243372f9cbbf1a9249b1349c2190",
+    "m176_external_security_review_package": "/home/ubuntu/agi-kernel/build/m176-external-security-review/review-package.json sha256=6ce9af194329237a938dab63cfb6caf32b914a38f5b36f29f844027338cc4b1d",
+    "m176_external_security_review_archive": "/home/ubuntu/agi-kernel/build/m176-external-security-review/faisal-esr-candidate-105f2b85e4c2-8766f1019d80.tar.gz sha256=6b905831fcd9e76e97a09223aefc248dff7edac00858f6b7051ee26ef43fbdd4",
     "m176_external_security_review_evidence": "tools/faisal-build/evidence/m176-external-security-review-readiness-validation.json",
     "m176_release_scope": "review_readiness_pass_external_execution_pending_production_gate_requires_separate_reviewer_key_exact_package_signed_findings_retests_residual_risk_and_final_disposition"
   }
