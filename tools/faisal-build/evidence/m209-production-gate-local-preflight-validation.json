@@ -1,0 +1,34 @@
+{
+  "project": "FAISAL",
+  "milestone": "M209-production-gate-local-preflight-integration",
+  "schema": "org.faisal.production-gate-local-preflight-validation.v1",
+  "recorded_at": "2026-08-18T10:10:06Z",
+  "status": "production_gate_requires_unified_local_preflight",
+  "implementation": {
+    "production_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "production_gate_sha256": "915e2bd874dbebae5c8aa485afa2d4d0286d9f973612d0f077478447e5ba62b8",
+    "preflight": "tools/faisal-build/run_candidate_local_preflight.py",
+    "preflight_sha256": "a20aac5928e9211dd284c97a3bebbf26bddbddbcd440b85afaf07182fb1ec87e",
+    "mandatory_inputs": [
+      "FAISAL_CANDIDATE_PROVENANCE_MANIFEST",
+      "FAISAL_CANDIDATE_EVIDENCE",
+      "FAISAL_PROGRAM_STATE"
+    ]
+  },
+  "validation": {
+    "shell_syntax": "shell_syntax=ok",
+    "negative": [
+      "FAISAL_RELEASE_GATE_FAIL:FAISAL_CANDIDATE_PROVENANCE_MANIFEST is required",
+      "gate_rc=1",
+      "expected_marker_rc=0"
+    ],
+    "ordering": "local preflight executes after candidate manifest validation and before production-line, security, CVE, accelerator, replication, deployment, signing, and external-review gates."
+  },
+  "boundary": {
+    "gate_integration_only": true,
+    "independent_builder": false,
+    "operator_signature": false,
+    "production_approval": false,
+    "note": "The release gate remains fail-closed; adding local preflight does not create any missing external qualification evidence."
+  }
+}

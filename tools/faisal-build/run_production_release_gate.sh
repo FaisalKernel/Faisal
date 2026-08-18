@@ -15,6 +15,9 @@ RELEASE_ATTESTATION=${FAISAL_RELEASE_ATTESTATION:-}
 RELEASE_AUTHORITY_REPORT=${FAISAL_RELEASE_AUTHORITY_REPORT:-${ARTIFACT_OUT:-/tmp}/FAISAL-release-authority.tsv}
 SECURITY_MANIFEST=${FAISAL_SECURITY_MANIFEST:-}
 PRODUCTION_CANDIDATE_MANIFEST=${FAISAL_PRODUCTION_CANDIDATE_MANIFEST:-}
+CANDIDATE_PROVENANCE_MANIFEST=${FAISAL_CANDIDATE_PROVENANCE_MANIFEST:-}
+CANDIDATE_EVIDENCE=${FAISAL_CANDIDATE_EVIDENCE:-}
+PROGRAM_STATE=${FAISAL_PROGRAM_STATE:-$LINUX/FAISAL-PROGRAM-STATE.json}
 ADVISORY_LEDGER=${FAISAL_ADVISORY_LEDGER:-}
 CVE_OPERATIONS_EVIDENCE=${FAISAL_CVE_OPERATIONS_EVIDENCE:-}
 CVE_OPERATIONS_PUBLIC_KEY=${FAISAL_CVE_OPERATIONS_PUBLIC_KEY:-$PUBLIC_KEY}
@@ -75,6 +78,14 @@ case "$PRODUCTION_CANDIDATE_MANIFEST" in
   *) fail "structured JSON production candidate manifest is required" ;;
 esac
 [ -r "$PRODUCTION_CANDIDATE_MANIFEST" ] || fail "production candidate manifest is unreadable"
+if [ "$REQUIRE_PRODUCTION_LINE" = 1 ]; then
+  [ -n "$CANDIDATE_PROVENANCE_MANIFEST" ] || fail "FAISAL_CANDIDATE_PROVENANCE_MANIFEST is required"
+  [ -n "$CANDIDATE_EVIDENCE" ] || fail "FAISAL_CANDIDATE_EVIDENCE is required"
+  [ -n "$PROGRAM_STATE" ] || fail "FAISAL_PROGRAM_STATE is required"
+  [ -r "$CANDIDATE_PROVENANCE_MANIFEST" ] || fail "candidate provenance manifest is unreadable"
+  [ -r "$CANDIDATE_EVIDENCE" ] || fail "candidate evidence is unreadable"
+  [ -r "$PROGRAM_STATE" ] || fail "program state is unreadable"
+fi
 [ -n "$ADVISORY_LEDGER" ] || fail "FAISAL_ADVISORY_LEDGER is required"
 [ -n "$CVE_OPERATIONS_EVIDENCE" ] || fail "FAISAL_CVE_OPERATIONS_EVIDENCE is required"
 case "$CVE_OPERATIONS_EVIDENCE" in
@@ -152,6 +163,7 @@ esac
 [ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_security_release_evidence.sh" ] || fail "security evidence verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_production_candidate_manifest.py" ] || fail "production candidate manifest verifier unavailable"
+[ -x "$LINUX/tools/faisal-build/run_candidate_local_preflight.py" ] || fail "unified local candidate preflight unavailable"
 [ -r "$LINUX/tools/faisal-build/faisal_release_authority.py" ] || fail "release authority verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_signing_authority_operational_proof.py" ] || fail "signing-authority operational-proof verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/compare_reproducible_builds.sh" ] || fail "reproducibility comparator unavailable"
@@ -190,6 +202,20 @@ FAISAL_PRODUCTION_CANDIDATE_MANIFEST="$PRODUCTION_CANDIDATE_MANIFEST" \
   fail "unified production candidate manifest verification"
 }
 printf 'production_candidate_manifest\tpass\t%s\n' "$PRODUCTION_CANDIDATE_MANIFEST" >> "$REPORT"
+if [ "$REQUIRE_PRODUCTION_LINE" = 1 ]; then
+  python3 "$LINUX/tools/faisal-build/run_candidate_local_preflight.py" \
+    --repo "$LINUX" \
+    --candidate "$PRODUCTION_CANDIDATE_MANIFEST" \
+    --provenance "$CANDIDATE_PROVENANCE_MANIFEST" \
+    --evidence "$CANDIDATE_EVIDENCE" \
+    --state "$PROGRAM_STATE" >/tmp/faisal-release-local-preflight.log 2>&1 || {
+    cat /tmp/faisal-release-local-preflight.log >&2
+    fail "unified local candidate preflight"
+  }
+  grep -q 'FAISAL_LOCAL_PREFLIGHT_OK checks=5' /tmp/faisal-release-local-preflight.log ||
+    fail "unified local candidate preflight marker missing"
+  printf 'local_candidate_preflight\tpass\t%s\n' "$CANDIDATE_EVIDENCE" >> "$REPORT"
+fi
 
 if [ "$REQUIRE_PRODUCTION_LINE" = 1 ]; then
   [ -n "$REQUIRED_KERNEL_LINE" ] || fail "FAISAL_REQUIRED_KERNEL_LINE is required for production release"
