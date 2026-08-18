@@ -53,6 +53,7 @@ def main() -> None:
         'm193-graph-fault-qemu-validation.json',
         'm194-durable-execution-recovery-validation.json',
         'm195-self-healing-hardened-qemu-validation.json',
+        'm196-concurrent-ipc-hardened-qemu-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:
