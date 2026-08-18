@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M241-agent-runtime-supervisor",
-  "recorded_at": "2026-08-18T20:30:28Z",
+  "recorded_at": "2026-08-18T20:32:50Z",
   "status": "local_platform_contract_qualified_persistent_agent_supervision_and_production_qualification_pending",
   "objective": "Provide a bounded AI-native userspace supervisor for persistent agent execution, durable objectives, event-driven dispatch, checkpoint and recovery, secure tools and messages, anomaly quarantine, and M240 adaptive budget integration while keeping model inference and high-level reasoning outside kernel authority.",
   "research": {
