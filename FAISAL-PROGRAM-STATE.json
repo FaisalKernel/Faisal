@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "53e8b489784bc25087aafa1103ee6f771637f3df",
-  "current_tag": "FAISAL-M205-CURRENT-LTS-PROVENANCE-CONSISTENCY",
+  "current_head": "9dd609d47961544e71df927b845e0a051e6e16df",
+  "current_tag": "FAISAL-M206-CANDIDATE-PROVENANCE-ALIGNMENT",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1851,6 +1851,10 @@
     "m205_current_lts_provenance_consistency": "pass_current_lts_source_bound_local_manifest_spdx_sbom_artifact_and_config_hashes_three_tamper_rejections_independent_builder_false",
     "m205_current_lts_provenance_evidence": "tools/faisal-build/evidence/m205-current-lts-provenance-consistency-validation.json",
     "m205_release_scope": "bounded_local_provenance_and_sbom_consistency_pass_not_independent_builder_or_external_attestation_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
-    "m205_candidate_manifest": "/home/ubuntu/agi-kernel/build/m205-candidate/production-candidate.json sha256=9618975aac107c51599c80fe2c6b5aeb740c5016d3dba23f1606d20cbdc582f9"
+    "m205_candidate_manifest": "/home/ubuntu/agi-kernel/build/m205-candidate/production-candidate.json sha256=9618975aac107c51599c80fe2c6b5aeb740c5016d3dba23f1606d20cbdc582f9",
+    "m206_candidate_provenance_alignment": "pass_current_lts_candidate_and_local_provenance_alignment_checks_11_source_artifact_config_and_lineage_drift_rejections_pass",
+    "m206_candidate_provenance_evidence": "tools/faisal-build/evidence/m206-candidate-provenance-alignment-validation.json",
+    "m206_release_scope": "bounded_candidate_to_local_provenance_drift_detection_independent_builder_external_attestation_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m206_candidate_manifest": "/home/ubuntu/agi-kernel/build/m206-candidate/production-candidate.json sha256=27a877d0e0bf0d88d043928619a9b9d8ddca4ddc744e0ec4e983c4db99f94d5e"
   }
 }
