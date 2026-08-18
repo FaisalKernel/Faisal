@@ -1,0 +1,83 @@
+{
+  "project": "FAISAL",
+  "milestone": "M175-physical-accelerator-handoff",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "3e75871d37a759699b896f247f7e86cc0998d652",
+  "lts_source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+  "status": "physical_accelerator_handoff_ready_hardware_qualification_pending",
+  "objective": "Provide an operator-controlled physical GPU/NPU qualification package and enforce fail-closed evidence for VRAM, IOMMU, DMA, and vendor-driver behavior without treating QEMU or host RAM as hardware evidence.",
+  "authoritative_research": {
+    "record": "tools/faisal-build/evidence/accelerator-research-2026-08-18.md",
+    "record_sha256": "950576a244b66295fd31d4ed221f73e7e418960c60f507467da2ca4da12d235c",
+    "sources": [
+      {
+        "url": "https://docs.kernel.org/core-api/dma-api-howto.html",
+        "conclusion": "Physical DMA qualification must use the Linux DMA API model, appropriate DMA masks, mapping/synchronization/unmap checks, and observed fault handling; device count alone is insufficient."
+      },
+      {
+        "url": "https://docs.kernel.org/gpu/drm-mm.html",
+        "conclusion": "Dedicated device memory is managed through upstream DRM GEM/TTM paths; VRAM qualification must measure the actual device-memory domain and its allocation/reclamation/accounting behavior."
+      },
+      {
+        "url": "https://docs.kernel.org/driver-api/vfio.html",
+        "conclusion": "IOMMU groups are the minimum isolation granularity for secure direct device access; group membership, topology, DMA ownership, IOMMU translation, and reset are qualification requirements."
+      }
+    ]
+  },
+  "implementation": {
+    "handoff_generator": "tools/faisal-build/prepare_physical_accelerator_bundle.py",
+    "handoff_generator_sha256": "7227fb364ee654405a8f59ea454e57a2beb50a58e7da25034f6f4ea91ab4ec5a",
+    "runbook": "FAISAL-ACCELERATOR-QUALIFICATION.md",
+    "runbook_sha256": "ce969bd99b5c4b78a9449aed7e163dcefe9dae772dc7de953fce93d867883aa4",
+    "existing_validator": "tools/faisal-build/verify_physical_accelerator_qualification.py",
+    "required_schema": "org.faisal.physical-accelerator-qualification.v2",
+    "required_attestation_classes": ["operator_observed", "provider_attested", "trusted_lab_attested"]
+  },
+  "handoff_bundle": {
+    "archive": "/home/ubuntu/agi-kernel/build/m175-physical-accelerator/faisal-m175-physical-accelerator-handoff.tar.gz",
+    "archive_sha256": "0543de52806743dcc2d8edb63083ca4c3443f5f83b788d238bb16f2efc3f185f",
+    "manifest": "/home/ubuntu/agi-kernel/build/m175-physical-accelerator/physical-accelerator-handoff.json",
+    "manifest_sha256": "2fc4fd262d7dca182ed7a0c281c4bf323f3b1be1e55202834bce933cf83b25f8",
+    "kernel_artifact_sha256": "8766f1019d80598c7982d91d89d7df27385a91ca7ea17d114d8869267204870b",
+    "configuration_sha256": "2c282274f1f716e2b1135b0a1fb819f99525dbe099ea0d31f1b3a2676f980e06",
+    "source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+    "required_outputs": ["physical accelerator inventory", "PCI identity", "signed driver/firmware provenance", "VRAM/device-memory tests", "IOMMU group and topology evidence", "DMA mapping/sync/unmap/fault tests", "reset/recovery", "stress", "multi-tenant isolation", "physical workload"]
+  },
+  "environment_inventory": {
+    "inventory": "/home/ubuntu/agi-kernel/build/m175-physical-accelerator/sandbox-inventory-final.json",
+    "inventory_sha256": "81cc18df2691efe926130bf0006d9ceab54985091f9e634a0031fbb10ce97e1f",
+    "inventory_log_sha256": "6f8c2a80ff8434a5dca9e0a675ecb09f1e3c6c510d61244660128ad6f83647fe",
+    "pci_accelerator_devices": 0,
+    "iommu_groups": 0,
+    "device_nodes": {"dri": false, "kfd": false, "vfio": false, "nvidia": false, "accel": false},
+    "kernel_command_line_boundary": "pci=off nomodules",
+    "physical_qualification": "not_available_in_sandbox"
+  },
+  "tests": {
+    "synthetic_gate": {
+      "result": "pass_synthetic_hardware_schema_qemu_denial_iommu_vram_dma_driver_signature_tamper_denial",
+      "log": "/home/ubuntu/agi-kernel/build/m175-physical-accelerator/physical-accelerator-unit-final.log",
+      "log_sha256": "1a6b820776c5e57a0a6b0cf57ecc0588f1d7d17b1cceb4e5fdf79045f9df4ee4"
+    },
+    "inventory": "pass_read_only_truthful_zero_device_result"
+  },
+  "production_boundary": {
+    "handoff_readiness": "pass",
+    "physical_gpu_npu_qualification": "blocked",
+    "production_release_gate": "blocked",
+    "limitations": [
+      "The sandbox exposes no physical GPU/NPU, VRAM, IOMMU groups, DMA path, device nodes, or vendor driver.",
+      "The sandbox kernel command line includes pci=off and nomodules, so host visibility cannot be treated as hardware absence beyond this environment boundary.",
+      "No provider-attested, trusted-lab, or operator-observed physical report exists.",
+      "Existing QEMU-TCG accelerator validation is software isolation/accounting evidence only.",
+      "The handoff package is ready for transfer to a real accelerator host but does not itself close qualification."
+    ],
+    "claims_not_made": [
+      "No physical GPU/NPU qualification claim.",
+      "No VRAM isolation claim.",
+      "No IOMMU or DMA safety claim on hardware.",
+      "No vendor-driver compatibility claim.",
+      "No production-readiness claim."
+    ]
+  }
+}
