@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "6022f4c979353097b214661e31cd4f3ed2091474",
-  "current_tag": "FAISAL-M173-EXTERNAL-SECURITY-REVIEW-READINESS",
+  "current_head": "5dfa04003508957727426ebcbc1670affb602072",
+  "current_tag": "FAISAL-M174-EXTERNAL-BUILDER-HANDOFF",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1563,7 +1563,7 @@
     "release_blocker_status": {
       "stable_or_lts_forward_port_and_upstream_patch_requalification": "partially_resolved_lts_6.18.44_forward_port_build_tenant_and_durable_qemu_pass_bounded_one_vcpu_soak_pass_representative_multivcpu_tcg_soak_pending",
       "production_release_gate": "blocked_fail_closed_operator_key_independent_builder_physical_accelerator_cve_process_external_security_review_and_operational_governance_remaining",
-      "independent_physical_builder_or_attested_build_farm_qualification": "open_same_sandbox_pair_byte_identical_but_verifier_rejects_local_container_identity_external_signed_measurement_required",
+      "independent_physical_builder_or_attested_build_farm_qualification": "partially_resolved_m174_external_lts_handoff_bundle_slsa_aligned_provenance_source_config_toolchain_and_artifact_subject_verifier_pass_same_sandbox_pair_rejected_external_physical_host_or_attested_farm_signed_evidence_pending",
       "cve_and_upstream_response_process_with_owned_advisory_ledger": "partially_resolved_m169_structured_signed_fail_closed_process_and_tests_pass_real_operator_owned_ledger_live_source_sync_and_external_security_review_pending",
       "physical_gpu_npu_vram_iommu_dma_vendor_driver_qualification": "partially_resolved_m170_structured_fail_closed_gate_and_synthetic_tests_pass_sandbox_inventory_has_zero_physical_accelerators_and_zero_iommu_groups",
       "replication_production_tls_pki_and_external_multihost_fixture_qualification": "partially_resolved_m171_actual_three_node_grpc_mtls_fixture_signed_quorum_commit_minority_denial_recovery_durable_reload_and_negative_paths_pass_production_pki_external_multihost_and_live_kms_pending",
@@ -1698,6 +1698,11 @@
     "m173_external_review_validator": "pass_signed_source_bound_independence_scope_findings_retest_disposition_staleness_tamper_and_model_authority_fail_closed_tests",
     "m173_external_review_self_review_denial": "pass_project_affiliated_internal_self_review_rejected_before_security_disposition",
     "m173_external_review_evidence": "tools/faisal-build/evidence/m173-external-security-review-validation.json",
-    "m173_release_scope": "review_readiness_package_qualified_genuine_external_security_review_and_signed_production_disposition_pending"
+    "m173_release_scope": "review_readiness_package_qualified_genuine_external_security_review_and_signed_production_disposition_pending",
+    "m174_external_builder_handoff": "pass_exact_linux_6.18.44_lts_source_bundle_config_build_recipe_expected_subjects_and_external_identity_contract_generated",
+    "m174_builder_provenance": "pass_slsa_aligned_builder_id_signer_id_source_uri_build_type_toolchain_digest_source_config_binding_and_distinct_identity_checks",
+    "m174_same_sandbox_denial": "pass_local_container_identity_and_same_sandbox_pair_rejected_fail_closed",
+    "m174_external_builder_evidence": "tools/faisal-build/evidence/m174-independent-builder-handoff-validation.json",
+    "m174_release_scope": "external_builder_handoff_ready_independent_physical_or_attested_builder_execution_and_signed_provenance_pending"
   }
 }

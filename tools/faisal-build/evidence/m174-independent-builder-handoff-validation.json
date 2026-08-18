@@ -1,0 +1,89 @@
+{
+  "project": "FAISAL",
+  "milestone": "M174-independent-builder-handoff",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "5dfa04003508957727426ebcbc1670affb602072",
+  "lts_source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+  "status": "external_builder_handoff_ready_independent_qualification_pending",
+  "objective": "Provide an independently executable LTS build handoff and enforce trusted external builder identity, provenance, source/configuration equality, and artifact-subject equality without claiming local independence.",
+  "authoritative_research": {
+    "record": "tools/faisal-build/evidence/builder-qualification-research-2026-08-18.md",
+    "record_sha256": "6b7ae77e432efe9da7cde8900afea36275549dbcf0e2ee13495ea72139dc1a60",
+    "sources": [
+      {
+        "url": "https://slsa.dev/spec/draft/build-provenance",
+        "conclusion": "Builder identity is a trust-root decision; provenance must identify build definition, dependencies, builder platform, and output subjects."
+      },
+      {
+        "url": "https://slsa.dev/spec/v1.0/verifying-artifacts",
+        "conclusion": "Verification requires trusted builder/signature binding, artifact-subject matching, expected source/build parameters, and rejection of unexpected inputs."
+      },
+      {
+        "url": "https://slsa.dev/spec/v1.1/faq",
+        "conclusion": "Verified reproducibility requires two or more genuinely independent build platforms; same-trust-base rebuilds are not sufficient."
+      }
+    ]
+  },
+  "implementation": {
+    "builder_verifier": "tools/faisal-build/verify_builder_qualification.py",
+    "builder_verifier_sha256": "523543da521ac2ff22322ae9d70722074497252e71e393e84eee923c842fcec6",
+    "builder_tests": "tools/faisal-build/test_verify_builder_qualification.py",
+    "builder_tests_sha256": "4484b22a3109ddc2d9de5c009ff025aa7fd83b4df0ed144a5a0725a016474609",
+    "handoff_generator": "tools/faisal-build/prepare_external_builder_bundle.py",
+    "handoff_generator_sha256": "b49cd6e387666e1da71cd9257a7dc1bd890d47b4595981252c822ffdaecb6d8e",
+    "runbook": "FAISAL-EXTERNAL-BUILDER-QUALIFICATION.md",
+    "runbook_sha256": "90014d62af1bf158da1ae30cc59a7092a7bc50bf1df05142f56ebd1f4a272e3b"
+  },
+  "handoff_bundle": {
+    "archive": "/home/ubuntu/agi-kernel/build/m174-external-builder/faisal-m174-external-builder-handoff.tar.gz",
+    "archive_sha256": "8b007719310de1822b19d941cf4b0540be344e8c14d34535947e2e99510a70a7",
+    "manifest": "/home/ubuntu/agi-kernel/build/m174-external-builder/external-builder-handoff.json",
+    "manifest_sha256": "e7eb36f5d4bf30b056a4671c42055e785ab9ff4016b4f056327f871bfff2f631",
+    "source_bundle_sha256": "ede661d48290d88258c8e2c5a116f9bf7e0fd3e865c72a26356540286e50b7f7",
+    "configuration_sha256": "2c282274f1f716e2b1135b0a1fb819f99525dbe099ea0d31f1b3a2676f980e06",
+    "source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+    "required_outputs": ["arch/x86/boot/bzImage", "vmlinux"],
+    "external_evidence_types_allowed": ["physical_host_measurement", "provider_attestation"],
+    "local_evidence_types_rejected": ["container_machine_id", "local_machine_id", "self_report"]
+  },
+  "tests": {
+    "verifier_unit": {
+      "result": "pass_synthetic_external_provenance_source_config_toolchain_and_artifact_path_tamper_denied_local_identity_denied",
+      "log": "/home/ubuntu/agi-kernel/build/m174-builder-qualification/builder-verifier-unit-final.log",
+      "log_sha256": "76c00d2a03704cb87a7a4537e023b3ab067df6509e261346f7aa53925198fe81"
+    },
+    "same_sandbox_pair_denial": {
+      "result": "blocked_fail_closed_as_required",
+      "primary_report_sha256": "1ff9c25a74235673796a9bc76b765afb98c237843e5b11c0db3a99febe3180e3",
+      "secondary_report_sha256": "2cd3afc21c0a38bacf4eb4564879d9f12a3e96dd746ed11b7818ce5e24813f87",
+      "qualification_result_sha256": "b570489454bad09e7b516c77cc0e7c08f5a067ea289abbbcba542fbda85b91f8",
+      "log_sha256": "4514f756891e7618d25a4c9d79c1eeea397bacefa565b8205f22517b6d19a941",
+      "expected_reason": "self-reported/local identity is not qualifying evidence"
+    }
+  },
+  "environment_boundary": {
+    "repository_remote": "none",
+    "github_connector": "enabled_but_authentication_invalid_not_used_for_builder_qualification",
+    "kvm": "absent",
+    "container_machine_id": "acb8107f24ce6696ad20c4956a7043aa",
+    "physical_or_attested_external_builder": "unavailable",
+    "local_builds": "same-sandbox byte-identical pair is diagnostic only"
+  },
+  "production_boundary": {
+    "handoff_readiness": "pass",
+    "independent_builder_qualification": "blocked",
+    "production_release_gate": "blocked",
+    "limitations": [
+      "No external host or attested build service executed the handoff in this environment.",
+      "The GitHub integration could not authenticate and was not used or modified.",
+      "No physical host measurement, provider attestation, independent signer, or trusted builder/signature root is available.",
+      "The local validation key and local container identity are explicitly non-qualifying.",
+      "The bundle is ready for transfer to an operator-controlled external builder but does not itself constitute qualification."
+    ],
+    "claims_not_made": [
+      "No claim of independent build qualification.",
+      "No claim of attested build-farm qualification.",
+      "No claim of production readiness."
+    ]
+  }
+}
