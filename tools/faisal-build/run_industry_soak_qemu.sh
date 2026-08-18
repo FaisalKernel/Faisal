@@ -27,7 +27,7 @@ for round in $(seq 1 "$ROUNDS"); do
   end=$(date +%s)
   cp "$rootfs/qemu.log" "$log"
   elapsed=$((end - start))
-  if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel' "$log"; then
+  if grep -aEq 'rcu: .*stall|BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|kernel BUG' "$log"; then
     printf '%s\t%s\t%s\t%s\n' "$round" "$ITERATIONS" "$elapsed" failed >> "$SUMMARY"
     echo "FAISAL_INDUSTRY_SOAK_DIAGNOSTIC round=$round" >&2
     exit 1

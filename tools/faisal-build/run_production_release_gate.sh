@@ -31,6 +31,7 @@ REQUIRE_PRODUCTION_LINE=${FAISAL_REQUIRE_PRODUCTION_LINE:-1}
 KERNEL_SOURCE=${FAISAL_KERNEL_SOURCE:-$LINUX}
 REQUIRED_KERNEL_LINE=${FAISAL_REQUIRED_KERNEL_LINE:-}
 EXPECTED_KERNEL_VERSION=${FAISAL_EXPECTED_KERNEL_VERSION:-}
+LTS_SOAK_EVIDENCE=${FAISAL_LTS_SOAK_EVIDENCE:-}
 RUN_ROLLBACK_QEMU=${FAISAL_RUN_ROLLBACK_QEMU:-0}
 RUN_ADAPTER_CONFORMANCE=${FAISAL_RUN_ADAPTER_CONFORMANCE:-1}
 SIGNING_OPERATIONAL_PROOF=${FAISAL_SIGNING_AUTHORITY_OPERATIONAL_PROOF:-}
@@ -89,6 +90,12 @@ case "$REPLICATION_EVIDENCE" in
   *.json) : ;;
   *) fail "structured JSON replication qualification evidence is required for production qualification" ;;
 esac
+[ -n "$LTS_SOAK_EVIDENCE" ] || fail "FAISAL_LTS_SOAK_EVIDENCE is required"
+case "$LTS_SOAK_EVIDENCE" in
+  *.json) : ;;
+  *) fail "structured JSON LTS soak requalification evidence is required for production qualification" ;;
+esac
+[ -r "$LTS_SOAK_EVIDENCE" ] || fail "LTS soak requalification evidence is unreadable"
 [ -n "$DEPLOYMENT_EVIDENCE" ] || fail "FAISAL_DEPLOYMENT_EVIDENCE is required"
 [ -n "$LIVE_DEPLOYMENT_EVIDENCE" ] || fail "FAISAL_LIVE_DEPLOYMENT_EVIDENCE is required"
 case "$LIVE_DEPLOYMENT_EVIDENCE" in
@@ -121,6 +128,7 @@ esac
 [ -x "$LINUX/tools/faisal-build/verify_replication_qualification.py" ] || fail "replication verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_external_replication_qualification.py" ] || fail "external replication verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_deployment_governance.py" ] || fail "deployment governance verifier unavailable"
+[ -x "$LINUX/tools/faisal-build/verify_lts_soak_requalification.py" ] || fail "LTS soak requalification verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_live_deployment_qualification.py" ] || fail "live deployment verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_external_security_review.py" ] || fail "external security-review verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_advisory_ledger.sh" ] || fail "advisory ledger verifier unavailable"
@@ -176,6 +184,15 @@ else
 fi
 
 expected_source_revision=$(sed -n 's/^source_revision=//p' "$BUILD_A/reproducible-build.env" | head -1)
+FAISAL_LTS_SOAK_EVIDENCE="$LTS_SOAK_EVIDENCE" \
+FAISAL_PUBLIC_KEY="$PUBLIC_KEY" \
+FAISAL_EXPECTED_SOURCE_REV="$expected_source_revision" \
+FAISAL_LTS_SOAK_VERIFY_REPORT="${REPORT}.lts-soak.tsv" \
+  python3 "$LINUX/tools/faisal-build/verify_lts_soak_requalification.py" >/tmp/faisal-release-lts-soak-gate.log 2>&1 || {
+  cat /tmp/faisal-release-lts-soak-gate.log >&2
+  fail "representative LTS soak requalification verification"
+}
+printf 'lts_soak_requalification\tpass\t%s\n' "$LTS_SOAK_EVIDENCE" >> "$REPORT"
 [ -n "$expected_source_revision" ] || fail "build A source revision missing"
 [ "$SIGNING_SOURCE_REVISION" = "$expected_source_revision" ] || fail "signing-authority proof source revision differs from build A"
 python3 "$LINUX/tools/faisal-build/verify_signing_authority_operational_proof.py" \
