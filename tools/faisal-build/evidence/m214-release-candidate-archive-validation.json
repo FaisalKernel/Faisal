@@ -1,0 +1,45 @@
+{
+  "project": "FAISAL",
+  "milestone": "M214-release-candidate-archive",
+  "recorded_at": "2026-08-18T10:31:10Z",
+  "status": "deterministic_relocatable_release_candidate_archive_verified",
+  "implementation": {
+    "archive_generator": "tools/faisal-build/archive_release_candidate_bundle.py",
+    "archive_generator_sha256": "861033c3f64afc0794bdc2626bb1908d6c569f60f4cf886db36b16208db23e9d",
+    "archive_verifier": "tools/faisal-build/verify_release_candidate_archive.py",
+    "archive_verifier_sha256": "c3ac44d13b1cc17152722493a04c7eca458e00f0a78592e38422bc46db0687cb",
+    "negative_test": "build/test_m214_release_archive.py",
+    "negative_test_sha256": "82eea5b98bc3cb3082d33d50e9c777c30b6b29acfea3d929325c97fe5a032ac3",
+    "checks": [
+      "sorted fixed-metadata gzip-tar creation",
+      "safe extraction with fixed archive root",
+      "relocated bundle delegation to 24-check verifier",
+      "byte-identical repeated archive generation",
+      "payload tamper rejection"
+    ]
+  },
+  "validation": {
+    "positive": "FAISAL_RELEASE_CANDIDATE_ARCHIVE_OK checks=6 plus FAISAL_RELEASE_CANDIDATE_BUNDLE_OK checks=24",
+    "determinism": "M214_DETERMINISTIC_ARCHIVE_OK",
+    "negative": [
+      "M214_NEGATIVE_TAMPER_REJECT_OK",
+      "M214_NEGATIVE_TEST_EXIT=0"
+    ]
+  },
+  "archive": {
+    "path": "/home/ubuntu/agi-kernel/build/m214-release-candidate.tar.gz",
+    "sha256": "8a15f937663c5d666374a36c5fcc33c6a91580014e542568906bb8905a44a8a0",
+    "bytes": 13932461,
+    "source_bundle_files": 54
+  },
+  "boundary": {
+    "deterministic_local_archive_only": true,
+    "independent_builder": false,
+    "operator_signature": false,
+    "physical_hardware": false,
+    "external_security_review": false,
+    "production_approval": false,
+    "model_output_is_authority": false,
+    "note": "The archive improves reproducible handoff and relocation validation; it does not create independent build, signing, hardware, external review, or production approval evidence."
+  }
+}
