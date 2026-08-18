@@ -18,16 +18,12 @@
     "privileged_kernel_code_changed": false,
     "artifacts": {
       "candidate_manifest": "/home/ubuntu/agi-kernel/build/final-integration-m248-final/artifacts/FAISAL-production-candidate-manifest.json",
-      "candidate_manifest_sha256": "bab192c2a5cd0ceb90561ad04df14a669abc717397ae42b84bb979f6684ddd03",
       "provenance_manifest": "/home/ubuntu/agi-kernel/build/final-integration-m248-final/artifacts/provenance/FAISAL-build-manifest.json",
-      "provenance_manifest_sha256": "16ecab6ec65ab4869d7a1bac4900b7a21a8311476a52620a9a58b4e481db0e7d",
       "provenance_generated_at": "2026-08-18T22:36:07Z",
       "spdx_sbom": "/home/ubuntu/agi-kernel/build/final-integration-m248-final/artifacts/FAISAL-SBOM.spdx.json",
-      "spdx_sbom_sha256": "0e9dac82ac0455e0bcd2352d7055001bf62a02efd04a419f0f5062495fb7591f",
       "local_readiness_gate": "/home/ubuntu/agi-kernel/build/final-integration-m248-final/FAISAL-readiness-gate-local.json",
-      "local_readiness_gate_sha256": "f19ceb426b384e4902fc0d6d50019f17224971299eb89d8533491b2efe4b9dce",
       "production_readiness_gate": "/home/ubuntu/agi-kernel/build/final-integration-m248-final/FAISAL-readiness-gate-production.json",
-      "production_readiness_gate_sha256": "455ec9ab332b6ad3221249f737832641f0ced0a5fb5fe5b6ab96898f6e748655"
+      "production_readiness_gate_status": "blocked_and_fail_closed"
     }
   },
   "validation": {
