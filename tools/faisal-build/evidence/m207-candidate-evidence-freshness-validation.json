@@ -1,0 +1,37 @@
+{
+  "project": "FAISAL",
+  "milestone": "M207-candidate-evidence-freshness",
+  "schema": "org.faisal.candidate-evidence-freshness-validation.v1",
+  "recorded_at": "2026-08-18T10:03:10Z",
+  "status": "freshness_and_bounded_lineage_pass_stale_and_future_rejections_pass",
+  "implementation": {
+    "freshness_auditor": "tools/faisal-build/audit_candidate_evidence_freshness.py",
+    "freshness_auditor_sha256": "9c935fa944fdc939ef2c5c2d40548fdba46005dce23c9f728aa9af4be04a2674",
+    "negative_test": "build/test_m207_freshness_negative.py",
+    "negative_test_sha256": "cf2939b46984ba1ac3160c37910cd60668809e59573f51627f6cbe348a6f1444",
+    "checks": [
+      "candidate, provenance, and state lineages remain within three ancestor commits",
+      "candidate, provenance, and evidence timestamps are not future-dated",
+      "candidate and provenance timestamps do not predate their bound commits",
+      "evidence timestamp follows provenance generation",
+      "candidate remains bounded and not production-approved"
+    ]
+  },
+  "validation": {
+    "positive": "FAISAL_CANDIDATE_EVIDENCE_FRESHNESS_OK checks=15 head=74092f62719b77c81e3d62836967ca1effb36ab0",
+    "negative": [
+      "M207_NEGATIVE_FUTURE_TIMESTAMP_REJECT_OK",
+      "M207_NEGATIVE_STALE_LINEAGE_REJECT_OK",
+      "M207_NEGATIVE_EVIDENCE_ORDER_REJECT_OK",
+      "M207_NEGATIVE_TEST_EXIT=0"
+    ],
+    "standard_candidate_validator": "FAISAL_PRODUCTION_CANDIDATE_MANIFEST_OK"
+  },
+  "boundary": {
+    "local_freshness_only": true,
+    "independent_builder": false,
+    "operator_signature": false,
+    "production_approval": false,
+    "note": "Fresh local evidence is not independent external qualification and does not authorize release."
+  }
+}

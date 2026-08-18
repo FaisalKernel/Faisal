@@ -64,6 +64,7 @@ def main() -> None:
         'm204-production-candidate-consistency-validation.json',
         'm205-current-lts-provenance-consistency-validation.json',
         'm206-candidate-provenance-alignment-validation.json',
+        'm207-candidate-evidence-freshness-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:
