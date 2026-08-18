@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M226-accelerator-fabric",
-  "recorded_at": "2026-08-18T14:53:24Z",
+  "recorded_at": "2026-08-18T14:55:14Z",
   "status": "local_provider_neutral_accelerator_policy_qualified_vendor_and_physical_accelerator_qualification_pending",
   "objective": "Add a provider-neutral accelerator-fabric contract for device identity, tiered memory regions, topology links, DMA/peer access, collective intent, provenance, generation fencing, device-loss abort, and authority-gated completion without claiming physical GPU execution.",
   "research": {
