@@ -1,0 +1,130 @@
+{
+  "project": "FAISAL",
+  "milestone": "M245-provider-neutral-platform-coordinator",
+  "recorded_at": "2026-08-18T21:41:06Z",
+  "status": "provider_neutral_platform_slice_qualified_production_ecosystem_qualification_pending",
+  "objective": "Compose FAISAL resource, fleet, agent, checkpoint, recovery, and policy primitives into a durable provider-neutral cluster workload contract that can interoperate with Kubernetes DRA, KubeRay, Ray, NVIDIA Dynamo-style runtimes, bare metal, and edge deployments without making external metadata or model output authority.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/",
+        "finding": "Kubernetes Dynamic Resource Allocation defines DeviceClass, ResourceClaim or ResourceClaimTemplate, and ResourceSlice contracts for device inventory, claims, filtering, sharing, topology access, and allocation.",
+        "implementation_impact": "M245 introduces a provider-neutral claim adapter whose canonical digest is bound to a workload intent; it does not embed Kubernetes client logic or treat a claim as authorization."
+      },
+      {
+        "url": "https://docs.ray.io/en/latest/cluster/kubernetes/index.html",
+        "finding": "KubeRay uses Kubernetes-native RayCluster, RayJob, and RayService resources, with worker lifecycle, autoscaling, heterogeneous compute, and multiple Ray versions.",
+        "implementation_impact": "M245 exposes runtime_ref, provider kind, topology, claim identity, checkpoint capability, and recovery semantics suitable for an adapter rather than replacing Ray or Kubernetes orchestration."
+      },
+      {
+        "url": "https://developer.nvidia.com/blog/nvidia-dynamo-1-production-ready/",
+        "finding": "NVIDIA Dynamo 1.0 describes KV-aware routing, disaggregated inference stages, checkpoint restore, model-weight streaming, topology-aware gang scheduling, health detection, request migration, and storage-backed KV management.",
+        "implementation_impact": "M245 adds provider-neutral lifecycle, topology, claim, checkpoint, and recovery evidence primitives while making no NVIDIA hardware or performance claim."
+      },
+      {
+        "url": "https://docs.kernel.org/accounting/psi.html",
+        "finding": "Linux PSI provides realtime CPU, memory, and I/O contention signals and supports load shedding, migration, and pollable pressure triggers.",
+        "implementation_impact": "M245 retains pressure-aware resource policy as an upstream-compatible control-plane input; physical signal collection remains an adapter responsibility."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-platform/faisal_platform.h",
+    "source": "tools/faisal-platform/faisal_platform.c",
+    "adapter_header": "tools/faisal-platform/faisal_platform_adapter.h",
+    "adapter_source": "tools/faisal-platform/faisal_platform_adapter.c",
+    "fleet_dependency": "tools/faisal-fleet/faisal_fleet_intent.c",
+    "selftest": "tools/testing/selftests/faisal_platform_test.c",
+    "benchmark": "tools/testing/selftests/faisal_platform_benchmark.c",
+    "concurrency_test": "tools/testing/selftests/faisal_platform_concurrency_test.c",
+    "fuzz_test": "tools/testing/selftests/faisal_platform_fuzz_test.c",
+    "runner": "tools/faisal-build/run_platform_validation.sh",
+    "platform_abi": 44,
+    "kernel_abi_changed": false,
+    "production_path_changed": false,
+    "features": [
+      "provider-neutral workload intent with CPU, memory, accelerator, network, storage, topology, deadline, tenant, agent, objective, model, lineage, policy, checkpoint, and provider-claim fields",
+      "canonical provider claim adapter for Kubernetes DRA, KubeRay, Ray, Dynamo-style, bare-metal, and edge runtimes",
+      "deterministic topology-aware gang placement composed with the existing fleet engine",
+      "durable SHA-256 chained journal with payload and event digest verification",
+      "generation-fenced node heartbeats and node failure handling",
+      "checkpoint identity, resource release, retry policy, bounded recovery, and workload completion",
+      "replayable cluster state with fail-closed malformed length, chain, payload, and event-digest rejection",
+      "concurrent read-side queries with serialized journal writes",
+      "model-output and provider-metadata non-authority boundaries",
+      "OpenSSL EVP modernization of the fleet evidence digest for strict current-toolchain builds"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11 -pthread",
+    "selftest": "M245_PLATFORM_SELFTEST_EXIT=0 cases=86 recovery=1 tamper_replay=1 authority_boundary=1",
+    "benchmark": {
+      "rounds": 64,
+      "durable_lifecycle_ns": 105879816,
+      "durable_ns_per_round": 1654372.12,
+      "static_elapsed_ns": 222,
+      "static_ns_per_round": 3.47,
+      "checksum": 0,
+      "interpretation": "The durable lifecycle includes provider-claim binding, journal serialization, SHA-256 hashing, fdatasync, placement, checkpoint, resource release, and replay-safe state. The static loop is a non-durable arithmetic comparison and is not apples-to-apples. The measurement is an overhead baseline, not a claimed speedup."
+    },
+    "concurrency": "M245_PLATFORM_CONCURRENCY_EXIT=0 readers=4 workloads=32 read_rounds=256 writer_rounds=256 failures=0",
+    "fuzzing": "M245_PLATFORM_FUZZ_EXIT=0 iterations=10000 rejected=10000 accepted=0 base_size=197064",
+    "asan_ubsan": "M245_PLATFORM_SANITIZERS_OK; lifecycle, concurrency, and fuzz fixtures passed with leak detection and halt-on-error",
+    "adjacent_regressions": {
+      "m244": "M244 optimizer validation passed",
+      "m243": "M243 adaptive validation passed through adjacent M244 runner",
+      "m242": "M242 fabric validation passed: cases=48, 64-node/256-shard benchmark, concurrency, fuzz, sanitizers",
+      "m241": "M241 agent runtime validation passed: cases=38, 512-objective scale, concurrency, sanitizers",
+      "m240": "M240 budget validation passed: cases=22, 300000-operation benchmark",
+      "m239": "M239 KV-tier validation passed: cases=16, 400000-operation benchmark",
+      "fleet": "Fleet-intent validation passed after OpenSSL EVP digest modernization",
+      "accelerator_fabric": "M226 accelerator-fabric validation passed; scope remains userspace policy fixture, not physical DMA or vendor qualification"
+    },
+    "qemu": "FAISAL_M76_QEMU_VALIDATION_OK; Linux 7.2 recovered artifact, ACPI-on, SMP=1, 4 GiB",
+    "industry_soak": "FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256 total_iterations=1024",
+    "runner_marker": "M245_PLATFORM_VALIDATION_OK"
+  },
+  "security": {
+    "privileged_kernel_self_modification": false,
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "external_claim_direct_commit": false,
+    "authority_required_by_policy": true,
+    "lineage_required_by_policy": true,
+    "topology_required_by_policy": true,
+    "claim_digest_binding": true,
+    "generation_fencing": true,
+    "checkpoint_recovery_bound": true,
+    "journal_tamper_rejection": true,
+    "replay_rejection": true,
+    "payload_length_overflow_rejection": true,
+    "fake_hardware_evidence": false,
+    "fake_external_evidence": false
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_gpu_npu": false,
+    "physical_hbm_vram_iommu_dma": false,
+    "live_rdma": false,
+    "live_kubernetes_cluster": false,
+    "live_kuberay": false,
+    "live_dynamo": false,
+    "live_multihost_replication": false,
+    "live_migration": false,
+    "live_disaster_recovery": false,
+    "tokens_per_second": false,
+    "inference_latency": false,
+    "accelerator_utilization": false,
+    "energy_per_inference": false,
+    "consciousness": false
+  },
+  "qualification_limits": [
+    "M245 is a durable userspace platform contract and reference coordinator; it does not replace Kubernetes, Ray, KubeRay, Dynamo, Linux networking, or vendor drivers.",
+    "The provider adapters validate canonical metadata but do not establish live API compatibility, live cluster operation, RDMA, NIXL, NVLink, GPU memory isolation, or physical accelerator behavior.",
+    "The durable lifecycle measured 1654372.12 ns per round versus a 3.47 ns static arithmetic loop; the comparison is intentionally non-apples-to-apples and is not a performance superiority claim.",
+    "The Linux 7.2 QEMU and industry soak results qualify only the tested virtualized profiles; they do not qualify physical hardware, firmware, IOMMU, DMA, power, thermal, or vendor-driver behavior.",
+    "Production release remains blocked by independent builder equivalence, operator signing and trusted-key lifecycle, physical accelerator qualification, independent external security review, production PKI/KMS/attestation, live multi-host migration and rollback, and operator-owned CVE response."
+  ]
+}

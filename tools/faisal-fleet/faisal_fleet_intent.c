@@ -1,5 +1,5 @@
 #include "faisal_fleet_intent.h"
-#include <openssl/sha.h>
+#include <openssl/evp.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -92,26 +92,51 @@ static int eligible(const struct fle_node *node, const struct fle_intent *intent
 static void evidence_digest(const struct fle_intent *intent,
 	const struct fle_assignment *assignment, uint8_t out[FLE_DIGEST_SIZE])
 {
-	SHA256_CTX ctx;
+	EVP_MD_CTX *ctx;
+	unsigned int digest_length = 0U;
 	uint32_t i;
-	SHA256_Init(&ctx);
-	SHA256_Update(&ctx, &intent->abi_version,
-		sizeof(intent->abi_version));
-	SHA256_Update(&ctx, &intent->objective_id, sizeof(intent->objective_id));
-	SHA256_Update(&ctx, &intent->tenant_id, sizeof(intent->tenant_id));
-	SHA256_Update(&ctx, &intent->agent_id, sizeof(intent->agent_id));
-	SHA256_Update(&ctx, &intent->expected_node_generation,
-		sizeof(intent->expected_node_generation));
-	SHA256_Update(&ctx, intent->lineage_digest, sizeof(intent->lineage_digest));
-	SHA256_Update(&ctx, intent->policy_digest, sizeof(intent->policy_digest));
-	SHA256_Update(&ctx, &assignment->assignment_id,
-		sizeof(assignment->assignment_id));
-	SHA256_Update(&ctx, &assignment->placement_sequence,
-		sizeof(assignment->placement_sequence));
-	for (i = 0; i < assignment->selected_count; i++)
-		SHA256_Update(&ctx, &assignment->selected_nodes[i],
-			sizeof(assignment->selected_nodes[i]));
-	SHA256_Final(out, &ctx);
+	int ok = 1;
+
+	ctx = EVP_MD_CTX_new();
+	if (ctx == NULL || EVP_DigestInit_ex(ctx, EVP_sha256(), NULL) != 1)
+		ok = 0;
+	if (ok && EVP_DigestUpdate(ctx, &intent->abi_version,
+			   sizeof(intent->abi_version)) != 1)
+		ok = 0;
+	if (ok && EVP_DigestUpdate(ctx, &intent->objective_id,
+			   sizeof(intent->objective_id)) != 1)
+		ok = 0;
+	if (ok && EVP_DigestUpdate(ctx, &intent->tenant_id,
+			   sizeof(intent->tenant_id)) != 1)
+		ok = 0;
+	if (ok && EVP_DigestUpdate(ctx, &intent->agent_id,
+			   sizeof(intent->agent_id)) != 1)
+		ok = 0;
+	if (ok && EVP_DigestUpdate(ctx, &intent->expected_node_generation,
+			   sizeof(intent->expected_node_generation)) != 1)
+		ok = 0;
+	if (ok && EVP_DigestUpdate(ctx, intent->lineage_digest,
+			   sizeof(intent->lineage_digest)) != 1)
+		ok = 0;
+	if (ok && EVP_DigestUpdate(ctx, intent->policy_digest,
+			   sizeof(intent->policy_digest)) != 1)
+		ok = 0;
+	if (ok && EVP_DigestUpdate(ctx, &assignment->assignment_id,
+			   sizeof(assignment->assignment_id)) != 1)
+		ok = 0;
+	if (ok && EVP_DigestUpdate(ctx, &assignment->placement_sequence,
+			   sizeof(assignment->placement_sequence)) != 1)
+		ok = 0;
+	for (i = 0U; ok && i < assignment->selected_count; ++i)
+		if (EVP_DigestUpdate(ctx, &assignment->selected_nodes[i],
+				     sizeof(assignment->selected_nodes[i])) != 1)
+			ok = 0;
+	if (ok && EVP_DigestFinal_ex(ctx, out, &digest_length) != 1)
+		ok = 0;
+	if (!ok || digest_length != FLE_DIGEST_SIZE)
+		memset(out, 0, FLE_DIGEST_SIZE);
+	if (ctx != NULL)
+		EVP_MD_CTX_free(ctx);
 }
 
 static int validate_selected_generation(const struct fle_service *s,

@@ -5,9 +5,9 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "c56a8659216a9dde178b13ad6c9816e032a6a507",
-  "current_tag": "FAISAL-M244-CONTINUOUS-OPTIMIZATION-SUPERVISOR",
-  "current_abi": 43,
+  "current_head": "c125b63bcedd9bada6d0cef1600d2e01a38e00db",
+  "current_tag": "FAISAL-M245-PROVIDER-NEUTRAL-PLATFORM-COORDINATOR",
+  "current_abi": 44,
   "operating_loop": [
     "RESEARCH",
     "DESIGN",
@@ -2035,5 +2035,11 @@
   "m244_research_boundary": "researched_linux_psi_kubernetes_psi_metrics_and_google_sre_canary_release_control_comparison",
   "m244_model_authority_boundary": "telemetry_model_hints_and_optimizer_proposals_are_untrusted_and_never_privileged_kernel_or_execution_authority",
   "m244_validation_boundary": "strict_selftest_73_mutation_rejections_3_512_sample_durability_benchmark_4_reader_256_sample_concurrency_10000_fuzz_asan_ubsan_m239_m240_m241_m242_m243_regressions_linux72_qemu_soak_passed",
-  "m244_production_boundary": "production_approval_false_kernel_code_self_modification_false_physical_accelerator_independent_builder_external_security_review_production_pki_multihost_live_rollback_and_cve_operations_pending"
+  "m244_production_boundary": "production_approval_false_kernel_code_self_modification_false_physical_accelerator_independent_builder_external_security_review_production_pki_multihost_live_rollback_and_cve_operations_pending",
+  "m245_provider_neutral_platform_coordinator": "pass_durable_provider_neutral_workload_claim_topology_placement_checkpoint_recovery_node_failure_fencing_replay_and_external_runtime_adapter_contract",
+  "m245_provider_neutral_platform_coordinator_evidence": "tools/faisal-build/evidence/m245-platform-coordinator-validation.json",
+  "m245_research_boundary": "researched_kubernetes_dra_kuberay_nvidia_dynamo_and_linux_psi_current_production_patterns",
+  "m245_model_authority_boundary": "model_output_provider_metadata_runtime_claims_and_external_scheduler_hints_are_untrusted_and_never_placement_execution_or_privileged_authority",
+  "m245_validation_boundary": "strict_selftest_86_provider_claim_binding_64_round_durable_benchmark_4_reader_32_workload_concurrency_10000_fuzz_asan_ubsan_m239_m240_m241_m242_m244_fleet_accelerator_regressions_linux72_qemu_soak_passed",
+  "m245_production_boundary": "production_approval_false_live_kubernetes_kuberay_dynamo_rdma_physical_accelerator_independent_builder_external_security_review_production_pki_multihost_live_migration_and_cve_operations_pending"
 }
