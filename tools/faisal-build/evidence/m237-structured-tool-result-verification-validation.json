@@ -1,0 +1,149 @@
+{
+  "project": "FAISAL",
+  "milestone": "M237-provider-neutral-structured-tool-result-verification",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "status": "local_contract_qualified_live_provider_and_external_deployment_qualification_pending",
+  "objective": "Verify structured and unstructured tool results against the intended tool contract, call correlation, schema and implementation generations, provenance, artifacts, world state, and independent verification before promotion to world state.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools",
+        "finding": "MCP tools expose inputSchema, optional outputSchema, execution metadata, annotations, structuredContent, content, and isError; tool annotations are untrusted unless they come from trusted servers.",
+        "impact": "M237 verifies output schema, payload, artifacts, error state, and trusted policy inputs instead of accepting MCP result metadata as authority."
+      },
+      {
+        "url": "https://developers.openai.com/api/docs/guides/function-calling",
+        "finding": "OpenAI function calling separates model tool calls from application-side execution and tool-call outputs, with JSON Schema and strict mode available.",
+        "impact": "M237 binds result records to tool-call correlation IDs, request and argument digests, schema identity, and application-side validation."
+      },
+      {
+        "url": "https://ai.google.dev/gemini-api/docs/function-calling",
+        "finding": "Gemini function calling defines function declarations, application execution, result return, parallel calls, compositional calls, multimodal responses, and remote MCP.",
+        "impact": "M237 requires correlation, sequence, generation, artifact, and world-state checks that remain valid under parallel or multimodal tool results."
+      },
+      {
+        "url": "https://docs.sglang.ai/advanced_features/structured_outputs.html",
+        "finding": "SGLang constrains JSON Schema, regex, and EBNF output with XGrammar, Outlines, or llguidance and recommends validating output after generation.",
+        "impact": "Constrained decoding is treated as a format signal, not proof of provenance, freshness, semantic correctness, or authority."
+      },
+      {
+        "url": "https://github.com/ggml-org/llama.cpp",
+        "finding": "llama.cpp provides portable C/C++ inference, OpenAI-compatible serving, grammars, quantization, hybrid CPU/GPU inference, and many hardware backends.",
+        "impact": "M237 uses a provider-neutral result envelope that can receive local-runtime outputs without binding FAISAL to a vendor API."
+      },
+      {
+        "url": "https://huggingface.co/docs/text-generation-inference/en/index",
+        "finding": "TGI is in maintenance mode and recommends vLLM, SGLang, and local engines such as llama.cpp or MLX; TGI documents streaming, tracing, metrics, batching, and schema-guided tool use.",
+        "impact": "Streaming and tracing are recorded as evidence inputs, while independent result and artifact verification remains required."
+      },
+      {
+        "url": "https://docs.kernel.org/filesystems/fsverity.html",
+        "finding": "Linux fs-verity uses Merkle trees to verify read-only file contents and provides a constant-time file digest; integrity is distinct from authentication and authorization.",
+        "impact": "M237 binds artifact digests but does not confuse byte integrity with semantic correctness or trusted authority."
+      },
+      {
+        "url": "https://docs.sel4.systems/",
+        "finding": "seL4 documents a capability-oriented verified kernel ecosystem including Microkit, CAmkES, capDL, and verified configurations.",
+        "impact": "FAISAL retains explicit capability and policy boundaries without claiming seL4 formal-verification properties for FAISAL code."
+      },
+      {
+        "url": "https://www.cloudhypervisor.org/docs/",
+        "finding": "Cloud Hypervisor provides a lightweight VMM with quick-start and command documentation.",
+        "impact": "FAISAL keeps fast-boot and isolation qualification at the existing QEMU/VMM boundary until external deployment evidence exists."
+      }
+    ],
+    "provider_catalog": {
+      "retrieved_at": "2026-08-18",
+      "source": "live built-in provider catalog",
+      "count": 10,
+      "ids": [
+        "gpt-5-nano",
+        "gpt-5-mini",
+        "gpt-5",
+        "gpt-5.5",
+        "claude-haiku-4-5",
+        "claude-sonnet-4-6",
+        "claude-opus-4-6",
+        "claude-opus-4-7",
+        "gemini-3-flash-preview",
+        "gemini-3.1-pro-preview"
+      ]
+    }
+  },
+  "implementation": {
+    "header": "tools/faisal-result-verify/faisal_result_verify.h",
+    "source": "tools/faisal-result-verify/faisal_result_verify.c",
+    "selftest": "tools/testing/selftests/faisal_result_verify_test.c",
+    "benchmark": "tools/testing/selftests/faisal_result_verify_benchmark.c",
+    "runner": "tools/faisal-build/run_result_verify_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "tool contract registration with schema and implementation digests",
+      "structured, text, and binary output-kind binding",
+      "tool-call and request sequence correlation",
+      "objective, trace, agent, tenant, task, registry, schema, session, and world-generation binding",
+      "input, arguments, schema, payload, provenance, validator, and artifact digest requirements",
+      "provider error and result-code rejection",
+      "age, latency, deadline, and observed-time freshness checks",
+      "replay rejection by sequence, nonce, and tool-call ID",
+      "independent validator and artifact requirements",
+      "authority-gated promotion to world state",
+      "SHA-256 request, validation, and receipt integrity",
+      "receipt query and tamper rejection",
+      "model-proposal and promotion authority separation"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M237_SELFTEST_EXIT=0 cases=24 mutation_rejections=64",
+    "selftest_cases": 24,
+    "mutation_cases": 64,
+    "benchmark_rounds": 100000,
+    "benchmark_operations": 400000,
+    "benchmark_elapsed_ns": 700490594,
+    "benchmark_ns_per_operation": 1751.23,
+    "asan_ubsan": true,
+    "qemu_kernel_boot": "pending post-implementation hardened requalification",
+    "industry_soak": "pending post-implementation hardened requalification",
+    "regression_m236": "M236 source remains integrated; M237 userspace contract does not change kernel ABI",
+    "known_diagnostic_policy": "ACPI-on SMP profiles that produce RCU stalls remain rejected and unsuppressed"
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_accelerator": false,
+    "independent_security_review": false,
+    "production_pki": false,
+    "live_kms_attestation": false,
+    "live_provider_qualification": false,
+    "live_multihost_deployment": false,
+    "model_retraining_or_consciousness_claim": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "tool_call_is_execution": false,
+    "provider_protocol_is_authority": false,
+    "schema_validity_is_authority": false,
+    "unbound_tool_result_promoted": false,
+    "wrong_tool_call_accepted": false,
+    "wrong_generation_accepted": false,
+    "stale_result_accepted": false,
+    "provider_error_promoted": false,
+    "missing_provenance_accepted": false,
+    "missing_artifact_accepted": false,
+    "duplicate_result_accepted": false,
+    "tampered_receipt_verified": false,
+    "model_only_promotion_accepted": false,
+    "missing_independent_verifier_accepted": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "M237 is a deterministic C userspace verification and receipt fixture, not a JSON parser, JSON Schema engine, MCP transport, provider SDK, or live tool executor.",
+    "The contract consumes canonical digests and policy inputs; it does not itself inspect arbitrary JSON syntax or prove the semantic truth of a tool result.",
+    "No OpenAI, Anthropic, Gemini, SGLang, llama.cpp, TGI, MCP, browser, or external tool call was executed for this milestone.",
+    "No physical accelerator, independent builder, independent security review, production PKI/KMS/TPM, external multihost transport, or production deployment was qualified.",
+    "Production release remains blocked by the project’s external evidence gate."
+  ]
+}
