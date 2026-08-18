@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "fe177e8fd74f63791aa0306991e21727ad6b4dc4",
-  "current_tag": "FAISAL-M202-END-TO-END-HARDENED-QEMU",
+  "current_head": "b0f5dd2249a1c026efc75f435dc04ba13e7221ec",
+  "current_tag": "FAISAL-M203-UNQUALIFIED-LEGACY-QEMU-FAIL-CLOSED",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1839,6 +1839,9 @@
     "m202_end_to_end_hardened_qemu": "pass_strict_static_compile_acpi_off_1vcpu_m76_fuzz_approval_long_horizon_multi_agent_reflection_deployment_and_recovery_markers_acpi_on_2vcpu_rejected_rcu_diagnostic",
     "m202_end_to_end_evidence": "tools/faisal-build/evidence/m202-end-to-end-hardened-qemu-validation.json",
     "m202_release_scope": "bounded_end_to_end_multi_service_qualification_pass_in_acpi_off_profile_explicit_acpi_on_smp_rcu_block_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
-    "m202_candidate_manifest": "/home/ubuntu/agi-kernel/build/m202-candidate/production-candidate.json sha256=67d0833951f501eb6a80423e29e5d546919e472594d4da23e7359712ef3cde33"
+    "m202_candidate_manifest": "/home/ubuntu/agi-kernel/build/m202-candidate/production-candidate.json sha256=67d0833951f501eb6a80423e29e5d546919e472594d4da23e7359712ef3cde33",
+    "m203_unqualified_legacy_qemu_guards": "pass_three_stale_entry_points_persistent_memory_experience_learning_model_orchestration_syntax_pass_exit_78_explicit_block_marker_no_false_pass_markers",
+    "m203_unqualified_legacy_qemu_evidence": "tools/faisal-build/evidence/m203-unqualified-legacy-qemu-fail-closed-validation.json",
+    "m203_release_scope": "bounded_fail_closed_deprecation_of_three_unqualified_legacy_qemu_paths_no_qualification_claim_for_guarded_workloads_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
   }
 }
