@@ -142,6 +142,18 @@
       "m245_platform_regression": "M245 platform selftest, benchmark, concurrency, fuzz, sanitizers, and hardened Linux 7.2 QEMU regression passed"
     }
   },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_gpu_npu": false,
+    "physical_hbm_vram_iommu_dma": false,
+    "live_rdma": false,
+    "live_multihost_migration": false,
+    "operator_signing_ceremony": false,
+    "independent_external_security_review": false,
+    "production_pkI_kms_tpm": false,
+    "cve_operations_owner": false
+  },
   "security_boundaries": {
     "model_output_is_authority": false,
     "optimizer_output_is_authority": false,
