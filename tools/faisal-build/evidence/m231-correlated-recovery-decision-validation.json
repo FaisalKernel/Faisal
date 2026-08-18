@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M231-correlated-recovery-decision-contract",
-  "recorded_at": "2026-08-18T16:05:36Z",
+  "recorded_at": "2026-08-18T16:07:35Z",
   "status": "local_contract_qualified_external_deployment_and_physical_backend_qualification_pending",
   "objective": "Bind autonomous recovery decisions to trace lineage, objective/agent/worker identity, observation and diagnosis evidence, candidate/checkpoint state, bounded retry/backoff, compensation policy, authority, and generation fencing.",
   "research": {
@@ -78,10 +78,10 @@
     "selftest_cases": 11,
     "benchmark_rounds": 100000,
     "benchmark_operations": 200000,
-    "benchmark_ns_per_operation": 1125,
+    "benchmark_ns_per_operation": 1150,
     "asan_ubsan": true,
-    "qemu_kernel_boot": "pending final integrated run",
-    "regression_m230": "pending final integrated run"
+    "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK on ACPI-on one-vCPU 4G; FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256",
+    "regression_m230": "M230_MODEL_ROUTER_VALIDATION_OK; M229_EXPERIENCE_EVIDENCE_VALIDATION_OK; M228_RUNNER_EXIT=0"
   },
   "boundary": {
     "production_approval": false,
