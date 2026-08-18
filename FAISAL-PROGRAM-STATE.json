@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "d02a6d5cf6edd7dd278882b77823fbd93ffe12e0",
-  "current_tag": "FAISAL-M218-EXTERNAL-QUALIFICATION-GATE",
+  "current_head": "8e802961603c00e243556fcafc157db4fe5eb5b7",
+  "current_tag": "FAISAL-M219-PRODUCTION-READINESS-BOUNDARY",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1896,6 +1896,9 @@
     "m217_candidate_manifest": "/home/ubuntu/agi-kernel/build/m217-candidate/production-candidate.json sha256=33ef1daad1abee7ce47a1f40d38e5b2eaf547c82657b2b95ca8aa4063b73330b",
     "m218_external_qualification_gate": "pass_production_line_intake_enforcement_local_marker_report_contract_and_fail_closed_missing_inputs",
     "m218_external_qualification_gate_evidence": "tools/faisal-build/evidence/m218-external-qualification-gate-validation.json",
-    "m218_candidate_manifest": "/home/ubuntu/agi-kernel/build/m218-candidate/production-candidate.json sha256=62f54690492b37ace48cf6cc608939ed492a63cfca832bffa48320a3289a96ae"
+    "m218_candidate_manifest": "/home/ubuntu/agi-kernel/build/m218-candidate/production-candidate.json sha256=62f54690492b37ace48cf6cc608939ed492a63cfca832bffa48320a3289a96ae",
+    "m219_production_readiness_boundary": "pass_bounded_candidate_complete_local_evidence_index_and_overstatement_rejection",
+    "m219_production_readiness_boundary_evidence": "tools/faisal-build/evidence/m219-production-readiness-boundary-validation.json",
+    "m219_candidate_manifest": "/home/ubuntu/agi-kernel/build/m219-candidate/production-candidate.json sha256=39fc0c104b5c6a753d52412d2aa9dd33bea9d719023cdbdf61cd3d3722ee20d2"
   }
 }
