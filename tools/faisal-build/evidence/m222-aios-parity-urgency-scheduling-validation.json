@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M222-aios-parity-urgency-scheduling",
-  "recorded_at": "2026-08-18T13:38:00Z",
+  "recorded_at": "2026-08-18T13:41:45Z",
   "status": "local_agent_runtime_improvement_qualified_external_aios_comparison_pending",
   "objective": "Add deterministic urgency-aware durable objective dispatch and a transparent AIOS-style parity workload without claiming an actual AIOS benchmark result.",
   "implementation": {
