@@ -1,0 +1,41 @@
+{
+  "project": "FAISAL",
+  "milestone": "M215-release-attestation",
+  "recorded_at": "2026-08-18T10:37:00Z",
+  "status": "signed_ed25519_attestation_verification_and_fail_closed_boundary_tests_pass",
+  "implementation": {
+    "creator": "tools/faisal-build/create_release_attestation.py",
+    "creator_sha256": "04a8474a1849e8b78c9e0a1e613e53de98707b1422aa116c594edaaa98040947",
+    "verifier": "tools/faisal-build/verify_release_attestation.py",
+    "verifier_sha256": "2ac899b965f952c1478fb1dd784174a1afd6328113abae2ef8b71e97398b3e96",
+    "test": "build/test_m215_release_attestation.py",
+    "test_sha256": "a1de175cd07726a7a3a9189e3fe8a4771d256d53239c28f1929b917697102d8c",
+    "checks": [
+      "Ed25519 canonical payload signature verification",
+      "candidate, provenance, bundle, source, tag, and expiry binding",
+      "active trusted-key and operator identity enforcement",
+      "test-only and incomplete external evidence production rejection",
+      "signed payload tamper rejection",
+      "unknown trusted-key rejection"
+    ]
+  },
+  "validation": {
+    "positive": "FAISAL_RELEASE_ATTESTATION_OK checks=18 disposition=blocked",
+    "negative": [
+      "M215_NEGATIVE_PRODUCTION_APPROVAL_REJECT_OK",
+      "M215_NEGATIVE_PAYLOAD_TAMPER_REJECT_OK",
+      "M215_NEGATIVE_UNKNOWN_KEY_REJECT_OK",
+      "M215_NEGATIVE_TEST_EXIT=0"
+    ]
+  },
+  "boundary": {
+    "cryptographic_fixture_only": true,
+    "operator_signature": false,
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_hardware": false,
+    "external_security_review": false,
+    "model_output_is_authority": false,
+    "note": "The local fixture proves signature semantics and fail-closed policy behavior. It is not an operator ceremony, trusted production key, external approval, or production release authorization."
+  }
+}
