@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "8414cf61807138e141fe9b7a4b3d5dfee33b132a",
+  "current_head": "a2ced1e4d284d4e165d2c43528f0f063296b36f0",
   "current_tag": "FAISAL-M210-RELEASE-GATE-REPORT-INTEGRITY",
   "current_abi": 38,
   "operating_loop": [
@@ -1871,6 +1871,6 @@
     "m210_release_gate_report_integrity": "pass_tsv_report_contract_self_consistency_integration_and_four_mutated_report_rejections",
     "m210_release_gate_report_integrity_evidence": "tools/faisal-build/evidence/m210-release-gate-report-integrity-validation.json",
     "m210_release_scope": "report_integrity_checker_integrated_with_fail_closed_production_gate_external_builder_attestation_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
-    "m210_candidate_manifest": "/home/ubuntu/agi-kernel/build/m210-candidate/production-candidate.json sha256=ad225de6f7eb85a8d32134736a6dd1b8b9877e033065737c194bde531441dee8"
+    "m210_candidate_manifest": "/home/ubuntu/agi-kernel/build/m210-candidate/production-candidate.json sha256=230d0c041aea85d43d97b97be08f299ccdc69f8413f726562ff384bda90923a2"
   }
 }
