@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "068141d1e6aaf76086edc2fe5d051121dd89864f",
-  "current_tag": "FAISAL-M211-LOCAL-GATE-SUMMARY",
+  "current_head": "ec8b64267610419756455b4b35e14e709b4dbad3",
+  "current_tag": "FAISAL-M212-LOCAL-GATE-SUMMARY-REPRODUCIBILITY",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1875,6 +1875,9 @@
     "m211_local_gate_summary": "pass_summary_generation_verification_and_candidate_state_boundary_rejections",
     "m211_local_gate_summary_evidence": "tools/faisal-build/evidence/m211-local-gate-summary-validation.json",
     "m211_release_scope": "local_gate_summary_only_independent_builder_external_attestation_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
-    "m211_candidate_manifest": "/home/ubuntu/agi-kernel/build/m211-candidate/production-candidate.json sha256=63af9946c9a2568184c5fbcc2c6f566c169b21fa0b78b58dc89fa88b48b84a17"
+    "m211_candidate_manifest": "/home/ubuntu/agi-kernel/build/m211-candidate/production-candidate.json sha256=63af9946c9a2568184c5fbcc2c6f566c169b21fa0b78b58dc89fa88b48b84a17",
+    "m212_local_gate_summary_reproducibility": "pass_controlled_timestamp_regeneration_and_boundary_mutation_rejection",
+    "m212_local_gate_summary_reproducibility_evidence": "tools/faisal-build/evidence/m212-local-gate-summary-reproducibility-validation.json",
+    "m212_candidate_manifest": "/home/ubuntu/agi-kernel/build/m212-candidate/production-candidate.json sha256=f8540b407db716c6c78a860668823ac5c634b218c317b5c8ce96a1f59506d83c"
   }
 }
