@@ -1742,7 +1742,7 @@
     "m181_cve_operations_evidence": "tools/faisal-build/evidence/m181-cve-operations-readiness-validation.json",
     "m181_release_scope": "workflow_readiness_pass_live_operator_ownership_authenticated_upstream_sync_real_advisory_ledger_external_feedback_and_production_trust_root_pending",
     "m182_production_candidate": "pass_unified_manifest_exact_lts_artifact_config_evidence_index_bounded_software_qemu_scope_and_fail_closed_approval_boundary",
-    "m182_production_candidate_manifest": "/home/ubuntu/agi-kernel/build/m182-candidate/production-candidate.json sha256=36ebb3c86bb45429bfa40f60c12d8600ae074b9acaeaea9bea6b62f88d1a39a4",
+    "m182_production_candidate_manifest": "/home/ubuntu/agi-kernel/build/m182-candidate/production-candidate.json sha256=aa12ac92b4a4ad7eeabe94b6bcb3d587840d5be15f0bb62ae8e86c8a6ba3dac0",
     "m182_production_candidate_evidence": "tools/faisal-build/evidence/m182-production-candidate-validation.json",
     "m182_release_scope": "bounded_candidate_manifest_verified_production_approval_blocked_external_operator_hardware_multihost_and_independent_review_evidence_pending"
   }
