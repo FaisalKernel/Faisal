@@ -85,6 +85,7 @@ def main() -> None:
         'm225-kubernetes-fleet-intent-validation.json',
         'm226-accelerator-fabric-validation.json',
         'm227-autonomous-model-action-validation.json',
+        'm228-sandbox-execution-contract-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:

@@ -1,0 +1,131 @@
+{
+  "project": "FAISAL",
+  "milestone": "M228-deterministic-capability-bound-sandbox-execution",
+  "recorded_at": "2026-08-18T15:24:51Z",
+  "status": "local_policy_contract_qualified_backend_and_physical_sandbox_qualification_pending",
+  "objective": "Extend FAISAL with a provider-neutral deterministic sandbox-execution contract informed by Firecracker, Wasmtime, and paid-provider background execution semantics.",
+  "research": {
+    "sources": [
+      "https://fuchsia.dev/fuchsia-src/concepts/kernel",
+      "https://firecracker-microvm.github.io/",
+      "https://docs.wasmtime.dev/security.html",
+      "https://developers.openai.com/api/docs/guides/background",
+      "https://github.com/agiresearch/AIOS",
+      "https://docs.vllm.ai/en/latest/",
+      "https://qwen.readthedocs.io/en/latest/framework/function_call.html",
+      "https://sel4.systems/",
+      "https://unikraft.org/docs/getting-started",
+      "https://developers.openai.com/api/docs/guides/structured-outputs",
+      "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview",
+      "https://ai.google.dev/gemini-api/docs/function-calling"
+    ],
+    "findings": [
+      "Zircon uses explicit kernel object and job/process ownership concepts; FAISAL can adopt explicit parentage and authority boundaries without replacing Linux.",
+      "Firecracker is a user-space KVM VMM with minimal devices, API-controlled microVM lifecycle, resource rate limiters, metadata service, and jailer isolation; it is a backend, not a Linux kernel replacement.",
+      "Wasmtime/WebAssembly uses explicit imports/exports, bounds-checked memory, type-checked control flow, no raw system calls, and capability-based WASI filesystem access; interruption and deterministic execution are available with tradeoffs.",
+      "OpenAI background mode provides asynchronous provider-side polling, cancellation, and stream cursor resumption; FAISAL must persist provider handles and cursors independently for durable objectives.",
+      "AIOS/vLLM/model-provider APIs remain user-space model/agent systems. FAISAL’s role is to enforce resource, authority, lineage, recovery, and evidence boundaries around them."
+    ],
+    "artifact": "build/autonomous-kernel-research-findings.md",
+    "artifact_sha256": "76015b52cffd8ff61eda6197cd22ef7351b91d69098eddf43bd8520f678ce9a7"
+  },
+  "implementation": {
+    "header": "tools/faisal-sandbox/faisal_sandbox_execution.h",
+    "header_sha256": "22042f7d0e80b6537dcccf9a040b19e9823087548d6ee45bd884df4fd8a715eb",
+    "source": "tools/faisal-sandbox/faisal_sandbox_execution.c",
+    "source_sha256": "d79949f0c612248fb8d89e309ecbdea19961b6c7df9e17ff110f3cfea139de2b",
+    "selftest": "tools/testing/selftests/faisal_sandbox_execution_test.c",
+    "selftest_sha256": "65a91ea830f51cbe2646ec5e9c05213bb66260f56204d5cc924ad2a3acdd0d5b",
+    "benchmark": "tools/testing/selftests/faisal_sandbox_execution_benchmark.c",
+    "benchmark_sha256": "e7e2ee71bcc2074c111816b9ed099e60bd3a0258ae66bf33cc30cdd4e81b3050",
+    "runner": "tools/faisal-build/run_sandbox_execution_validation.sh",
+    "runner_sha256": "4be2eced03dcc65c9aafd434dcfc373ee450cc828d1cd0b3ef3f80c307ae8197",
+    "features": [
+      "sandbox/agent/objective/tenant identity binding",
+      "generation fencing for stale sandbox state",
+      "explicit capability-import subset admission",
+      "CPU, memory, I/O, and fuel budgets",
+      "deadline and runtime admission",
+      "provider handle and stream cursor binding",
+      "input/program/import provenance digests",
+      "monotonic sequence and nonce replay protection",
+      "start, fuel consumption, checkpoint, resume, cancel, and completion state machine",
+      "checkpoint request/state digest binding",
+      "authorized completion and result digest requirements",
+      "fail-closed resource, deadline, authority, tamper, and cancellation behavior"
+    ]
+  },
+  "validation": {
+    "strict_build": "-O2 -Wall -Wextra -Werror",
+    "selftest_markers": [
+      "FSE_CAPABILITY_RESOURCE_ADMISSION_OK",
+      "FSE_FUEL_DEADLINE_EXECUTION_OK",
+      "FSE_CHECKPOINT_DIGEST_BINDING_OK",
+      "FSE_RESUME_CURSOR_OK",
+      "FSE_AUTHORIZED_COMPLETION_OK",
+      "FSE_CANCELLATION_ENFORCED_OK",
+      "FSE_CAPABILITY_REJECT_OK",
+      "FSE_GENERATION_REJECT_OK",
+      "FSE_FUEL_OVERRUN_REJECT_OK",
+      "FSE_TAMPER_REJECT_OK",
+      "FSE_DEADLINE_REJECT_OK",
+      "FSE_CHECKPOINT_TAMPER_REJECT_OK",
+      "FSE_AUTHORITY_REJECT_OK",
+      "FSE_SELFTEST_EXIT=0"
+    ],
+    "benchmark": {
+      "rounds": 100000,
+      "admitted": 100000,
+      "checkpointed": 100000,
+      "resumed": 100000,
+      "completed": 100000,
+      "total_ns": 461861063,
+      "ns_per_round": 4618,
+      "scope": "local userspace policy fixture, not Wasm execution, Firecracker boot, KVM, or provider latency"
+    },
+    "sanitizer": {
+      "status": "pass_no_asan_ubsan_diagnostics",
+      "selftest_binary_sha256": "c0dda0f975ff5a5d1d06a89be4ec60d8679b20fcf96fc0bd3a689f2489b9a346",
+      "benchmark_binary_sha256": "28b8f8652f32ba15b91e6eb594d7e74d90171c13cf82581d0c018c9a174125a5"
+    },
+    "runner_log_sha256": "3f9c1502e22b3dfb3f3e1dfa1c1e0a16ba95059904c987e2ce2db631fa9924a8",
+    "m227_regression": "M227_RUNNER_EXIT=0",
+    "m227_regression_log_sha256": "8c39b5627e77b19742afb385c8ae85a9ea32b07ee9535c212d8d94f432bbc637",
+    "boot": {
+      "profile": "ACPI-on one-vCPU QEMU",
+      "rounds": 2,
+      "iterations_per_round": 256,
+      "status": "pass",
+      "summary_sha256": "f465881e1b752a2b002c9802d0e8fb0ce337b1fefee3f5d6103459f33821ea1e",
+      "qemu_log_sha256": "28f6680753165f1a41d03a7da21d1d1bcd9f0d642ed89e60a57d1d7b6bdd7d28",
+      "marker": "FAISAL_INDUSTRY_SOAK_OK"
+    },
+    "known_boundary": {
+      "acpi_on_two_vcpu": "known rcu_preempt stall profile remains rejected by existing hardened runner",
+      "physical_backend": "not executed",
+      "interpretation": "The M228 contract is a userspace policy/state-machine fixture; it does not qualify Wasmtime, Firecracker, KVM, physical sandboxing, or vendor infrastructure."
+    }
+  },
+  "comparison": {
+    "faisal_advantage": "agent/objective/tenant lineage, authority, generation fencing, deterministic budgets, fuel/deadline/cancellation, checkpoint digest binding, and durable provider-cursor boundary",
+    "firecracker_advantage": "real KVM microVM isolation, device model, VMM, jailer, and hardware virtualization",
+    "wasmtime_advantage": "real Wasm execution, linear-memory sandbox, imports/exports, WASI implementation, and runtime-specific interruption/determinism",
+    "paid_provider_advantage": "real asynchronous model execution and provider-managed state/availability",
+    "overall_superiority_claim": false,
+    "same_hardware": false,
+    "same_backend": false,
+    "same_workload": false
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_hardware": false,
+    "external_security_review": false,
+    "wasmtime_qualification": false,
+    "firecracker_kvm_qualification": false,
+    "paid_provider_qualification": false,
+    "model_output_is_authority": false,
+    "fast_boot_claim": "qualified only for the existing ACPI-off one-vCPU QEMU profile",
+    "note": "No physical backend, external reviewer, provider service, production signing ceremony, or production approval was fabricated."
+  }
+}
