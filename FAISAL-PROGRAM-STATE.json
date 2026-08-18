@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "8a6832300538d902c6e68a598d5edd612bbce29b",
+  "current_head": "24667764fbe3bb82fa599f7c4eab8fff94f3c100",
   "current_tag": "FAISAL-M201-LEGACY-QEMU-WRAPPER-HARDENING",
   "current_abi": 38,
   "operating_loop": [
@@ -1834,6 +1834,7 @@
     "m200_candidate_manifest": "/home/ubuntu/agi-kernel/build/m200-candidate/production-candidate.json sha256=162ed97ca639d3f0758bbf11e64d9c1001ad15d6da6d00f9abb3e62d72338c0b",
     "m201_legacy_qemu_wrapper_hardening": "pass_world_state_and_self_healing_legacy_paths_delegate_to_hardened_configurable_runners_acpi_off_1vcpu_zero_exit_strict_diagnostics",
     "m201_legacy_qemu_wrapper_evidence": "tools/faisal-build/evidence/m201-legacy-qemu-wrapper-hardening-validation.json",
-    "m201_release_scope": "bounded_legacy_qemu_entry_point_hardening_and_acpi_off_qualification_global_acpi_on_smp_rcu_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
+    "m201_release_scope": "bounded_legacy_qemu_entry_point_hardening_and_acpi_off_qualification_global_acpi_on_smp_rcu_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m201_candidate_manifest": "/home/ubuntu/agi-kernel/build/m201-candidate/production-candidate.json sha256=fd39895eb621d2d7302421ae1f12472551830b89bd38ab9503c63a6f13f672b1"
   }
 }
