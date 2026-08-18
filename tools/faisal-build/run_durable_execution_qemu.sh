@@ -8,6 +8,15 @@ LOG="$ROOTFS/qemu.log"
 TEST="$BUILD/agi_durable_execution_test"
 TRUST_TEST="$BUILD/faisal_journal_trust_test"
 ELECTION_TEST="$BUILD/faisal_replication_election_test"
+QEMU_SMP=${FAISAL_QEMU_SMP:-1}
+QEMU_MEMORY=${FAISAL_QEMU_MEMORY:-512M}
+QEMU_TIMEOUT_SECONDS=${FAISAL_QEMU_TIMEOUT_SECONDS:-120}
+QEMU_ACPI=${FAISAL_QEMU_ACPI:-off}
+case "$QEMU_ACPI" in
+  on) QEMU_MACHINE='pc' ;;
+  off) QEMU_MACHINE='pc,acpi=off' ;;
+  *) echo 'FAISAL_QEMU_ACPI must be on or off' >&2; exit 2 ;;
+esac
 
 cc -O2 -Wall -Wextra -Werror -Wno-cpp -Wno-deprecated-declarations -pthread -static \
   -I"$LINUX/tools/faisal-task" -I"$LINUX/tools/faisal-execution" \
@@ -57,23 +66,44 @@ rc=$?
 printf 'M108_SELFTEST_RC=%s\n' "$rc"
 /bin/faisal_journal_trust_test
 /bin/faisal_replication_election_test
+printf 'FAISAL_M108_TEST_COMPLETE\n'
 poweroff -f
 INIT
 chmod +x "$ROOTFS/init"
 ( cd "$ROOTFS" && find . -print0 | cpio --null -o -H newc 2>/dev/null | gzip -9 > "$ROOTFS/initramfs.cpio.gz" )
 set +e
-timeout 90s qemu-system-x86_64 \
-  -M pc \
+timeout "${QEMU_TIMEOUT_SECONDS}s" qemu-system-x86_64 \
+  -M "$QEMU_MACHINE" \
   -accel tcg,thread=multi \
   -cpu qemu64 \
-  -m 512M \
-  -smp 1 \
+  -m "$QEMU_MEMORY" \
+  -smp "$QEMU_SMP" \
   -kernel "$BUILD/arch/x86/boot/bzImage" \
   -initrd "$ROOTFS/initramfs.cpio.gz" \
   -append 'console=ttyS0 rdinit=/init quiet' \
   -nographic -no-reboot -monitor none -serial "file:$LOG" \
-  >/tmp/faisal-m108-durable-execution-qemu-stderr.log 2>&1
-qemu_rc=$?
+  >/tmp/faisal-m108-durable-execution-qemu-stderr.log 2>&1 &
+qemu_pid=$!
+qemu_rc=124
+deadline=$(( $(date +%s) + QEMU_TIMEOUT_SECONDS ))
+while [ "$(date +%s)" -lt "$deadline" ]; do
+  if grep -q 'FAISAL_M108_TEST_COMPLETE' "$LOG" 2>/dev/null; then
+    kill -TERM "$qemu_pid" 2>/dev/null || true
+    wait "$qemu_pid" 2>/dev/null || true
+    qemu_rc=0
+    break
+  fi
+  if ! kill -0 "$qemu_pid" 2>/dev/null; then
+    wait "$qemu_pid" 2>/dev/null
+    qemu_rc=$?
+    break
+  fi
+  sleep 1
+done
+if kill -0 "$qemu_pid" 2>/dev/null; then
+  kill -TERM "$qemu_pid" 2>/dev/null || true
+  wait "$qemu_pid" 2>/dev/null || true
+fi
 set -e
 cat "$LOG"
 cat /tmp/faisal-m108-durable-execution-qemu-stderr.log 2>/dev/null || true
@@ -129,10 +159,11 @@ for marker in \
   M108_CANCELLATION_COMPENSATION_BOUNDARY_OK \
   M108_ENGINE_REPLAY_FAIL_CLOSED_OK \
   M108_SELFTEST_EXIT=0 \
-  M108_SELFTEST_RC=0; do
+  M108_SELFTEST_RC=0 \
+  FAISAL_M108_TEST_COMPLETE; do
   grep -q "$marker" "$LOG"
 done
-if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|possible circular locking dependency|data-race|use-after-free|kernel BUG|rcu: .*stall' "$LOG"; then
+if grep -Eq 'BUG:|Oops:|kernel panic|KASAN:|KCSAN:|WARNING:.*kernel|general protection fault|unable to handle kernel|possible circular locking dependency|data-race|use-after-free|kernel BUG|rcu: .*stall|rcu_preempt.*stall|RCU_GP_WAIT_FQS|kthread starved' "$LOG"; then
   echo M108_DIAGNOSTIC_FAILURE >&2
   exit 1
 fi
