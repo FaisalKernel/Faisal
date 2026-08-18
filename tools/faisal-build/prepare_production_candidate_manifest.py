@@ -44,6 +44,7 @@ def main() -> None:
         'm184-driver-checkpatch-validation.json',
         'm185-qemu-regression-validation.json',
         'm186-driver-style-validation.json',
+        'm187-world-queue-helper-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:

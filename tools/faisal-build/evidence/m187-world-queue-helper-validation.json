@@ -1,0 +1,39 @@
+{
+  "project": "FAISAL",
+  "milestone": "M187-world-queue-drop-helper",
+  "schema": "org.faisal.world-queue-helper-validation.v1",
+  "recorded_at": "2026-08-18T06:50:35Z",
+  "repository_parent_commit": "346e7bd0f3b36c79f9b3c2da58e01fe5575a7256",
+  "status": "helper_extraction_compile_pass_zero_checkpatch_errors_two_deep_nesting_warnings",
+  "scope": {
+    "file": "drivers/misc/agi_lifecycle.c",
+    "file_sha256": "6ecb62b1d092f9ab20cd98a90eebb28e60e45a336b4387c473a661b04674b14d",
+    "change": "Extracted lowest-priority world-ring entry selection into agi_lc_world_drop_low_locked().",
+    "semantic_invariants": [
+      "selection begins at session->head",
+      "candidate traversal remains i=1 through session->count-1 with ring wrap",
+      "ties retain the first encountered entry because replacement remains candidate < lowest",
+      "overflow comparison remains selected_priority >= incoming_priority",
+      "world drop counters, resync state, sequence output, and -EAGAIN paths are unchanged"
+    ],
+    "checkpatch": "0 errors, 2 deep-nesting warnings",
+    "compile": "pass with build/industry-production-m153/.config and CONFIG_CFS_BANDWIDTH=y"
+  },
+  "validation_artifacts": {
+    "checkpatch_log": "build/m186-world-helper-recheck/checkpatch.log",
+    "compile_log": "build/m186-world-helper-recheck/compile.log",
+    "checkpatch_tail": "WARNING: Too many leading tabs - consider code refactoring\n#3308: FILE: drivers/misc/agi_lifecycle.c:3308:\n+\t\t\t\t\t\tif (observability_sampled_event)\n\nWARNING: Too many leading tabs - consider code refactoring\n#3312: FILE: drivers/misc/agi_lifecycle.c:3312:\n+\t\t\t\t\t\tif (sequence_out)\n\ntotal: 0 errors, 2 warnings, 11299 lines checked\n\nNOTE: For some of the reported defects, checkpatch may be able to\n      mechanically convert to the typical style using --fix or --fix-inplace.\n\ndrivers/misc/agi_lifecycle.c has style problems, please review.\n\nNOTE: If any of the errors are false positives, please report\n      them to the maintainer, see CHECKPATCH in MAINTAINERS.",
+    "compile_tail": "",
+    "qemu_scope": "existing qualified ACPI-off 2-vCPU fuzz profile remains the applicable runtime regression; this patch changes overflow-path layout and helper structure only"
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "All driver checkpatch warnings are closed.",
+      "ACPI-on SMP RCU qualification passed.",
+      "Physical hardware qualification occurred.",
+      "FAISAL is production-approved."
+    ],
+    "remaining_action": "Validate the helper through the full lifecycle graph/world-event selftest matrix and complete all external production qualifications."
+  }
+}
