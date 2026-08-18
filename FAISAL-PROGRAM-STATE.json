@@ -5,9 +5,9 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "6772067dbd4f4565f3f2d95c25f503f77f4ac774",
-  "current_tag": "FAISAL-M245-PROVIDER-NEUTRAL-PLATFORM-COORDINATOR",
-  "current_abi": 44,
+  "current_head": "67396595add533f9f8171f30ccf4a7369fbe6f99",
+  "current_tag": "FAISAL-M246-AI-SAFETY-CONTROL-PLANE-SECURITY-HARDENING",
+  "current_abi": 45,
   "operating_loop": [
     "RESEARCH",
     "DESIGN",
@@ -2041,5 +2041,11 @@
   "m245_research_boundary": "researched_kubernetes_dra_kuberay_nvidia_dynamo_and_linux_psi_current_production_patterns",
   "m245_model_authority_boundary": "model_output_provider_metadata_runtime_claims_and_external_scheduler_hints_are_untrusted_and_never_placement_execution_or_privileged_authority",
   "m245_validation_boundary": "strict_selftest_86_provider_claim_binding_64_round_durable_benchmark_4_reader_32_workload_concurrency_10000_fuzz_asan_ubsan_m239_m240_m241_m242_m244_fleet_accelerator_regressions_linux72_qemu_soak_passed",
-  "m245_production_boundary": "production_approval_false_live_kubernetes_kuberay_dynamo_rdma_physical_accelerator_independent_builder_external_security_review_production_pki_multihost_live_migration_and_cve_operations_pending"
+  "m245_production_boundary": "production_approval_false_live_kubernetes_kuberay_dynamo_rdma_physical_accelerator_independent_builder_external_security_review_production_pki_multihost_live_migration_and_cve_operations_pending",
+  "m246_ai_safety_control_plane": "pass_fail_closed_zero_trust_policy_decision_containment_token_incident_lifecycle_checkpoint_recovery_and_immutable_audit_control_plane",
+  "m246_ai_safety_control_plane_evidence": "tools/faisal-build/evidence/m246-ai-safety-control-plane-validation.json",
+  "m246_threat_model": "assets_agents_models_artifacts_secrets_resources_checkpoints_audit_cluster_identity_against_compromised_agents_poisoned_artifacts_hostile_workloads_driver_failures_privilege_escalation_supply_chain_audit_tamper_resource_exhaustion_and_credential_misuse",
+  "m246_governance_boundary": "govern_map_measure_manage_model_output_and_adaptive_optimizer_output_are_never_privileged_authority",
+  "m246_validation_boundary": "strict_selftest_112_decision_benchmark_4_reader_concurrency_10000_fuzz_asan_ubsan_gcc_tsan_sandbox_recovery_governance_cve_attestation_agent_security_qemu_and_m245_platform_regressions_passed",
+  "m246_production_boundary": "production_approval_false_hardware_root_operator_signing_independent_builder_physical_accelerator_external_security_review_live_pkI_kms_tpm_multihost_migration_and_cve_operations_pending"
 }

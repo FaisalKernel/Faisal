@@ -1,0 +1,167 @@
+{
+  "project": "FAISAL",
+  "milestone": "M246-ai-safety-control-plane-security-hardening",
+  "recorded_at": "2026-08-18T21:53:35Z",
+  "status": "security_control_plane_qualified_production_security_qualification_pending",
+  "objective": "Provide a deterministic, fail-closed AI safety and governance control plane that evaluates identity, capabilities, resources, provenance, artifact verification, attestation, risk, anomaly, checkpoint, operator approval, model authority, deadline, and generation evidence before allowing or restricting autonomous workloads.",
+  "research": [
+    {
+      "source": "https://csrc.nist.gov/pubs/sp/800/207/final",
+      "authority": "NIST SP 800-207 Zero Trust Architecture",
+      "conclusion": "No implicit trust is granted from network location or ownership; authentication and authorization are discrete controls before resource access; protection focuses on resources and workflows.",
+      "implementation_impact": "FSA evaluates every workload request against explicit identity, capability, resource, provenance, attestation, risk, anomaly, and policy-generation evidence."
+    },
+    {
+      "source": "https://csrc.nist.gov/pubs/sp/800/61/r3/final",
+      "authority": "NIST SP 800-61 Rev. 3 Incident Response Recommendations",
+      "conclusion": "Incident response should be integrated across risk management to improve preparation, detection, response, and recovery.",
+      "implementation_impact": "FSA provides durable incident states detected, triaged, contained, recovering, recovered, closed, escalated, and terminated with checkpoint and evidence bindings."
+    },
+    {
+      "source": "https://docs.kernel.org/userspace-api/landlock.html",
+      "authority": "Linux Landlock documentation, June 2026",
+      "conclusion": "Unprivileged processes can add stackable filesystem and network restrictions; policies are inherited by descendants; ABI support must be detected; no-new-privileges is part of enforcement.",
+      "implementation_impact": "FSA emits bounded restriction actions and capability masks for an adapter layer; it does not claim that Landlock, seccomp, namespaces, or hardware isolation are present unless separately measured."
+    },
+    {
+      "source": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "authority": "NIST AI Risk Management Framework and Generative AI Profile",
+      "conclusion": "Trustworthy AI risk management is organized around Govern, Map, Measure, and Manage; NIST has a 2026 critical-infrastructure trustworthy-AI concept note.",
+      "implementation_impact": "M246 records governance policy identity, deterministic decisions, incident evidence, immutable audit continuity, and explicit production limitations."
+    }
+  ],
+  "implementation": {
+    "header": "tools/faisal-safety/faisal_safety.h",
+    "source": "tools/faisal-safety/faisal_safety.c",
+    "selftest": "tools/testing/selftests/faisal_safety_test.c",
+    "benchmark": "tools/testing/selftests/faisal_safety_benchmark.c",
+    "concurrency_test": "tools/testing/selftests/faisal_safety_concurrency_test.c",
+    "fuzz_test": "tools/testing/selftests/faisal_safety_fuzz_test.c",
+    "runner": "tools/faisal-build/run_safety_validation.sh",
+    "platform_abi": 45,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "zero-trust policy evaluation with explicit policy generation",
+      "identity, capability, resource, provenance, artifact, attestation, risk, anomaly, checkpoint, operator, deadline, generation, and model-authority checks",
+      "deterministic actions allow, restrict, checkpoint, migrate, quarantine, terminate, and operator review",
+      "64-bit capability restriction masks with no truncation",
+      "bounded signed-like containment tokens with workload, agent, generation, issuance, expiry, action, and digest binding",
+      "incident lifecycle with monotonic generation and timestamp checks, checkpoint-bound recovery, escalation, termination, and closure",
+      "append-only SHA-256 chained audit journal with payload length bounds, payload digest verification, event digest verification, sequence fencing, replay rejection, and partial-tail rejection",
+      "model output and adaptive optimizer output explicitly rejected as authority",
+      "provider-neutral adapter boundary for Landlock, seccomp, cgroups, TPM, KMS, secure boot, and external SIEM integrations"
+    ]
+  },
+  "threat_model": {
+    "assets": [
+      "kernel and driver integrity",
+      "agent identity and delegated capabilities",
+      "model and dataset artifacts",
+      "secrets and credentials",
+      "tenant CPU memory accelerator network storage budgets",
+      "checkpoint and recovery state",
+      "audit and incident evidence",
+      "cluster membership and node attestation"
+    ],
+    "adversaries": [
+      "compromised or deceptive autonomous agent",
+      "malicious application or hostile workload",
+      "poisoned or tampered model artifact",
+      "compromised node or driver",
+      "privilege-escalation exploit",
+      "malformed provider metadata or forged scheduler hint",
+      "audit journal tampering or replay",
+      "resource exhaustion and denial of service",
+      "operator or control-plane credential misuse"
+    ],
+    "controls": [
+      {
+        "threat": "model output requests privileged action",
+        "control": "FSA_VIOLATION_MODEL_AUTHORITY causes terminate and is covered by selftest"
+      },
+      {
+        "threat": "capability escalation",
+        "control": "granted_capabilities must be a subset of requested capabilities; violation restricts or fails closed"
+      },
+      {
+        "threat": "unverified artifact or provenance",
+        "control": "required verified flags and nonzero digests; violation quarantines"
+      },
+      {
+        "threat": "untrusted node or hardware measurement",
+        "control": "required trusted attestation state and digest; violation quarantines"
+      },
+      {
+        "threat": "risk or anomaly threshold breach",
+        "control": "deterministic threshold evaluation; quarantine action and incident opening"
+      },
+      {
+        "threat": "irreversible high-risk action without checkpoint/operator",
+        "control": "checkpoint and operator-review violations; no implicit approval"
+      },
+      {
+        "threat": "containment token replay or scope confusion",
+        "control": "digest, identity, workload, agent, generation, and expiry verification"
+      },
+      {
+        "threat": "audit tampering, malformed record, or replay",
+        "control": "SHA-256 chain, sequence fencing, payload/event digest checks, bounded lengths, and fail-closed replay"
+      },
+      {
+        "threat": "incident state abuse",
+        "control": "explicit transition graph, monotonic timestamps, generation fence, checkpoint requirement for recovery"
+      }
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11 -pthread",
+    "selftest": "M246_SAFETY_SELFTEST_EXIT=0 cases=112 decisions=3 incidents=1 containment_expiry=1 replay=1 tamper=1 model_authority=1",
+    "benchmark": {
+      "rounds": 512,
+      "durable_decision_ns": 200840647,
+      "durable_ns_per_decision": 392266.89,
+      "static_elapsed_ns": 662,
+      "static_ns_per_check": 1.29,
+      "checksum": 512,
+      "interpretation": "The durable path includes SHA-256 request and decision digests, fdatasync, policy checks, and append-only audit retention. The static comparison is an in-memory predicate and is not apples-to-apples; the result is a security overhead baseline, not a performance superiority claim."
+    },
+    "concurrency": "M246_SAFETY_CONCURRENCY_EXIT=0 readers=4 read_rounds=256 writer_rounds=256 failures=0",
+    "fuzzing": "M246_SAFETY_FUZZ_EXIT=0 iterations=10000 rejected=10000 accepted=0 base_size=8336",
+    "asan_ubsan": "M246_SAFETY_SANITIZERS_OK; lifecycle, concurrency, and fuzz fixtures passed with leak detection and halt-on-error",
+    "thread_sanitizer": "M246_SAFETY_CONCURRENCY_EXIT=0 readers=4 read_rounds=256 writer_rounds=256 failures=0 under GCC ThreadSanitizer",
+    "adjacent_security": {
+      "sandbox_execution": "M228 sandbox execution selftest and benchmark passed",
+      "recovery_decision": "M231 recovery-decision validation passed",
+      "deployment_governance": "approval binding, migration fence, canary, rollback, stale, and tamper tests passed",
+      "external_security_review_validator": "independence, scope, findings, disposition, stale, and tamper tests passed",
+      "cve_operations_validator": "owner, upstream sync, feedback loop, positive and denial tests passed",
+      "runtime_attestation_qemu": "M86 runtime-attestation QEMU validation passed",
+      "agent_security_qemu": "M64 agent-security M64 QEMU validation passed",
+      "m245_platform_regression": "M245 platform selftest, benchmark, concurrency, fuzz, sanitizers, and hardened Linux 7.2 QEMU regression passed"
+    }
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "optimizer_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "unrestricted_kernel_self_modification": false,
+    "untrusted_input_direct_commit": false,
+    "fake_hardware_evidence": false,
+    "fake_external_review": false,
+    "production_approval": false,
+    "hardware_root_of_trust_measured_here": false,
+    "physical_gpu_npu_iommu_dma_measured_here": false,
+    "live_rdma_measured_here": false,
+    "live_multihost_migration_measured_here": false,
+    "operator_key_ceremony_measured_here": false
+  },
+  "qualification_limits": [
+    "M246 is a userspace safety and governance control plane; it does not itself create a TPM, secure enclave, secure boot chain, signed driver system, KMS, SIEM, Landlock, seccomp, cgroup, IOMMU, or vendor accelerator isolation mechanism.",
+    "The token is a locally verified capability restriction artifact, not a replacement for cryptographic key custody, mTLS, TPM-backed signing, or operator key governance.",
+    "The current benchmark measures local durable policy and audit overhead; it does not establish cluster-scale throughput, tail latency, power, or energy per inference.",
+    "QEMU and local validators qualify only tested virtualized and userspace profiles, not physical hardware, firmware, driver, DMA, thermal, or side-channel behavior.",
+    "Production release remains blocked by independent builder equivalence, operator signing and trusted-key lifecycle, physical accelerator and IOMMU/DMA qualification, independent external security review, production PKI/KMS/TPM attestation, live multi-host migration and rollback, and operator-owned CVE response."
+  ]
+}

@@ -103,6 +103,7 @@ def main() -> None:
         'm243-frontier-adaptive-policy-validation.json',
         'm244-continuous-optimization-supervisor-validation.json',
         'm245-platform-coordinator-validation.json',
+        'm246-ai-safety-control-plane-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:
