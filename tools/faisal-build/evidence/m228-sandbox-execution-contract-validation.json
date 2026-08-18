@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M228-deterministic-capability-bound-sandbox-execution",
-  "recorded_at": "2026-08-18T15:24:51Z",
+  "recorded_at": "2026-08-18T15:29:06Z",
   "status": "local_policy_contract_qualified_backend_and_physical_sandbox_qualification_pending",
   "objective": "Extend FAISAL with a provider-neutral deterministic sandbox-execution contract informed by Firecracker, Wasmtime, and paid-provider background execution semantics.",
   "research": {
