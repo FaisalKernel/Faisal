@@ -8,7 +8,7 @@ from pathlib import Path
 
 ALLOWED_STATUSES = {'pass', 'not-enforced', 'not-run'}
 KNOWN_CHECKS = {
-    'operator_release_authority', 'signed_artifacts', 'production_candidate_manifest', 'local_candidate_preflight',
+    'operator_release_authority', 'signed_artifacts', 'production_candidate_manifest', 'production_readiness_boundary', 'local_candidate_preflight',
     'kernel_release_line', 'lts_soak_requalification', 'signing_authority_operational_proof', 'security_evidence',
     'advisory_ledger', 'cve_operations', 'accelerator_qualification', 'replication_qualification',
     'external_replication_qualification', 'external_qualification_intake', 'deployment_governance', 'live_deployment_qualification',

@@ -173,6 +173,7 @@ esac
 [ -x "$LINUX/tools/faisal-build/run_candidate_local_preflight.py" ] || fail "unified local candidate preflight unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_release_gate_report.py" ] || fail "release-gate report integrity verifier unavailable"
 [ -r "$LINUX/tools/faisal-build/verify_release_attestation.py" ] || fail "signed release attestation verifier unavailable"
+[ -r "$LINUX/tools/faisal-build/verify_production_readiness_boundary.py" ] || fail "production-readiness boundary verifier unavailable"
 [ -r "$LINUX/tools/faisal-build/faisal_release_authority.py" ] || fail "release authority verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_signing_authority_operational_proof.py" ] || fail "signing-authority operational-proof verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/compare_reproducible_builds.sh" ] || fail "reproducibility comparator unavailable"
@@ -211,6 +212,14 @@ FAISAL_PRODUCTION_CANDIDATE_MANIFEST="$PRODUCTION_CANDIDATE_MANIFEST" \
   fail "unified production candidate manifest verification"
 }
 printf 'production_candidate_manifest\tpass\t%s\n' "$PRODUCTION_CANDIDATE_MANIFEST" >> "$REPORT"
+python3 "$LINUX/tools/faisal-build/verify_production_readiness_boundary.py" \
+  --repo "$LINUX" \
+  --candidate "$PRODUCTION_CANDIDATE_MANIFEST" \
+  --state "$PROGRAM_STATE" >/tmp/faisal-release-readiness-boundary.log 2>&1 || {
+  cat /tmp/faisal-release-readiness-boundary.log >&2
+  fail "production-readiness boundary verification"
+}
+printf 'production_readiness_boundary\tpass\tbounded-candidate-policy\n' >> "$REPORT"
 if [ "$REQUIRE_SIGNED_RELEASE_ATTESTATION" != 0 ] && [ "$REQUIRE_SIGNED_RELEASE_ATTESTATION" != 1 ]; then
   fail "invalid FAISAL_REQUIRE_SIGNED_RELEASE_ATTESTATION mode"
 fi

@@ -1,0 +1,38 @@
+{
+  "project": "FAISAL",
+  "milestone": "M220-release-gate-boundary-integration",
+  "recorded_at": "2026-08-18T10:52:00Z",
+  "status": "production_readiness_boundary_enforced_by_release_gate",
+  "implementation": {
+    "release_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "release_gate_sha256": "6de6e31eef4d3bde0f609cb05b41d92f8357231731a6555136f6e7294a0d6ded",
+    "report_verifier": "tools/faisal-build/verify_release_gate_report.py",
+    "report_verifier_sha256": "1de8ae80592df0ea6b4fe1d97e77d3efc9ee9bf3b53030438fcda1b5bdf2690b",
+    "checks": [
+      "release gate invokes production-readiness boundary verifier",
+      "boundary verifier unavailable is fail-closed",
+      "production_readiness_boundary pass marker is emitted",
+      "report-integrity contract accepts the new marker",
+      "local syntax and report checks pass"
+    ]
+  },
+  "validation": {
+    "positive": [
+      "M220_GATE_BOUNDARY_INTEGRATION_OK",
+      "FAISAL_RELEASE_GATE_REPORT_OK checks=1"
+    ],
+    "negative": [
+      "missing boundary verifier fails closed by required gate dependency"
+    ]
+  },
+  "boundary": {
+    "production_approval": false,
+    "external_evidence_complete": false,
+    "independent_builder": false,
+    "physical_accelerator": false,
+    "independent_security_review": false,
+    "operator_ceremony": false,
+    "model_output_is_authority": false,
+    "note": "The release gate now enforces the readiness boundary, but local enforcement does not create external qualification or production approval."
+  }
+}
