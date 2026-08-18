@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "9a2ac9c35c840ed991184dc3c31448295f418f60",
+  "current_head": "5602a534628c0c3e2f49461798fba63d2c139892",
   "current_tag": "FAISAL-M212-LOCAL-GATE-SUMMARY-REPRODUCIBILITY",
   "current_abi": 38,
   "operating_loop": [
@@ -1878,6 +1878,6 @@
     "m211_candidate_manifest": "/home/ubuntu/agi-kernel/build/m211-candidate/production-candidate.json sha256=63af9946c9a2568184c5fbcc2c6f566c169b21fa0b78b58dc89fa88b48b84a17",
     "m212_local_gate_summary_reproducibility": "pass_controlled_timestamp_regeneration_and_boundary_mutation_rejection",
     "m212_local_gate_summary_reproducibility_evidence": "tools/faisal-build/evidence/m212-local-gate-summary-reproducibility-validation.json",
-    "m212_candidate_manifest": "/home/ubuntu/agi-kernel/build/m212-candidate/production-candidate.json sha256=dcb3a0b2700b2c23741fdcb22640edc4fd3c40feedc503dd9ba39f04d7186e08"
+    "m212_candidate_manifest": "/home/ubuntu/agi-kernel/build/m212-candidate/production-candidate.json sha256=464e2569b7ef53cfdb1abd6eebe17a1e877b790a0cf3032743ff2d4a731acf76"
   }
 }
