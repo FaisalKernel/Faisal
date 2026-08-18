@@ -1,0 +1,112 @@
+{
+  "project": "FAISAL",
+  "milestone": "M231-correlated-recovery-decision-contract",
+  "recorded_at": "2026-08-18T16:05:36Z",
+  "status": "local_contract_qualified_external_deployment_and_physical_backend_qualification_pending",
+  "objective": "Bind autonomous recovery decisions to trace lineage, objective/agent/worker identity, observation and diagnosis evidence, candidate/checkpoint state, bounded retry/backoff, compensation policy, authority, and generation fencing.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://opentelemetry.io/docs/concepts/context-propagation/",
+        "finding": "OpenTelemetry context propagation correlates distributed traces across service boundaries and can correlate logs with trace and span identifiers.",
+        "impact": "M231 binds trace/objective/agent/worker lineage into recovery receipts while treating propagated context as data rather than authority."
+      },
+      {
+        "url": "https://opentelemetry.io/docs/concepts/signals/traces/",
+        "finding": "OpenTelemetry traces assemble spans representing units of work through propagated context.",
+        "impact": "Recovery observations, diagnosis, retry, reroute, replan, canary, compensation, and rollback can share stable lineage and sequence fields."
+      },
+      {
+        "url": "https://opentelemetry.io/docs/concepts/signals/baggage/",
+        "finding": "Baggage is contextual key-value data propagated alongside trace context and is not itself an authorization system.",
+        "impact": "M231 does not promote baggage or model-provided context into authority; required evidence and policy flags are explicit."
+      },
+      {
+        "url": "https://opentelemetry.io/docs/zero-code/obi/distributed-traces/",
+        "finding": "eBPF-based observability combines kernel-dependent observations with distributed trace context and depends on Linux configuration and granted capabilities.",
+        "impact": "Kernel event adapters remain separate qualification surfaces; M231 records correlated evidence without assuming eBPF availability."
+      },
+      {
+        "url": "https://docs.temporal.io/workflow-execution",
+        "finding": "Temporal describes a workflow execution as a durable, reliable, scalable function execution and the main unit of a Temporal application.",
+        "impact": "M231 complements FAISAL durable objectives with a compact recovery decision receipt rather than copying a workflow engine."
+      },
+      {
+        "url": "https://temporal.io/blog/what-is-durable-execution",
+        "finding": "Durable execution records enough history to resume after crashes instead of blindly rerunning non-idempotent work.",
+        "impact": "M231 requires idempotency or checkpoint evidence for retry and checkpoint/compensation/authority evidence for irreversible actions."
+      },
+      {
+        "url": "https://sel4.systems/",
+        "finding": "seL4 emphasizes strong isolation, controlled communication, and formal assurance.",
+        "impact": "M231 adopts explicit authority separation but does not claim seL4 formal verification."
+      },
+      {
+        "url": "https://unikraft.org/docs",
+        "finding": "Unikraft documents minimal VM isolation and fast-start library operating systems for sandboxes and AI agents.",
+        "impact": "Recovery decisions can bind backend generation and checkpoint evidence across process, VM, and unikernel backends."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-recovery/faisal_recovery_decision.h",
+    "source": "tools/faisal-recovery/faisal_recovery_decision.c",
+    "selftest": "tools/testing/selftests/faisal_recovery_decision_test.c",
+    "benchmark": "tools/testing/selftests/faisal_recovery_decision_benchmark.c",
+    "runner": "tools/faisal-build/run_recovery_decision_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "trace objective agent worker and action lineage",
+      "observation diagnosis candidate and checkpoint evidence flags",
+      "retry reroute replan compensate rollback quarantine and escalation actions",
+      "idempotency and checkpoint policy for retry",
+      "operator authority and compensation requirements for irreversible recovery",
+      "candidate canary gate",
+      "bounded attempts and saturating exponential backoff",
+      "deadline enforcement",
+      "monotonic request replay rejection",
+      "SHA-256 decision receipt binding",
+      "stale generation rejection",
+      "model-output-is-not-authority boundary"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M231_SELFTEST_EXIT=0",
+    "selftest_cases": 11,
+    "benchmark_rounds": 100000,
+    "benchmark_operations": 200000,
+    "benchmark_ns_per_operation": 1125,
+    "asan_ubsan": true,
+    "qemu_kernel_boot": "pending final integrated run",
+    "regression_m230": "pending final integrated run"
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_accelerator": false,
+    "external_security_review": false,
+    "live_multihost_deployment": false,
+    "paid_provider_qualification": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "trace_context_is_authority": false,
+    "baggage_is_authority": false,
+    "irreversible_recovery_without_authority": false,
+    "irreversible_recovery_without_compensation": false,
+    "retry_without_idempotency_or_checkpoint": false,
+    "tampered_decision_reused": false,
+    "stale_generation_reused": false,
+    "replay_allowed": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "This is a provider-neutral userspace recovery-decision contract, not an unrestricted self-healing kernel.",
+    "The contract authorizes a bounded decision receipt for an external supervisor; it does not patch, compile, canary, or deploy a kernel by itself.",
+    "No physical accelerator, KVM microVM, independent builder, independent security review, live multihost deployment, or paid provider was qualified by this milestone.",
+    "Production release remains blocked by the project’s external evidence gate."
+  ]
+}

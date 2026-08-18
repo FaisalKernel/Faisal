@@ -88,6 +88,7 @@ def main() -> None:
         'm228-sandbox-execution-contract-validation.json',
         'm229-experience-evidence-contract-validation.json',
         'm230-adaptive-model-routing-validation.json',
+        'm231-correlated-recovery-decision-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:
