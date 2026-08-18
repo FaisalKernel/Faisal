@@ -1,0 +1,50 @@
+{
+  "project": "FAISAL",
+  "milestone": "M204-production-candidate-consistency-audit",
+  "schema": "org.faisal.production-candidate-consistency-audit.v1",
+  "recorded_at": "2026-08-18T09:42:38Z",
+  "status": "positive_audit_pass_negative_stale_binding_rejections_pass",
+  "implementation": {
+    "auditor": "tools/faisal-build/audit_production_candidate_consistency.py",
+    "auditor_sha256": "e98bfcdb41c0875bb9b1e7c79f40877140b9f56a5f4c42de6b3e8ccef78d0917",
+    "negative_test": "build/test_m204_consistency_negative.py",
+    "negative_test_sha256": "d2392da5c7fa75b831dbff39261e11d9104fc5020d4fa3c27688367a19004e02",
+    "checks": [
+      "manifest repository_head matches git HEAD",
+      "program-state current_head matches git HEAD",
+      "program-state current_tag resolves to git HEAD",
+      "candidate ID binds to current HEAD",
+      "blocked approval and model-authority boundaries",
+      "mandatory external release blockers",
+      "all evidence-index SHA-256 values",
+      "protected files are neither staged nor tracked"
+    ]
+  },
+  "validation": {
+    "positive_log": "build/m204-audit-positive.log",
+    "positive_result": "FAISAL_EVIDENCE_CONSISTENCY_AUDIT_OK checks=46 head=7f3c02e238a199b5d8088d9f5e962461f32f1fcb",
+    "negative_log": "build/m204-negative-tests.log",
+    "negative_results": [
+      "M204_NEGATIVE_MANIFEST_HEAD_REJECT_OK",
+      "M204_NEGATIVE_STATE_HEAD_REJECT_OK",
+      "M204_NEGATIVE_TEST_EXIT=0"
+    ],
+    "standard_manifest_validator": "FAISAL_PRODUCTION_CANDIDATE_MANIFEST_OK"
+  },
+  "correction_record": {
+    "finding": "The previous M203 state and candidate manifest were stale after final tag binding.",
+    "corrective_action": "Refreshed state and candidate manifest to the actual current HEAD before recording this evidence.",
+    "current_head": "7f3c02e238a199b5d8088d9f5e962461f32f1fcb"
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "evidence consistency equals independent external qualification",
+      "physical accelerator qualification",
+      "independent builder or attested-farm qualification",
+      "independent external security review",
+      "operator-controlled production signing ceremony",
+      "live multihost deployment and rollback qualification"
+    ]
+  }
+}
