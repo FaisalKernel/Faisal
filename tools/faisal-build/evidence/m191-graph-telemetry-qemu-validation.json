@@ -1,0 +1,43 @@
+{
+  "project": "FAISAL",
+  "milestone": "M191-graph-telemetry-qemu-integration",
+  "schema": "org.faisal.graph-telemetry-qemu-validation.v1",
+  "recorded_at": "2026-08-18T08:53:30Z",
+  "repository_parent_commit": "82e8d5e23cba61f08491645b81c2c5974c9c0ebb",
+  "status": "graph_telemetry_qemu_acpi_off_2vcpu_pass_all_m69_assertions_pass",
+  "implementation": {
+    "runner": "tools/faisal-build/run_graph_telemetry_qemu.sh",
+    "runner_sha256": "f4156cb7da942c99c7988d3066cc8343611a3a9e61b1a7ff0c8014aac5ba3929",
+    "existing_selftest": "tools/testing/selftests/agi_graph_telemetry_test.c",
+    "selftest_sha256": "9ebb493a6b0790f3bca1d6061c1ceb88db8765343e7be8aff441d6ad6cb2ec3c",
+    "strict_compile": "pass with -O2 -Wall -Wextra -Werror -Wno-cpp -static"
+  },
+  "profile": {
+    "qemu_acpi": "off",
+    "qemu_smp": 2,
+    "result": "pass",
+    "runner_log": "build/m191-graph-qemu/runner.log",
+    "guest_log": "build/qemu-faisal-graph-telemetry/qemu.log",
+    "markers": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)\n\n\niPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+2EFCB260+2EF0B260 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from ROM..\u001bc\u001b[?7l\u001b[2J\u001b[0m.\n[    0.030743] ACPI BIOS Error (bug): A valid RSDP was not found (20250807/tbxfroot-222)\n\ufffd[   55.752784] Driver 'wmi-bmof' was unable to register with bus_type 'wmi' because the bus was not initialized.\nFAISAL_GRAPH_TELEMETRY_BOOT_OK\nM69_TELEMETRY_BEGIN_OK id=1 start=69578890614\nM69_TELEMETRY_QUERY_OK\nM69_STALE_TELEMETRY_CAPABILITY_REJECT_OK\nM69_ANOMALY_SIGNAL_OK score=420000\nM69_TELEMETRY_END_OK duration=4979893\nM69_GRAPH_EVENT_DELIVERY_OK\nM69_COMPLETED_QUERY_OK\nM69_SELFTEST_EXIT=0\nFAISAL_GRAPH_TELEMETRY_RC=0\n[   69.628533] reboot: Power off not available: System halted instead\nqemu-system-x86_64: terminating on signal 15 from pid 2350960 (timeout)\nFAISAL_GRAPH_TELEMETRY_QEMU_RC=0\n",
+    "assertions": [
+      "telemetry begin",
+      "telemetry query",
+      "stale telemetry capability rejection",
+      "anomaly signal",
+      "telemetry end",
+      "graph event delivery",
+      "completed telemetry query"
+    ]
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "ACPI-on SMP is qualified.",
+      "Physical accelerator qualification occurred.",
+      "Independent security review occurred.",
+      "Operator signing or attested builder qualification occurred.",
+      "FAISAL is production-approved."
+    ],
+    "remaining_action": "Bind M191 graph telemetry evidence, continue write-side fault injection, and complete external enterprise qualification."
+  }
+}

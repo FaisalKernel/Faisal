@@ -48,6 +48,7 @@ def main() -> None:
         'm188-queue-overflow-validation.json',
         'm189-write-side-lifecycle-validation.json',
         'm190-write-side-state-validation.json',
+        'm191-graph-telemetry-qemu-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:
