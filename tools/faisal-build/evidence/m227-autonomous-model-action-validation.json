@@ -1,0 +1,138 @@
+{
+  "project": "FAISAL",
+  "milestone": "M227-autonomous-model-action",
+  "recorded_at": "2026-08-18T15:11:14Z",
+  "status": "local_model_action_policy_qualified_kernel_and_physical_model_provider_qualification_pending",
+  "objective": "Research current open-source kernels, AI runtimes, model ecosystems, and paid-model APIs, then implement a provider-neutral model-action envelope that keeps model output separate from authority.",
+  "research": {
+    "open_source_and_runtime_sources": [
+      "https://github.com/agiresearch/AIOS",
+      "https://docs.vllm.ai/en/latest/",
+      "https://qwen.readthedocs.io/en/latest/framework/function_call.html",
+      "https://sel4.systems/",
+      "https://unikraft.org/docs/getting-started",
+      "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html",
+      "https://rocm.docs.amd.com/projects/rccl/en/latest/what-is-rccl.html",
+      "https://oneapi-src.github.io/level-zero-spec/level-zero/latest/core/PROG.html"
+    ],
+    "paid_model_sources": [
+      "https://developers.openai.com/api/docs/guides/structured-outputs",
+      "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview",
+      "https://ai.google.dev/gemini-api/docs/function-calling"
+    ],
+    "findings": [
+      "AIOS provides agent-level scheduling, context switching, memory, tool management, and routing above a traditional OS; it is not a Linux kernel replacement.",
+      "vLLM provides PagedAttention, continuous batching, prefix caching, disaggregated prefill/decode/encode, distributed parallelism, structured outputs, tool/reasoning parsers, and broad hardware support above the OS.",
+      "Qwen documents application-mediated function calling with JSON-schema tools and thinking/no-thinking controls.",
+      "seL4 contributes formally verified capability isolation and controlled communication; FAISAL can adopt narrow formalizable policy invariants without claiming whole-kernel formal verification.",
+      "Unikraft contributes specialization and fast-startup library-OS ideas; FAISAL can use measured minimal sandbox profiles without abandoning Linux compatibility.",
+      "OpenAI Structured Outputs, Anthropic client tools, Gemini function calling, and Qwen function calling all distinguish model-emitted requests from application-side execution.",
+      "NCCL, RCCL, and Level Zero remain hardware-specific execution stacks and are not replaced by a policy envelope."
+    ],
+    "research_artifacts": {
+      "autonomous_ai_findings": "build/autonomous-ai-research-findings.md",
+      "autonomous_ai_findings_sha256": "e6fe2a2b85bf8a0756eb70632687d3af72f927a64c54372d9d8ac36187f44086",
+      "paid_model_findings": "build/paid-model-research-findings.md",
+      "paid_model_findings_sha256": "21d5b6878be967ccc20cd80aae5856926d3f10a88234cd433bbe7f3751bc0df3",
+      "vendor_accelerator_findings": "build/vendor-accelerator-research-findings.md",
+      "vendor_accelerator_findings_sha256": "539f32bf888a955e6491766e20acb9638bac6bf6585b64d1af29f46259f2b74f"
+    }
+  },
+  "implementation": {
+    "header": "tools/faisal-model-action/faisal_model_action.h",
+    "header_sha256": "1389723095e64c215b38ccab8c2f794ca91af278314d4e491e5bccb37984c4a9",
+    "source": "tools/faisal-model-action/faisal_model_action.c",
+    "source_sha256": "6d634d48cef68fea5ace04d41bc2c63229e4d810ac3adaa18cbe2c95b4d2cdd8",
+    "selftest": "tools/testing/selftests/faisal_model_action_test.c",
+    "selftest_sha256": "2d721d08779821d42af20638e65af56e34bd11bde0a9e74a49c06ec1f2a99fc8",
+    "benchmark": "tools/testing/selftests/faisal_model_action_benchmark.c",
+    "benchmark_sha256": "2a1b9beafd86967344e7158e3c751b245ca365b7138f41ec5fa92ea4ee571184",
+    "runner": "tools/faisal-build/run_model_action_validation.sh",
+    "runner_sha256": "1c8d845179575877bed2d2f73bfa4ef53ff9497c28c0bedc6cfef5b1195e719d",
+    "features": [
+      "provider-neutral OpenAI, Anthropic, Gemini, Qwen, and local-provider identities",
+      "tool or structured-response action types",
+      "schema-validity and schema/arguments digest requirements",
+      "input and model-provenance digest requirements",
+      "agent/objective/tenant/tool/registry/revocation/lease identity binding",
+      "independent policy or kernel authority requirement",
+      "explicit rejection of model authority",
+      "provider/action allowlists",
+      "bounded expiry and TTL",
+      "monotonic request-sequence and nonce replay protection",
+      "tamper-evident envelope digest binding at completion",
+      "authorized result and result-digest validation"
+    ]
+  },
+  "validation": {
+    "strict_build": "-O2 -Wall -Wextra -Werror",
+    "selftest_markers": [
+      "FMA_OPENAI_TOOL_ADMISSION_OK",
+      "FMA_AUTHORIZED_COMPLETION_OK",
+      "FMA_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+      "FMA_SCHEMA_REJECT_OK",
+      "FMA_REFUSAL_REJECT_OK",
+      "FMA_PROVIDER_REJECT_OK",
+      "FMA_REPLAY_REJECT_OK",
+      "FMA_TTL_REJECT_OK",
+      "FMA_TAMPER_REJECT_OK",
+      "FMA_SELFTEST_EXIT=0"
+    ],
+    "benchmark": {
+      "rounds": 100000,
+      "admitted": 100000,
+      "completed": 100000,
+      "total_ns": 182732078,
+      "ns_per_round": 1827,
+      "scope": "local userspace policy fixture, not model inference or paid-provider latency"
+    },
+    "sanitizer": {
+      "status": "pass_no_asan_ubsan_diagnostics",
+      "selftest_binary_sha256": "a94a1693184cb243a6f49aaa18d0b9ef9d6f1a34009ab959512947b3cd250963",
+      "benchmark_binary_sha256": "3d3485c00fd2f1258d455e6601a8c32702e0c37580519caca89967bcd9e69892"
+    },
+    "m227_runner_log_sha256": "6a64e0c31e9333e9017ea5ed9e59360ada9d032a067faaede6cfd04da76fb008",
+    "m226_regression": "M226_RUNNER_EXIT=0",
+    "m226_regression_log_sha256": "86c0aff206d488981272739a72cd9fd0b9ec175cdc2b480f365dd41fb5dd20c6",
+    "m225_regression": "M225_RUNNER_EXIT=0",
+    "m225_regression_log_sha256": "8fc7ae7a9b82d0551adf8377f0f0850f2e5c6a9b461267f0913e57e3e2e4a0cd",
+    "m224_regression": "M224_RUNNER_EXIT=0",
+    "m224_regression_log_sha256": "6bedf4888c303646d731c89769c513c4cf9211b80961de1c6a1706ead9f45165",
+    "m222_regression": "M222_RUNNER_EXIT=0",
+    "m222_regression_log_sha256": "a8cf7edb23c93956b4567375fb76185b1ca2ef03796a80261ed8e26c1c0541c9",
+    "boot": {
+      "qualified_profile": "ACPI-off one-vCPU QEMU",
+      "rounds": 2,
+      "iterations_per_round": 256,
+      "status": "pass",
+      "summary_sha256": "5ad133b9918f9255ae53cc398c68dc6cf48463b679b9ade3ce0674f055c5c3f9",
+      "qemu_log_sha256": "0839dff48308e10c698c2cbbecbdd720c124ac7c07b2d1298f623a2d1daf92a6",
+      "markers": ["FAISAL_INDUSTRY_SOAK_OK"]
+    },
+    "known_boundary": {
+      "profile": "ACPI-on two-vCPU QEMU",
+      "status": "rejected_known_rcu_preempt_stall",
+      "interpretation": "The existing virtualization limitation was reproduced and rejected; it was not suppressed or attributed to M227 model-action code."
+    }
+  },
+  "comparison": {
+    "scope": "FAISAL provider-neutral action governance versus AIOS, vLLM, open-weight model tool protocols, and paid-model APIs",
+    "faisal_advantage": "independent authorization, replay/tamper protection, agent/objective/tenant lineage, registry generation binding, and fail-closed model-output boundary",
+    "ecosystem_advantage": "AIOS and agent runtimes provide richer user-space agent behavior; vLLM provides real model serving, KV/memory optimization, batching, distributed execution, and hardware plugins; paid providers provide hosted model quality, tools, and multimodal services",
+    "overall_superiority_claim": false,
+    "same_model": false,
+    "same_hardware": false,
+    "same_workload": false,
+    "note": "M227 improves the control-plane safety contract. It does not train a model, create consciousness, execute paid APIs, implement inference kernels, or prove human-level learning."
+  },
+  "boundary": {
+    "production_approval": false,
+    "external_builder": false,
+    "physical_accelerator_qualification": false,
+    "paid_provider_qualification": false,
+    "external_security_review": false,
+    "model_output_is_authority": false,
+    "fast_boot_claim": "qualified only for the measured ACPI-off one-vCPU QEMU profile; no universal fast-boot claim",
+    "note": "The production release gate remains fail-closed. No external model, hardware, reviewer, production signing ceremony, or production approval was fabricated."
+  }
+}
