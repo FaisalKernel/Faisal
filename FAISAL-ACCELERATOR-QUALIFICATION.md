@@ -31,4 +31,16 @@ The gate must emit `FAISAL_ACCELERATOR_QUALIFICATION_OK`. Any missing physical o
 
 ## Current environment boundary
 
-The current sandbox inventory records zero accelerator PCI devices, zero IOMMU groups, and no `/dev/dri`, `/dev/kfd`, or `/dev/vfio`. Its existing accelerator result is QEMU-TCG software validation only. Therefore this repository does not claim physical accelerator qualification until the signed report is collected on a real device host and independently reviewed.
+The current sandbox inventory records zero accelerator PCI devices, zero IOMMU groups, and no `/dev/dri`, `/dev/kfd`, or `/dev/vfio`. Its kernel command line also includes `pci=off` and `nomodules`. Its existing accelerator result is QEMU-TCG software validation only. Therefore this repository does not claim physical accelerator qualification until the signed report is collected on a real device host and independently reviewed.
+
+## Physical-device handoff
+
+To prepare an operator-controlled host without fabricating local hardware evidence, generate the exact handoff bundle:
+
+```sh
+python3 tools/faisal-build/prepare_physical_accelerator_bundle.py
+```
+
+The bundle binds the Linux 6.18.44 source revision, FAISAL configuration, candidate `bzImage`, inventory collector, validator, and runbook. Transfer it to a real GPU/NPU host, verify the manifest, boot the exact candidate, and collect the signed structured report there. The report must use `qualification_mode=hardware`, include physical observation and operator confirmation, identify the vendor driver and firmware, record the IOMMU group and DMA path, prove actual VRAM/device-memory behavior, and include reset, stress, multi-tenant, and physical workload results.
+
+QEMU, host RAM, device counts, synthetic fixtures, model output, container identity, and a local validation key are not physical qualification evidence. The sandbox-generated bundle is a handoff artifact only; it does not close the hardware blocker.
