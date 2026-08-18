@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "bdf03b0488daed48ba6841ec912d4ce77d4b4e45",
+  "current_head": "72d8db7dab09ccd571c52865708518611a23ae58",
   "current_tag": "FAISAL-M235-BROWSER-INTERACTION-VERIFICATION",
   "current_abi": 38,
   "operating_loop": [
