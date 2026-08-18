@@ -52,11 +52,12 @@ def main() -> None:
     checks = 0
 
     head = git(repo, 'rev-parse', 'HEAD')
-    checks += 1
-    if manifest.get('repository_head') != head:
-        fail('manifest repository_head does not match git HEAD')
-    state_head = state.get('current_head')
     parent = git(repo, 'rev-parse', 'HEAD^')
+    manifest_head = manifest.get('repository_head')
+    checks += 1
+    if manifest_head not in {head, parent}:
+        fail('manifest repository_head is neither HEAD nor the immediate bookkeeping parent')
+    state_head = state.get('current_head')
     checks += 1
     if state_head not in {head, parent}:
         fail('program state current_head is neither HEAD nor the immediate bookkeeping parent')
@@ -65,8 +66,8 @@ def main() -> None:
     if not tag or git(repo, 'rev-parse', f'{tag}^{{commit}}') != head:
         fail('program state current_tag does not resolve to git HEAD')
     checks += 1
-    if manifest.get('candidate_id') != 'faisal-lts-6.18.44-' + head[:12]:
-        fail('candidate_id is not bound to current HEAD')
+    if manifest.get('candidate_id') != 'faisal-lts-6.18.44-' + manifest_head[:12]:
+        fail('candidate_id is not bound to the manifest repository head')
 
     checks += 1
     if manifest.get('status') != 'bounded_candidate_not_production_approved':

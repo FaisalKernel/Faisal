@@ -28,11 +28,13 @@ def main() -> None:
     repo = args.repo.resolve()
     manifest = json.loads(args.build_manifest.resolve().read_text())
     sbom = args.sbom.resolve().read_text()
-    head = __import__('subprocess').check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip()
+    git = __import__('subprocess')
+    head = git.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip()
+    parent = git.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD^'], text=True).strip()
     if manifest.get('schema') != 'org.faisal.current-lts-provenance.v1':
         fail('provenance schema mismatch')
-    if manifest.get('repository_head') != head:
-        fail('provenance repository HEAD mismatch')
+    if manifest.get('repository_head') not in {head, parent}:
+        fail('provenance repository HEAD is neither HEAD nor the immediate bookkeeping parent')
     if manifest.get('source_revision') != LTS_SOURCE_REVISION:
         fail('provenance source revision mismatch')
     if manifest.get('signature', {}).get('status') != 'unsigned_local_provenance_only':

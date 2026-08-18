@@ -6,7 +6,7 @@
   "status": "positive_audit_pass_negative_stale_binding_rejections_pass",
   "implementation": {
     "auditor": "tools/faisal-build/audit_production_candidate_consistency.py",
-    "auditor_sha256": "0f62ebd392d7052e09611a2ff636b07700757d576d0f1779cbacc00df7e044db",
+    "auditor_sha256": "09f6a2ca67f5e86dc3a9a477eda181bb2038abfc800a172a5c2c5691c19cf477",
     "negative_test": "build/test_m204_consistency_negative.py",
     "negative_test_sha256": "d2392da5c7fa75b831dbff39261e11d9104fc5020d4fa3c27688367a19004e02",
     "checks": [
@@ -22,7 +22,7 @@
   },
   "validation": {
     "positive_log": "build/m204-audit-positive.log",
-    "positive_result": "FAISAL_EVIDENCE_CONSISTENCY_AUDIT_OK checks=47 head=a01d1d449cd046948e0fcef917b3d829600e288a",
+    "positive_result": "FAISAL_EVIDENCE_CONSISTENCY_AUDIT_OK checks=48 head=5834113134103c0356000a6f8e1307e883d6053c",
     "negative_log": "build/m204-negative-tests.log",
     "negative_results": [
       "M204_NEGATIVE_MANIFEST_HEAD_REJECT_OK",
@@ -34,7 +34,7 @@
   "correction_record": {
     "finding": "The previous M203 state and candidate manifest were stale after final tag binding; M204 also exposed a sequencing issue when the declared M204 tag did not yet exist.",
     "corrective_action": "Refreshed state and candidate manifest to the actual current HEAD, created the declared annotated tag, and reran both validators before recording this evidence.",
-    "current_head": "a01d1d449cd046948e0fcef917b3d829600e288a"
+    "current_head": "5834113134103c0356000a6f8e1307e883d6053c"
   },
   "production_boundary": {
     "status": "not_production_approved",
