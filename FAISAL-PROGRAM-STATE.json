@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "ada677d7dd263486c75ef85f90f232945090e010",
-  "current_tag": "FAISAL-M185-QEMU-REGRESSION-QUALIFICATION",
+  "current_head": "d50f37362927772842453c5b15e4e36e9f55311a",
+  "current_tag": "FAISAL-M186-DRIVER-WARNING-CLEANUP",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1419,7 +1419,8 @@
     "FAISAL-M163",
     "FAISAL-M164",
     "FAISAL-M184-DRIVER-CHECKPATCH-CLEANUP",
-    "FAISAL-M185-QEMU-REGRESSION-QUALIFICATION"
+    "FAISAL-M185-QEMU-REGRESSION-QUALIFICATION",
+    "FAISAL-M186-DRIVER-WARNING-CLEANUP"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1760,6 +1761,10 @@
     "m185_qemu_regression_qualification": "pass_harness_success_marker_fix_acpi_off_2vcpu_16384_pass_acpi_on_1vcpu_4096_pass_acpi_on_2vcpu_rcu_preempt_stall_blocked",
     "m185_qemu_regression_evidence": "tools/faisal-build/evidence/m185-qemu-regression-validation.json",
     "m185_candidate_manifest": "/home/ubuntu/agi-kernel/build/m185-candidate/production-candidate.json sha256=8a328e8c8bd33ef0e10b894e8ae0661fe404a07feadbb3b6943fbcfb79620ce1",
-    "m185_release_scope": "bounded_qemu_profile_qualification_pass_partial_acpi_on_smp_rcu_stall_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
+    "m185_release_scope": "bounded_qemu_profile_qualification_pass_partial_acpi_on_smp_rcu_stall_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m186_driver_warning_cleanup": "pass_driver_checkpatch_zero_errors_three_deep_nesting_warnings_compile_pass_acpi_off_2vcpu_16384_qemu_profile_pass",
+    "m186_driver_warning_evidence": "tools/faisal-build/evidence/m186-driver-style-validation.json",
+    "m186_candidate_manifest": "/home/ubuntu/agi-kernel/build/m186-candidate/production-candidate.json sha256=8ff12f0c022d41282d18b4d913381ccb4ead3134de5b02b53056f16503625635",
+    "m186_release_scope": "bounded_driver_quality_and_configured_compile_pass_candidate_manifest_verified_acpi_on_smp_rcu_stall_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
   }
 }
