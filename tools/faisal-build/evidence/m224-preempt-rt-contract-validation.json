@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M224-preempt-rt-contract",
-  "recorded_at": "2026-08-18T14:20:50Z",
+  "recorded_at": "2026-08-18T14:24:13Z",
   "status": "local_rt_control_plane_qualified_preempt_rt_kernel_and_hard_latency_qualification_pending",
   "objective": "Reuse PREEMPT_RT’s mature kernel mechanisms while adding provider-neutral deterministic agent workload admission, dependency-aware priority inheritance, deadline and budget enforcement, CPU-affinity policy, authority gating, and explicit qualification boundaries.",
   "research": {
