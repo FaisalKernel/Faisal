@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "c8b31f2f2d948b276a753ccaae71a5f2f8cc2431",
-  "current_tag": "FAISAL-M188-QUEUE-OVERFLOW-HARDENING",
+  "current_head": "49fc35adafd9c21e960ae7563d49395d8953d605",
+  "current_tag": "FAISAL-M189-WRITE-SIDE-LIFECYCLE-STRESS",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1422,7 +1422,8 @@
     "FAISAL-M185-QEMU-REGRESSION-QUALIFICATION",
     "FAISAL-M186-DRIVER-WARNING-CLEANUP",
     "FAISAL-M187-WORLD-QUEUE-DROP-HELPER",
-    "FAISAL-M188-QUEUE-OVERFLOW-HARDENING"
+    "FAISAL-M188-QUEUE-OVERFLOW-HARDENING",
+    "FAISAL-M189-WRITE-SIDE-LIFECYCLE-STRESS"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1775,6 +1776,10 @@
     "m188_queue_overflow_helper": "pass_queue_full_and_world_drop_handling_extracted_zero_checkpatch_errors_zero_warnings_compile_pass",
     "m188_queue_overflow_evidence": "tools/faisal-build/evidence/m188-queue-overflow-validation.json",
     "m188_candidate_manifest": "/home/ubuntu/agi-kernel/build/m188-candidate/production-candidate.json sha256=1ba1e03e99690975275f77ac7a4a334516962e4b49af0ff425b3e76e1c746916",
-    "m188_release_scope": "bounded_queue_overflow_quality_and_compile_pass_write_side_runtime_stress_and_qemu_acpi_on_smp_rcu_stall_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
+    "m188_release_scope": "bounded_queue_overflow_quality_and_compile_pass_write_side_runtime_stress_and_qemu_acpi_on_smp_rcu_stall_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m189_write_side_lifecycle_stress": "pass_valid_session_attach_64_graph_creates_64_graph_cancels_acpi_off_2vcpu_pass_acpi_on_1vcpu_pass_acpi_on_2vcpu_rejected_rcu_diagnostic",
+    "m189_write_side_evidence": "tools/faisal-build/evidence/m189-write-side-lifecycle-validation.json",
+    "m189_candidate_manifest": "/home/ubuntu/agi-kernel/build/m189-candidate/production-candidate.json sha256=9242bc7cd371f090b4d0cf9912054dfdbe203eaf7b86a514600b7ad1b1ebe6df",
+    "m189_release_scope": "bounded_write_side_lifecycle_qualification_pass_runner_rcu_diagnostics_hardened_acpi_on_smp_blocked_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
   }
 }
