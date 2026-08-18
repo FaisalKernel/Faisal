@@ -1,0 +1,105 @@
+{
+  "project": "FAISAL",
+  "milestone": "M229-provenance-bound-experience-evidence-contract",
+  "recorded_at": "2026-08-18T15:43:22Z",
+  "status": "local_contract_qualified_external_and_physical_backend_qualification_pending",
+  "objective": "Extend FAISAL persistent experience learning with deterministic provenance-bound promotion, conflict detection, correction, expiry, replay protection, reusable retrieval, and evidence verification.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://docs.kernel.org/scheduler/sched-ext.html",
+        "finding": "sched_ext provides an extensible BPF scheduler with diagnostic counters and fail-safe bypass to fair scheduling on error or stalled runnable tasks.",
+        "impact": "Future FAISAL scheduler adapters must preserve fail-safe fallback and treat sched_ext ABI as unstable."
+      },
+      {
+        "url": "https://docs.kernel.org/admin-guide/cgroup-v2.html",
+        "finding": "cgroup v2 provides hierarchical resource governance, delegation containment, and top-down limits.",
+        "impact": "Experience and sandbox workloads should bind to stable resource domains and use controller tuning rather than frequent migration."
+      },
+      {
+        "url": "https://docs.vllm.ai/en/latest/",
+        "finding": "vLLM documents paged attention, continuous batching, prefix caching, speculative decoding, disaggregated serving, structured output, tools, tracing, and broad hardware support.",
+        "impact": "FAISAL records provider/runtime/cache provenance without embedding vLLM implementation details."
+      },
+      {
+        "url": "https://docs.sglang.ai/",
+        "finding": "SGLang documents radix/prefix caching, multimodal and agentic workflows, parallelism, and OpenAI-compatible serving.",
+        "impact": "Cache reuse and agentic results require evidence-bound leases rather than provider promises."
+      },
+      {
+        "url": "https://nvidia.github.io/TensorRT-LLM/",
+        "finding": "TensorRT-LLM documents KV-cache exchange, in-flight batching, guided decoding, speculative decoding, telemetry, quantization, and hardware-specific parallelism.",
+        "impact": "Accelerator and inference contracts remain provider-neutral and physically qualified separately."
+      },
+      {
+        "url": "https://developers.openai.com/api/docs/guides/tools",
+        "finding": "OpenAI documents web/file/function/MCP/tool-search and other tool surfaces.",
+        "impact": "Model tool requests are untrusted intent; tool execution and authority remain external policy decisions."
+      },
+      {
+        "url": "https://developers.openai.com/api/docs/guides/background",
+        "finding": "OpenAI background mode documents asynchronous execution, polling, cancellation, and resumable stream cursors.",
+        "impact": "Provider handles and cursors are recorded as evidence but cannot become durable authority."
+      },
+      {
+        "url": "https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview",
+        "finding": "Anthropic distinguishes client-executed structured tool calls from provider-executed server tools and supports constrained parallel tool use.",
+        "impact": "FAISAL binds tool schema, call, execution location, result, and verifier provenance."
+      },
+      {
+        "url": "https://ai.google.dev/gemini-api/docs/function-calling",
+        "finding": "Gemini documents application-executed function calls, parallel/compositional calling, exact stateless replay, and function-result continuation.",
+        "impact": "FAISAL binds model-step, call-argument, function-result, and replay lineage digests."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-experience/faisal_experience_evidence.h",
+    "source": "tools/faisal-experience/faisal_experience_evidence.c",
+    "selftest": "tools/testing/selftests/faisal_experience_evidence_test.c",
+    "benchmark": "tools/testing/selftests/faisal_experience_evidence_benchmark.c",
+    "runner": "tools/faisal-build/run_experience_evidence_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "canonical SHA-256 action observation result lesson skill binding",
+      "source provider model tool sandbox verifier provenance binding",
+      "bounded deterministic importance scoring",
+      "authority-gated verified promotion",
+      "same-key conflicting-result detection",
+      "correction and supersession",
+      "expiry and bounded reuse budget",
+      "minimum confidence and importance retrieval policy",
+      "monotonic request sequence replay protection",
+      "tamper-evident verification",
+      "model-output-is-not-authority boundary"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M229_SELFTEST_EXIT=0",
+    "selftest_cases": 13,
+    "benchmark_rounds": 4096,
+    "benchmark_operations": 12288,
+    "benchmark_ns_per_operation": 4101,
+    "asan_ubsan": true,
+    "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK on ACPI-on one-vCPU 4G",
+    "regression_m228": "M228_RUNNER_EXIT=0 selftest and 100000-round benchmark passed"
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "unverified_experience_promoted": false,
+    "incomplete_required_provenance_promoted": false,
+    "tampered_record_reused": false,
+    "conflict_retrieval_allowed": false,
+    "replay_allowed": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "This is a provider-neutral user-space contract, not a model retraining implementation.",
+    "This does not claim consciousness, human-like learning, or unrestricted self-modification.",
+    "No physical GPU/NPU, KVM microVM, vendor runtime, paid provider, independent builder, or independent security review was performed by this milestone.",
+    "Production release remains blocked by the project’s external evidence gate."
+  ]
+}
