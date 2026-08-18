@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "84cdc5d73ec5d9a413340ca9b5761b877a5dcd68",
-  "current_tag": "FAISAL-M199-GRAPH-WORLD-MULTIOP-HARDENED-QEMU",
+  "current_head": "5b92b60bdc4e09a580b400594313bd21c939f326",
+  "current_tag": "FAISAL-M200-WORLD-MODEL-ROUTER-PROFILE-CLASSIFICATION",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1827,6 +1827,9 @@
     "m199_graph_world_multiop_hardened_qemu": "pass_strict_static_compile_acpi_off_2vcpu_24_node_graph_chain_8_node_cancellation_11_interleaved_world_queries_two_graph_fault_guards_acpi_on_2vcpu_rejected_rcu_diagnostic",
     "m199_graph_world_multiop_evidence": "tools/faisal-build/evidence/m199-graph-world-multiop-hardened-qemu-validation.json",
     "m199_release_scope": "bounded_graph_world_multi_operation_qualification_pass_in_acpi_off_profile_explicit_acpi_on_smp_rcu_block_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
-    "m199_candidate_manifest": "/home/ubuntu/agi-kernel/build/m199-candidate/production-candidate.json sha256=540ec8d492c251a1e33e63b1898d7d0fdf6406e2b081ac576f3448d88fd20f0f"
+    "m199_candidate_manifest": "/home/ubuntu/agi-kernel/build/m199-candidate/production-candidate.json sha256=540ec8d492c251a1e33e63b1898d7d0fdf6406e2b081ac576f3448d88fd20f0f",
+    "m200_world_model_router_profile_classification": "pass_strict_static_compile_acpi_off_1vcpu_qualified_acpi_on_2vcpu_qualified_for_this_workload_no_diagnostics_global_other_workloads_rcu_block_preserved",
+    "m200_world_model_router_evidence": "tools/faisal-build/evidence/m200-world-model-router-profile-classification-validation.json",
+    "m200_release_scope": "bounded_world_model_router_profile_qualification_pass_acpi_off_and_acpi_on_smp_for_this_workload_global_qemu_block_preserved_other_workloads_rcu_stall_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
   }
 }
