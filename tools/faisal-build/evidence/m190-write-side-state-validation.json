@@ -1,0 +1,47 @@
+{
+  "project": "FAISAL",
+  "milestone": "M190-write-side-state-invariants",
+  "schema": "org.faisal.write-side-state-validation.v1",
+  "recorded_at": "2026-08-18T08:49:59Z",
+  "repository_parent_commit": "160cafa6fcbd0bd0e6282c6fe1adf760a2393ad8",
+  "status": "state_asserting_write_stress_pass_acpi_off_2vcpu_pass_acpi_on_1vcpu_rcu_diagnostic_policy_hardened",
+  "implementation": {
+    "source": "tools/testing/selftests/agi_lifecycle_write_stress_test.c",
+    "source_sha256": "618280bc658cb5228cdf5176a74f471fc2e5517ffb3a3ab7b05dee943ba3b7c2",
+    "assertions": [
+      "every graph create response is READY even when event delivery returns an expected overflow errno",
+      "every graph cancel response is CANCELLED even when event delivery returns an expected overflow errno",
+      "unexpected graph state or errno fails the test"
+    ],
+    "strict_compile": "pass with -O2 -Wall -Wextra -Werror -static"
+  },
+  "profiles": {
+    "acpi_off_2vcpu": {
+      "result": "pass",
+      "log": "build/m190-state-check/qemu.log",
+      "markers": "FAISAL_UAPI_WRITE_STRESS_QEMU_VALIDATION_OK\n"
+    },
+    "acpi_on_1vcpu": {
+      "result": "pass",
+      "log": "build/m190-profile-check/acpi-on-1vcpu.log",
+      "guest_log": "build/m190-profile-check/acpi-on-1vcpu-guest.log",
+      "markers": "FAISAL_UAPI_WRITE_STRESS_QEMU_VALIDATION_OK\n"
+    },
+    "acpi_on_2vcpu": {
+      "result": "rejected_rcu_diagnostic_by_runner_policy",
+      "source_run": "build/m189-runner-hardening/write-acpi-on-2vcpu-guest.log",
+      "reason": "RCU stall and kthread-starvation signatures are hard failures even if the write workload marker is emitted."
+    }
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "ACPI-on SMP is qualified.",
+      "Physical accelerator qualification occurred.",
+      "Independent security review occurred.",
+      "External operator or attested builder qualification occurred.",
+      "FAISAL is production-approved."
+    ],
+    "remaining_action": "Bind M190 evidence into the candidate, maintain strict RCU diagnostics, and continue independent enterprise qualification."
+  }
+}
