@@ -20,7 +20,7 @@ FAISAL_PRODUCTION_CANDIDATE_MANIFEST=/path/to/production-candidate.json \
 
 ## Bounded qualification scope
 
-The candidate includes the verified Linux 6.18.44 forward-port build, software regressions, tenant and durable QEMU tests, representative TCG soak using the documented ACPI-off profile, signed-structure evidence validators, and fail-closed negative-path tests. These establish a hardened candidate state within the available sandbox; they do not establish live production operation.
+The candidate includes the verified Linux 6.18.44 forward-port build, software regressions, tenant and durable QEMU tests, representative TCG soak using the documented ACPI-off profile, signed-structure evidence validators, and fail-closed negative-path tests. M183 additionally makes the lifecycle UAPI header checkpatch-clean with strict userspace selftest compilation and unchanged ABI layout. The lifecycle driver itself still has substantial checkpatch residue and remains open for small semantic-preserving cleanup. These establish a hardened candidate state within the available sandbox; they do not establish live production operation.
 
 ## Mandatory production blockers
 

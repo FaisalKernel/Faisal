@@ -1,0 +1,35 @@
+{
+  "project": "FAISAL",
+  "milestone": "M183-uapi-checkpatch-cleanup",
+  "schema": "org.faisal.uapi-checkpatch-validation.v1",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "repository_parent_commit": "bed3bf57543c7cd165e7e042183ba05e29b2ff3f",
+  "status": "partial_checkpatch_cleanup_uapi_clean_driver_residue_open",
+  "scope": {
+    "file": "include/uapi/linux/agi_lifecycle.h",
+    "file_sha256": "4e3487d39cb422706906b47b61ff8be0f8fb11b17fe61ebdb57c9f4dd71cf534",
+    "checkpatch": "0 errors, 0 warnings",
+    "selftest": "tools/testing/selftests/agi_lifecycle_uapi_fuzz_test.c strict compile pass",
+    "abi_probe": "pass",
+    "abi_layout": "unchanged from pre-cleanup header",
+    "graph_node_size": 208,
+    "compute_context_size": 232
+  },
+  "driver_audit": {
+    "file": "drivers/misc/agi_lifecycle.c",
+    "original_checkpatch_errors": 324,
+    "original_checkpatch_warnings": 94,
+    "temporary_mechanical_autofix_residual_errors": 54,
+    "driver_sha256": "f0bff4d88d14b79829627398086c2d1f6eba55d4dee469e24fa3cc20395af7bf",
+    "production_claim": "driver checkpatch cleanup remains open; no automatic driver rewrite was applied"
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "The lifecycle driver is checkpatch-clean.",
+      "An external security review occurred.",
+      "FAISAL is production-approved."
+    ],
+    "remaining_action": "Review and clean the lifecycle driver in small semantic-preserving patches, then rerun compile, selftests, sanitizer/QEMU regressions, and independent review."
+  }
+}
