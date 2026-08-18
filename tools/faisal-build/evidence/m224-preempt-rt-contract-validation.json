@@ -1,0 +1,114 @@
+{
+  "project": "FAISAL",
+  "milestone": "M224-preempt-rt-contract",
+  "recorded_at": "2026-08-18T14:20:50Z",
+  "status": "local_rt_control_plane_qualified_preempt_rt_kernel_and_hard_latency_qualification_pending",
+  "objective": "Reuse PREEMPT_RT’s mature kernel mechanisms while adding provider-neutral deterministic agent workload admission, dependency-aware priority inheritance, deadline and budget enforcement, CPU-affinity policy, authority gating, and explicit qualification boundaries.",
+  "research": {
+    "sources": [
+      "https://docs.kernel.org/core-api/real-time/theory.html",
+      "https://www.kernel.org/doc/html/next/core-api/real-time/index.html"
+    ],
+    "verified_preempt_rt_mechanisms": [
+      "preemptible priority-inheritance-aware rtmutex locking",
+      "threaded interrupt handlers with a small IRQ-context primary stage",
+      "more scheduler-controlled kernel execution contexts",
+      "remaining critical paths including entry, scheduler, and low-level interrupt handling"
+    ],
+    "design_conclusion": "FAISAL must compose with PREEMPT_RT rather than replace its kernel-wide preemption and locking work. FAISAL M224 adds higher-level workload semantics and evidence; it does not claim to improve raw IRQ or kernel preemption latency."
+  },
+  "implementation": {
+    "header": "tools/faisal-rt/faisal_rt_contract.h",
+    "header_sha256": "9e4f212f7fc585e2b84eb2e6a41db683314428fa7c506df96f83d536349dd0e4",
+    "source": "tools/faisal-rt/faisal_rt_contract.c",
+    "source_sha256": "d43db4c46968d75a672e6b5664b3a59d0d5a71b3b7000c55b94169566e3d13f2",
+    "selftest": "tools/testing/selftests/faisal_rt_contract_test.c",
+    "selftest_sha256": "9f2105df12271143edabf6803411599815642ef47dee88e434365b743f3bb20d",
+    "benchmark": "tools/testing/selftests/faisal_rt_contract_benchmark.c",
+    "benchmark_sha256": "aecd126f46bb4d3a30cbdadecd873298fea5c87d77140af04cdf4adebde33b5b",
+    "profile_validator": "tools/faisal-build/verify_faisal_rt_profile.py",
+    "profile_validator_sha256": "aca996a3e388b546364473e53f1fc6db6faf8084961531bfbf07e810e6404967",
+    "runner": "tools/faisal-build/run_rt_contract_validation.sh",
+    "runner_sha256": "dd574690b8fec5ce564ed165bf023568633b828399ecd243f678317aa8f4cccd",
+    "features": [
+      "dependency-cycle rejection",
+      "dependency readiness gating",
+      "criticality-aware transitive effective priority",
+      "earliest-deadline then effective-priority then criticality then stable-ID selection",
+      "budget overrun detection",
+      "deadline miss detection",
+      "CPU-affinity admission checks",
+      "model-output/authority rejection",
+      "fail-closed PREEMPT_RT profile validator"
+    ]
+  },
+  "validation": {
+    "strict_build": "-O2 -Wall -Wextra -Werror",
+    "selftest_markers": [
+      "FRT_PRIORITY_INHERITANCE_OK",
+      "FRT_DEADLINE_PRIORITY_DISPATCH_OK",
+      "FRT_BUDGET_OVERRUN_REJECT_OK",
+      "FRT_DEADLINE_MISS_FAIL_CLOSED_OK",
+      "FRT_CPU_AFFINITY_REJECT_OK",
+      "FRT_DEPENDENCY_CYCLE_REJECT_OK",
+      "FRT_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+      "FRT_SELFTEST_EXIT=0"
+    ],
+    "benchmark": {
+      "rounds": 10000,
+      "jobs_per_round": 32,
+      "selections": 320000,
+      "total_ns": 279239738,
+      "ns_per_round": 27923,
+      "ns_per_selection": 872,
+      "scope": "local userspace policy fixture, not PREEMPT_RT or hard-latency qualification"
+    },
+    "sanitizer": {
+      "status": "pass_no_asan_ubsan_diagnostics",
+      "selftest_binary_sha256": "06774e765fa2553518c1b92f6423ddae8871583aff5b7f107bf647e599a3e98a",
+      "benchmark_binary_sha256": "4616d9b9057a7b7199f4baedd494cdf29fc4cff3d22b7098b00ed8dc21ca66db"
+    },
+    "runner_log_sha256": "4aa935e7ab094ca1d85ea3cfe67198af609d12307e6f9b18bbe014965234ee60",
+    "m222_regression": "M222_SELFTEST_EXIT=0",
+    "m222_regression_log_sha256": "90fbae508b8230ac3b3d0cb87392cf1856733222e37c35c8c4b4152cd39d8cbc",
+    "profile": {
+      "config": "build/industry-production-m153/.config",
+      "status": "blocked_not_preempt_rt",
+      "missing_required": ["CONFIG_PREEMPT_RT"],
+      "missing_optional": ["CONFIG_NO_HZ_FULL", "CONFIG_RCU_NOCB_CPU"],
+      "hard_latency_claim": false,
+      "production_approval": false
+    },
+    "system_latency_tools": {
+      "cyclictest_available": false,
+      "oslat_available": false,
+      "physical_latency_qualification": false
+    }
+  },
+  "comparison": {
+    "scope": "FAISAL userspace/control-plane RT contract versus PREEMPT_RT kernel mechanisms",
+    "same_kernel_config": false,
+    "same_hardware": false,
+    "same_workload": false,
+    "same_measurement_tool": false,
+    "faisal_advantage": "explicit agent/DAG deadline, budget, dependency, authority, and evidence semantics above the scheduler",
+    "preempt_rt_advantage": "kernel-wide preemptibility, rtmutex priority inheritance, threaded interrupts, and mature hardware/driver latency methodology",
+    "direct_hard_realtime_superiority_claim": false,
+    "required_before_hard_latency_claim": [
+      "CONFIG_PREEMPT_RT=y build",
+      "physical target hardware",
+      "cyclictest/oslat or equivalent measurements",
+      "IRQ, firmware, driver, CPU-isolation, and power-management characterization",
+      "reproducible worst-case workload and soak evidence"
+    ]
+  },
+  "boundary": {
+    "production_approval": false,
+    "preempt_rt_kernel_qualification": false,
+    "physical_hardware_qualification": false,
+    "independent_builder": false,
+    "external_security_review": false,
+    "model_output_is_authority": false,
+    "note": "M224 is a measurable policy and orchestration improvement that should run on a PREEMPT_RT-qualified kernel when available. It does not replace PREEMPT_RT and does not establish hard real-time guarantees in QEMU or a userspace fixture."
+  }
+}

@@ -81,6 +81,7 @@ def main() -> None:
         'm221-external-blocker-coverage-validation.json',
         'm222-aios-parity-urgency-scheduling-validation.json',
         'm223-inference-objective-contract-validation.json',
+        'm224-preempt-rt-contract-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:
