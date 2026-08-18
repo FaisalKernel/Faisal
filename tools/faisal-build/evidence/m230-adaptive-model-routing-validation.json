@@ -1,0 +1,122 @@
+{
+  "project": "FAISAL",
+  "milestone": "M230-evidence-bound-adaptive-model-routing",
+  "recorded_at": "2026-08-18T15:55:58Z",
+  "status": "local_contract_qualified_external_provider_and_physical_backend_qualification_pending",
+  "objective": "Make model/runtime selection capability-aware, health-aware, cost-aware, privacy-aware, circuit-breaker protected, generation-fenced, and receipt-verifiable without treating model output as authority.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://sel4.systems/",
+        "finding": "seL4 provides open-source microkernel isolation, controlled communication, and machine-checked functional-correctness proofs.",
+        "impact": "M230 uses controlled communication and explicit evidence boundaries but makes no formal-verification claim for FAISAL."
+      },
+      {
+        "url": "https://unikraft.org/docs",
+        "finding": "Unikraft documents minimal Linux-API-compatible library operating systems, hardware-level VM isolation, and fast cold starts for cloud-native workloads and AI agents.",
+        "impact": "FAISAL records runtime/backend capabilities as metadata and leaves minimal-VM qualification to a separate backend gate."
+      },
+      {
+        "url": "https://github.com/cloud-hypervisor/cloud-hypervisor",
+        "finding": "Cloud Hypervisor documents KVM/MSHV support, low-latency minimal VMM design, hotplug, migration, vhost-user offload, and experimental compatibility boundaries.",
+        "impact": "Route and execution receipts must bind backend identity/generation and fail closed when migration or snapshot compatibility is unknown."
+      },
+      {
+        "url": "https://docs.litellm.ai/docs/routing",
+        "finding": "LiteLLM documents multi-deployment routing, latency/cost/rate-limit strategies, cooldowns, fallbacks, weighted failover, concurrency limits, retries, and deployment-specific health tracking.",
+        "impact": "M230 implements a smaller deterministic provider-neutral contract with explicit circuit state and route receipts rather than embedding a gateway."
+      },
+      {
+        "url": "https://docs.vllm.ai/en/latest/",
+        "finding": "vLLM documents continuous batching, prefix caching, structured output, tools, tracing, speculative decoding, disaggregated serving, and broad model/hardware support.",
+        "impact": "M230 represents these as capability claims and does not claim vLLM execution or hardware performance."
+      },
+      {
+        "url": "https://docs.sglang.ai/",
+        "finding": "SGLang documents radix/prefix caching, agentic and multimodal workflows, parallelism, and OpenAI-compatible serving.",
+        "impact": "Provider/runtime capability masks can express structured output, tools, multimodality, and related requirements without provider lock-in."
+      },
+      {
+        "url": "https://nvidia.github.io/TensorRT-LLM/",
+        "finding": "TensorRT-LLM documents hardware-specific KV-cache, batching, guided decoding, speculative decoding, quantization, and telemetry features.",
+        "impact": "Hardware-specific capabilities are admitted only as metadata until physical accelerator qualification exists."
+      },
+      {
+        "url": "https://developers.openai.com/api/docs/guides/tools",
+        "finding": "OpenAI documents tool and function surfaces including web, file, MCP, and tool search.",
+        "impact": "A route selects a backend only; it never authorizes the model-requested tool."
+      },
+      {
+        "url": "https://developers.openai.com/api/docs/guides/background",
+        "finding": "OpenAI background mode documents asynchronous execution, polling, cancellation, and resumable cursors.",
+        "impact": "Background capability metadata is provider-neutral and requires separate execution authorization."
+      },
+      {
+        "url": "https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview",
+        "finding": "Anthropic documents structured client and server tool-use blocks and application-executed tool flows.",
+        "impact": "Tool-calling capability claims do not become authority."
+      },
+      {
+        "url": "https://ai.google.dev/gemini-api/docs/function-calling",
+        "finding": "Gemini documents parallel/compositional function calling and stateless replay of model steps and function results.",
+        "impact": "Request sequence, model generation, and route receipt fencing support replay-safe provider adapters."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-model-router/faisal_model_router.h",
+    "source": "tools/faisal-model-router/faisal_model_router.c",
+    "selftest": "tools/testing/selftests/faisal_model_router_test.c",
+    "benchmark": "tools/testing/selftests/faisal_model_router_benchmark.c",
+    "runner": "tools/faisal-build/run_model_router_adaptive_validation.sh",
+    "abi": 2,
+    "kernel_abi_changed": false,
+    "features": [
+      "provider-neutral capability masks for structured output tools background streaming vision speech embeddings multimodality citations and JSON schema",
+      "privacy locality hardware context and latency/cost admission",
+      "sample-aware health confidence and uncertainty",
+      "closed open and half-open circuit states",
+      "bounded failure threshold and cooldown",
+      "cloud fallback and recovery probe state",
+      "deterministic score and model-id tie break",
+      "request sequence and model generation fencing",
+      "SHA-256 route receipt binding request constraints selected backend and generation",
+      "tamper and stale receipt rejection",
+      "model-output-is-not-authority boundary"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M230_SELFTEST_EXIT=0",
+    "selftest_cases": 10,
+    "benchmark_rounds": 100000,
+    "benchmark_operations": 200000,
+    "benchmark_ns_per_operation": 1008,
+    "asan_ubsan": true,
+    "qemu_kernel_boot": "pending final integrated run",
+    "regression_m229": "pending final integrated run"
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_accelerator": false,
+    "external_security_review": false,
+    "paid_provider_qualification": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "capability_metadata_is_authority": false,
+    "tampered_route_reused": false,
+    "stale_generation_reused": false,
+    "unhealthy_circuit_routed_before_cooldown": false,
+    "cloud_fallback_bypassed_privacy": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "This is a provider-neutral userspace routing contract, not a model-serving engine.",
+    "It does not claim model quality, hosted-provider availability, GPU performance, or equivalent functionality across providers.",
+    "No paid provider call, physical GPU/NPU, KVM microVM, independent builder, or independent security review was performed by this milestone.",
+    "Production release remains blocked by the project’s external evidence gate."
+  ]
+}
