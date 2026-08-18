@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "26dbb7a41a022cfb70dae7396c407c3fa862711f",
-  "current_tag": "FAISAL-M182-PRODUCTION-CANDIDATE-CONTRACT",
+  "current_head": "43d1be770bad4e7cfbe07e1f73ccc54035217555",
+  "current_tag": "FAISAL-M183-UAPI-CHECKPATCH-CLEANUP",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1744,6 +1744,10 @@
     "m182_production_candidate": "pass_unified_manifest_exact_lts_artifact_config_evidence_index_bounded_software_qemu_scope_and_fail_closed_approval_boundary",
     "m182_production_candidate_manifest": "/home/ubuntu/agi-kernel/build/m182-candidate/production-candidate.json sha256=50c61b771b7427e8e1600a2d3e50761568bbe145087d81e3a8eecc7952174c23",
     "m182_production_candidate_evidence": "tools/faisal-build/evidence/m182-production-candidate-validation.json",
-    "m182_release_scope": "bounded_candidate_manifest_verified_production_approval_blocked_external_operator_hardware_multihost_and_independent_review_evidence_pending"
+    "m182_release_scope": "bounded_candidate_manifest_verified_production_approval_blocked_external_operator_hardware_multihost_and_independent_review_evidence_pending",
+    "m183_uapi_checkpatch_cleanup": "pass_lifecycle_uapi_header_zero_checkpatch_errors_zero_warnings_strict_userspace_selftest_compile_abi_layout_unchanged_driver_checkpatch_residue_open",
+    "m183_uapi_checkpatch_evidence": "tools/faisal-build/evidence/m183-uapi-checkpatch-validation.json",
+    "m183_candidate_manifest": "/home/ubuntu/agi-kernel/build/m183-candidate/production-candidate.json sha256=d7fce4cca8dddfdc224174d78143b0666a0bec849a4de86b1986ea49bc995b2d",
+    "m183_release_scope": "bounded_candidate_software_qemu_and_uapi_quality_evidence_pass_lifecycle_driver_cleanup_external_operator_hardware_multihost_and_independent_review_pending"
   }
 }

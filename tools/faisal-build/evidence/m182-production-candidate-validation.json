@@ -4,14 +4,14 @@
   "schema": "org.faisal.production-candidate-validation.v1",
   "recorded_at": "2026-08-18T00:00:00Z",
   "recorded_epoch": 1787030584,
-  "repository_parent_commit": "26dbb7a41a022cfb70dae7396c407c3fa862711f",
+  "repository_parent_commit": "43d1be770bad4e7cfbe07e1f73ccc54035217555",
   "status": "bounded_candidate_manifest_verified_production_approval_blocked",
   "candidate_manifest": {
     "path": "/home/ubuntu/agi-kernel/build/m182-candidate/production-candidate.json",
-    "sha256": "50c61b771b7427e8e1600a2d3e50761568bbe145087d81e3a8eecc7952174c23",
+    "sha256": "d7fce4cca8dddfdc224174d78143b0666a0bec849a4de86b1986ea49bc995b2d",
     "status": "bounded_candidate_not_production_approved",
-    "repository_head": "26dbb7a41a022cfb70dae7396c407c3fa862711f",
-    "candidate_id": "faisal-lts-6.18.44-26dbb7a41a02"
+    "repository_head": "43d1be770bad4e7cfbe07e1f73ccc54035217555",
+    "candidate_id": "faisal-lts-6.18.44-43d1be770bad"
   },
   "artifact": {
     "lts_source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
