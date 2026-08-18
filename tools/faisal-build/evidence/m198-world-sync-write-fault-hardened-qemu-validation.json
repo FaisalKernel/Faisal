@@ -1,0 +1,67 @@
+{
+  "project": "FAISAL",
+  "milestone": "M198-world-sync-write-fault-hardening",
+  "schema": "org.faisal.world-sync-write-fault-hardened-qemu-validation.v1",
+  "recorded_at": "2026-08-18T09:23:04Z",
+  "status": "acpi_off_1vcpu_pass_acpi_on_2vcpu_rejected_rcu_diagnostic",
+  "implementation": {
+    "selftest": "tools/testing/selftests/agi_world_sync_fault_test.c",
+    "selftest_sha256": "63aa3b4cfa14d0dc9eb3cbe7a4af64d39d45398d59f0a7a33578b894b3b03982",
+    "runner": "tools/faisal-build/run_world_sync_fault_hardened_qemu.sh",
+    "runner_sha256": "fc1c5a34b7edbd64c7e200fcf9912a5a96ea5a2bc497f6eaa4bc2c0bb44fa95d",
+    "compile": "strict static -O2 -Wall -Wextra -Werror with memory and world services, libcrypto, libdl, and pthread"
+  },
+  "acpi_off_1vcpu": {
+    "result": "pass",
+    "runner_log": "build/m198-world-sync/runner.log",
+    "guest_log": "build/m198-world-sync/rootfs/qemu.log",
+    "required_markers": [
+      "FAISAL_M198_BOOT_OK",
+      "M198_SUBSCRIPTION_REJECT_OK cases=7",
+      "M198_SUBSCRIPTION_UPDATE_OK",
+      "M198_WORLD_QUERY_OK",
+      "M198_SYNC_WRITE_GUARD_OK",
+      "M198_RESYNC_GUARD_OK",
+      "M198_SELFTEST_EXIT=0",
+      "M198_SELFTEST_RC=0",
+      "FAISAL_M198_TEST_COMPLETE"
+    ]
+  },
+  "acpi_on_2vcpu": {
+    "result": "rejected_rcu_diagnostic",
+    "runner_log": "build/m198-world-sync-acpi-on/runner.log",
+    "guest_log": "build/m198-world-sync-acpi-on/rootfs/qemu.log",
+    "reason": "The runner observed repeated rcu_preempt stalls, RCU_GP_WAIT_FQS, and kthread-starvation diagnostics and rejected the profile.",
+    "selftest_markers_before_rejection": [
+      "FAISAL_M198_BOOT_OK",
+      "M198_SUBSCRIPTION_REJECT_OK cases=7",
+      "M198_SUBSCRIPTION_UPDATE_OK",
+      "M198_WORLD_QUERY_OK",
+      "M198_SYNC_WRITE_GUARD_OK",
+      "M198_RESYNC_GUARD_OK",
+      "M198_SELFTEST_EXIT=0",
+      "M198_SELFTEST_RC=0",
+      "FAISAL_M198_TEST_COMPLETE"
+    ]
+  },
+  "validated_properties": [
+    "seven malformed subscription writes rejected with EINVAL",
+    "valid subscription policy update and kernel readback",
+    "world query write-shape rejection and successful query",
+    "future ACK rejected with ERANGE",
+    "ACK rollback rejected by the service guard",
+    "unrequired RESYNC rejected with EAGAIN",
+    "marker-driven QEMU termination and strict diagnostics"
+  ],
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "ACPI-on SMP qualification",
+      "physical accelerator qualification",
+      "independent builder or attested-farm qualification",
+      "independent external security review",
+      "operator-controlled production signing ceremony",
+      "live multihost deployment and rollback qualification"
+    ]
+  }
+}
