@@ -284,10 +284,10 @@
 #define AGI_LC_TEMPORAL_FLAG_PARENT 0x00000008U
 #define AGI_LC_TEMPORAL_FLAG_REFERENCE 0x00000010U
 #define AGI_LC_TEMPORAL_FLAGS_ALL (AGI_LC_TEMPORAL_FLAG_EVENT_REALTIME | \
-                                  AGI_LC_TEMPORAL_FLAG_EVENT_BOOTTIME | \
-                                  AGI_LC_TEMPORAL_FLAG_DEADLINE | \
-                                  AGI_LC_TEMPORAL_FLAG_PARENT | \
-                                  AGI_LC_TEMPORAL_FLAG_REFERENCE)
+					  AGI_LC_TEMPORAL_FLAG_EVENT_BOOTTIME | \
+					  AGI_LC_TEMPORAL_FLAG_DEADLINE | \
+					  AGI_LC_TEMPORAL_FLAG_PARENT | \
+					  AGI_LC_TEMPORAL_FLAG_REFERENCE)
 #define AGI_LC_REFLECTION_SNAPSHOT 1
 #define AGI_LC_REFLECTION_ACTION_BEGIN 2
 #define AGI_LC_REFLECTION_ACTION_END 3
@@ -302,7 +302,7 @@
 #define AGI_LC_REFLECTION_FLAG_DEPENDENCY 0x00000001U
 #define AGI_LC_REFLECTION_FLAG_FAILURE 0x00000002U
 #define AGI_LC_REFLECTION_FLAGS_ALL (AGI_LC_REFLECTION_FLAG_DEPENDENCY | \
-                                     AGI_LC_REFLECTION_FLAG_FAILURE)
+						 AGI_LC_REFLECTION_FLAG_FAILURE)
 #define AGI_LC_OBSERVABILITY_SET 1
 #define AGI_LC_OBSERVABILITY_QUERY 2
 #define AGI_LC_OBSERVABILITY_RESET 3
@@ -310,8 +310,8 @@
 #define AGI_LC_OBSERVABILITY_FLAG_SAMPLE 0x00000002U
 #define AGI_LC_OBSERVABILITY_FLAG_TRACEFS_CORRELATION 0x00000004U
 #define AGI_LC_OBSERVABILITY_FLAGS_ALL (AGI_LC_OBSERVABILITY_FLAG_ENABLE | \
-                                       AGI_LC_OBSERVABILITY_FLAG_SAMPLE | \
-                                       AGI_LC_OBSERVABILITY_FLAG_TRACEFS_CORRELATION)
+						 AGI_LC_OBSERVABILITY_FLAG_SAMPLE | \
+						 AGI_LC_OBSERVABILITY_FLAG_TRACEFS_CORRELATION)
 #define AGI_LC_OBSERVABILITY_MAX_SAMPLE_PERIOD 1048576U
 #define AGI_LC_GRAPH_TELEMETRY_BEGIN 1U
 #define AGI_LC_GRAPH_TELEMETRY_END 2U
@@ -1828,13 +1828,31 @@ struct agi_lc_memory_region {
 };
 
 struct agi_lc_graph_node {
- __u32 size; __u32 operation; __u32 flags; __u32 state;
- __u64 graph_id; __u64 node_id; __u64 agent_id; __u64 authority_capability;
- __u32 workload; __u32 device_mask; __u32 queue_class; __u32 dependency_count;
- __u64 dependencies[AGI_LC_GRAPH_MAX_DEPS];
- __u32 priority; __u32 latency_sensitive; __u64 deadline_ns; __u64 expected_runtime_ns;
- __u64 criticality; __u64 observed_runtime_ns; __u32 ready; __u32 completed_dependencies;
- __u32 generation; __u32 reserved32; __u64 correlation; __u64 reserved[2];
+	__u32 size;
+	__u32 operation;
+	__u32 flags;
+	__u32 state;
+	__u64 graph_id;
+	__u64 node_id;
+	__u64 agent_id;
+	__u64 authority_capability;
+	__u32 workload;
+	__u32 device_mask;
+	__u32 queue_class;
+	__u32 dependency_count;
+	__u64 dependencies[AGI_LC_GRAPH_MAX_DEPS];
+	__u32 priority;
+	__u32 latency_sensitive;
+	__u64 deadline_ns;
+	__u64 expected_runtime_ns;
+	__u64 criticality;
+	__u64 observed_runtime_ns;
+	__u32 ready;
+	__u32 completed_dependencies;
+	__u32 generation;
+	__u32 reserved32;
+	__u64 correlation;
+	__u64 reserved[2];
 };
 struct agi_lc_compute_context {
 __u32 size;
