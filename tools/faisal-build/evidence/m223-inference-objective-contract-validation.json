@@ -1,0 +1,84 @@
+{
+  "project": "FAISAL",
+  "milestone": "M223-inference-objective-contract",
+  "recorded_at": "2026-08-18T13:56:19Z",
+  "status": "local_provider_neutral_inference_contract_qualified_external_dynamo_comparison_pending",
+  "objective": "Bind inference objectives to fail-closed SLO admission, model routing, prefill/decode phase semantics, KV-tier locality hints, tenant identity, cryptographic provenance, completion verification, and explicit model-output authority checks.",
+  "implementation": {
+    "header": "tools/faisal-inference/faisal_inference_contract.h",
+    "header_sha256": "b790adcf49183671c60195813c8d27f344352272c0adcb13c442ff2fae497854",
+    "source": "tools/faisal-inference/faisal_inference_contract.c",
+    "source_sha256": "911b86d4ca40350fcaa02efa47e7e458e92b737a646b6311e430dc60488e4257",
+    "selftest": "tools/testing/selftests/faisal_inference_contract_test.c",
+    "selftest_sha256": "4f60619a3d5d235fa8d0621cce0633d70f86d66a7998118d04371fed77a8bd61",
+    "benchmark": "tools/testing/selftests/faisal_inference_contract_benchmark.c",
+    "benchmark_sha256": "85edbc2b9ecca71070e3110b3c5f38b55ba5a09a0eec7c0539a1ed01f2823dfb",
+    "runner": "tools/faisal-build/run_inference_contract_validation.sh",
+    "runner_sha256": "1e13e00ba2452c60d317041da2d31891dedc07b8e42f4e2292b95f5dc00e8a64",
+    "contract_features": [
+      "fail-closed objective validation",
+      "provider-neutral model-router binding",
+      "prefill/decode phase contract",
+      "GPU/host/local-storage/remote KV-tier policy hints",
+      "SHA-256 provenance digest binding",
+      "decision tamper verification before completion",
+      "TTFT, inter-token latency, cost, accelerator-memory, phase, KV-locality, and authority violation accounting"
+    ]
+  },
+  "validation": {
+    "strict_build": "-O2 -Wall -Wextra -Werror",
+    "selftest_markers": [
+      "FIC_ADMISSION_OK",
+      "FIC_COMPLETION_OK",
+      "FIC_PROVENANCE_TAMPER_REJECT_OK",
+      "FIC_SLO_ADMISSION_REJECT_OK",
+      "FIC_MODEL_OUTPUT_NOT_AUTHORITY_OK",
+      "FIC_RESERVED_FIELD_REJECT_OK",
+      "FIC_FAIL_CLOSED_POLICY_REJECT_OK",
+      "FIC_SELFTEST_EXIT=0"
+    ],
+    "benchmark_iterations": 100000,
+    "plain_route_total_ns": 14513760,
+    "contract_admit_complete_total_ns": 213396331,
+    "plain_route_ns_per_op": 145,
+    "contract_ns_per_op": 2133,
+    "contract_overhead_x100": 1470,
+    "benchmark_binary_sha256": "f6a4703c0e0b9ba471433c00405924e6c975afb7cbf098e1b0684e8fc70aa074",
+    "selftest_binary_sha256": "20e68c0c493b0947fa99bd272c4587d5a9e780d11196365c146a678d06e4b12d",
+    "validation_log_sha256": "45ded24c4013bb016693a0755d81c99d489dc9c10229220eff862b0bb4403bad",
+    "sanitizer_selftest_binary_sha256": "86c5060073e2b18966b4db03bab081829e1c30872910ec1519055a9f95110907",
+    "sanitizer_benchmark_binary_sha256": "8081ebd939b8185c82edcdd3a148828d6c348876075fff7b037838fb2f4b159d",
+    "m222_regression": "M222_SELFTEST_EXIT=0",
+    "m222_regression_log_sha256": "95ac01fec9d5e5296b8c4ce380095dda7ca06bb8409b085a8f22c312669ac5bd",
+    "model_router_regression": "M110_SELFTEST_EXIT=0",
+    "model_router_regression_log_sha256": "b4f8698582c0984f1f52dd7422c5372a8b24d5bf188ec2236c8234b04bdb33e5"
+  },
+  "comparison": {
+    "dynamo_sources": [
+      "https://docs.nvidia.com/dynamo/v-0-8-0/design-docs/overall-architecture",
+      "https://github.com/ai-dynamo/dynamo",
+      "https://developer.nvidia.com/blog/introducing-nvidia-dynamo-a-low-latency-distributed-inference-framework-for-scaling-reasoning-ai-models/"
+    ],
+    "scope": "local transparent model-router fixture; not an NVIDIA Dynamo benchmark",
+    "same_hardware": false,
+    "same_model": false,
+    "same_request_workload": false,
+    "physical_gpu": false,
+    "nixl_or_rdma": false,
+    "kv_cache_execution": false,
+    "kubernetes_multinode_deployment": false,
+    "direct_dynamo_superiority_claim": false,
+    "measured_faisal_advantage": "fail-closed objective/provenance/authority contract at the system-service boundary",
+    "measured_faisal_cost": "cryptographic provenance and completion accounting measured at 2133 ns/op in this local fixture versus 145 ns/op for the transparent router-only path",
+    "external_dynamo_comparison": "required before any claim about throughput, TTFT, inter-token latency, KV-cache hit rate, GPU utilization, network transfer, or cluster scaling"
+  },
+  "boundary": {
+    "production_approval": false,
+    "physical_accelerator_qualification": false,
+    "independent_builder": false,
+    "independent_security_review": false,
+    "external_multinode_inference": false,
+    "model_output_is_authority": false,
+    "note": "M223 adds a measurable provider-neutral control-plane primitive complementary to Dynamo. It does not replace Dynamo’s GPU execution, backend integrations, KV-cache manager, NIXL transport, planner, or Kubernetes deployment and does not make FAISAL production-approved."
+  }
+}
