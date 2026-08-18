@@ -1,0 +1,38 @@
+{
+  "project": "FAISAL",
+  "milestone": "M186-driver-warning-cleanup",
+  "schema": "org.faisal.driver-style-validation.v1",
+  "recorded_at": "2026-08-18T06:46:27Z",
+  "repository_parent_commit": "697468c67e861d1f8c6fc048b86b46bacd6b280e",
+  "status": "driver_zero_checkpatch_errors_three_deep_nesting_warnings_compile_pass_qemu_profile_pass",
+  "scope": {
+    "file": "drivers/misc/agi_lifecycle.c",
+    "file_sha256": "dd72e190fc02b915ab44615ef8b705b86c07e710ff4838abaf11fc5ebd353bbc",
+    "checkpatch": "0 errors, 3 warnings",
+    "remaining_warnings": [
+      "too many leading tabs / deep nesting at agi_lc_push_record_ex candidate selection",
+      "too many leading tabs / deep nesting at observability drop accounting",
+      "too many leading tabs / deep nesting at sequence-out handling"
+    ],
+    "compile": "pass with build/industry-production-m153/.config and CONFIG_CFS_BANDWIDTH=y",
+    "semantic_scope": "layout, line folding, declaration spacing, and indentation only; no non-whitespace token changes intended"
+  },
+  "validation_artifacts": {
+    "checkpatch_log": "build/m186-compile-fix/checkpatch.log",
+    "compile_log": "build/m186-compile-fix/compile.log",
+    "qemu_log": "build/m186-style-build/qemu.log",
+    "qemu_result": "ACPI-off 2-vCPU 16,384-iteration fuzz profile passed; ACPI-on SMP RCU-stall blocker remains recorded by M185",
+    "qemu_tail": "FAISAL_UAPI_FUZZ_QEMU_VALIDATION_OK"
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "All checkpatch warnings are closed.",
+      "ACPI-on SMP qualification passed.",
+      "Physical accelerator qualification occurred.",
+      "Independent security review occurred.",
+      "FAISAL is production-approved."
+    ],
+    "remaining_action": "Refactor the three deep-nesting warning sites only if a semantics-preserving extraction is demonstrated; remediate or formally bound the ACPI-on SMP RCU stall; complete all external operational qualifications."
+  }
+}
