@@ -41,6 +41,8 @@ def main() -> None:
         'm180-lts-soak-requalification-validation.json',
         'm181-cve-operations-readiness-validation.json',
         'm183-uapi-checkpatch-validation.json',
+        'm184-driver-checkpatch-validation.json',
+        'm185-qemu-regression-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:
@@ -66,7 +68,14 @@ def main() -> None:
         'qualification_scope': {
             'linux_lts_build': True,
             'software_regressions': True,
-            'qemu_regressions': True,
+            'qemu_regressions': False,
+            'qemu_qualified_profiles': [
+                'acpi_off_2vcpu_16384',
+                'acpi_on_1vcpu_4096',
+            ],
+            'qemu_blocked_profiles': [
+                'acpi_on_2vcpu_4096_rcu_preempt_stall',
+            ],
             'representative_tcg_soak': True,
             'physical_hardware': False,
             'independent_builder': False,
