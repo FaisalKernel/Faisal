@@ -1,0 +1,34 @@
+{
+  "project": "FAISAL",
+  "milestone": "M221-external-blocker-coverage",
+  "recorded_at": "2026-08-18T10:56:00Z",
+  "status": "external_blocker_evidence_coverage_required_and_overstatement_rejected",
+  "implementation": {
+    "verifier": "tools/faisal-build/verify_production_readiness_boundary.py",
+    "verifier_sha256": "881ce5c7f3925a654088b010ea3b964feebd43f17795b3f7ccc45a070547db76",
+    "checks": [
+      "M170-M181 external blocker evidence records are required",
+      "candidate remains bounded_candidate_not_production_approved",
+      "blocker evidence cannot claim production approval",
+      "complete M204-M220 local evidence chain remains required",
+      "production-style tag and candidate overstatement are rejected"
+    ]
+  },
+  "validation": {
+    "positive": "FAISAL_PRODUCTION_READINESS_BOUNDARY_OK checks=27 status=bounded_candidate_not_production_approved",
+    "negative": "M219_NEGATIVE_OVERSTATEMENT_REJECT_OK",
+    "regression": "M220 baseline regression remains pass"
+  },
+  "boundary": {
+    "independent_builder": false,
+    "physical_accelerator": false,
+    "independent_security_review": false,
+    "operator_ceremony": false,
+    "external_replication": false,
+    "live_deployment": false,
+    "cve_operations": false,
+    "production_approval": false,
+    "model_output_is_authority": false,
+    "note": "Coverage of blocker records improves auditability but does not create the required independent evidence."
+  }
+}

@@ -78,6 +78,7 @@ def main() -> None:
         'm218-external-qualification-gate-validation.json',
         'm219-production-readiness-boundary-validation.json',
         'm220-release-gate-boundary-integration-validation.json',
+        'm221-external-blocker-coverage-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:

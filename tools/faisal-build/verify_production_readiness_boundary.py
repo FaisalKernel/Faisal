@@ -3,6 +3,15 @@ from __future__ import annotations
 import argparse, json, sys
 from pathlib import Path
 
+REQUIRED_BLOCKER_EVIDENCE = {
+    'm170-physical-accelerator-qualification-validation.json',
+    'm174-independent-builder-handoff-validation.json',
+    'm176-external-security-review-readiness-validation.json',
+    'm177-signing-authority-operational-proof-validation.json',
+    'm178-external-replication-qualification-readiness-validation.json',
+    'm179-live-deployment-qualification-readiness-validation.json',
+    'm181-cve-operations-readiness-validation.json',
+}
 REQUIRED_EVIDENCE = {
     'm204-production-candidate-consistency-validation.json',
     'm205-current-lts-provenance-consistency-validation.json',
@@ -37,9 +46,15 @@ def main():
     for key,value in forbidden.items():
         if candidate.get(key) is value: fail('candidate overstates '+key)
     evidence_dir=repo/'tools/faisal-build/evidence'
-    missing=sorted(name for name in REQUIRED_EVIDENCE if not (evidence_dir/name).is_file())
+    missing=sorted(name for name in REQUIRED_EVIDENCE | REQUIRED_BLOCKER_EVIDENCE if not (evidence_dir/name).is_file())
     if missing: fail('required local evidence index is incomplete: '+','.join(missing))
-    print('FAISAL_PRODUCTION_READINESS_BOUNDARY_OK checks=20 status=bounded_candidate_not_production_approved')
+    overstated=[]
+    for name in sorted(REQUIRED_BLOCKER_EVIDENCE):
+        record=json.loads((evidence_dir/name).read_text())
+        if record.get('production_approval') is True or record.get('production_release_gate') in {'approved','pass'} or record.get('overall_production_release') in {'approved','pass'}:
+            overstated.append(name)
+    if overstated: fail('blocker evidence overstates qualification: '+','.join(overstated))
+    print('FAISAL_PRODUCTION_READINESS_BOUNDARY_OK checks=27 status=bounded_candidate_not_production_approved')
 
 if __name__=='__main__':
     try: main()
