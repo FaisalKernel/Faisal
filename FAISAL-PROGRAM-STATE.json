@@ -1,13 +1,13 @@
 {
   "project": "FAISAL",
   "program": "autonomous AGI-native Linux operating-system implementation",
-  "updated": "2026-08-18",
+  "updated": "2026-08-19",
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
   "current_head": "a2b073521321b2f3ffa22d69a8f6a71295f5b3bc",
-  "current_tag": "FAISAL-M246-AI-SAFETY-CONTROL-PLANE-SECURITY-HARDENING",
-  "current_abi": 45,
+  "current_tag": "FAISAL-M247-PORTABLE-HARDWARE-PERFORMANCE-EVOLUTION",
+  "current_abi": 46,
   "operating_loop": [
     "RESEARCH",
     "DESIGN",
@@ -2047,5 +2047,11 @@
   "m246_threat_model": "assets_agents_models_artifacts_secrets_resources_checkpoints_audit_cluster_identity_against_compromised_agents_poisoned_artifacts_hostile_workloads_driver_failures_privilege_escalation_supply_chain_audit_tamper_resource_exhaustion_and_credential_misuse",
   "m246_governance_boundary": "govern_map_measure_manage_model_output_and_adaptive_optimizer_output_are_never_privileged_authority",
   "m246_validation_boundary": "strict_selftest_112_decision_benchmark_4_reader_concurrency_10000_fuzz_asan_ubsan_gcc_tsan_sandbox_recovery_governance_cve_attestation_agent_security_qemu_and_m245_platform_regressions_passed",
-  "m246_production_boundary": "production_approval_false_hardware_root_operator_signing_independent_builder_physical_accelerator_external_security_review_live_pkI_kms_tpm_multihost_migration_and_cve_operations_pending"
+  "m246_production_boundary": "production_approval_false_hardware_root_operator_signing_independent_builder_physical_accelerator_external_security_review_live_pkI_kms_tpm_multihost_migration_and_cve_operations_pending",
+  "m247_portable_hardware_performance_evolution": "pass_provider_neutral_cpu_vector_accelerator_memory_io_topology_isolation_power_thermal_and_virtualization_capability_contract_with_host_discovery_deterministic_path_selection_partitioning_and_cpu_fallback",
+  "m247_portable_hardware_performance_evolution_evidence": "tools/faisal-build/evidence/m247-portable-hardware-performance-validation.json",
+  "m247_research_boundary": "researched_linux_cxl_vfio_iommufd_rdma_userspace_verbs_and_existing_faisal_accelerator_memory_fabric_contracts",
+  "m247_model_authority_boundary": "provider_metadata_hardware_discovery_and_execution_path_hints_are_untrusted_and_never_authorization_or_privileged_kernel_authority",
+  "m247_validation_boundary": "strict_selftest_128_host_discovery_2048_round_path_selection_benchmark_4_reader_256_writer_concurrency_10000_fuzz_asan_ubsan_gcc_tsan_m239_m240_m241_m242_m244_m245_m246_regressions_linux72_qemu_lts_qemu_and_industry_soak_passed",
+  "m247_production_boundary": "production_approval_false_physical_gpu_npu_tpu_fpga_hbm_vram_iommu_dma_rdma_cxl_nvme_power_thermal_secure_boot_independent_builder_external_security_review_production_pki_multihost_and_cve_operations_pending"
 }

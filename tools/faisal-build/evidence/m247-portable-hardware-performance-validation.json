@@ -1,0 +1,142 @@
+{
+  "project": "FAISAL",
+  "milestone": "M247-portable-hardware-performance-evolution",
+  "recorded_at": "2026-08-18T22:12:25Z",
+  "status": "portable_hardware_layer_qualified_host_and_virtual_profiles_hardware_qualification_pending",
+  "objective": "Provide a provider-neutral hardware capability, topology, path-selection, partitioning, and host-discovery layer that improves portability across CPU, vector, accelerator, memory, DMA, RDMA, CXL, storage, virtualization, power, and thermal environments without replacing Linux drivers or claiming unmeasured physical hardware behavior.",
+  "research": [
+    {
+      "source": "https://docs.kernel.org/driver-api/cxl/linux/overview.html",
+      "authority": "Linux kernel CXL overview",
+      "conclusion": "CXL Type-3 memory is surfaced through ACPI/PCI discovery, NUMA node creation, memory tiers, DAX, and memory hotplug; driver-managed memory is kept separate from kernel update regions.",
+      "implementation_impact": "M247 represents CXL and memory-tier facts as provider-neutral capability observations while leaving firmware, decoder, DAX, and memory-hotplug control to Linux adapters."
+    },
+    {
+      "source": "https://docs.kernel.org/driver-api/vfio.html",
+      "authority": "Linux kernel VFIO documentation",
+      "conclusion": "VFIO exposes direct userspace device access through an IOMMU-protected environment; IOMMU groups are the minimum ownership/isolation unit and topology can reduce isolation granularity.",
+      "implementation_impact": "M247 requires explicit isolation and attestation evidence for direct paths and treats IOMMU/VFIO metadata as measured constraints rather than authority."
+    },
+    {
+      "source": "https://docs.kernel.org/userspace-api/iommufd.html",
+      "authority": "Linux kernel IOMMUFD documentation",
+      "conclusion": "IOMMUFD provides IOAS, device, HWPT, nested translation, virtual-IOMMU, fault, and DMA-ownership objects; a device must establish DMA ownership before safe use.",
+      "implementation_impact": "M247 includes IOMMUFD-compatible path vocabulary and fail-closed topology/path digests without implementing a replacement IOMMU or claiming DMA isolation."
+    },
+    {
+      "source": "https://docs.kernel.org/infiniband/user_verbs.html",
+      "authority": "Linux kernel userspace verbs documentation",
+      "conclusion": "RDMA fast paths can use userspace-mapped hardware while slow-path resource management remains in the kernel; opaque handles, cleanup, memory pinning, and resource accounting are required.",
+      "implementation_impact": "M247 exposes RDMA as a capability/path observation and keeps resource lifecycle and isolation explicit; no live RDMA hardware was available in this environment."
+    }
+  ],
+  "implementation": {
+    "header": "tools/faisal-hardware/faisal_hardware.h",
+    "source": "tools/faisal-hardware/faisal_hardware.c",
+    "selftest": "tools/testing/selftests/faisal_hardware_test.c",
+    "discovery_test": "tools/testing/selftests/faisal_hardware_discovery_test.c",
+    "benchmark": "tools/testing/selftests/faisal_hardware_benchmark.c",
+    "concurrency_test": "tools/testing/selftests/faisal_hardware_concurrency_test.c",
+    "fuzz_test": "tools/testing/selftests/faisal_hardware_fuzz_test.c",
+    "runner": "tools/faisal-build/run_hardware_validation.sh",
+    "platform_abi": 46,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "provider-neutral CPU, SIMD/vector, GPU, NPU, TPU, FPGA, memory, storage, network, and virtual-device classes",
+      "explicit capability vocabulary for tensor, DMA, peer DMA, RDMA, CXL, IOMMU, confidential computing, hotplug, power, thermal, asynchronous I/O, and direct userspace paths",
+      "versioned device and topology path records with identity/path digests, generation fencing, health, driver verification, attestation, isolation, bandwidth, latency, power, and thermal fields",
+      "deterministic topology-aware execution-path selection with bandwidth, latency, thermal headroom, power headroom, capability, isolation, attestation, and generation gates",
+      "explicit CPU fallback only when requested and accelerator-only isolation or attestation requirements are deliberately relaxed",
+      "partition reservation and release with memory/compute accounting, grant digest, generation fencing, double-release protection, and tamper rejection",
+      "observation-only host discovery from procfs/sysfs for CPU count, vector features, memory, DRM, RDMA, NVMe, CXL, power, thermal, and TPM device presence",
+      "canonical path and discovery digests with fail-closed malformed or tampered metadata admission",
+      "provider-neutral vocabulary compatible with Linux VFIO/IOMMUFD/RDMA/CXL adapters without replacing upstream driver mechanisms"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11 -pthread",
+    "discovery": {
+      "marker": "M247_HARDWARE_DISCOVERY_EXIT=0",
+      "online_cpus": 6,
+      "vector_features_mask": 39,
+      "memory_total_bytes": 25604468736,
+      "memory_available_bytes": 22467559424,
+      "drm_devices_observed": 0,
+      "rdma_devices_observed": 0,
+      "nvme_devices_observed": 0,
+      "cxl_devices_observed": 0,
+      "power_telemetry_entries": 0,
+      "thermal_telemetry_entries": 0,
+      "attestation_device_observed": 0,
+      "interpretation": "These are observations from the current sandbox procfs/sysfs environment. Zero device counts mean no visible devices were observed, not that the platform lacks support. No physical accelerator or root-of-trust qualification is claimed."
+    },
+    "selftest": "M247_HARDWARE_SELFTEST_EXIT=0 cases=128 accelerator_select=1 topology_path=1 partition=1 fallback=1 isolation=1 generation=1 tamper=1",
+    "benchmark": {
+      "rounds": 2048,
+      "selection_total_ns": 2462665,
+      "selection_ns_per_request": 1202.47,
+      "static_total_ns": 3016,
+      "static_ns_per_check": 1.47,
+      "checksum": 0,
+      "interpretation": "The selection path includes mutex synchronization, device and path filtering, topology checks, deterministic scoring, and SHA-256 decision binding. The static loop is an in-memory predicate and is not apples-to-apples; this is a capability-selection overhead baseline, not an accelerator-throughput or end-to-end latency superiority claim."
+    },
+    "concurrency": "M247_HARDWARE_CONCURRENCY_EXIT=0 readers=4 read_rounds=256 writer_rounds=256 failures=0",
+    "fuzzing": "M247_HARDWARE_FUZZ_EXIT=0 iterations=10000 rejected=10000 accepted=0 scope=synthetic_path_metadata_not_physical_hardware",
+    "asan_ubsan": "M247_HARDWARE_ASAN_UBSAN_OK; lifecycle, discovery, concurrency, and fuzz fixtures passed with leak detection and halt-on-error",
+    "thread_sanitizer": "M247_HARDWARE_CONCURRENCY_EXIT=0 readers=4 read_rounds=256 writer_rounds=256 failures=0 under GCC ThreadSanitizer",
+    "runner": "M247_HARDWARE_VALIDATION_OK",
+    "adjacent_regressions": {
+      "m246_safety": "M246 safety validation passed including strict selftest, benchmark, concurrency, fuzz, ASan/UBSan, and ThreadSanitizer",
+      "m245_platform": "M245 platform validation passed including provider adapter, lifecycle, benchmark, concurrency, fuzz, sanitizers, and QEMU regression",
+      "m244_optimizer": "M244 optimizer validation passed including strict selftest, benchmark, concurrency, fuzz, and sanitizers",
+      "m242_fabric": "M242 fabric validation passed including 8-thread concurrency and 10,000-mutation fuzz",
+      "m241_agent_runtime": "M241 agent runtime validation passed including 256-objective concurrency",
+      "m240_budget": "M240 budget validation passed including 300000-operation benchmark",
+      "m239_kv_tier": "M239 KV-tier validation passed including 400000-operation benchmark"
+    },
+    "qemu": {
+      "faisal_linux_7_2": "FAISAL_M76_QEMU_VALIDATION_OK; ACPI-on SMP=1 4 GiB hardened profile",
+      "industry_soak": "FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256 total_iterations=1024",
+      "linux_lts_6_18_44": "FAISAL_M76_QEMU_VALIDATION_OK; bounded ACPI-on one-vCPU compatibility profile"
+    }
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_gpu_npu": false,
+    "physical_hbm_vram_iommu_dma": false,
+    "live_rdma": false,
+    "live_cxl": false,
+    "live_nvme": false,
+    "live_multihost_hardware": false,
+    "physical_power_thermal": false,
+    "secure_boot_tpm_measured_here": false,
+    "independent_external_security_review": false,
+    "operator_signing_ceremony": false,
+    "cve_operations_owner": false
+  },
+  "security_boundaries": {
+    "provider_metadata_is_authority": false,
+    "hardware_discovery_is_authority": false,
+    "unrestricted_kernel_self_modification": false,
+    "unsafe_fallback_without_explicit_policy": false,
+    "path_digest_required": true,
+    "generation_fencing": true,
+    "isolation_required_for_direct_paths": true,
+    "attestation_required_when_policy_requests": true,
+    "physical_hardware_measured_here": false,
+    "fake_hardware_evidence": false,
+    "fake_external_evidence": false,
+    "production_approval": false
+  },
+  "qualification_limits": [
+    "M247 is a userspace/reference hardware capability and path-selection layer; it does not replace Linux CPU, GPU, NPU, RDMA, NVMe, CXL, VFIO, IOMMUFD, KVM, container, or power-management drivers.",
+    "Host discovery reports only the current procfs/sysfs environment and cannot establish device performance, firmware correctness, isolation granularity, DMA behavior, thermal behavior, or power efficiency.",
+    "No physical GPU, NPU, TPU, FPGA, HBM/VRAM, IOMMU, DMA, RDMA, CXL, NVMe, confidential-computing, or vendor-driver qualification was possible in this sandbox.",
+    "The 1202.47 ns/request selection result is a local userspace decision overhead baseline and must not be presented as an inference-latency, tokens-per-second, accelerator-utilization, or energy-per-inference claim.",
+    "QEMU validates only the tested virtualized boot and soak profiles. It does not qualify physical hardware, hotplug, PCIe topology, firmware, power, thermal, accelerator reset, or live multihost behavior.",
+    "Production release remains blocked by independent builder equivalence, operator signing and trusted-key lifecycle, physical accelerator and IOMMU/DMA qualification, live RDMA/CXL/NVMe qualification, independent external security review, production PKI/KMS/TPM attestation, live migration and rollback, and operator-owned CVE response."
+  ]
+}
