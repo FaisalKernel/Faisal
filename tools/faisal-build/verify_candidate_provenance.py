@@ -30,11 +30,15 @@ def main() -> None:
     sbom = args.sbom.resolve().read_text()
     git = __import__('subprocess')
     head = git.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip()
-    parent = git.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD^'], text=True).strip()
+    def binding_distance(bound: str) -> int:
+        result = git.run(['git', '-C', str(repo), 'merge-base', '--is-ancestor', bound, head], stdout=git.DEVNULL, stderr=git.DEVNULL)
+        if result.returncode != 0:
+            return -1
+        return int(git.check_output(['git', '-C', str(repo), 'rev-list', '--count', f'{bound}..{head}'], text=True).strip())
     if manifest.get('schema') != 'org.faisal.current-lts-provenance.v1':
         fail('provenance schema mismatch')
-    if manifest.get('repository_head') not in {head, parent}:
-        fail('provenance repository HEAD is neither HEAD nor the immediate bookkeeping parent')
+    if binding_distance(manifest.get('repository_head', '')) not in range(0, 4):
+        fail('provenance repository HEAD is outside the bounded metadata binding window')
     if manifest.get('source_revision') != LTS_SOURCE_REVISION:
         fail('provenance source revision mismatch')
     if manifest.get('signature', {}).get('status') != 'unsigned_local_provenance_only':

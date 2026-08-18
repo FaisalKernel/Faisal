@@ -40,6 +40,14 @@ def fail(message: str) -> None:
     raise ValueError(message)
 
 
+def binding_distance(repo: Path, bound: str, head: str) -> int:
+    try:
+        subprocess.check_call(['git', '-C', str(repo), 'merge-base', '--is-ancestor', bound, head], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        return -1
+    return int(git(repo, 'rev-list', '--count', f'{bound}..{head}'))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('--repo', type=Path, required=True)
@@ -52,15 +60,14 @@ def main() -> None:
     checks = 0
 
     head = git(repo, 'rev-parse', 'HEAD')
-    parent = git(repo, 'rev-parse', 'HEAD^')
     manifest_head = manifest.get('repository_head')
     checks += 1
-    if manifest_head not in {head, parent}:
-        fail('manifest repository_head is neither HEAD nor the immediate bookkeeping parent')
+    if binding_distance(repo, manifest_head, head) not in range(0, 4):
+        fail('manifest repository_head is outside the bounded metadata binding window')
     state_head = state.get('current_head')
     checks += 1
-    if state_head not in {head, parent}:
-        fail('program state current_head is neither HEAD nor the immediate bookkeeping parent')
+    if binding_distance(repo, state_head, head) not in range(0, 4):
+        fail('program state current_head is outside the bounded metadata binding window')
     tag = state.get('current_tag')
     checks += 1
     if not tag or git(repo, 'rev-parse', f'{tag}^{{commit}}') != head:

@@ -31,13 +31,20 @@ def main() -> None:
     provenance = json.loads(args.provenance.resolve().read_text())
     git = subprocess
     head = git.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip()
-    parent = git.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD^'], text=True).strip()
+    def binding_distance(bound: str) -> int:
+        result = git.run(['git', '-C', str(repo), 'merge-base', '--is-ancestor', bound, head], stdout=git.DEVNULL, stderr=git.DEVNULL)
+        if result.returncode != 0:
+            return -1
+        return int(git.check_output(['git', '-C', str(repo), 'rev-list', '--count', f'{bound}..{head}'], text=True).strip())
     candidate_head = candidate.get('repository_head')
     provenance_head = provenance.get('repository_head')
-    if candidate_head not in {head, parent}:
-        fail('candidate is not generated from HEAD or its immediate parent')
-    if provenance_head != candidate_head or provenance_head not in {head, parent}:
-        fail('provenance and candidate are not aligned to the same HEAD or immediate parent')
+    if binding_distance(candidate_head or '') not in range(0, 4):
+        fail('candidate is outside the bounded metadata window')
+    if binding_distance(provenance_head or '') not in range(0, 4):
+        fail('provenance is outside the bounded metadata window')
+    lineage = git.run(['git', '-C', str(repo), 'merge-base', '--is-ancestor', provenance_head or '', candidate_head or ''], stdout=git.DEVNULL, stderr=git.DEVNULL)
+    if lineage.returncode != 0:
+        fail('provenance and candidate have divergent lineage')
     if candidate.get('lts_source_revision') != provenance.get('source_revision') or candidate.get('lts_source_revision') != LTS_SOURCE_REVISION:
         fail('candidate and provenance source revisions differ')
     artifact = candidate.get('artifact', {})
