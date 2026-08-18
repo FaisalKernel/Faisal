@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M212-local-gate-summary-reproducibility",
-  "recorded_at": "2026-08-18T10:30:00Z",
+  "recorded_at": "2026-08-18T10:23:40Z",
   "status": "local_gate_summary_reproduction_and_mutation_rejection_pass",
   "implementation": {
     "generator": "tools/faisal-build/generate_local_gate_summary.py",
