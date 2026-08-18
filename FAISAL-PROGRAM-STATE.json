@@ -5,9 +5,9 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "3e150d923faeecdd68b4e788eb54afbbd7bd7c50",
-  "current_tag": "FAISAL-M242-UNIFIED-AI-CONTROL-PLANE-FABRIC",
-  "current_abi": 41,
+  "current_head": "2d328d0bd67ba783d72de82732e25bf2f3fa09e3",
+  "current_tag": "FAISAL-M243-FRONTIER-ADAPTIVE-POLICY-LABORATORY",
+  "current_abi": 42,
   "operating_loop": [
     "RESEARCH",
     "DESIGN",
@@ -2023,5 +2023,11 @@
   "m242_research_boundary": "researched_ray_placement_groups_kubernetes_topology_manager_device_plugins_and_nvidia_dynamo_request_control_state_planes",
   "m242_model_authority_boundary": "model_outputs_runtime_hints_provider_metadata_and_planner_proposals_are_untrusted_and_never_placement_or_execution_authority",
   "m242_validation_boundary": "strict_selftest_48_mutation_rejections_6_scale_64_nodes_256_shards_8_thread_256_shard_concurrency_10000_fuzz_asan_ubsan_m236_m237_m238_m239_m240_m241_regressions_linux72_qemu_soak_multitenant_broad_stress_passed",
-  "m242_production_boundary": "production_approval_false_million_agent_scale_distributed_consensus_live_multihost_transport_physical_accelerator_zero_copy_inference_power_and_external_evidence_pending"
+  "m242_production_boundary": "production_approval_false_million_agent_scale_distributed_consensus_live_multihost_transport_physical_accelerator_zero_copy_inference_power_and_external_evidence_pending",
+  "m243_frontier_adaptive_policy_laboratory": "pass_isolated_userspace_verified_observations_bounded_adaptive_recommendations_deterministic_fallback_authority_experimental_commit_rollback_generation_fencing_and_replayable_journal",
+  "m243_frontier_adaptive_policy_laboratory_evidence": "tools/faisal-build/evidence/m243-frontier-adaptive-policy-validation.json",
+  "m243_research_boundary": "researched_linux_sched_ext_fallback_kubernetes_scheduling_framework_safe_cmdp_constraints_and_training_wheels_for_safe_online_rl",
+  "m243_model_authority_boundary": "external_model_proposals_and_runtime_hints_are_untrusted_data_experimental_flag_authority_and_verified_input_required_for_commit",
+  "m243_validation_boundary": "strict_selftest_29_mutation_rejections_6_1024_decision_benchmark_4_reader_512_observation_concurrency_10000_fuzz_asan_ubsan_m239_m240_m241_m242_regressions_linux72_qemu_soak_multitenant_and_stress_passed",
+  "m243_production_boundary": "production_approval_false_kernel_self_modification_false_reinforcement_training_false_physical_accelerator_inference_power_and_independent_external_evidence_pending"
 }
