@@ -418,12 +418,48 @@ int fex_add_node(struct fex_service *service, uint64_t objective_id,
 	return FEX_OK;
 }
 
+static unsigned int fex_dependent_fanout(const struct fex_service *service,
+						 uint64_t task_id)
+{
+	unsigned int fanout = 0;
+	size_t i;
+	unsigned int dependency;
+
+	for (i = 0; i < service->tasks.task_count; i++) {
+		const struct fts_task *candidate = &service->tasks.tasks[i];
+
+		for (dependency = 0; dependency < candidate->dependency_count; dependency++)
+			if (candidate->dependency_ids[dependency] == (uint32_t)task_id) {
+				fanout++;
+				break;
+			}
+	}
+	return fanout;
+}
+
+static int fex_task_precedes(const struct fts_task *candidate,
+					 const struct fts_task *best,
+					 unsigned int candidate_fanout,
+					 unsigned int best_fanout)
+{
+	if (!best)
+		return 1;
+	if (candidate->deadline_ns != best->deadline_ns)
+		return candidate->deadline_ns < best->deadline_ns;
+	if (candidate->priority != best->priority)
+		return candidate->priority > best->priority;
+	if (candidate_fanout != best_fanout)
+		return candidate_fanout > best_fanout;
+	return candidate->sequence < best->sequence;
+}
+
 int fex_dispatch(struct fex_service *service, uint64_t objective_id,
 			 uint64_t now_ns, uint32_t lease_ns, uint32_t *claimed)
 {
 	struct fex_objective *objective;
-	size_t i;
+	unsigned char attempted[FEX_MAX_NODES] = { 0 };
 	uint32_t count = 0;
+	uint32_t attempts = 0;
 
 	if (!service || !claimed || !lease_ns)
 		return FEX_ERR_ARGUMENT;
@@ -433,49 +469,77 @@ int fex_dispatch(struct fex_service *service, uint64_t objective_id,
 		pthread_mutex_unlock(&service->lock);
 		return FEX_ERR_NOT_FOUND;
 	}
-	for (i = 0; i < service->node_count && count < objective->max_workers; i++) {
-		struct fex_node *node = &service->nodes[i];
+	while (count < objective->max_workers && attempts < service->node_count) {
+		struct fts_task best_task;
 		struct fts_task task;
+		struct fex_node *best_node = NULL;
+		unsigned int best_fanout = 0;
+		size_t best_index = 0;
+		size_t i;
 		int rc;
 
-					if (node->objective_id != objective_id || node->state == FTS_TASK_SUCCEEDED ||
-			    node->state == FTS_TASK_CANCELLED || node->state == FTS_TASK_DEAD_LETTER)
+		memset(&best_task, 0, sizeof(best_task));
+		for (i = 0; i < service->node_count; i++) {
+			struct fex_node *node = &service->nodes[i];
+			unsigned int fanout;
+
+			if (attempted[i] || node->objective_id != objective_id ||
+			    node->state == FTS_TASK_SUCCEEDED ||
+			    node->state == FTS_TASK_CANCELLED ||
+			    node->state == FTS_TASK_DEAD_LETTER)
 				continue;
 			{
 				struct fex_worker *existing = find_worker(service, node->task_id);
 				if (existing && existing->health == FEX_WORKER_QUARANTINED)
 					continue;
 			}
-
-					if (!find_worker(service, node->task_id) &&
-			    service->worker_count >= FEX_MAX_WORKERS) {
+			if (fts_query(&service->tasks, node->task_id, &task) != FTS_OK) {
 				pthread_mutex_unlock(&service->lock);
-				return FEX_ERR_FULL;
+				return FEX_ERR_STATE;
 			}
-			rc = fts_claim(&service->tasks, node->task_id, now_ns, lease_ns, &task);
-			if (rc == FTS_OK) {
-				struct fex_worker *worker = find_worker(service, node->task_id);
-				if (!worker) {
-					worker = &service->workers[service->worker_count++];
-					memset(worker, 0, sizeof(*worker));
-					worker->task_id = node->task_id;
-					worker->objective_id = objective_id;
-				}
-				worker->worker_id = task.owner_agent_id ? task.owner_agent_id : task.task_id;
-				worker->lease_generation = task.lease_generation;
-				worker->last_heartbeat_ns = now_ns;
-				worker->lease_deadline_ns = task.lease_until_ns;
-				worker->last_transition_ns = now_ns;
-				worker->health = FEX_WORKER_HEALTHY;
-				if (persist_worker(service, worker) != FEX_OK) {
-					pthread_mutex_unlock(&service->lock);
-					return FEX_ERR_IO;
-				}
-				node->state = task.state;
+			fanout = fex_dependent_fanout(service, node->task_id);
+			if (!best_node || fex_task_precedes(&task, &best_task,
+								 fanout, best_fanout)) {
+				best_node = node;
+				best_task = task;
+				best_fanout = fanout;
+				best_index = i;
+			}
+		}
+		if (!best_node)
+			break;
+		attempted[best_index] = 1;
+		attempts++;
+		if (!find_worker(service, best_node->task_id) &&
+		    service->worker_count >= FEX_MAX_WORKERS) {
+			pthread_mutex_unlock(&service->lock);
+			return FEX_ERR_FULL;
+		}
+		rc = fts_claim(&service->tasks, best_node->task_id, now_ns,
+				lease_ns, &task);
+		if (rc == FTS_OK) {
+			struct fex_worker *worker = find_worker(service, best_node->task_id);
 
-			node->owner_agent_id = task.owner_agent_id;
-			node->lease_generation = task.lease_generation;
-			persist_node(service, node);
+			if (!worker) {
+				worker = &service->workers[service->worker_count++];
+				memset(worker, 0, sizeof(*worker));
+				worker->task_id = best_node->task_id;
+				worker->objective_id = objective_id;
+			}
+			worker->worker_id = task.owner_agent_id ? task.owner_agent_id : task.task_id;
+			worker->lease_generation = task.lease_generation;
+			worker->last_heartbeat_ns = now_ns;
+			worker->lease_deadline_ns = task.lease_until_ns;
+			worker->last_transition_ns = now_ns;
+			worker->health = FEX_WORKER_HEALTHY;
+			if (persist_worker(service, worker) != FEX_OK) {
+				pthread_mutex_unlock(&service->lock);
+				return FEX_ERR_IO;
+			}
+			best_node->state = task.state;
+			best_node->owner_agent_id = task.owner_agent_id;
+			best_node->lease_generation = task.lease_generation;
+			persist_node(service, best_node);
 			count++;
 		} else if (rc != FTS_ERR_DEPENDENCY && rc != FTS_ERR_LEASE &&
 			   rc != FTS_ERR_DEADLINE && rc != FTS_ERR_BUDGET) {

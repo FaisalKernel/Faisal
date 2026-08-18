@@ -1,0 +1,57 @@
+{
+  "project": "FAISAL",
+  "milestone": "M222-aios-parity-urgency-scheduling",
+  "recorded_at": "2026-08-18T13:38:00Z",
+  "status": "local_agent_runtime_improvement_qualified_external_aios_comparison_pending",
+  "objective": "Add deterministic urgency-aware durable objective dispatch and a transparent AIOS-style parity workload without claiming an actual AIOS benchmark result.",
+  "implementation": {
+    "engine": "tools/faisal-execution/faisal_execution_engine.c",
+    "engine_sha256": "903c1efb1ddfbd53024bd2c0a11de51a26e91169b2f81af10b93a5a50c1443d0",
+    "benchmark": "tools/testing/selftests/agi_aios_parity_benchmark.c",
+    "benchmark_sha256": "95281755a95b6a6e69aa36d8fde83a653f957c9181b42a706c2d7917149eec4",
+    "policy": "deadline_then_priority_then_dependency_fanout_then_sequence",
+    "durability": "existing_hash_chained_journal_and_recovery_contract_preserved",
+    "runner": "tools/faisal-build/run_aios_parity_benchmark.sh",
+    "runner_sha256": "9986c60f47742aa9afff84ef98a282b8d4ea2afc976cb33133432dcbf2ed9398"
+  },
+  "validation": {
+    "dispatch_policy_order": "M222_DISPATCH_POLICY_ORDER_OK",
+    "parity_workload": {
+      "agents": 8,
+      "phases": 4,
+      "iterations": 8,
+      "reference_mean_ns": 343,
+      "reference_p95_ns": 481,
+      "faisal_durable_mean_ns": 10522572,
+      "faisal_durable_p95_ns": 11463961,
+      "recovery_ok": true,
+      "provenance_boundary": "journal_chain_attestation_and_verified_evidence_digest"
+    },
+    "durable_execution_regression": "M108_SELFTEST_EXIT=0",
+    "sanitizer_regression": "ASAN_UBSAN_EXIT=0",
+    "normal_runner_log_sha256": "333750e34467d5272e4d836dcd7cc3cb2a36971925c9507c1f8e4c8e0f87841e",
+    "sanitized_runner_log_sha256": "d80a8f582c53d4dfd9c998f1909f5e84eb2c561b9da94ae23e644ca029386349",
+    "benchmark_binary_sha256": "1a7fd0d9b9f15609c754c5c7ee6b6ef63060c1a83317cc6b6f28cf19dcccacf0",
+    "durable_regression_binary_sha256": "4b9d326f769c64720d26c46891757a0e21613c26f44ddc1ea5763a892650ce34"
+  },
+  "comparison": {
+    "scope": "transparent_reference_fixture_not_actual_AIOS_implementation",
+    "aios_source": "https://arxiv.org/html/2403.16971v5",
+    "aios_repository": "https://github.com/agiresearch/AIOS",
+    "same_hardware": false,
+    "same_model": false,
+    "same_workload_implementation": false,
+    "direct_aios_superiority_claim": false,
+    "measured_faisal_advantage": "durable_hash_chained_recovery_and_explicit_evidence_boundary in this local fixture",
+    "measured_faisal_disadvantage": "durability_and_fsync overhead is substantially higher than the in-memory transparent reference fixture",
+    "external_aios_comparison": "required before any performance superiority claim"
+  },
+  "boundary": {
+    "production_approval": false,
+    "physical_accelerator_qualification": false,
+    "independent_builder": false,
+    "independent_security_review": false,
+    "model_output_is_authority": false,
+    "note": "M222 improves the agent-runtime contract and measurement discipline; it does not create external production qualification or prove FAISAL beats AIOS overall."
+  }
+}
