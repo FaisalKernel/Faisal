@@ -1,0 +1,103 @@
+{
+  "project": "FAISAL",
+  "milestone": "M234-cross-subsystem-trace-correlation-contract",
+  "recorded_at": "2026-08-18T16:30:18Z",
+  "status": "local_contract_qualified_external_telemetry_and_deployment_qualification_pending",
+  "objective": "Bind agent, objective, task, model, tool, sandbox, world, recovery, completion, and kernel events into a deterministic tamper-evident causal trace without granting authority.",
+  "research": {
+    "sources": [
+      {
+        "url": "https://docs.kernel.org/trace/tracepoints.html",
+        "finding": "Linux tracepoints are lightweight runtime hooks that can be enabled or disabled, accept typed parameters, and support tracing and performance accounting.",
+        "impact": "M234 models the correlation fields that kernel tracepoints, eBPF, perf, and userspace services can export without changing kernel tracepoint ABI."
+      },
+      {
+        "url": "https://opentelemetry.io/docs/concepts/context-propagation/",
+        "finding": "OpenTelemetry propagates trace and span context across service boundaries so traces, logs, and metrics can be correlated; its security guidance warns that incoming context and baggage can be forged or leak sensitive data.",
+        "impact": "M234 validates trace/span context, treats external context as untrusted, rejects disallowed baggage, and binds lineage separately."
+      },
+      {
+        "url": "https://developers.openai.com/api/docs/guides/background",
+        "finding": "OpenAI background responses support asynchronous polling, terminal states, idempotent cancellation, and resumable stream cursors.",
+        "impact": "M234 stores provider request sequences and cursors as correlation metadata, but provider completion is not authority."
+      },
+      {
+        "url": "https://ai.google.dev/gemini-api/docs/function-calling",
+        "finding": "Gemini function calling separates model-generated function names and arguments from application-side execution.",
+        "impact": "M234 correlates tool requests as events but never executes or authorizes them."
+      },
+      {
+        "url": "https://docs.kernel.org/userspace-api/landlock.html",
+        "finding": "Linux Landlock provides explicit, runtime-discoverable unprivileged restrictions for filesystem and network access.",
+        "impact": "Sandbox and capability references are correlation metadata and do not expand authority."
+      },
+      {
+        "url": "https://docs.vllm.ai/en/v0.25.1/features/tool_calling/",
+        "finding": "vLLM supports named function calling and tool-choice policies for model-serving workflows.",
+        "impact": "Model-serving events are represented as untrusted provider events and require measured or separately authorized execution evidence."
+      }
+    ]
+  },
+  "implementation": {
+    "header": "tools/faisal-trace-correlation/faisal_trace_correlation.h",
+    "source": "tools/faisal-trace-correlation/faisal_trace_correlation.c",
+    "selftest": "tools/testing/selftests/faisal_trace_correlation_test.c",
+    "benchmark": "tools/testing/selftests/faisal_trace_correlation_benchmark.c",
+    "runner": "tools/faisal-build/run_trace_correlation_validation.sh",
+    "abi": 1,
+    "kernel_abi_changed": false,
+    "features": [
+      "trace_id, span_id, parent_span_id, trace flags, and context validation",
+      "agent/objective/task/worker/model/tool/sandbox/world/recovery lineage",
+      "provider sequence and resumable cursor metadata",
+      "causal previous-event sequence and digest chaining",
+      "SHA-256 event receipt generation and verification",
+      "monotonic event sequence replay rejection",
+      "trace generation fencing",
+      "minimum event-time policy",
+      "external-context and baggage rejection policies",
+      "measured external/model-event policy",
+      "model-output and tool-call correlation without authority",
+      "event query by sequence"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11",
+    "selftest": "M234_SELFTEST_EXIT=0",
+    "selftest_cases": 12,
+    "benchmark_rounds": 100000,
+    "benchmark_operations": 500000,
+    "benchmark_ns_per_operation": 728,
+    "asan_ubsan": true,
+    "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK on ACPI-on one-vCPU 4G; FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256",
+    "regression_m233_m232_m231_m230_m229_m228": "M233_WORLD_RECONCILE_VALIDATION_OK; M232 local verification baseline passing; M231_RECOVERY_DECISION_VALIDATION_OK; M230_MODEL_ROUTER_VALIDATION_OK; M229_EXPERIENCE_EVIDENCE_VALIDATION_OK; M228_RUNNER_EXIT=0"
+  },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_accelerator": false,
+    "external_security_review": false,
+    "external_telemetry_backend": false,
+    "live_multihost_trace": false,
+    "paid_provider_qualification": false
+  },
+  "security": {
+    "model_output_is_authority": false,
+    "tool_call_is_execution": false,
+    "trace_context_is_trusted": false,
+    "baggage_is_unconditionally_accepted": false,
+    "unmeasured_external_event_accepted": false,
+    "tampered_event_verified": false,
+    "chain_break_accepted": false,
+    "replayed_event_accepted": false,
+    "stale_generation_reused": false,
+    "fake_external_evidence": false
+  },
+  "qualification_limits": [
+    "M234 is a deterministic userspace correlation fixture, not a complete OpenTelemetry collector, eBPF program, kernel tracepoint implementation, or distributed tracing backend.",
+    "No live OpenAI, Anthropic, Google, vLLM, llama.cpp, or external provider call is part of this milestone.",
+    "No physical accelerator, independent builder, independent security review, production PKI, or live multihost trace was qualified.",
+    "Production release remains blocked by the project’s external evidence gate."
+  ]
+}
