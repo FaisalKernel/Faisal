@@ -1,0 +1,102 @@
+{
+  "project": "FAISAL",
+  "milestone": "M225-kubernetes-fleet-intent",
+  "recorded_at": "2026-08-18T14:40:00Z",
+  "status": "local_agent_aware_fleet_policy_qualified_kubernetes_gpu_fleet_qualification_pending",
+  "objective": "Add a provider-neutral agent-aware fleet-intent control plane that complements Kubernetes and GPU scheduling ecosystems with durable identity, lineage, topology/resource policy, deterministic gang placement, stale-generation fencing, fail-closed authorization, and replacement-node recovery.",
+  "research": {
+    "sources": [
+      "https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/",
+      "https://kueue.sigs.k8s.io/docs/concepts/topology_aware_scheduling/"
+    ],
+    "verified_ecosystem_capabilities": [
+      "Kubernetes DRA resource claims, device classes, device filtering, sharing, device status, and health monitoring",
+      "Kueue hierarchical topology-aware scheduling using node labels and capacity calculation",
+      "Kueue workload queues, fair sharing, preemption, all-or-nothing/gang concepts, autoscaler support, and MultiKueue concepts"
+    ],
+    "design_conclusion": "Kubernetes and GPU operators remain stronger for live cluster lifecycle, declarative reconciliation, device drivers, autoscaling, service discovery, and physical accelerator operations. FAISAL adds a trusted agent/objective governance layer above them rather than replacing them."
+  },
+  "implementation": {
+    "header": "tools/faisal-fleet/faisal_fleet_intent.h",
+    "header_sha256": "701d1f52109137745aa0f57df3ff37d5aae7ab44f1a44bb68b5479059dc315a6",
+    "source": "tools/faisal-fleet/faisal_fleet_intent.c",
+    "source_sha256": "fd3714e65d67b67cc573dee65a6a84e5ed571f010786338075388492975a998e",
+    "selftest": "tools/testing/selftests/faisal_fleet_intent_test.c",
+    "selftest_sha256": "e011fcb07ad13eb076710569b15f14977699f1bd411590d64ed97597e743dd4f",
+    "benchmark": "tools/testing/selftests/faisal_fleet_intent_benchmark.c",
+    "benchmark_sha256": "41066e67006b2329a5531d1647ef0342d8b8feff1cd06f4aeadc3e9bb8e80935",
+    "runner": "tools/faisal-build/run_fleet_intent_validation.sh",
+    "runner_sha256": "692397fef78195b7f5b08d6ffac25c43d0dcedd8d8b2a320324f8e6330bd85ca",
+    "features": [
+      "agent, tenant, objective, policy-generation, and lineage binding",
+      "topology zone/rack/fabric constraints",
+      "CPU, memory, accelerator, capability, and health eligibility checks",
+      "deterministic topology/resource score and stable node-ID tie-breaking",
+      "gang placement across distinct eligible nodes",
+      "SHA-256 placement evidence digest",
+      "node generation fencing and stale placement rejection",
+      "node failure detection and replacement-node recovery",
+      "fail-closed authority and lineage checks"
+    ]
+  },
+  "validation": {
+    "strict_build": "-O2 -Wall -Wextra -Werror",
+    "selftest_markers": [
+      "FLE_TOPOLOGY_GANG_PLACEMENT_OK",
+      "FLE_NODE_FAILURE_RECOVERY_OK",
+      "FLE_LINEAGE_ASSIGNMENT_QUERY_OK",
+      "FLE_AUTHORITY_REJECT_OK",
+      "FLE_LINEAGE_REJECT_OK",
+      "FLE_GENERATION_POLICY_REJECT_OK",
+      "FLE_SELFTEST_EXIT=0"
+    ],
+    "benchmark": {
+      "rounds": 5000,
+      "nodes_per_round": 16,
+      "gang_size": 4,
+      "placements": 5000,
+      "total_ns": 27418541,
+      "ns_per_round": 5483,
+      "scope": "local userspace policy fixture, not Kubernetes or physical GPU qualification"
+    },
+    "sanitizer": {
+      "status": "pass_no_asan_ubsan_diagnostics",
+      "selftest_binary_sha256": "dd92cd239c5d0dd160f1abb2d60d7f83a9bc19f0b740506c85cd46f46fa96c95",
+      "benchmark_binary_sha256": "aca4f27352337515299f7543a2ccdc46673d649a3b7dcb3a844def7eb4c4d9d4"
+    },
+    "runner_log_sha256": "7eebf6a499735af89a343db0b3d3178a7f8adebf40cb1cafb95e29b871f397c2",
+    "m224_regression": "M224_RUNNER_EXIT=0",
+    "m224_regression_log_sha256": "67f280e9e875bc49c4f0d7113933ec455a90f3e6ee7f2dd45f59b7a1c1059863",
+    "m222_regression": "M222_SELFTEST_EXIT=0",
+    "m222_regression_log_sha256": "ac71ba52753c24e8fd24c14fcee583ce7677cc991427d49dc26abb590374a45f"
+  },
+  "comparison": {
+    "scope": "FAISAL agent-aware placement/governance fixture versus Kubernetes DRA/Kueue/GPU-fleet operations",
+    "same_cluster": false,
+    "same_hardware": false,
+    "same_gpu_driver": false,
+    "same_workload": false,
+    "same_autoscaler": false,
+    "faisal_advantage": "explicit objective/agent lineage, authority, stale-generation fencing, placement evidence, and deterministic replacement recovery at the control-plane boundary",
+    "ecosystem_advantage": "live Kubernetes reconciliation, DRA/device drivers, node and pod lifecycle, service discovery, autoscaling, topology APIs, queueing, and physical GPU isolation/health",
+    "direct_fleet_superiority_claim": false,
+    "required_before_fleet_superiority_claim": [
+      "real Kubernetes cluster",
+      "actual GPU/NPU devices and vendor driver",
+      "DRA or device-plugin integration",
+      "Kueue or equivalent queue/autoscaler integration",
+      "multi-node topology and failure-injection tests",
+      "same workload and production-equivalent measurements"
+    ]
+  },
+  "boundary": {
+    "production_approval": false,
+    "kubernetes_qualification": false,
+    "physical_accelerator_qualification": false,
+    "external_multinode_deployment": false,
+    "independent_builder": false,
+    "external_security_review": false,
+    "model_output_is_authority": false,
+    "note": "M225 is a provider-neutral trusted fleet-intent and recovery policy layer. It does not replace Kubernetes, DRA, Kueue, GPU Operator, device drivers, kubelet, autoscalers, or physical hardware, and it does not establish production fleet readiness."
+  }
+}
