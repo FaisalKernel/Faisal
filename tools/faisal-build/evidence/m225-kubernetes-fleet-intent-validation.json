@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M225-kubernetes-fleet-intent",
-  "recorded_at": "2026-08-18T14:40:00Z",
+  "recorded_at": "2026-08-18T14:42:30Z",
   "status": "local_agent_aware_fleet_policy_qualified_kubernetes_gpu_fleet_qualification_pending",
   "objective": "Add a provider-neutral agent-aware fleet-intent control plane that complements Kubernetes and GPU scheduling ecosystems with durable identity, lineage, topology/resource policy, deterministic gang placement, stale-generation fencing, fail-closed authorization, and replacement-node recovery.",
   "research": {
