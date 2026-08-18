@@ -1,0 +1,108 @@
+{
+  "project": "FAISAL",
+  "milestone": "M226-accelerator-fabric",
+  "recorded_at": "2026-08-18T14:53:24Z",
+  "status": "local_provider_neutral_accelerator_policy_qualified_vendor_and_physical_accelerator_qualification_pending",
+  "objective": "Add a provider-neutral accelerator-fabric contract for device identity, tiered memory regions, topology links, DMA/peer access, collective intent, provenance, generation fencing, device-loss abort, and authority-gated completion without claiming physical GPU execution.",
+  "research": {
+    "sources": [
+      "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html",
+      "https://rocm.docs.amd.com/projects/rccl/en/latest/what-is-rccl.html",
+      "https://oneapi-src.github.io/level-zero-spec/level-zero/latest/core/PROG.html"
+    ],
+    "verified_vendor_capabilities": [
+      "NCCL topology-aware multi-GPU/multi-node collectives and point-to-point communication over PCIe, NVLink, InfiniBand Verbs, and IP sockets",
+      "RCCL topology-aware AMD GPU collectives over PCIe, xGMI, InfiniBand, RoCE, and TCP/IP using ring/tree algorithms and RDMA paths",
+      "Intel Level Zero device-specific memory, peer access, command queues, synchronization, virtual/physical memory, external memory, and device-loss recovery semantics"
+    ],
+    "design_conclusion": "Vendor stacks remain ahead in hardware-specific kernels, DMA, firmware, device memory, interconnects, topology discovery, driver error handling, and accelerator throughput. FAISAL M226 adds a trusted provider-neutral control contract above those backends."
+  },
+  "implementation": {
+    "header": "tools/faisal-accelerator/faisal_accelerator_fabric.h",
+    "header_sha256": "02eb4058dc25a227b84eb989f483bedce69382f81c4d5925a2054d195bd0a7d7",
+    "source": "tools/faisal-accelerator/faisal_accelerator_fabric.c",
+    "source_sha256": "9ccf20db2269910cbfda7e32b1a72d1037f50a5de7174fe282062a684dc5b6f2",
+    "selftest": "tools/testing/selftests/faisal_accelerator_fabric_test.c",
+    "selftest_sha256": "afd1f0782870c4095015060cf498c4b0180cb509967c22cfe65d86b7b1d8099d",
+    "benchmark": "tools/testing/selftests/faisal_accelerator_fabric_benchmark.c",
+    "benchmark_sha256": "2e9d8fb89cafe439ce0f0d5f2a83ebb3a208fc77c20cf0ee47d3ea7442e7ddfa",
+    "runner": "tools/faisal-build/run_accelerator_fabric_validation.sh",
+    "runner_sha256": "4875670d45e98696a8ec09b2f0b2838f1579a8744999cb26f831515e60b362b2",
+    "features": [
+      "provider-neutral device identity, provider kind, generation, health, and lifecycle",
+      "tiered host/device/shared/remote memory regions",
+      "explicit region owner, capability, access, and provenance binding",
+      "topology links with bandwidth, latency, link kind, DMA, and peer-access masks",
+      "collective intents for AllReduce, AllGather, Reduce, Broadcast, ReduceScatter, and AllToAll",
+      "participant membership and ring topology validation",
+      "generation fencing and stale completion rejection",
+      "device-loss abort for queued collectives",
+      "authority-gated completion and region-owner release"
+    ]
+  },
+  "validation": {
+    "strict_build": "-O2 -Wall -Wextra -Werror",
+    "selftest_markers": [
+      "FAF_DEVICE_MEMORY_TOPOLOGY_OK",
+      "FAF_ALLREDUCE_PROVENANCE_COMPLETION_OK",
+      "FAF_DEVICE_LOSS_ABORT_OK",
+      "FAF_STALE_GENERATION_REJECT_OK",
+      "FAF_AUTHORITY_REJECT_OK",
+      "FAF_REGION_OWNER_REJECT_OK",
+      "FAF_SELFTEST_EXIT=0"
+    ],
+    "benchmark": {
+      "rounds": 5000,
+      "devices_per_round": 8,
+      "regions": 8,
+      "participants": 8,
+      "completed": 5000,
+      "total_ns": 14110265,
+      "ns_per_round": 2822,
+      "scope": "local userspace policy fixture, not vendor collective or physical DMA qualification"
+    },
+    "sanitizer": {
+      "status": "pass_no_asan_ubsan_diagnostics",
+      "selftest_binary_sha256": "d2ccd0451552f052fc484b085068d539a65bb68d0303ac6d1cb4c23ad2aa4e00",
+      "benchmark_binary_sha256": "953ef84f5330e5fc20a2fa939d4e830df493e813314f1e243dfa4a7c648f7586"
+    },
+    "runner_log_sha256": "193d7a5f3c040c08fbd7f3c8f13db0a7da2f8168dbbf1c696a5da3267b441fbb",
+    "m225_regression": "M225_RUNNER_EXIT=0",
+    "m225_regression_log_sha256": "c40b5c867df5f807620004657adcbe0b98bc0a0447d1f96d22ad4d40032856df",
+    "m224_regression": "M224_RUNNER_EXIT=0",
+    "m224_regression_log_sha256": "35e56127b791116cba774b0093cce4c3c4da2d295492c065bd0c19e8dc136ef2",
+    "m222_regression": "M222_SELFTEST_EXIT=0",
+    "m222_regression_log_sha256": "ffa108391ed075768a9582e345f439b6f5843abfe00f3f4ab8ffb432fd99c9e9"
+  },
+  "comparison": {
+    "scope": "FAISAL provider-neutral accelerator policy fixture versus NVIDIA NCCL, AMD RCCL, Intel Level Zero, vendor drivers, firmware, and physical accelerator stacks",
+    "same_hardware": false,
+    "same_driver": false,
+    "same_firmware": false,
+    "same_interconnect": false,
+    "same_workload": false,
+    "faisal_advantage": "provider-neutral evidence, ownership, authority, generation fencing, and cross-provider recovery semantics above vendor backends",
+    "vendor_advantage": "hardware-specific memory/DMA, topology discovery, collectives, firmware, driver reset, interconnect transport, and measured throughput",
+    "direct_vendor_stack_superiority_claim": false,
+    "required_before_physical_superiority_claim": [
+      "physical NVIDIA, AMD, Intel, or other accelerator targets",
+      "vendor driver and firmware qualification",
+      "IOMMU/DMA and device-memory isolation tests",
+      "peer-to-peer and collective correctness tests",
+      "topology and interconnect bandwidth/latency measurements",
+      "device reset/loss recovery and long-duration soak",
+      "independent hardware evidence"
+    ]
+  },
+  "boundary": {
+    "production_approval": false,
+    "vendor_driver_qualification": false,
+    "physical_accelerator_qualification": false,
+    "real_dma_execution": false,
+    "real_collective_execution": false,
+    "independent_builder": false,
+    "external_security_review": false,
+    "model_output_is_authority": false,
+    "note": "M226 is a measured provider-neutral accelerator control contract. It does not implement or emulate vendor GPU kernels, DMA engines, firmware, physical memory isolation, NCCL/RCCL/Level Zero execution, or production accelerator qualification."
+  }
+}
