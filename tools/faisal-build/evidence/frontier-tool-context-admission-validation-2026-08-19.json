@@ -1,0 +1,124 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-tool-context-admission-2026-08-19",
+  "recorded_at": "2026-08-18T23:02:07Z",
+  "status": "bounded_userspace_progressive_tool_context_admission_qualified",
+  "objective": "Reduce model-context overhead for large MCP-like tool registries through deterministic capability/trust filtering, byte budgets, generation fencing, receipt integrity, and bounded result projection without granting model output or provider metadata authority.",
+  "research": [
+    {
+      "source": "https://docs.vllm.ai/en/latest/",
+      "conclusion": "Current inference runtimes emphasize prefix caching, continuous batching, structured outputs, tool/reasoning parsers, multimodal execution, and provider/hardware adapters.",
+      "implementation_impact": "FAISAL should expose runtime observations and policies through provider-neutral control-plane contracts rather than embed a runtime or model provider in privileged code."
+    },
+    {
+      "source": "https://docs.vllm.ai/en/latest/features/speculative_decoding/",
+      "conclusion": "Speculative decoding supports multiple methods and documents workload-dependent gains, compatibility constraints, and lossless-validation boundaries.",
+      "implementation_impact": "Any future latency optimizer must be measured per workload and bounded by explicit compatibility and rollback policy."
+    },
+    {
+      "source": "https://docs.sglang.ai/",
+      "conclusion": "SGLang emphasizes RadixAttention/prefix caching, low-latency scheduling, multimodal models, and broad accelerator support.",
+      "implementation_impact": "FAISAL can model cache locality and accelerator observations as untrusted inputs for adaptive control, not as privileged authority."
+    },
+    {
+      "source": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "conclusion": "MCP defines resources, prompts, tools, capability negotiation, cancellation, progress, asynchronous tasks, and explicit consent/tool-safety guidance.",
+      "implementation_impact": "FAISAL needs progressive capability-scoped admission and deterministic tool/result governance at the control-plane boundary."
+    },
+    {
+      "source": "https://developers.openai.com/api/docs/guides/tools-computer-use",
+      "conclusion": "Computer-use integrations require isolated browser/VM environments, explicit action boundaries, untrusted page content, and human control for high-impact actions.",
+      "implementation_impact": "The tool-context layer must not authorize browser or computer actions; it only bounds context and preserves provenance for a separately authorized sandbox."
+    },
+    {
+      "source": "https://www.anthropic.com/engineering/code-execution-with-mcp",
+      "conclusion": "Progressive tool discovery and code execution can reduce context transfer, while generated execution requires sandboxing, resource limits, and monitoring.",
+      "implementation_impact": "FAISAL implements deterministic admission and metadata-only result projection, leaving code execution to an isolated userspace sandbox."
+    }
+  ],
+  "implementation": {
+    "header": "tools/faisal-tool-context/faisal_tool_context.h",
+    "source": "tools/faisal-tool-context/faisal_tool_context.c",
+    "selftest": "tools/testing/selftests/faisal_tool_context_test.c",
+    "benchmark": "tools/testing/selftests/faisal_tool_context_benchmark.c",
+    "fuzz_test": "tools/testing/selftests/faisal_tool_context_fuzz_test.c",
+    "runner": "tools/faisal-build/run_tool_context_validation.sh",
+    "abi": 1,
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "provider-neutral function/resource/prompt tool records",
+      "capability-mask and minimum-trust admission filters",
+      "maximum-tool, definition-byte, and result-byte budgets",
+      "deterministic registry-order admission and stable selected IDs",
+      "registry generation fencing for stale requests and receipts",
+      "SHA-256 definition, admission, original-result, projected-result, and receipt digests",
+      "tamper rejection for receipt counters and digest fields",
+      "metadata-only bounded result projection without returning payload contents",
+      "model-proposal and verified-input flags retained as non-authoritative metadata",
+      "fail-closed malformed request and oversized-result handling"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11 -pthread",
+    "selftest": "FTC_TOOL_CONTEXT_SELFTEST_OK cases=18 selected=1 skipped=4 projected_definition=81 projected_result=400 generation=2",
+    "benchmark": {
+      "marker": "FTC_TOOL_CONTEXT_BENCHMARK_OK",
+      "iterations": 20000,
+      "progressive_ns": 17973900,
+      "baseline_scan_ns": 76127,
+      "progressive_ns_per_request": 898.70,
+      "baseline_ns_per_request": 3.81,
+      "full_definition_bytes": 11820000,
+      "admitted_definition_bytes": 3040000,
+      "context_reduction_permille": 742,
+      "interpretation": "The progressive planner admitted 25.8% of the full fixture definition bytes, a 74.2% reduction. The baseline is a local full-manifest byte scan, not a model-inference or end-to-end latency comparison; the planner adds digest and policy work by design."
+    },
+    "fuzzing": "FTC_TOOL_CONTEXT_FUZZ_OK iterations=10000 rejected=8000 accepted=2000",
+    "asan_ubsan": "FTC_TOOL_CONTEXT_ASAN_UBSAN_OK",
+    "thread_sanitizer": "FTC_TOOL_CONTEXT_TSAN_OK",
+    "runner": "FTC_TOOL_CONTEXT_VALIDATION_OK",
+    "adjacent_regressions": {
+      "m230_model_router": "M230_MODEL_ROUTER_VALIDATION_OK",
+      "m237_result_verify": "M237_RESULT_VERIFY_VALIDATION_OK"
+    },
+    "live_model_catalog": {
+      "captured": true,
+      "model_count": 10,
+      "archive": "/home/ubuntu/agi-kernel/build/frontier/live-model-catalog-2026-08-19.json",
+      "sha256": "40054874a368d65dc021b80b2849ea92eb0398dcdac50e608280562bc286829f",
+      "interpretation": "The live catalog was researched for adapter/routing design only; no model ID or provider metadata is treated as authorization or hard-coded into privileged code."
+    }
+  },
+  "boundary": {
+    "production_approval": false,
+    "physical_hardware_qualification": false,
+    "live_mcp_server_qualification": false,
+    "independent_external_security_review": false,
+    "independent_builder": false,
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "security_boundaries": {
+    "tool_descriptions_are_authority": false,
+    "tool_metadata_is_authority": false,
+    "model_proposal_is_authority": false,
+    "browser_page_content_is_authority": false,
+    "unsafe_tool_execution": false,
+    "oversized_context_fail_closed": true,
+    "stale_generation_fail_closed": true,
+    "receipt_tamper_fail_closed": true,
+    "result_payload_returned_by_admission_layer": false,
+    "privileged_kernel_code_changed": false
+  },
+  "qualification_limits": [
+    "This is a bounded userspace/control-plane contract and does not implement an MCP client, browser driver, code-execution sandbox, model inference engine, or physical accelerator path.",
+    "The 74.2% context-byte reduction is measured on the deterministic eight-tool fixture and does not claim proportional token, latency, cost, or quality improvement for any provider or model.",
+    "The benchmark’s full-manifest baseline is intentionally simpler than the integrity-checked planner and must not be presented as an apples-to-apples latency superiority result.",
+    "No live external tool invocation, paid model call, browser session, robotics device, GPU/NPU, or production cluster was used; no such qualification is claimed.",
+    "The registry and receipts remain userspace/reference contracts until separately integrated with a production service, capability broker, audit journal, and independent security review."
+  ]
+}
