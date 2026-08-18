@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "125acc405a93b610d0351eef3201b22e0cd2da92",
-  "current_tag": "FAISAL-M233-WORLD-STATE-RECONCILIATION",
+  "current_head": "82cb89f1aa76b572eb3a08bf199ffc8191eef2da",
+  "current_tag": "FAISAL-M234-CROSS-SUBSYSTEM-TRACE-CORRELATION",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1969,5 +1969,11 @@
   "m233_research_boundary": "researched_kubernetes_controllers_etcd_openai_background_gemini_function_calling_landlock_and_vllm",
   "m233_model_authority_boundary": "model_function_calls_and_provider_observations_are_untrusted_data_and_never_execute_remediation",
   "m233_validation_boundary": "strict_userspace_selftest_sanitizer_100000_round_benchmark_acpi_on_one_vcpu_qemu_m229_m230_m231_m232_m228_regressions_and_industry_soak_pending_final_evidence_bind",
-  "m233_production_boundary": "production_approval_false_external_state_store_live_multihost_external_builder_physical_accelerator_external_security_review_and_independent_evidence_pending"
+  "m233_production_boundary": "production_approval_false_external_state_store_live_multihost_external_builder_physical_accelerator_external_security_review_and_independent_evidence_pending",
+  "m234_trace_correlation": "pass_context_lineage_event_chain_receipt_generation_replay_and_non_authority_contract",
+  "m234_trace_correlation_evidence": "tools/faisal-build/evidence/m234-trace-correlation-validation.json",
+  "m234_research_boundary": "researched_linux_tracepoints_opentelemetry_context_openai_background_gemini_function_calling_landlock_vllm_and_builtin_model_catalog",
+  "m234_model_authority_boundary": "model_output_tool_calls_provider_context_and_trace_baggage_are_untrusted_and_never_authority",
+  "m234_validation_boundary": "strict_userspace_selftest_sanitizer_100000_round_benchmark_acpi_on_one_vcpu_qemu_m233_m232_m231_m230_m229_m228_regressions_and_industry_soak_pending_final_evidence_bind",
+  "m234_production_boundary": "production_approval_false_external_telemetry_backend_live_multihost_trace_independent_builder_physical_accelerator_external_security_review_and_independent_evidence_pending"
 }
