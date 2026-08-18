@@ -838,14 +838,20 @@ static int agi_lc_autonomy_control(struct agi_lc_session *session,
 		break;
 	case AGI_LC_AUTONOMY_ADVANCE:
 		if (record->owner_session != session->session_id ||
-		    request.state != record->control.state + 1)
-			{ ret = -EPERM; goto out_unlock; }
+		    request.state != record->control.state + 1) {
+			ret = -EPERM;
+			goto out_unlock;
+		}
 		if (request.state == AGI_LC_AUTONOMY_STATE_DIAGNOSE &&
-		    !(record->control.evidence_mask & AGI_LC_AUTONOMY_EVIDENCE_OBSERVATION))
-			{ ret = -EAGAIN; goto out_unlock; }
+		    !(record->control.evidence_mask & AGI_LC_AUTONOMY_EVIDENCE_OBSERVATION)) {
+			ret = -EAGAIN;
+			goto out_unlock;
+		}
 		if (request.state == AGI_LC_AUTONOMY_STATE_PROPOSE &&
-		    !(record->control.evidence_mask & AGI_LC_AUTONOMY_EVIDENCE_DIAGNOSIS))
-			{ ret = -EAGAIN; goto out_unlock; }
+		    !(record->control.evidence_mask & AGI_LC_AUTONOMY_EVIDENCE_DIAGNOSIS)) {
+			ret = -EAGAIN;
+			goto out_unlock;
+		}
 		if (request.state == AGI_LC_AUTONOMY_STATE_VERIFY &&
 		    ((record->control.evidence_mask &
 		      (AGI_LC_AUTONOMY_EVIDENCE_PATCH | AGI_LC_AUTONOMY_EVIDENCE_BUILD |
@@ -853,28 +859,36 @@ static int agi_lc_autonomy_control(struct agi_lc_session *session,
 		       AGI_LC_AUTONOMY_EVIDENCE_SECURITY)) !=
 		     (AGI_LC_AUTONOMY_EVIDENCE_PATCH | AGI_LC_AUTONOMY_EVIDENCE_BUILD |
 		      AGI_LC_AUTONOMY_EVIDENCE_TEST | AGI_LC_AUTONOMY_EVIDENCE_FUZZ |
-		      AGI_LC_AUTONOMY_EVIDENCE_SECURITY)))
-			{ ret = -EAGAIN; goto out_unlock; }
+		      AGI_LC_AUTONOMY_EVIDENCE_SECURITY))) {
+			ret = -EAGAIN;
+			goto out_unlock;
+		}
 		if (request.state == AGI_LC_AUTONOMY_STATE_DEPLOY &&
 		    ((record->control.evidence_mask & record->control.required_evidence_mask) !=
 		     record->control.required_evidence_mask ||
-		     !(record->control.evidence_mask & AGI_LC_AUTONOMY_EVIDENCE_CANARY)))
-			{ ret = -EAGAIN; goto out_unlock; }
+		     !(record->control.evidence_mask & AGI_LC_AUTONOMY_EVIDENCE_CANARY))) {
+			ret = -EAGAIN;
+			goto out_unlock;
+		}
 		if (request.state == AGI_LC_AUTONOMY_STATE_CANARY &&
 		    ((!agi_lc_autonomy_has_approval(&record->control,
 			 AGI_LC_AUTONOMY_FLAG_REQUIRE_SUPERVISOR) &&
 		      (record->control.flags & AGI_LC_AUTONOMY_FLAG_REQUIRE_SUPERVISOR)) ||
 		     (!agi_lc_autonomy_has_approval(&record->control,
 			 AGI_LC_AUTONOMY_FLAG_REQUIRE_OPERATOR) &&
-		      (record->control.flags & AGI_LC_AUTONOMY_FLAG_REQUIRE_OPERATOR))))
-			{ ret = -EACCES; goto out_unlock; }
+		      (record->control.flags & AGI_LC_AUTONOMY_FLAG_REQUIRE_OPERATOR)))) {
+			ret = -EACCES;
+			goto out_unlock;
+		}
 		record->control.state = request.state;
 		record->control.attempt++;
 		record->control.generation++;
 		break;
 	case AGI_LC_AUTONOMY_ROLLBACK:
-		if (record->owner_session != session->session_id && !privileged)
-			{ ret = -EPERM; goto out_unlock; }
+		if (record->owner_session != session->session_id && !privileged) {
+			ret = -EPERM;
+			goto out_unlock;
+		}
 		record->control.state = AGI_LC_AUTONOMY_STATE_ROLLED_BACK;
 		record->control.status = 0;
 		record->control.generation++;
@@ -882,8 +896,10 @@ static int agi_lc_autonomy_control(struct agi_lc_session *session,
 	case AGI_LC_AUTONOMY_QUERY:
 		break;
 	case AGI_LC_AUTONOMY_CLOSE:
-		if (record->owner_session != session->session_id)
-			{ ret = -EPERM; goto out_unlock; }
+		if (record->owner_session != session->session_id) {
+			ret = -EPERM;
+			goto out_unlock;
+		}
 		record->closed = true;
 		record->control.state = AGI_LC_AUTONOMY_STATE_CLOSED;
 		record->control.generation++;
@@ -1446,7 +1462,7 @@ static int agi_lc_persistent_memory_control(struct agi_lc_session *session,
 	    request.importance_ppm > AGI_LC_MEMORY_CONFIDENCE_MAX ||
 	    request.freshness_state > AGI_LC_MEMORY_EXPIRED ||
 	    request.correlation == 0 || request.reserved[0] || request.reserved[1] ||
-	        request.expires_realtime_ns > now + AGI_LC_MEMORY_MAX_TTL_NS)
+	    request.expires_realtime_ns > now + AGI_LC_MEMORY_MAX_TTL_NS)
 
 		return -EINVAL;
 	if (!session->session_id || READ_ONCE(session->revoked))
@@ -1479,8 +1495,8 @@ static int agi_lc_persistent_memory_control(struct agi_lc_session *session,
 	if (request.operation == AGI_LC_MEMORY_RECORD_RESOLVE &&
 	    (!request.related_record_id || request.related_record_id == request.record_id))
 		return -EINVAL;
-	if (    request.operation == AGI_LC_MEMORY_RECORD_QUERY &&
-    memchr_inv(request.content_digest, 0, sizeof(request.content_digest)))
+	if (request.operation == AGI_LC_MEMORY_RECORD_QUERY &&
+	    memchr_inv(request.content_digest, 0, sizeof(request.content_digest)))
 
 		return -EINVAL;
 	if ((request.operation == AGI_LC_MEMORY_RECORD_CORRECT ||
@@ -3079,84 +3095,82 @@ static void agi_lc_get_current_parent_ids(u64 *parent_pid, u64 *parent_tgid)
 }
 
 static void agi_lc_capture_attribution(struct agi_lc_session *session,
-                                         struct agi_lc_attribution *attribution,
-                                         u64 sequence, u16 type, s32 status,
-                                         u64 correlation, u64 metadata)
+					 struct agi_lc_attribution *attribution,
+					 u64 sequence, u16 type, s32 status,
+					 u64 correlation, u64 metadata)
 {
-    struct agi_lc_agent_record *agent;
-    struct agi_lc_light_agent_record *light = NULL;
-    u64 budget_ns, elapsed_ns, limit_pages, current_pages;
-    bool budget_exhausted, memory_exceeded;
-    u64 agent_id = faisal_task_get_agent(current);
-    u32 i;
+	struct agi_lc_agent_record *agent;
+	struct agi_lc_light_agent_record *light = NULL;
+	u64 budget_ns, elapsed_ns, limit_pages, current_pages;
+	bool budget_exhausted, memory_exceeded;
+	u64 agent_id = faisal_task_get_agent(current);
+	u32 i;
 
-    memset(attribution, 0, sizeof(*attribution));
-    attribution->size = sizeof(*attribution);
-    attribution->sequence = sequence;
-    attribution->action_type = type;
-    attribution->status = status;
-    attribution->session_id = session->session_id;
-    attribution->lineage_id = faisal_task_get_lineage(current);
-    attribution->agent_id = agent_id;
-    attribution->task_id = task_pid_nr(current);
-    attribution->tgid = task_tgid_nr(current);
+	memset(attribution, 0, sizeof(*attribution));
+	attribution->size = sizeof(*attribution);
+	attribution->sequence = sequence;
+	attribution->action_type = type;
+	attribution->status = status;
+	attribution->session_id = session->session_id;
+	attribution->lineage_id = faisal_task_get_lineage(current);
+	attribution->agent_id = agent_id;
+	attribution->task_id = task_pid_nr(current);
+	attribution->tgid = task_tgid_nr(current);
 	agi_lc_get_current_parent_ids(&attribution->parent_task_id,
 				       &attribution->parent_tgid);
-    attribution->capabilities_effective =
-        agi_lc_capability_mask(current_cred()->cap_effective);
-    attribution->capabilities_permitted =
-        agi_lc_capability_mask(current_cred()->cap_permitted);
-    attribution->phase = faisal_task_get_phase(current);
-    attribution->correlation = correlation;
-    attribution->metadata = metadata;
-    attribution->recorded_at_ns = ktime_get_ns();
-    faisal_task_get_budget(current, &budget_ns, &elapsed_ns, &budget_exhausted);
-    faisal_task_get_memory_limit(current, &limit_pages, &current_pages,
-                                 &memory_exceeded);
-    attribution->cpu_budget_ns = budget_ns;
-    attribution->cpu_elapsed_ns = elapsed_ns;
-    attribution->memory_limit_pages = limit_pages;
-    attribution->memory_current_pages = current_pages;
-    attribution->state = budget_exhausted || memory_exceeded ?
-        AGI_LC_AGENT_STATE_BLOCKED : AGI_LC_AGENT_STATE_RUNNING;
+	attribution->capabilities_effective =
+		agi_lc_capability_mask(current_cred()->cap_effective);
+	attribution->capabilities_permitted =
+		agi_lc_capability_mask(current_cred()->cap_permitted);
+	attribution->phase = faisal_task_get_phase(current);
+	attribution->correlation = correlation;
+	attribution->metadata = metadata;
+	attribution->recorded_at_ns = ktime_get_ns();
+	faisal_task_get_budget(current, &budget_ns, &elapsed_ns, &budget_exhausted);
+	faisal_task_get_memory_limit(current, &limit_pages, &current_pages,
+				     &memory_exceeded);
+	attribution->cpu_budget_ns = budget_ns;
+	attribution->cpu_elapsed_ns = elapsed_ns;
+	attribution->memory_limit_pages = limit_pages;
+	attribution->memory_current_pages = current_pages;
+	attribution->state = budget_exhausted || memory_exceeded ?
+		AGI_LC_AGENT_STATE_BLOCKED : AGI_LC_AGENT_STATE_RUNNING;
 
-    agent = agi_lc_find_agent(session, agent_id);
-    if (!agent && session->light_agents && agent_id &&
-        agent_id <= AGI_LC_LIGHT_AGENT_MAX &&
-        session->light_agents[agent_id - 1].valid)
-        light = &session->light_agents[agent_id - 1];
-    if (agent) {
-        attribution->parent_agent = agent->parent_agent;
-        attribution->creator_pid = agent->creator_pid;
-        attribution->creator_tgid = agent->creator_tgid;
-        attribution->parent_task_id = agent->parent_pid;
+	agent = agi_lc_find_agent(session, agent_id);
+	if (!agent && session->light_agents && agent_id &&
+	    agent_id <= AGI_LC_LIGHT_AGENT_MAX &&
+	    session->light_agents[agent_id - 1].valid)
+		light = &session->light_agents[agent_id - 1];
+	if (agent) {
+		attribution->parent_agent = agent->parent_agent;
+		attribution->creator_pid = agent->creator_pid;
+		attribution->creator_tgid = agent->creator_tgid;
+		attribution->parent_task_id = agent->parent_pid;
+		attribution->creator_uid = agent->creator_uid;
+		attribution->creator_euid = agent->creator_euid;
+		attribution->state = agent->state;
+	} else if (light) {
+		attribution->parent_agent = light->parent_agent;
+		attribution->creator_pid = light->creator_pid;
+		attribution->creator_tgid = light->creator_tgid;
+		attribution->parent_task_id = light->parent_pid;
+		attribution->creator_uid = light->creator_uid;
+		attribution->creator_euid = light->creator_euid;
+		attribution->state = light->state;
+	}
+	for (i = 0; i < AGI_LC_CAPABILITY_RECORDS; i++) {
+		struct agi_lc_capability_record *grant = &session->capabilities[i];
 
-        attribution->creator_uid = agent->creator_uid;
-        attribution->creator_euid = agent->creator_euid;
-        attribution->state = agent->state;
-    } else if (light) {
-        attribution->parent_agent = light->parent_agent;
-        attribution->creator_pid = light->creator_pid;
-        attribution->creator_tgid = light->creator_tgid;
-        attribution->parent_task_id = light->parent_pid;
-
-        attribution->creator_uid = light->creator_uid;
-        attribution->creator_euid = light->creator_euid;
-        attribution->state = light->state;
-    }
-    for (i = 0; i < AGI_LC_CAPABILITY_RECORDS; i++) {
-        struct agi_lc_capability_record *grant = &session->capabilities[i];
-
-        if (!grant->valid || grant->grant.status != AGI_LC_CAP_STATUS_ACTIVE ||
-            grant->grant.agent_id != agent_id)
-            continue;
-        attribution->authority_rights |= grant->grant.rights;
-        attribution->sandbox_flags |= grant->grant.sandbox_flags;
-        attribution->active_grants++;
-        attribution->authority_generation = max_t(u64,
-            attribution->authority_generation, grant->grant.generation);
-    }
-    session->attributions[sequence % AGI_LC_RING_SIZE] = *attribution;
+		if (!grant->valid || grant->grant.status != AGI_LC_CAP_STATUS_ACTIVE ||
+		    grant->grant.agent_id != agent_id)
+			continue;
+		attribution->authority_rights |= grant->grant.rights;
+		attribution->sandbox_flags |= grant->grant.sandbox_flags;
+		attribution->active_grants++;
+		attribution->authority_generation = max_t(u64,
+			attribution->authority_generation, grant->grant.generation);
+	}
+	session->attributions[sequence % AGI_LC_RING_SIZE] = *attribution;
 }
 
 static bool agi_lc_observability_sample(struct agi_lc_session *session,
@@ -4602,16 +4616,195 @@ static int agi_lc_experience(struct agi_lc_session *session,
 	return 0;
 }
 
-static struct agi_lc_graph_node_record *agi_lc_graph_find_locked(struct agi_lc_session *s,u64 g,u64 n){u32 i;for(i=0;i<AGI_LC_GRAPH_NODES;i++)if(s->graph_nodes[i].valid&&s->graph_nodes[i].node.graph_id==g&&s->graph_nodes[i].node.node_id==n)return &s->graph_nodes[i];return NULL;}
-static void agi_lc_graph_refresh_locked(struct agi_lc_session *s,u64 g){u32 i,j;for(i=0;i<AGI_LC_GRAPH_NODES;i++){struct agi_lc_graph_node*n;u32 done=0;bool cancelled=false;if(!s->graph_nodes[i].valid||s->graph_nodes[i].node.graph_id!=g)continue;n=&s->graph_nodes[i].node;if(n->state==AGI_LC_GRAPH_STATE_COMPLETE||n->state==AGI_LC_GRAPH_STATE_CANCELLED)continue;for(j=0;j<n->dependency_count;j++){struct agi_lc_graph_node_record*d=agi_lc_graph_find_locked(s,g,n->dependencies[j]);if(!d)continue;if(d->node.state==AGI_LC_GRAPH_STATE_COMPLETE)done++;if(d->node.state==AGI_LC_GRAPH_STATE_CANCELLED)cancelled=true;}n->completed_dependencies=done;if(cancelled)n->state=AGI_LC_GRAPH_STATE_CANCELLED;else if(done==n->dependency_count&&n->state==AGI_LC_GRAPH_STATE_PENDING)n->state=AGI_LC_GRAPH_STATE_READY;n->ready=n->state==AGI_LC_GRAPH_STATE_READY;n->criticality=n->priority+(n->latency_sensitive?AGI_LC_SCHED_PRIORITY_MAX+1:0);}}
-static int agi_lc_graph_node_control(struct agi_lc_session*s,unsigned long arg){struct agi_lc_graph_node p,out;struct agi_lc_graph_node_record*r=NULL,*slot=NULL;u32 i,j;int ret=0;if(copy_from_user(&p,(void __user*)arg,sizeof(p)))return-EFAULT;if(p.size!=sizeof(p)||p.flags||p.reserved32||p.reserved[0]||p.reserved[1]||p.operation<AGI_LC_GRAPH_NODE_CREATE||p.operation>AGI_LC_GRAPH_NODE_CANCEL)return-EINVAL;if(!s->session_id||READ_ONCE(s->revoked))return-ESHUTDOWN;if(faisal_task_get_lineage(current)!=s->session_id)return-EPERM;if(p.agent_id&&p.agent_id!=faisal_task_get_agent(current))return-EPERM;mutex_lock(&s->graph_lock);if(p.operation==AGI_LC_GRAPH_NODE_CREATE){if(!p.graph_id||!p.node_id||p.dependency_count>AGI_LC_GRAPH_MAX_DEPS||!p.device_mask||(p.device_mask&~AGI_LC_GRAPH_DEVICE_ALL)||p.priority>AGI_LC_SCHED_PRIORITY_MAX||p.latency_sensitive>1||agi_lc_graph_find_locked(s,p.graph_id,p.node_id)){ret=-EINVAL;goto out;}for(j=0;j<p.dependency_count;j++){if(!p.dependencies[j]||p.dependencies[j]==p.node_id||!agi_lc_graph_find_locked(s,p.graph_id,p.dependencies[j])){ret=-EINVAL;goto out;}for(i=j+1;i<p.dependency_count;i++)if(p.dependencies[j]==p.dependencies[i]){ret=-EINVAL;goto out;}}for(i=0;i<AGI_LC_GRAPH_NODES;i++)if(!s->graph_nodes[i].valid){slot=&s->graph_nodes[i];break;}if(!slot){ret=-ENOSPC;goto out;}p.agent_id=p.agent_id?p.agent_id:faisal_task_get_agent(current);p.state=AGI_LC_GRAPH_STATE_PENDING;p.ready=0;p.completed_dependencies=0;p.generation=1;slot->valid=true;slot->node=p;agi_lc_graph_refresh_locked(s,p.graph_id);out=slot->node;}else{if(!p.graph_id||!p.node_id){ret=-EINVAL;goto out;}r=agi_lc_graph_find_locked(s,p.graph_id,p.node_id);if(!r){ret=-ENOENT;goto out;}if(p.operation==AGI_LC_GRAPH_NODE_GET){out=r->node;out.operation=AGI_LC_GRAPH_NODE_GET;goto copy_out;}if(p.operation==AGI_LC_GRAPH_NODE_COMPLETE){if(r->node.state!=AGI_LC_GRAPH_STATE_READY&&r->node.state!=AGI_LC_GRAPH_STATE_RUNNING){ret=-EINVAL;goto out;}r->node.state=AGI_LC_GRAPH_STATE_COMPLETE;r->node.observed_runtime_ns=p.observed_runtime_ns;}else{if(r->node.state==AGI_LC_GRAPH_STATE_COMPLETE){ret=-EALREADY;goto out;}r->node.state=AGI_LC_GRAPH_STATE_CANCELLED;r->node.ready=0;}r->node.generation++;agi_lc_graph_refresh_locked(s,p.graph_id);out=r->node;}copy_out:mutex_unlock(&s->graph_lock);if(copy_to_user((void __user*)arg,&out,sizeof(out)))return-EFAULT;if(p.operation!=AGI_LC_GRAPH_NODE_GET)return agi_lc_push_record(s,AGI_LC_EVENT_SCHED_HINT,0,out.correlation,out.node_id);return 0;out:mutex_unlock(&s->graph_lock);return ret;}
-static struct agi_lc_compute_context_record *agi_lc_context_find_locked(struct agi_lc_session *s, u64 id, u64 cap)
+static struct agi_lc_graph_node_record *
+agi_lc_graph_find_locked(struct agi_lc_session *s, u64 graph_id, u64 node_id)
 {
-u32 i;
-for (i = 0; i < AGI_LC_CONTEXT_RECORDS; i++)
-if (s->contexts[i].valid && s->contexts[i].context.context_id == id && s->contexts[i].context.context_capability == cap)
-return &s->contexts[i];
-return NULL;
+	u32 i;
+
+	for (i = 0; i < AGI_LC_GRAPH_NODES; i++) {
+		struct agi_lc_graph_node_record *record = &s->graph_nodes[i];
+
+		if (record->valid && record->node.graph_id == graph_id &&
+		    record->node.node_id == node_id)
+			return record;
+	}
+	return NULL;
+}
+static void agi_lc_graph_refresh_locked(struct agi_lc_session *session,
+						 u64 graph_id)
+{
+	u32 i;
+
+	for (i = 0; i < AGI_LC_GRAPH_NODES; i++) {
+		struct agi_lc_graph_node *node;
+		u32 completed = 0;
+		bool cancelled = false;
+		u32 j;
+
+		if (!session->graph_nodes[i].valid ||
+		    session->graph_nodes[i].node.graph_id != graph_id)
+			continue;
+		node = &session->graph_nodes[i].node;
+		if (node->state == AGI_LC_GRAPH_STATE_COMPLETE ||
+		    node->state == AGI_LC_GRAPH_STATE_CANCELLED)
+			continue;
+		for (j = 0; j < node->dependency_count; j++) {
+			struct agi_lc_graph_node_record *dependency;
+
+			dependency = agi_lc_graph_find_locked(session, graph_id,
+							     node->dependencies[j]);
+			if (!dependency)
+				continue;
+			if (dependency->node.state == AGI_LC_GRAPH_STATE_COMPLETE)
+				completed++;
+			if (dependency->node.state == AGI_LC_GRAPH_STATE_CANCELLED)
+				cancelled = true;
+		}
+		node->completed_dependencies = completed;
+		if (cancelled)
+			node->state = AGI_LC_GRAPH_STATE_CANCELLED;
+		else if (completed == node->dependency_count &&
+			 node->state == AGI_LC_GRAPH_STATE_PENDING)
+			node->state = AGI_LC_GRAPH_STATE_READY;
+		node->ready = node->state == AGI_LC_GRAPH_STATE_READY;
+		node->criticality = node->priority +
+			(node->latency_sensitive ? AGI_LC_SCHED_PRIORITY_MAX + 1 : 0);
+	}
+}
+static int agi_lc_graph_node_control(struct agi_lc_session *session,
+					 unsigned long arg)
+{
+	struct agi_lc_graph_node request, output;
+	struct agi_lc_graph_node_record *record = NULL, *slot = NULL;
+	u32 i, j;
+	int ret = 0;
+
+	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
+		return -EFAULT;
+	if (request.size != sizeof(request) || request.flags ||
+	    request.reserved32 || request.reserved[0] || request.reserved[1] ||
+	    request.operation < AGI_LC_GRAPH_NODE_CREATE ||
+	    request.operation > AGI_LC_GRAPH_NODE_CANCEL)
+		return -EINVAL;
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != session->session_id)
+		return -EPERM;
+	if (request.agent_id &&
+	    request.agent_id != faisal_task_get_agent(current))
+		return -EPERM;
+
+	mutex_lock(&session->graph_lock);
+	if (request.operation == AGI_LC_GRAPH_NODE_CREATE) {
+		if (!request.graph_id || !request.node_id ||
+		    request.dependency_count > AGI_LC_GRAPH_MAX_DEPS ||
+		    !request.device_mask ||
+		    (request.device_mask & ~AGI_LC_GRAPH_DEVICE_ALL) ||
+		    request.priority > AGI_LC_SCHED_PRIORITY_MAX ||
+		    request.latency_sensitive > 1 ||
+		    agi_lc_graph_find_locked(session, request.graph_id,
+						      request.node_id)) {
+			ret = -EINVAL;
+			goto out;
+		}
+		for (j = 0; j < request.dependency_count; j++) {
+			if (!request.dependencies[j] ||
+			    request.dependencies[j] == request.node_id ||
+			    !agi_lc_graph_find_locked(session, request.graph_id,
+						       request.dependencies[j])) {
+				ret = -EINVAL;
+				goto out;
+			}
+			for (i = j + 1; i < request.dependency_count; i++) {
+				if (request.dependencies[j] == request.dependencies[i]) {
+					ret = -EINVAL;
+					goto out;
+				}
+			}
+		}
+		for (i = 0; i < AGI_LC_GRAPH_NODES; i++) {
+			if (!session->graph_nodes[i].valid) {
+				slot = &session->graph_nodes[i];
+				break;
+			}
+		}
+		if (!slot) {
+			ret = -ENOSPC;
+			goto out;
+		}
+		request.agent_id = request.agent_id ? request.agent_id :
+			faisal_task_get_agent(current);
+		request.state = AGI_LC_GRAPH_STATE_PENDING;
+		request.ready = 0;
+		request.completed_dependencies = 0;
+		request.generation = 1;
+		slot->valid = true;
+		slot->node = request;
+		agi_lc_graph_refresh_locked(session, request.graph_id);
+		output = slot->node;
+	} else {
+		if (!request.graph_id || !request.node_id) {
+			ret = -EINVAL;
+			goto out;
+		}
+		record = agi_lc_graph_find_locked(session, request.graph_id,
+						   request.node_id);
+		if (!record) {
+			ret = -ENOENT;
+			goto out;
+		}
+		if (request.operation == AGI_LC_GRAPH_NODE_GET) {
+			output = record->node;
+			output.operation = AGI_LC_GRAPH_NODE_GET;
+			goto copy_out;
+		}
+		if (request.operation == AGI_LC_GRAPH_NODE_COMPLETE) {
+			if (record->node.state != AGI_LC_GRAPH_STATE_READY &&
+			    record->node.state != AGI_LC_GRAPH_STATE_RUNNING) {
+				ret = -EINVAL;
+				goto out;
+			}
+			record->node.state = AGI_LC_GRAPH_STATE_COMPLETE;
+			record->node.observed_runtime_ns = request.observed_runtime_ns;
+		} else {
+			if (record->node.state == AGI_LC_GRAPH_STATE_COMPLETE) {
+				ret = -EALREADY;
+				goto out;
+			}
+			record->node.state = AGI_LC_GRAPH_STATE_CANCELLED;
+			record->node.ready = 0;
+		}
+		record->node.generation++;
+		agi_lc_graph_refresh_locked(session, request.graph_id);
+		output = record->node;
+	}
+copy_out:
+	mutex_unlock(&session->graph_lock);
+	if (copy_to_user((void __user *)arg, &output, sizeof(output)))
+		return -EFAULT;
+	if (request.operation != AGI_LC_GRAPH_NODE_GET)
+		return agi_lc_push_record(session, AGI_LC_EVENT_SCHED_HINT, 0,
+					  output.correlation, output.node_id);
+	return 0;
+out:
+	mutex_unlock(&session->graph_lock);
+	return ret;
+}
+
+static struct agi_lc_compute_context_record *
+agi_lc_context_find_locked(struct agi_lc_session *session, u64 context_id,
+				   u64 capability)
+{
+	u32 i;
+
+	for (i = 0; i < AGI_LC_CONTEXT_RECORDS; i++) {
+		struct agi_lc_compute_context_record *record = &session->contexts[i];
+
+		if (record->valid && record->context.context_id == context_id &&
+		    record->context.context_capability == capability)
+			return record;
+	}
+	return NULL;
 }
 static void agi_lc_compute_context_fabric_caps(struct agi_lc_compute_context *context)
 {
@@ -4630,66 +4823,218 @@ static void agi_lc_compute_context_fabric_caps(struct agi_lc_compute_context *co
 	context->active_fabric = active;
 	context->unsupported_fabric = context->requested_fabric & ~active;
 	context->active_device_mask = context->device_mask & AGI_LC_CONTEXT_DEVICE_CPU;
-	context->unsupported_device_mask = context->device_mask & ~context->active_device_mask;
+	context->unsupported_device_mask = context->device_mask &
+		~context->active_device_mask;
 	context->provider_kind = context->active_device_mask ?
 		AGI_LC_CONTEXT_PROVIDER_CPU : AGI_LC_CONTEXT_PROVIDER_NONE;
 	context->address_space_mode = context->active_device_mask ?
 		AGI_LC_CONTEXT_ADDRESS_SPACE_PROCESS :
 		AGI_LC_CONTEXT_ADDRESS_SPACE_NONE;
 }
-static int agi_lc_compute_context_control(struct agi_lc_session *s, unsigned long arg)
+static int agi_lc_compute_context_control(struct agi_lc_session *session,
+					  unsigned long arg)
 {
-struct agi_lc_compute_context p, out;
-struct agi_lc_compute_context_record *r = NULL, *slot = NULL;
-struct agi_lc_memory_record *m;
-u64 tid = task_pid_nr(current);
-u32 i;
-int ret = 0;
-if (copy_from_user(&p, (void __user *)arg, sizeof(p))) return -EFAULT;
-if (p.size != sizeof(p) || p.flags || p.reserved[0] || p.reserved[1] || p.operation < AGI_LC_CONTEXT_CREATE || p.operation > AGI_LC_CONTEXT_CLOSE) return -EINVAL;
-if (!s->session_id || READ_ONCE(s->revoked)) return -ESHUTDOWN;
-if (faisal_task_get_lineage(current) != s->session_id) return -EPERM;
-mutex_lock(&s->context_lock);
-if (p.operation == AGI_LC_CONTEXT_CREATE) {
-if (p.context_id || p.context_capability || (p.agent_id && p.agent_id != faisal_task_get_agent(current)) || (p.device_mask & ~AGI_LC_CONTEXT_DEVICE_ALL) || (p.requested_fabric & ~AGI_LC_CONTEXT_FABRIC_ALL) || p.attached_tasks || p.bound_regions || p.active_device_mask || p.unsupported_device_mask || p.generation || p.task_id || p.region_id || p.region_capability || p.region_access || p.status || p.bytes_referenced || p.active_fabric || p.unsupported_fabric || p.address_space_mode || p.provider_kind || p.bytes_accounted || p.transfer_bytes || p.compute_ns || p.state_sequence) { ret = -EINVAL; goto out; }
-for (i = 0; i < AGI_LC_CONTEXT_RECORDS; i++) if (!s->contexts[i].valid) { slot = &s->contexts[i]; break; }
-if (!slot) { ret = -ENOSPC; goto out; }
-memset(slot, 0, sizeof(*slot)); slot->valid = true; slot->context = p; slot->context.state = AGI_LC_CONTEXT_STATE_ACTIVE; slot->context.context_id = ++s->next_context_id; if (!slot->context.context_id) slot->context.context_id = ++s->next_context_id; slot->context.context_capability = agi_lc_memory_new_capability(); slot->context.agent_id = faisal_task_get_agent(current); slot->context.generation = 1; agi_lc_compute_context_fabric_caps(&slot->context); out = slot->context;
-} else {
-if (!p.context_id || !p.context_capability) { ret = -EINVAL; goto out; }
-r = agi_lc_context_find_locked(s, p.context_id, p.context_capability);
-if (!r || r->context.agent_id != faisal_task_get_agent(current)) { ret = -EACCES; goto out; }
-if (p.operation == AGI_LC_CONTEXT_GET) { out = r->context; goto copy_out; }
-if (r->context.state != AGI_LC_CONTEXT_STATE_ACTIVE) { ret = -ESHUTDOWN; goto out; }
-switch (p.operation) {
-case AGI_LC_CONTEXT_ATTACH_TASK:
-for (i = 0; i < AGI_LC_CONTEXT_MAX_TASKS; i++) if (r->tasks[i] == tid) break;
-if (i == AGI_LC_CONTEXT_MAX_TASKS) { for (i = 0; i < AGI_LC_CONTEXT_MAX_TASKS; i++) if (!r->tasks[i]) { r->tasks[i] = tid; r->context.attached_tasks++; break; } if (i == AGI_LC_CONTEXT_MAX_TASKS) { ret = -ENOSPC; goto out; } }
-r->context.task_id = tid; r->context.state_sequence++; break;
-case AGI_LC_CONTEXT_DETACH_TASK:
-for (i = 0; i < AGI_LC_CONTEXT_MAX_TASKS; i++) if (r->tasks[i] == tid) { r->tasks[i] = 0; r->context.attached_tasks--; break; }
-if (i == AGI_LC_CONTEXT_MAX_TASKS) { ret = -ENOENT; goto out; } r->context.task_id = tid; r->context.state_sequence++; break;
-case AGI_LC_CONTEXT_BIND_REGION:
-if (!p.region_id || !p.region_capability || !agi_lc_memory_access_valid(p.region_access)) { ret = -EINVAL; goto out; }
-mutex_lock(&agi_lc_memory_lock); m = agi_lc_memory_find_locked(s, p.region_id); if (!m || !agi_lc_memory_authorized_locked(s, m, p.region_capability, p.region_access)) { mutex_unlock(&agi_lc_memory_lock); ret = -EACCES; goto out; }
-for (i = 0; i < AGI_LC_CONTEXT_MAX_REGIONS; i++) if (r->regions[i] == p.region_id) break;
-if (i == AGI_LC_CONTEXT_MAX_REGIONS) { for (i = 0; i < AGI_LC_CONTEXT_MAX_REGIONS; i++) if (!r->regions[i]) { r->regions[i] = p.region_id; r->region_capabilities[i] = p.region_capability; r->region_access[i] = p.region_access; r->context.bound_regions++; r->context.bytes_referenced += m->size_bytes; break; } if (i == AGI_LC_CONTEXT_MAX_REGIONS) { mutex_unlock(&agi_lc_memory_lock); ret = -ENOSPC; goto out; } }
-mutex_unlock(&agi_lc_memory_lock); r->context.region_id = p.region_id; r->context.region_capability = p.region_capability; r->context.region_access = p.region_access; r->context.bytes_accounted = r->context.bytes_referenced; r->context.state_sequence++; break;
-case AGI_LC_CONTEXT_UNBIND_REGION:
-if (!p.region_id) { ret = -EINVAL; goto out; }
-for (i = 0; i < AGI_LC_CONTEXT_MAX_REGIONS; i++) if (r->regions[i] == p.region_id) break;
-if (i == AGI_LC_CONTEXT_MAX_REGIONS) { ret = -ENOENT; goto out; }
-mutex_lock(&agi_lc_memory_lock); m = agi_lc_memory_find_locked(s, p.region_id); if (m && r->context.bytes_referenced >= m->size_bytes) r->context.bytes_referenced -= m->size_bytes; mutex_unlock(&agi_lc_memory_lock);
-r->regions[i] = 0; r->region_capabilities[i] = 0; r->region_access[i] = 0; r->context.bound_regions--; r->context.bytes_accounted = r->context.bytes_referenced; r->context.state_sequence++; break;
-case AGI_LC_CONTEXT_CLOSE: r->context.state = AGI_LC_CONTEXT_STATE_CLOSED; r->context.state_sequence++; break;
-default: ret = -EINVAL; goto out;
-}
-r->context.generation++; out = r->context;
-}
+	struct agi_lc_compute_context request, output;
+	struct agi_lc_compute_context_record *record = NULL, *slot = NULL;
+	struct agi_lc_memory_record *memory;
+	u64 task_id = task_pid_nr(current);
+	u32 i;
+	int ret = 0;
+
+	if (copy_from_user(&request, (void __user *)arg, sizeof(request)))
+		return -EFAULT;
+	if (request.size != sizeof(request) || request.flags ||
+	    request.reserved[0] || request.reserved[1] ||
+	    request.operation < AGI_LC_CONTEXT_CREATE ||
+	    request.operation > AGI_LC_CONTEXT_CLOSE)
+		return -EINVAL;
+	if (!session->session_id || READ_ONCE(session->revoked))
+		return -ESHUTDOWN;
+	if (faisal_task_get_lineage(current) != session->session_id)
+		return -EPERM;
+
+	mutex_lock(&session->context_lock);
+	if (request.operation == AGI_LC_CONTEXT_CREATE) {
+		if (request.context_id || request.context_capability ||
+		    (request.agent_id &&
+		     request.agent_id != faisal_task_get_agent(current)) ||
+		    (request.device_mask & ~AGI_LC_CONTEXT_DEVICE_ALL) ||
+		    (request.requested_fabric & ~AGI_LC_CONTEXT_FABRIC_ALL) ||
+		    request.attached_tasks || request.bound_regions ||
+		    request.active_device_mask || request.unsupported_device_mask ||
+		    request.generation || request.task_id || request.region_id ||
+		    request.region_capability || request.region_access ||
+		    request.status || request.bytes_referenced ||
+		    request.active_fabric || request.unsupported_fabric ||
+		    request.address_space_mode || request.provider_kind ||
+		    request.bytes_accounted || request.transfer_bytes ||
+		    request.compute_ns || request.state_sequence) {
+			ret = -EINVAL;
+			goto out;
+		}
+		for (i = 0; i < AGI_LC_CONTEXT_RECORDS; i++) {
+			if (!session->contexts[i].valid) {
+				slot = &session->contexts[i];
+				break;
+			}
+		}
+		if (!slot) {
+			ret = -ENOSPC;
+			goto out;
+		}
+		memset(slot, 0, sizeof(*slot));
+		slot->valid = true;
+		slot->context = request;
+		slot->context.state = AGI_LC_CONTEXT_STATE_ACTIVE;
+		slot->context.context_id = ++session->next_context_id;
+		if (!slot->context.context_id)
+			slot->context.context_id = ++session->next_context_id;
+		slot->context.context_capability = agi_lc_memory_new_capability();
+		slot->context.agent_id = faisal_task_get_agent(current);
+		slot->context.generation = 1;
+		agi_lc_compute_context_fabric_caps(&slot->context);
+		output = slot->context;
+	} else {
+		if (!request.context_id || !request.context_capability) {
+			ret = -EINVAL;
+			goto out;
+		}
+		record = agi_lc_context_find_locked(session, request.context_id,
+						     request.context_capability);
+		if (!record || record->context.agent_id != faisal_task_get_agent(current)) {
+			ret = -EACCES;
+			goto out;
+		}
+		if (request.operation == AGI_LC_CONTEXT_GET) {
+			output = record->context;
+			goto copy_out;
+		}
+		if (record->context.state != AGI_LC_CONTEXT_STATE_ACTIVE) {
+			ret = -ESHUTDOWN;
+			goto out;
+		}
+		switch (request.operation) {
+		case AGI_LC_CONTEXT_ATTACH_TASK:
+			for (i = 0; i < AGI_LC_CONTEXT_MAX_TASKS; i++)
+				if (record->tasks[i] == task_id)
+					break;
+			if (i == AGI_LC_CONTEXT_MAX_TASKS) {
+				for (i = 0; i < AGI_LC_CONTEXT_MAX_TASKS; i++) {
+					if (!record->tasks[i]) {
+						record->tasks[i] = task_id;
+						record->context.attached_tasks++;
+						break;
+					}
+				}
+				if (i == AGI_LC_CONTEXT_MAX_TASKS) {
+					ret = -ENOSPC;
+					goto out;
+				}
+			}
+			record->context.task_id = task_id;
+			record->context.state_sequence++;
+			break;
+		case AGI_LC_CONTEXT_DETACH_TASK:
+			for (i = 0; i < AGI_LC_CONTEXT_MAX_TASKS; i++) {
+				if (record->tasks[i] == task_id) {
+					record->tasks[i] = 0;
+					record->context.attached_tasks--;
+					break;
+				}
+			}
+			if (i == AGI_LC_CONTEXT_MAX_TASKS) {
+				ret = -ENOENT;
+				goto out;
+			}
+			record->context.task_id = task_id;
+			record->context.state_sequence++;
+			break;
+		case AGI_LC_CONTEXT_BIND_REGION:
+			if (!request.region_id || !request.region_capability ||
+			    !agi_lc_memory_access_valid(request.region_access)) {
+				ret = -EINVAL;
+				goto out;
+			}
+			mutex_lock(&agi_lc_memory_lock);
+			memory = agi_lc_memory_find_locked(session, request.region_id);
+			if (!memory || !agi_lc_memory_authorized_locked(session, memory,
+									request.region_capability,
+									request.region_access)) {
+				mutex_unlock(&agi_lc_memory_lock);
+				ret = -EACCES;
+				goto out;
+			}
+			for (i = 0; i < AGI_LC_CONTEXT_MAX_REGIONS; i++)
+				if (record->regions[i] == request.region_id)
+					break;
+			if (i == AGI_LC_CONTEXT_MAX_REGIONS) {
+				for (i = 0; i < AGI_LC_CONTEXT_MAX_REGIONS; i++) {
+					if (!record->regions[i]) {
+						record->regions[i] = request.region_id;
+						record->region_capabilities[i] = request.region_capability;
+						record->region_access[i] = request.region_access;
+						record->context.bound_regions++;
+						record->context.bytes_referenced += memory->size_bytes;
+						break;
+					}
+				}
+				if (i == AGI_LC_CONTEXT_MAX_REGIONS) {
+					mutex_unlock(&agi_lc_memory_lock);
+					ret = -ENOSPC;
+					goto out;
+				}
+			}
+			mutex_unlock(&agi_lc_memory_lock);
+			record->context.region_id = request.region_id;
+			record->context.region_capability = request.region_capability;
+			record->context.region_access = request.region_access;
+			record->context.bytes_accounted = record->context.bytes_referenced;
+			record->context.state_sequence++;
+			break;
+		case AGI_LC_CONTEXT_UNBIND_REGION:
+			if (!request.region_id) {
+				ret = -EINVAL;
+				goto out;
+			}
+			for (i = 0; i < AGI_LC_CONTEXT_MAX_REGIONS; i++)
+				if (record->regions[i] == request.region_id)
+					break;
+			if (i == AGI_LC_CONTEXT_MAX_REGIONS) {
+				ret = -ENOENT;
+				goto out;
+			}
+			mutex_lock(&agi_lc_memory_lock);
+			memory = agi_lc_memory_find_locked(session, request.region_id);
+			if (memory && record->context.bytes_referenced >= memory->size_bytes)
+				record->context.bytes_referenced -= memory->size_bytes;
+			mutex_unlock(&agi_lc_memory_lock);
+			record->regions[i] = 0;
+			record->region_capabilities[i] = 0;
+			record->region_access[i] = 0;
+			record->context.bound_regions--;
+			record->context.bytes_accounted = record->context.bytes_referenced;
+			record->context.state_sequence++;
+			break;
+		case AGI_LC_CONTEXT_CLOSE:
+			record->context.state = AGI_LC_CONTEXT_STATE_CLOSED;
+			record->context.state_sequence++;
+			break;
+		default:
+			ret = -EINVAL;
+			goto out;
+		}
+		record->context.generation++;
+		output = record->context;
+	}
 copy_out:
-mutex_unlock(&s->context_lock); if (copy_to_user((void __user *)arg, &out, sizeof(out))) return -EFAULT; return agi_lc_push_record(s, AGI_LC_EVENT_SCHED_HINT, out.status, out.correlation, out.context_id);
+	mutex_unlock(&session->context_lock);
+	if (copy_to_user((void __user *)arg, &output, sizeof(output)))
+		return -EFAULT;
+	return agi_lc_push_record(session, AGI_LC_EVENT_SCHED_HINT, output.status,
+					  output.correlation, output.context_id);
 out:
-mutex_unlock(&s->context_lock); return ret;
+	mutex_unlock(&session->context_lock);
+	return ret;
 }
 static struct agi_lc_graph_telemetry_record *agi_lc_graph_telemetry_find_locked(struct agi_lc_session *s, u64 id, u64 cap)
 {

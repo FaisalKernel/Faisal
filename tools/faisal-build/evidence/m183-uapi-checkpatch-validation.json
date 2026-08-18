@@ -21,7 +21,12 @@
     "original_checkpatch_warnings": 94,
     "temporary_mechanical_autofix_residual_errors": 54,
     "driver_sha256": "f0bff4d88d14b79829627398086c2d1f6eba55d4dee469e24fa3cc20395af7bf",
-    "production_claim": "driver checkpatch cleanup remains open; no automatic driver rewrite was applied"
+    "production_claim": "driver checkpatch errors are closed; warnings remain and QEMU regression requalification is open",
+    "post_m184_checkpatch_errors": 0,
+    "post_m184_checkpatch_warnings": 18,
+    "post_m184_driver_sha256": "eda16e42796e49c2fa1729096a21d5d2777128f8d11724ea592631f75bbe4e06",
+    "post_m184_compile": "pass with build/industry-production-m153/.config",
+    "post_m184_qemu": "bounded ACPI-on, ACPI-off, and one-vCPU runs timed out with no boot/test markers; requalification remains open"
   },
   "production_boundary": {
     "status": "not_production_approved",
@@ -30,6 +35,6 @@
       "An external security review occurred.",
       "FAISAL is production-approved."
     ],
-    "remaining_action": "Review and clean the lifecycle driver in small semantic-preserving patches, then rerun compile, selftests, sanitizer/QEMU regressions, and independent review."
+    "remaining_action": "Review remaining warnings, investigate QEMU timeout/no-boot-marker behavior, rerun compile, selftests, sanitizer/QEMU regressions, and independent review."
   }
 }

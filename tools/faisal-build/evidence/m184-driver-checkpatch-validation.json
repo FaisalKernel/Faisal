@@ -1,0 +1,46 @@
+{
+  "project": "FAISAL",
+  "milestone": "M184-driver-checkpatch-cleanup",
+  "schema": "org.faisal.driver-checkpatch-validation.v1",
+  "recorded_at": "2026-08-18T06:08:06Z",
+  "repository_parent_commit": "5612735992ec23bb6d7f5b86ed2f94cc2be72756",
+  "status": "driver_zero_checkpatch_errors_compiles_qemu_requalification_timeout",
+  "scope": {
+    "file": "drivers/misc/agi_lifecycle.c",
+    "file_sha256": "eda16e42796e49c2fa1729096a21d5d2777128f8d11724ea592631f75bbe4e06",
+    "checkpatch": "0 errors, 18 warnings",
+    "checkpatch_error_count": 0,
+    "checkpatch_warning_count": 1,
+    "compile": "pass with build/industry-production-m153/.config and CONFIG_CFS_BANDWIDTH=y",
+    "semantic_scope": [
+      "agi_lc_graph_node_control formatting and parameter-name alignment",
+      "agi_lc_context_find_locked formatting",
+      "agi_lc_compute_context_control formatting",
+      "two memory-validation whitespace-only corrections"
+    ]
+  },
+  "validation_artifacts": {
+    "checkpatch_log": "build/m184-final-style-build/checkpatch.log",
+    "compile_log": "build/m184-final-style-build/compile.log",
+    "qemu_default_log": "build/m184-qemu-regression/regression.log",
+    "qemu_acpi_off_log": "build/m184-qemu-regression-acpi-off/regression.log",
+    "qemu_one_vcpu_log": "build/m184-qemu-regression-1vcpu/regression.log",
+    "qemu_result": "bounded runs ended with FAISAL_UAPI_FUZZ_QEMU_RC=124 and no boot/test markers; no pass claimed",
+    "qemu_log_tails": {
+      "default": "",
+      "acpi_off": "",
+      "one_vcpu": ""
+    }
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "The driver has zero checkpatch warnings.",
+      "The QEMU regression suite passed in this run.",
+      "An independent external security review occurred.",
+      "Physical accelerator qualification occurred.",
+      "FAISAL is production-approved."
+    ],
+    "remaining_action": "Investigate the QEMU timeout/no-boot-marker condition, then rerun regression and continue independent builder, hardware, external review, operator signing, replication, deployment, and CVE ownership qualification."
+  }
+}
