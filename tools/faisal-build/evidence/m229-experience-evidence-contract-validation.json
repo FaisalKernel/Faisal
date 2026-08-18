@@ -87,6 +87,13 @@
     "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK on ACPI-on one-vCPU 4G",
     "regression_m228": "M228_RUNNER_EXIT=0 selftest and 100000-round benchmark passed"
   },
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_accelerator": false,
+    "external_security_review": false,
+    "paid_provider_qualification": false
+  },
   "security": {
     "model_output_is_authority": false,
     "unverified_experience_promoted": false,
