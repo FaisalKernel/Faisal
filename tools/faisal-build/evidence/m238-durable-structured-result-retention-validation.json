@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M238-durable-structured-result-retention",
-  "recorded_at": "2026-08-18T19:41:39Z",
+  "recorded_at": "2026-08-18T19:43:20Z",
   "status": "local_contract_qualified_crash_recovery_and_hardened_boot_qualified_external_production_evidence_pending",
   "objective": "Retain only M237-verified tool results in an append-only SHA-256 journal, recover projections after restart, replay bounded events with generation fencing, and require independent authority before commitment.",
   "research": {
