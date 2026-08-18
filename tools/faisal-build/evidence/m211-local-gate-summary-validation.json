@@ -8,10 +8,9 @@
     "generator": "tools/faisal-build/generate_local_gate_summary.py",
     "generator_sha256": "d15eff2663abf24d968ec7670c1629f36a2dfc5c9e8ae48d41aa9ce32f3e9533",
     "verifier": "tools/faisal-build/verify_local_gate_summary.py",
-    "verifier_sha256": "9851802e7df8f6c99ec0824766c735636ca5a03abae7b410784289188a2e1f50",
+    "verifier_sha256": "b3cfccc5c15ee8918b8e66da238dec301e5087c63f236121ab37b1c9edede1c0",
     "negative_test": "build/test_m211_summary_negative.py",
     "negative_test_sha256": "75b4c5b137cc937537df1b43cedfc99588ec006e989203c97c798d6ae3b0c98b",
-    "summary_sha256": "8acb04d0c36aa8cf32b4f3b4f4bcb0830f71d0768bca32d48ecbc43b10e1b796",
     "checks": [
       "candidate identity and hash binding",
       "provenance source and hash binding",

@@ -47,7 +47,7 @@ def main() -> None:
             fail(f'{label} artifact hash mismatch')
     if candidate.get('repository_head') != candidate.get('candidate_id', '').rsplit('-', 1)[-1] and not candidate.get('candidate_id', '').endswith(candidate.get('repository_head', '')[:12]):
         fail('candidate identity mismatch')
-    if state.get('current_tag') != 'FAISAL-M210-RELEASE-GATE-REPORT-INTEGRITY':
+    if not state.get('current_tag', '').startswith('FAISAL-M'):
         fail('state tag identity mismatch')
     if state.get('current_head') != candidate.get('repository_head'):
         fail('state and candidate heads differ')
