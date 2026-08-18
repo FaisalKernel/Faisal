@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "e00a48fae70db3861cc3b2ef8b2bd38b48449e7a",
-  "current_tag": "FAISAL-M230-EVIDENCE-BOUND-ADAPTIVE-MODEL-ROUTING",
+  "current_head": "80bc102537801935c5030b02d59e155672ae99f5",
+  "current_tag": "FAISAL-M231-CORRELATED-RECOVERY-DECISION",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1951,5 +1951,11 @@
   "m230_research_boundary": "researched_sel4_unikraft_cloud_hypervisor_litellm_vllm_sglang_tensorrt_llm_openai_anthropic_gemini_and_provider_neutral_contract_selected",
   "m230_model_authority_boundary": "route_selection_is_not_tool_or_privilege_authority_model_output_and_capability_metadata_remain_untrusted",
   "m230_validation_boundary": "strict_userspace_selftest_sanitizer_100000_round_benchmark_acpi_on_one_vcpu_qemu_m229_regression_and_industry_soak_passed",
-  "m230_production_boundary": "production_approval_false_physical_accelerator_external_builder_external_security_review_paid_provider_and_independent_evidence_pending"
+  "m230_production_boundary": "production_approval_false_physical_accelerator_external_builder_external_security_review_paid_provider_and_independent_evidence_pending",
+  "m231_correlated_recovery_decision": "pass_trace_objective_agent_worker_evidence_action_policy_backoff_compensation_generation_and_receipt_contract",
+  "m231_correlated_recovery_decision_evidence": "tools/faisal-build/evidence/m231-correlated-recovery-decision-validation.json",
+  "m231_research_boundary": "researched_opentelemetry_context_traces_baggage_ebpf_temporal_sel4_unikraft_and_provider_neutral_recovery_contract_selected",
+  "m231_model_authority_boundary": "model_output_trace_context_and_baggage_are_untrusted_irreversible_recovery_requires_independent_authority_and_compensation",
+  "m231_validation_boundary": "strict_userspace_selftest_sanitizer_100000_round_benchmark_acpi_on_one_vcpu_qemu_m229_m230_m228_regressions_and_industry_soak_passed",
+  "m231_production_boundary": "production_approval_false_physical_accelerator_external_builder_external_security_review_live_multihost_and_independent_evidence_pending"
 }
