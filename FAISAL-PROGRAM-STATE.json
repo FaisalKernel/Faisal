@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "f2e6c2c1d37d7d23a38458e7074d4922b9a46acc",
+  "current_head": "0baa403a47c6085dc12aab00f37dd8ee1c5546dd",
   "current_tag": "FAISAL-FRONTIER-EXECUTION-MEMORY-SNAPSHOT-INDEX-2026-08-20",
   "current_abi": 47,
   "operating_loop": [
@@ -2068,5 +2068,11 @@
   "frontier_execution_memory_snapshot_index_evidence": "tools/faisal-build/evidence/frontier-execution-memory-snapshot-index-validation-2026-08-20.json",
   "frontier_execution_memory_snapshot_index_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-2026-08-20.md",
   "frontier_execution_memory_snapshot_index_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-20",
-  "frontier_execution_memory_authority_boundary": "snapshot_payloads_model_proposals_and_robotics_action_proposals_remain_untrusted_data_and_never_privileged_authority"
+  "frontier_execution_memory_authority_boundary": "snapshot_payloads_model_proposals_and_robotics_action_proposals_remain_untrusted_data_and_never_privileged_authority",
+  "frontier_handoff_approval_lease": "pass_provider_neutral_propose_approve_consume_revoke_expire_lease_with_capability_and_generation_fencing_nonce_replay_protection_durable_receipts_and_chain_verification",
+  "frontier_handoff_approval_lease_evidence": "tools/faisal-build/evidence/frontier-handoff-approval-lease-validation-2026-08-21.json",
+  "frontier_handoff_approval_lease_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-2026-08-21.md",
+  "frontier_handoff_approval_lease_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-21",
+  "frontier_handoff_authority_boundary": "handoff_reasons_model_outputs_mcp_metadata_and_skill_instructions_remain_untrusted_data_and_never_self_authorize_agent_capabilities_or_irreversible_actions",
+  "frontier_inference_contract_fixture_repair": "pass_request_sequence_and_deterministic_logical_now_ns_seeded_before_model_router_admission"
 }
