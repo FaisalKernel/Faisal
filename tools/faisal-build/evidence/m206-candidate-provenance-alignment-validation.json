@@ -1,0 +1,39 @@
+{
+  "project": "FAISAL",
+  "milestone": "M206-candidate-provenance-alignment",
+  "schema": "org.faisal.candidate-provenance-alignment-validation.v1",
+  "recorded_at": "2026-08-18T09:54:03Z",
+  "status": "candidate_and_local_provenance_aligned_drift_rejections_pass",
+  "implementation": {
+    "alignment_verifier": "tools/faisal-build/verify_candidate_provenance_alignment.py",
+    "alignment_verifier_sha256": "d1532c04bc7ff7c19db11da2e1f9507e0f0d6738e175977629c61ebd6b50c564",
+    "negative_test": "build/test_m206_alignment_negative.py",
+    "negative_test_sha256": "a54d73007c8647ad1a2f39c851bbf0dd3bfcd9a1001dc94e67d7d42670ead4be",
+    "checks": [
+      "candidate repository HEAD is current HEAD",
+      "provenance repository HEAD is current HEAD or immediate parent",
+      "Linux 6.18.44 LTS source revision equality",
+      "bzImage path and SHA-256 equality",
+      "config path, SHA-256, and CONFIG_CFS_BANDWIDTH equality",
+      "unsigned and independent-builder-false boundary"
+    ]
+  },
+  "validation": {
+    "positive": "FAISAL_CANDIDATE_PROVENANCE_ALIGNMENT_OK checks=11 head=6bbe3e6bfe396ec81f65a341310ae067c5f8d238",
+    "negative": [
+      "M206_NEGATIVE_SOURCE_DRIFT_REJECT_OK",
+      "M206_NEGATIVE_ARTIFACT_DRIFT_REJECT_OK",
+      "M206_NEGATIVE_LINEAGE_DRIFT_REJECT_OK",
+      "M206_NEGATIVE_TEST_EXIT=0"
+    ],
+    "standard_candidate_validator": "FAISAL_PRODUCTION_CANDIDATE_MANIFEST_OK",
+    "local_provenance_verifier": "FAISAL_CANDIDATE_PROVENANCE_OK"
+  },
+  "boundary": {
+    "local_consistency_only": true,
+    "independent_builder": false,
+    "operator_signature": false,
+    "production_approval": false,
+    "note": "Alignment catches drift between candidate and local provenance artifacts; it does not establish independent trust or external qualification."
+  }
+}
