@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M232-verified-research-consensus-contract",
-  "recorded_at": "2026-08-18T16:13:51Z",
+  "recorded_at": "2026-08-18T16:15:41Z",
   "status": "local_contract_qualified_external_web_provider_and_kernel_sandbox_qualification_pending",
   "objective": "Prevent unverified or model-only web research from becoming durable world knowledge by enforcing source diversity, freshness, citation binding, conflict scoring, provenance, replay protection, and generation fencing.",
   "research": {
@@ -27,7 +27,7 @@
         "impact": "M232 represents search budget, source-domain identity, page age, tool provenance, and citation binding as explicit evidence rather than implicit trust."
       },
       {
-        "url": "https://docs.opentelemetry.io/docs/concepts/context-propagation/",
+        "url": "https://opentelemetry.io/docs/concepts/context-propagation/",
         "finding": "OpenTelemetry context propagation correlates trace and span context across service boundaries.",
         "impact": "Research requests can bind claim, source, tool, provider, and generation lineage without turning context into authority."
       },
@@ -76,8 +76,8 @@
     "benchmark_operations": 400000,
     "benchmark_ns_per_operation": 698,
     "asan_ubsan": true,
-    "qemu_kernel_boot": "pending final integrated run",
-    "regression_m231": "pending final integrated run"
+    "qemu_kernel_boot": "FAISAL_M76_QEMU_VALIDATION_OK on ACPI-on one-vCPU 4G; FAISAL_INDUSTRY_SOAK_OK rounds=2 iterations_per_round=256",
+    "regression_m231": "M231_RECOVERY_DECISION_VALIDATION_OK; M230_MODEL_ROUTER_VALIDATION_OK; M229_EXPERIENCE_EVIDENCE_VALIDATION_OK; M228_RUNNER_EXIT=0"
   },
   "boundary": {
     "production_approval": false,
