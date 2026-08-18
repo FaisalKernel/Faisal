@@ -1,0 +1,50 @@
+{
+  "project": "FAISAL",
+  "milestone": "M195-self-healing-hardened-qemu",
+  "schema": "org.faisal.self-healing-hardened-qemu-validation.v1",
+  "recorded_at": "2026-08-18T09:10:56Z",
+  "repository_parent_commit": "a794ba28bbe653f409ef798de7e51a81863b3d44",
+  "status": "self_healing_acpi_off_1vcpu_pass",
+  "implementation": {
+    "runner": "tools/faisal-build/run_self_healing_hardened_qemu.sh",
+    "runner_sha256": "90666d58090d2ce143e576eec0e4d07421965bcc763d5485a9cc9cdf3c58c7d1",
+    "runner_properties": [
+      "self-contained strict compilation of memory, deployment, self-healing, attestation, and runtime-verification services",
+      "configurable ACPI, SMP, memory, and timeout profile",
+      "explicit boot, test, and completion markers",
+      "marker-driven QEMU termination",
+      "strict rejection of kernel diagnostics including RCU stalls and kthread starvation"
+    ]
+  },
+  "profile": {
+    "qemu_acpi": "off",
+    "qemu_smp": 1,
+    "result": "pass",
+    "runner_log": "build/m195-self-healing-hardened/runner.log",
+    "guest_log": "build/m195-self-healing-hardened/rootfs/qemu.log",
+    "markers": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)\n\n\niPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+2EFCB260+2EF0B260 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from ROM..\u001bc\u001b[?7l\u001b[2J[    0.031186] ACPI BIOS Error (bug): A valid RSDP was not found (20250807/tbxfroot-222)\n\ufffd[   15.631104] Driver 'wmi-bmof' was unable to register with bus_type 'wmi' because the bus was not initialized.\nFAISAL_SELF_HEALING_BOOT_OK\nFAS_AUTOMATIC_ROLLBACK_OK recovery=4\nFAS_AUDIT_RETENTION_OK records=5\nFAS_APPROVED_REPAIR_CANARY_OK attempts=1\nFAS_CANARY_FAILURE_ROLLBACK_OK\nFAS_SECURITY_QUARANTINE_OK\nFAS_RETRY_LIMIT_QUARANTINE_OK attempts=4\nFAS_SELFTEST_EXIT=0\nFAISAL_SELF_HEALING_RC=0\nFAISAL_SELF_HEALING_COMPLETE\nqemu-system-x86_64: terminating on signal 15 from pid 2354551 (timeout)\nFAISAL_SELF_HEALING_QEMU_RC=0\n"
+  },
+  "verified_recovery_properties": [
+    "automatic rollback and audit retention",
+    "approved repair canary",
+    "canary failure rollback",
+    "security quarantine",
+    "retry-limit quarantine"
+  ],
+  "security_boundary": {
+    "automatic_repair_is_policy_gated": true,
+    "model_output_is_not_authority": true,
+    "unapproved_security_signal_quarantines": true
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "ACPI-on SMP is qualified.",
+      "Physical accelerator qualification occurred.",
+      "Independent security review occurred.",
+      "Operator signing or attested builder qualification occurred.",
+      "FAISAL is production-approved."
+    ],
+    "remaining_action": "Bind M195 evidence, continue multi-agent/world recovery stress, and complete independent enterprise qualification."
+  }
+}
