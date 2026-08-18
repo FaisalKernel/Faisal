@@ -119,6 +119,17 @@ def verify_report(path: Path, public_key: Path, expected_role: str) -> dict[str,
             f"external identity evidence type required in {path}")
     issuer = identity.get("issuer")
     require(isinstance(issuer, str) and issuer.strip(), f"identity issuer missing in {path}")
+    provenance = payload.get("provenance")
+    require(isinstance(provenance, dict), f"provenance missing in {path}")
+    for field in ("builder_id", "signer_id", "source_uri", "build_type", "source_revision", "config_sha256", "toolchain_digest"):
+        require(isinstance(provenance.get(field), str) and provenance[field].strip(),
+                f"provenance.{field} missing in {path}")
+    require(provenance["source_revision"] == payload.get("source_revision"),
+            f"provenance/source revision mismatch in {path}")
+    require(provenance["config_sha256"] == payload.get("config_sha256"),
+            f"provenance/configuration mismatch in {path}")
+    require(not provenance["builder_id"].startswith(("local:", "container:", "sandbox:")),
+            f"local builder ID is not qualifying evidence in {path}")
     artifact_map(report)
     return report
 
@@ -178,6 +189,15 @@ def command_verify(args: argparse.Namespace) -> int:
         secondary_identity = secondary_payload["builder_identity"]["identity_digest_sha256"]
         require(primary_identity != secondary_identity,
                 "builder identity digests match; same-host or duplicated identity")
+        primary_provenance = primary_payload["provenance"]
+        secondary_provenance = secondary_payload["provenance"]
+        require(primary_provenance["builder_id"] != secondary_provenance["builder_id"],
+                "builder IDs match; independent builder platform required")
+        require(primary_provenance["signer_id"] != secondary_provenance["signer_id"],
+                "signer IDs match; independent signer binding required")
+        for field in ("source_uri", "build_type", "source_revision", "config_sha256", "toolchain_digest"):
+            require(primary_provenance[field] == secondary_provenance[field],
+                    f"provenance field differs: {field}")
         primary_artifacts = artifact_map(primary)
         secondary_artifacts = artifact_map(secondary)
         require(set(primary_artifacts) == set(secondary_artifacts), "artifact sets differ")
@@ -193,6 +213,11 @@ def command_verify(args: argparse.Namespace) -> int:
             "secondary_report": str(Path(args.secondary).resolve()),
             "source_revision": primary_payload["source_revision"],
             "config_sha256": primary_payload["config_sha256"],
+            "source_uri": primary_provenance["source_uri"],
+            "build_type": primary_provenance["build_type"],
+            "toolchain_digest": primary_provenance["toolchain_digest"],
+            "builder_ids": {"primary": primary_provenance["builder_id"], "independent": secondary_provenance["builder_id"]},
+            "signer_ids": {"primary": primary_provenance["signer_id"], "independent": secondary_provenance["signer_id"]},
             "artifact_digests": {name: primary_artifacts[name]["sha256"] for name in sorted(primary_artifacts)},
             "identity_digests": {"primary": primary_identity, "independent": secondary_identity},
             "qualification_boundary": "external signed identity evidence verified; physical independence is accepted only from the declared external evidence type and issuer"

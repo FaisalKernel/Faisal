@@ -34,6 +34,15 @@ def report(directory: Path, role: str, private: Path, evidence_type: str, identi
         "builder_role": role,
         "source_revision": "test-source-revision",
         "config_sha256": "0" * 64,
+        "provenance": {
+            "builder_id": f"https://builder.example/{role}",
+            "signer_id": f"https://signer.example/{role}",
+            "source_uri": "git+file:///faisal/linux",
+            "build_type": "https://faisal.example/build/linux-kernel/v1",
+            "source_revision": "test-source-revision",
+            "config_sha256": "0" * 64,
+            "toolchain_digest": "2" * 64,
+        },
         "builder_identity": {
             "evidence_type": evidence_type,
             "issuer": "synthetic-test-root",
@@ -74,6 +83,9 @@ def main() -> int:
         assert json.loads(output.read_text())["result"] == "blocked"
 
         local = report(directory, "independent", secondary_private, "container_machine_id", "host-b")
+        local_data = json.loads(local.read_text())
+        local_data["signed_payload"].pop("provenance", None)
+        local.write_text(json.dumps(local_data))
         args.secondary = str(local)
         assert verifier.command_verify(args) == 1
 
