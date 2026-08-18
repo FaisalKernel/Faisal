@@ -8,10 +8,10 @@
   "status": "bounded_candidate_manifest_verified_production_approval_blocked",
   "candidate_manifest": {
     "path": "/home/ubuntu/agi-kernel/build/m182-candidate/production-candidate.json",
-    "sha256": "680fac48139a3c5d9e7a669c018e7bf33c98ed37e002e0be01282aed93e7a27b",
+    "sha256": "36ebb3c86bb45429bfa40f60c12d8600ae074b9acaeaea9bea6b62f88d1a39a4",
     "status": "bounded_candidate_not_production_approved",
-    "repository_head": "3437ac16a90deeee561f93cbb0a39b50f9400560",
-    "candidate_id": "faisal-lts-6.18.44-3437ac16a90d"
+    "repository_head": "13e928b6b524261294ec5a2ad4a91c8d634be65f",
+    "candidate_id": "faisal-lts-6.18.44-13e928b6b524"
   },
   "artifact": {
     "lts_source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
