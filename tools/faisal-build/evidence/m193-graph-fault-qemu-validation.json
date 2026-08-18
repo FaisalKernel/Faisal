@@ -1,0 +1,53 @@
+{
+  "project": "FAISAL",
+  "milestone": "M193-graph-fault-injection",
+  "schema": "org.faisal.graph-fault-qemu-validation.v1",
+  "recorded_at": "2026-08-18T09:01:18Z",
+  "repository_parent_commit": "d5ae35b784f82109261418f066fad0d76c3627bd",
+  "status": "graph_fault_acpi_off_2vcpu_pass",
+  "implementation": {
+    "selftest": "tools/testing/selftests/agi_lifecycle_graph_fault_test.c",
+    "selftest_sha256": "dba272ce86b48a34aa3dc7f06aff6a0fb2dedde4b57a949b8b204bd3b80db23b",
+    "runner": "tools/faisal-build/run_graph_fault_qemu.sh",
+    "runner_sha256": "b2436166ab7bccf4ef8e425e6eeff9bf20203d305501456f320147df35a51ac9",
+    "strict_compile": "pass with -O2 -Wall -Wextra -Werror -Wno-cpp -static",
+    "workload": [
+      "malformed graph request size rejection",
+      "missing dependency rejection",
+      "valid create and READY state assertion",
+      "duplicate node rejection",
+      "missing-node GET rejection",
+      "valid COMPLETE and COMPLETE state assertion",
+      "duplicate COMPLETE rejection",
+      "complete-node CANCEL rejection",
+      "completed-node GET state assertion"
+    ]
+  },
+  "profile": {
+    "qemu_acpi": "off",
+    "qemu_smp": 2,
+    "result": "pass",
+    "checks": 9,
+    "expected_rejections": 6,
+    "unexpected": 0,
+    "runner_log": "build/m193-graph-fault-qemu/runner.log",
+    "guest_log": "build/qemu-faisal-graph-fault/qemu.log",
+    "markers": "\u001bc\u001b[?7l\u001b[2J\u001b[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)\n\n\niPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+2EFCB260+2EF0B260 CA00\nPress Ctrl-B to configure iPXE (PCI 00:03.0)...\n                                                                               \n\n\nBooting from ROM..\u001bc\u001b[?7l\u001b[2J\u001b[0m.\n[    0.035621] ACPI BIOS Error (bug): A valid RSDP was not found (20250807/tbxfroot-222)\n\ufffd[   42.388977] Driver 'wmi-bmof' was unable to register with bus_type 'wmi' because the bus was not initialized.\nFAISAL_GRAPH_FAULT_BOOT_OK\nFAISAL_GRAPH_FAULT_OK checks=9 expected_rejections=6 unexpected=0\nFAISAL_GRAPH_FAULT_RC=0\n[   56.257024] reboot: Power off not available: System halted instead\nqemu-system-x86_64: terminating on signal 15 from pid 2352532 (timeout)\nFAISAL_GRAPH_FAULT_QEMU_RC=0\n"
+  },
+  "security_boundary": {
+    "invalid_requests_fail_closed": true,
+    "state_is_checked_after_expected_event_overflow": true,
+    "model_output_is_not_authority": true
+  },
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "ACPI-on SMP is qualified.",
+      "Physical accelerator qualification occurred.",
+      "Independent security review occurred.",
+      "Operator signing or attested builder qualification occurred.",
+      "FAISAL is production-approved."
+    ],
+    "remaining_action": "Bind M193 evidence, continue world/graph multi-operation stress, and complete independent enterprise qualification."
+  }
+}

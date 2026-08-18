@@ -50,6 +50,7 @@ def main() -> None:
         'm190-write-side-state-validation.json',
         'm191-graph-telemetry-qemu-validation.json',
         'm192-world-state-hardened-qemu-validation.json',
+        'm193-graph-fault-qemu-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:
