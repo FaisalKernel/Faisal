@@ -655,7 +655,29 @@ static int agi_lc_sandbox_ioctl(struct agi_lc_session *session,
 }
 
 static int agi_lc_push_record(struct agi_lc_session *session, u16 type,
-				      s32 status, u64 correlation, u64 metadata);
+					      s32 status, u64 correlation, u64 metadata);
+static u32 agi_lc_world_priority(u16 type, s32 status);
+static u32 agi_lc_world_drop_low_locked(struct agi_lc_session *session)
+{
+	u32 drop_index = session->head;
+	u32 lowest;
+	u32 i;
+
+	lowest = agi_lc_world_priority(session->records[drop_index].type,
+					       session->records[drop_index].status);
+	for (i = 1; i < session->count; i++) {
+		u32 index = (session->head + i) % AGI_LC_RING_SIZE;
+		u32 candidate = agi_lc_world_priority(session->records[index].type,
+							 session->records[index].status);
+
+		if (candidate < lowest) {
+			lowest = candidate;
+			drop_index = index;
+		}
+	}
+	return drop_index;
+}
+
 static int agi_lc_push_record_ex(struct agi_lc_session *session, u16 type,
 					 s32 status, u64 correlation,
 					 u64 metadata, u64 *sequence_out);
@@ -3277,28 +3299,15 @@ static int agi_lc_push_record_ex(struct agi_lc_session *session, u16 type,
 			    session->world_queue_policy != AGI_LC_WORLD_QUEUE_DROP_NEW) {
 				drop_index = session->head;
 				if (session->world_queue_policy == AGI_LC_WORLD_QUEUE_DROP_LOW) {
-					u32 lowest = agi_lc_world_priority(
-						session->records[drop_index].type,
-						session->records[drop_index].status);
-
-					for (i = 1; i < session->count; i++) {
-						u32 index = (session->head + i) % AGI_LC_RING_SIZE;
-						u32 candidate = agi_lc_world_priority(
-							session->records[index].type,
-							session->records[index].status);
-
-						if (candidate < lowest) {
-							lowest = candidate;
-							drop_index = index;
-						}
-					}
-					if (lowest >= priority) {
+					drop_index = agi_lc_world_drop_low_locked(session);
+					if (agi_lc_world_priority(
+							session->records[drop_index].type,
+							session->records[drop_index].status) >= priority) {
 						session->world_dropped++;
-													session->dropped_records++;
-							if (observability_sampled_event)
-								session->observability_dropped++;
-							session->world_last_loss_sequence = event_sequence;
-
+						session->dropped_records++;
+						if (observability_sampled_event)
+							session->observability_dropped++;
+						session->world_last_loss_sequence = event_sequence;
 						session->world_resync_required = true;
 						if (sequence_out)
 							*sequence_out = session->world_last_loss_sequence;
@@ -3318,16 +3327,15 @@ static int agi_lc_push_record_ex(struct agi_lc_session *session, u16 type,
 				session->dropped_records++;
 				if (observability_sampled_event)
 					session->observability_dropped++;
-			if (world_event) {
-				session->world_dropped++;
-				session->world_last_loss_sequence = event_sequence;
-				session->world_resync_required = true;
-			}
-			if (sequence_out)
-				*sequence_out = event_sequence;
-			ret = -EAGAIN;
-			goto out_unlock;
-
+				if (world_event) {
+					session->world_dropped++;
+					session->world_last_loss_sequence = event_sequence;
+					session->world_resync_required = true;
+				}
+				if (sequence_out)
+					*sequence_out = event_sequence;
+				ret = -EAGAIN;
+				goto out_unlock;
 			}
 		}
 		record = &session->records[session->tail];
