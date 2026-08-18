@@ -1,0 +1,53 @@
+{
+  "project": "FAISAL",
+  "milestone": "M199-graph-world-multiop-hardened-qemu",
+  "schema": "org.faisal.graph-world-multiop-hardened-qemu-validation.v1",
+  "recorded_at": "2026-08-18T09:25:25Z",
+  "status": "acpi_off_2vcpu_pass_acpi_on_2vcpu_rejected_rcu_diagnostic",
+  "implementation": {
+    "selftest": "tools/testing/selftests/agi_graph_world_multiop_stress_test.c",
+    "selftest_sha256": "68da826b44f31bd9bf2d45b0f188d359fc746311e5211bb7118cd1849bb78185",
+    "runner": "tools/faisal-build/run_graph_world_multiop_hardened_qemu.sh",
+    "runner_sha256": "cbeb3b979c480091b5d003613665bfa2e7fd72e749194722fb13272c30adaeda",
+    "compile": "strict static -O2 -Wall -Wextra -Werror against the lifecycle UAPI"
+  },
+  "acpi_off_2vcpu": {
+    "result": "pass",
+    "runner_log": "build/m199-graph-world/runner.log",
+    "guest_log": "build/m199-graph-world/rootfs/qemu.log",
+    "required_markers": [
+      "FAISAL_M199_BOOT_OK",
+      "M199_GRAPH_CHAIN_OK nodes=24 world_queries=6",
+      "M199_GRAPH_CANCEL_OK nodes=8 world_queries=10",
+      "M199_GRAPH_FAULT_GUARD_OK cases=2",
+      "M199_WORLD_SYNC_INTERLEAVE_OK queries=11 ack=63",
+      "M199_SELFTEST_EXIT=0",
+      "M199_SELFTEST_RC=0",
+      "FAISAL_M199_TEST_COMPLETE"
+    ]
+  },
+  "acpi_on_2vcpu": {
+    "result": "rejected_rcu_diagnostic",
+    "runner_log": "build/m199-graph-world-acpi-on/runner.log",
+    "guest_log": "build/m199-graph-world-acpi-on/rootfs/qemu.log",
+    "reason": "The hardened runner observed rcu_preempt stalls, RCU_GP_WAIT_FQS, and kthread-starvation diagnostics and rejected the profile."
+  },
+  "validated_properties": [
+    "24-node dependency-chain create/get/complete workload",
+    "8-node independent cancellation workload",
+    "11 interleaved world query/ACK operations",
+    "malformed graph size and dependency-overflow rejection",
+    "marker-driven QEMU termination and strict diagnostics"
+  ],
+  "production_boundary": {
+    "status": "not_production_approved",
+    "claims_not_made": [
+      "ACPI-on SMP qualification",
+      "physical accelerator qualification",
+      "independent builder or attested-farm qualification",
+      "independent external security review",
+      "operator-controlled production signing ceremony",
+      "live multihost deployment and rollback qualification"
+    ]
+  }
+}
