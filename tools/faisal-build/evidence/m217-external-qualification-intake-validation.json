@@ -28,6 +28,7 @@
   "boundary": {
     "fixture_only": true,
     "independent_external_review": false,
+    "independent_builder": false,
     "production_approval": false,
     "operator_signature": false,
     "model_output_is_authority": false,
