@@ -19,6 +19,8 @@ ACCELERATOR_EVIDENCE=${FAISAL_ACCELERATOR_EVIDENCE:-}
 REPLICATION_EVIDENCE=${FAISAL_REPLICATION_EVIDENCE:-}
 DEPLOYMENT_EVIDENCE=${FAISAL_DEPLOYMENT_EVIDENCE:-}
 EXTERNAL_SECURITY_REVIEW=${FAISAL_EXTERNAL_SECURITY_REVIEW:-}
+EXTERNAL_SECURITY_REVIEW_PACKAGE=${FAISAL_EXTERNAL_SECURITY_REVIEW_PACKAGE:-}
+EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY=${FAISAL_EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY:-}
 REQUIRE_PRODUCTION_LINE=${FAISAL_REQUIRE_PRODUCTION_LINE:-1}
 KERNEL_SOURCE=${FAISAL_KERNEL_SOURCE:-$LINUX}
 REQUIRED_KERNEL_LINE=${FAISAL_REQUIRED_KERNEL_LINE:-}
@@ -67,6 +69,14 @@ case "$EXTERNAL_SECURITY_REVIEW" in
   *.json) : ;;
   *) fail "structured JSON independent external-security-review evidence is required for production qualification" ;;
 esac
+[ -n "$EXTERNAL_SECURITY_REVIEW_PACKAGE" ] || fail "FAISAL_EXTERNAL_SECURITY_REVIEW_PACKAGE is required"
+[ -r "$EXTERNAL_SECURITY_REVIEW_PACKAGE" ] || fail "external security-review package manifest is unreadable"
+case "$EXTERNAL_SECURITY_REVIEW_PACKAGE" in
+  *.json) : ;;
+  *) fail "exact external security-review package manifest must be JSON" ;;
+esac
+[ -n "$EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY" ] || fail "FAISAL_EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY is required"
+[ -r "$EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY" ] || fail "external reviewer public key is unreadable"
 [ -x "$LINUX/tools/faisal-build/verify_industry_artifacts.sh" ] || fail "artifact verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_accelerator_qualification.sh" ] || fail "accelerator verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_replication_qualification.py" ] || fail "replication verifier unavailable"
@@ -172,7 +182,8 @@ FAISAL_DEPLOYMENT_VERIFY_REPORT="${REPORT}.deployment.tsv" \
 }
 printf 'deployment_governance\tpass\t%s\n' "$DEPLOYMENT_EVIDENCE" >> "$REPORT"
 FAISAL_EXTERNAL_SECURITY_REVIEW="$EXTERNAL_SECURITY_REVIEW" \
-FAISAL_SECURITY_REVIEW_PUBLIC_KEY="$PUBLIC_KEY" \
+FAISAL_EXTERNAL_SECURITY_REVIEW_PACKAGE="$EXTERNAL_SECURITY_REVIEW_PACKAGE" \
+FAISAL_SECURITY_REVIEW_PUBLIC_KEY="$EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY" \
 FAISAL_EXPECTED_SOURCE_REV="$expected_source_revision" \
 FAISAL_EXTERNAL_SECURITY_REVIEW_REPORT="${REPORT}.external-security-review.tsv" \
   python3 "$LINUX/tools/faisal-build/verify_external_security_review.py" >/tmp/faisal-release-external-security-review-gate.log 2>&1 || {

@@ -30,7 +30,15 @@ def valid_hex(value: object, length: int = 64) -> bool:
     return isinstance(value, str) and len(value) == length and value != "0" * length and all(c in "0123456789abcdef" for c in value.lower())
 
 
-def verify(report: Path, public_key: Path, expected_revision: str, now: int, max_age: int, require_external: bool = True) -> dict:
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def verify(report: Path, public_key: Path, expected_revision: str, now: int, max_age: int, require_external: bool = True, package: Path | None = None) -> dict:
     if report.suffix != ".json":
         fail("structured JSON external-review evidence is required")
     signature = Path(f"{report}.sig")
@@ -45,6 +53,26 @@ def verify(report: Path, public_key: Path, expected_revision: str, now: int, max
     if result.returncode != 0:
         fail("external-review signature mismatch")
     data = json.loads(report.read_text())
+    if package is not None:
+        if not package.is_file() or package.suffix != ".json":
+            fail("exact external-review package manifest is required")
+        package_data = json.loads(package.read_text())
+        if package_data.get("schema") != "org.faisal.external-security-review-package.v1":
+            fail("external-review package schema mismatch")
+        package_ref = data.get("review_package")
+        if not isinstance(package_ref, dict) or package_ref.get("manifest_sha256") != sha256_file(package):
+            fail("review evidence is not bound to the exact package manifest")
+        if package_ref.get("package_id") != package_data.get("package_id"):
+            fail("review package identity mismatch")
+        candidate = package_data.get("candidate")
+        if not isinstance(candidate, dict):
+            fail("review package candidate record is missing")
+        if candidate.get("source_revision") != expected_revision:
+            fail("review package source revision mismatch")
+        target = data.get("target")
+        for key in ("source_revision", "artifact_sha256", "config_sha256", "build_id"):
+            if target.get(key) != candidate.get(key):
+                fail(f"review target does not match package candidate: {key}")
     if data.get("schema") != SCHEMA:
         fail("external-review schema mismatch")
     if data.get("source_revision") != expected_revision:
@@ -68,6 +96,10 @@ def verify(report: Path, public_key: Path, expected_revision: str, now: int, max
         fail("reviewer independence record is incomplete")
     if reviewer.get("independent_of_project") is not True or reviewer.get("conflict_declaration") is not True:
         fail("reviewer independence or conflict declaration failed")
+    if not valid_hex(reviewer.get("public_key_sha256")) or reviewer.get("public_key_sha256") != sha256_file(public_key):
+        fail("reviewer signing key fingerprint is missing or mismatched")
+    if reviewer.get("signed_final_report") is not True:
+        fail("reviewer signed-final-report attestation is required")
     if not reviewer.get("qualification_evidence"):
         fail("reviewer qualification evidence missing")
     if not reviewer.get("organization") or not reviewer.get("reviewer_id"):
@@ -106,6 +138,8 @@ def verify(report: Path, public_key: Path, expected_revision: str, now: int, max
         fail(f"unresolved critical/high findings: critical={open_critical} high={open_high}")
     if disposition.get("recommendation") != "approve" or disposition.get("production_allowed") is not True:
         fail("review disposition does not approve this exact candidate")
+    if disposition.get("signed_by_reviewer") is not True:
+        fail("final production disposition lacks reviewer signature attestation")
     if disposition.get("target_source_revision") != expected_revision or disposition.get("target_artifact_sha256") != target.get("artifact_sha256"):
         fail("review disposition is not bound to the reviewed candidate")
     if not disposition.get("residual_risk") or not disposition.get("retest_complete"):
@@ -122,11 +156,13 @@ def main() -> int:
     report = Path(os.environ.get("FAISAL_EXTERNAL_SECURITY_REVIEW", ""))
     public_key = Path(os.environ.get("FAISAL_SECURITY_REVIEW_PUBLIC_KEY", ""))
     expected = os.environ.get("FAISAL_EXPECTED_SOURCE_REV", "")
+    package_value = os.environ.get("FAISAL_EXTERNAL_SECURITY_REVIEW_PACKAGE", "")
+    package = Path(package_value) if package_value else None
     output = Path(os.environ.get("FAISAL_EXTERNAL_SECURITY_REVIEW_REPORT", f"{report}.verification.tsv"))
     try:
         now = int(os.environ.get("FAISAL_SECURITY_REVIEW_NOW_EPOCH", str(int(time.time()))))
         max_age = int(os.environ.get("FAISAL_SECURITY_REVIEW_MAX_AGE_SECONDS", str(30 * 24 * 60 * 60)))
-        data = verify(report, public_key, expected, now, max_age, require_external=True)
+        data = verify(report, public_key, expected, now, max_age, require_external=True, package=package)
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text("check\tstatus\tdetail\nexternal_security_review\tpass\t" + data["reviewer"]["organization"] + "\n")
         print(f"FAISAL_EXTERNAL_SECURITY_REVIEW_OK report={output}")

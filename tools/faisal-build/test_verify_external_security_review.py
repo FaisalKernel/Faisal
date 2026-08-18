@@ -33,6 +33,8 @@ def good() -> dict:
         "reviewer": {
             "organization": "Independent Security Review Group",
             "reviewer_id": "reviewer-173-01",
+            "public_key_sha256": "TO_BE_BOUND_AFTER_KEY_GENERATION",
+            "signed_final_report": True,
             "affiliation": "external-security-review-group",
             "qualification_evidence": ["signed-certification-record", "engagement-scope"],
             "conflict_declaration": True,
@@ -61,6 +63,7 @@ def good() -> dict:
             "target_artifact_sha256": target["artifact_sha256"],
             "residual_risk": "Documented residual risks accepted only for this exact candidate.",
             "retest_complete": True,
+            "signed_by_reviewer": True,
         },
         "limitations": ["review applies only to the exact source, artifact, and evidence set"],
     }
@@ -72,6 +75,7 @@ def signed(directory: Path, data: dict) -> tuple[Path, Path]:
     report = directory / "review.json"
     subprocess.run(["openssl", "genpkey", "-algorithm", "RSA", "-pkeyopt", "rsa_keygen_bits:2048", "-out", str(private)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     subprocess.run(["openssl", "pkey", "-in", str(private), "-pubout", "-out", str(public)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    data["reviewer"]["public_key_sha256"] = validator.sha256_file(public)
     report.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
     subprocess.run(["openssl", "dgst", "-sha256", "-sign", str(private), "-out", f"{report}.sig", str(report)], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return report, public
