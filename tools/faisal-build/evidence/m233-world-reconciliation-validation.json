@@ -1,7 +1,7 @@
 {
   "project": "FAISAL",
   "milestone": "M233-world-state-reconciliation-contract",
-  "recorded_at": "2026-08-18T16:23:10Z",
+  "recorded_at": "2026-08-18T16:24:31Z",
   "status": "local_contract_qualified_external_state_store_and_deployment_qualification_pending",
   "objective": "Compare expected and observed world state deterministically, classify drift, bind snapshots and observations to evidence, and emit a proposal-only receipt without granting model output authority.",
   "research": {
