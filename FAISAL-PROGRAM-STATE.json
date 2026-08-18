@@ -5,9 +5,9 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "3ea855741618fb0e7b24a8bbcb701b54088ab1e0",
-  "current_tag": "FAISAL-M241-AGENT-RUNTIME-SUPERVISOR",
-  "current_abi": 40,
+  "current_head": "3e150d923faeecdd68b4e788eb54afbbd7bd7c50",
+  "current_tag": "FAISAL-M242-UNIFIED-AI-CONTROL-PLANE-FABRIC",
+  "current_abi": 41,
   "operating_loop": [
     "RESEARCH",
     "DESIGN",
@@ -2017,5 +2017,11 @@
   "m241_research_boundary": "researched_temporal_durable_replay_kubernetes_priority_preemption_openai_agents_sdk_sessions_handoffs_tools_guardrails_and_existing_faisal_execution_memory_coordination_sandbox",
   "m241_model_authority_boundary": "model_outputs_plans_tool_proposals_provider_metadata_and_anomaly_hints_are_untrusted_and_never_execution_authority",
   "m241_validation_boundary": "strict_userspace_selftest_38_cases_8_mutation_rejections_scale_512_objectives_8_thread_256_objective_concurrency_asan_ubsan_m237_m238_m239_m240_m236_m228_regressions_linux72_qemu_boot_industry_soak_and_multitenant_fixture_passed",
-  "m241_production_boundary": "production_approval_false_million_agent_scale_physical_accelerator_independent_builder_external_security_review_production_pki_multihost_live_migration_rollback_and_cve_operations_pending"
+  "m241_production_boundary": "production_approval_false_million_agent_scale_physical_accelerator_independent_builder_external_security_review_production_pki_multihost_live_migration_rollback_and_cve_operations_pending",
+  "m242_unified_ai_control_plane_fabric": "pass_provider_neutral_node_observation_topology_aware_shard_placement_durable_lease_renewal_migration_release_backpressure_quarantine_expired_recovery_and_replay",
+  "m242_unified_ai_control_plane_fabric_evidence": "tools/faisal-build/evidence/m242-unified-ai-control-plane-fabric-validation.json",
+  "m242_research_boundary": "researched_ray_placement_groups_kubernetes_topology_manager_device_plugins_and_nvidia_dynamo_request_control_state_planes",
+  "m242_model_authority_boundary": "model_outputs_runtime_hints_provider_metadata_and_planner_proposals_are_untrusted_and_never_placement_or_execution_authority",
+  "m242_validation_boundary": "strict_selftest_48_mutation_rejections_6_scale_64_nodes_256_shards_8_thread_256_shard_concurrency_10000_fuzz_asan_ubsan_m236_m237_m238_m239_m240_m241_regressions_linux72_qemu_soak_multitenant_broad_stress_passed",
+  "m242_production_boundary": "production_approval_false_million_agent_scale_distributed_consensus_live_multihost_transport_physical_accelerator_zero_copy_inference_power_and_external_evidence_pending"
 }
