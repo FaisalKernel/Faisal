@@ -1,0 +1,82 @@
+{
+  "project": "FAISAL",
+  "milestone": "M182-production-candidate-contract",
+  "schema": "org.faisal.production-candidate-validation.v1",
+  "recorded_at": "2026-08-18T00:00:00Z",
+  "recorded_epoch": 1787030584,
+  "repository_parent_commit": "3437ac16a90deeee561f93cbb0a39b50f9400560",
+  "status": "bounded_candidate_manifest_verified_production_approval_blocked",
+  "candidate_manifest": {
+    "path": "/home/ubuntu/agi-kernel/build/m182-candidate/production-candidate.json",
+    "sha256": "680fac48139a3c5d9e7a669c018e7bf33c98ed37e002e0be01282aed93e7a27b",
+    "status": "bounded_candidate_not_production_approved",
+    "repository_head": "3437ac16a90deeee561f93cbb0a39b50f9400560",
+    "candidate_id": "faisal-lts-6.18.44-3437ac16a90d"
+  },
+  "artifact": {
+    "lts_source_revision": "105f2b85e4c26305a79f5e584df6ebb705858d33",
+    "bzImage": "/home/ubuntu/agi-kernel/build/faisal-lts-6.18.44/arch/x86/boot/bzImage",
+    "bzImage_sha256": "8766f1019d80598c7982d91d89d7df27385a91ca7ea17d114d8869267204870b",
+    "config": "/home/ubuntu/agi-kernel/build/faisal-lts-6.18.44/.config",
+    "config_sha256": "2c282274f1f716e2b1135b0a1fb819f99525dbe099ea0d31f1b3a2676f980e06",
+    "required_config": {"CONFIG_CFS_BANDWIDTH": "y"}
+  },
+  "implementation": {
+    "manifest_generator": "tools/faisal-build/prepare_production_candidate_manifest.py",
+    "manifest_generator_sha256": "1a0c7d82269672e1594a4a41808866a6d9cebe47ba1458e6abd2c2b753d4917a",
+    "manifest_validator": "tools/faisal-build/verify_production_candidate_manifest.py",
+    "manifest_validator_sha256": "89b6b0c71838a6d7d4974d748ce3f6648bcda06191259a45ee683f82f1c743b1",
+    "integration_test": "tools/faisal-build/test_verify_production_candidate_manifest.py",
+    "integration_test_sha256": "e14e54a6a416a523fbc8a31ed12855ce1456454d99b3abd744ea17539da8fadc",
+    "production_gate_sha256": "30e87a8e8c1ebbdc676724532ffbc2b884bb2ac9bfc9afcb56898929fdd34cf3",
+    "runbook_sha256": "e03ae151b0807314dcee65af6fb6fe78c05de99cc2c155ba2594901bf923c85f",
+    "research_sha256": "fad1fedd1dcb140aa14ac95b89c8a849ed96ddf134818196092b791559287a01"
+  },
+  "qualification_scope": {
+    "linux_lts_build": true,
+    "software_regressions": true,
+    "qemu_regressions": true,
+    "representative_tcg_soak": true,
+    "physical_hardware": false,
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "external_security_review": false,
+    "external_multihost_replication": false,
+    "live_multihost_deployment": false,
+    "live_cve_operations": false
+  },
+  "tests": {
+    "candidate_validator_positive": "pass",
+    "candidate_validator_approval_overstatement_denial": "pass",
+    "candidate_validator_hardware_overstatement_denial": "pass",
+    "candidate_validator_missing_blocker_denial": "pass",
+    "candidate_validator_artifact_tamper_denial": "pass",
+    "production_gate_syntax": "pass",
+    "production_gate_without_external_inputs": "fail_closed"
+  },
+  "approval": {
+    "status": "blocked",
+    "operator_approved": false,
+    "authority": "none",
+    "model_output_is_authority": false,
+    "signature_required": true,
+    "signature_present": false
+  },
+  "remaining_production_blockers": [
+    "independent_external_builder_or_attested_farm",
+    "operator_signing_ceremony_trusted_distribution_rotation_revocation",
+    "physical_gpu_npu_vram_iommu_dma_vendor_driver",
+    "independent_external_security_review_signed_disposition",
+    "production_pki_external_multihost_replication_live_kms_attestation",
+    "live_multihost_migration_rollback_irreversible_action_compensation",
+    "operator_owned_cve_workflow_upstream_sync_external_feedback"
+  ],
+  "claims_not_made": [
+    "production approval",
+    "physical hardware qualification",
+    "independent builder qualification",
+    "live external security review",
+    "live production PKI/KMS/TPM qualification",
+    "zero-CVE or vulnerability-free status"
+  ]
+}
