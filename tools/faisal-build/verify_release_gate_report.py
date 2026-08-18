@@ -11,7 +11,7 @@ KNOWN_CHECKS = {
     'operator_release_authority', 'signed_artifacts', 'production_candidate_manifest', 'local_candidate_preflight',
     'kernel_release_line', 'lts_soak_requalification', 'signing_authority_operational_proof', 'security_evidence',
     'advisory_ledger', 'cve_operations', 'accelerator_qualification', 'replication_qualification',
-    'external_replication_qualification', 'deployment_governance', 'live_deployment_qualification',
+    'external_replication_qualification', 'external_qualification_intake', 'deployment_governance', 'live_deployment_qualification',
     'external_security_review', 'signed_release_attestation', 'adapter_conformance', 'independent_rebuild', 'rollback_qemu', 'report_integrity',
 }
 

@@ -33,6 +33,8 @@ LIVE_DEPLOYMENT_PACKAGE=${FAISAL_LIVE_DEPLOYMENT_PACKAGE:-}
 EXTERNAL_SECURITY_REVIEW=${FAISAL_EXTERNAL_SECURITY_REVIEW:-}
 EXTERNAL_SECURITY_REVIEW_PACKAGE=${FAISAL_EXTERNAL_SECURITY_REVIEW_PACKAGE:-}
 EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY=${FAISAL_EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY:-}
+EXTERNAL_QUALIFICATION_PACKAGE=${FAISAL_EXTERNAL_QUALIFICATION_PACKAGE:-}
+EXTERNAL_QUALIFICATION_KEYS=${FAISAL_EXTERNAL_QUALIFICATION_KEYS:-}
 RELEASE_CANDIDATE_BUNDLE=${FAISAL_RELEASE_CANDIDATE_BUNDLE:-}
 SIGNED_RELEASE_ATTESTATION=${FAISAL_SIGNED_RELEASE_ATTESTATION:-}
 SIGNED_ATTESTATION_KEYRING=${FAISAL_SIGNED_ATTESTATION_KEYRING:-}
@@ -162,6 +164,7 @@ esac
 [ -x "$LINUX/tools/faisal-build/verify_lts_soak_requalification.py" ] || fail "LTS soak requalification verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_live_deployment_qualification.py" ] || fail "live deployment verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_external_security_review.py" ] || fail "external security-review verifier unavailable"
+[ -r "$LINUX/tools/faisal-build/verify_external_qualification_intake.py" ] || fail "external qualification-intake verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_advisory_ledger.sh" ] || fail "advisory ledger verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_cve_operations.py" ] || fail "CVE operations verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_kernel_release_line.sh" ] || fail "kernel release-line verifier unavailable"
@@ -373,6 +376,23 @@ FAISAL_EXTERNAL_SECURITY_REVIEW_REPORT="${REPORT}.external-security-review.tsv" 
   fail "independent external security review verification"
 }
 printf 'external_security_review\tpass\t%s\n' "$EXTERNAL_SECURITY_REVIEW" >> "$REPORT"
+if [ "$REQUIRE_PRODUCTION_LINE" = 1 ]; then
+  [ -n "$EXTERNAL_QUALIFICATION_PACKAGE" ] || fail "FAISAL_EXTERNAL_QUALIFICATION_PACKAGE is required"
+  [ -r "$EXTERNAL_QUALIFICATION_PACKAGE" ] || fail "external qualification package is unreadable"
+  [ -n "$EXTERNAL_QUALIFICATION_KEYS" ] || fail "FAISAL_EXTERNAL_QUALIFICATION_KEYS is required"
+  [ -r "$EXTERNAL_QUALIFICATION_KEYS" ] || fail "external qualification trusted-key file is unreadable"
+  python3 "$LINUX/tools/faisal-build/verify_external_qualification_intake.py" \
+    --package "$EXTERNAL_QUALIFICATION_PACKAGE" \
+    --trusted-keys "$EXTERNAL_QUALIFICATION_KEYS" \
+    --candidate "$PRODUCTION_CANDIDATE_MANIFEST" \
+    --provenance "$CANDIDATE_PROVENANCE_MANIFEST" >/tmp/faisal-release-external-qualification-intake.log 2>&1 || {
+    cat /tmp/faisal-release-external-qualification-intake.log >&2
+    fail "external qualification intake verification"
+  }
+  printf 'external_qualification_intake\tpass\t%s\n' "$EXTERNAL_QUALIFICATION_PACKAGE" >> "$REPORT"
+else
+  printf 'external_qualification_intake\tnot-enforced\tFAISAL_REQUIRE_PRODUCTION_LINE=0\n' >> "$REPORT"
+fi
 if [ "$RUN_ADAPTER_CONFORMANCE" = 1 ]; then
   FAISAL_BUILD="$BUILD_A" \
   FAISAL_ADAPTER_CONFORMANCE_REPORT="${REPORT}.adapter.tsv" \

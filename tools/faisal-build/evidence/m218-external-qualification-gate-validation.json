@@ -1,0 +1,42 @@
+{
+  "project": "FAISAL",
+  "milestone": "M218-external-qualification-gate",
+  "recorded_at": "2026-08-18T10:46:00Z",
+  "status": "external_qualification_intake_wired_into_production_gate_and_fail_closed_tests_pass",
+  "implementation": {
+    "release_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "release_gate_sha256": "68346fd1a1c2ff286fe315bab6841598440f2746c8fc8949050d9efa25ae2cce",
+    "report_verifier": "tools/faisal-build/verify_release_gate_report.py",
+    "report_verifier_sha256": "8f0e9a33e171737209c4c5dcd43817f646aa3f78e95a4f323097932fcb158a70",
+    "test": "build/test_m218_external_qualification_gate.py",
+    "test_sha256": "cdaa751e15d81e1ae931bd4743ea721c503611559c7e4e7d40460b7b0355aa59",
+    "checks": [
+      "production-line external qualification package and keyring required",
+      "M217 verifier invocation wired into production branch",
+      "local-mode not-enforced report marker",
+      "external_qualification_intake report known-check acceptance",
+      "missing production inputs remain fail-closed"
+    ]
+  },
+  "validation": {
+    "positive": [
+      "M218_GATE_EXTERNAL_QUALIFICATION_WIRING_OK",
+      "M218_GATE_REPORT_MARKER_OK"
+    ],
+    "negative": [
+      "M218_NEGATIVE_PRODUCTION_INPUTS_FAIL_CLOSED_BY_REQUIRED_ENVIRONMENT",
+      "M218_NEGATIVE_TEST_EXIT=0"
+    ],
+    "syntax": "sh -n and report verifier pass"
+  },
+  "boundary": {
+    "gate_integration_only": true,
+    "independent_external_review": false,
+    "production_approval": false,
+    "operator_signature": false,
+    "independent_builder": false,
+    "physical_hardware": false,
+    "model_output_is_authority": false,
+    "note": "The gate now enforces a real qualification-intake package when production mode is requested, but no real independent reviewer, external key, or qualification result exists in this environment."
+  }
+}
