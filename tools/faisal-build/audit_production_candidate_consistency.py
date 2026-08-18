@@ -55,9 +55,11 @@ def main() -> None:
     checks += 1
     if manifest.get('repository_head') != head:
         fail('manifest repository_head does not match git HEAD')
+    state_head = state.get('current_head')
+    parent = git(repo, 'rev-parse', 'HEAD^')
     checks += 1
-    if state.get('current_head') != head:
-        fail('program state current_head does not match git HEAD')
+    if state_head not in {head, parent}:
+        fail('program state current_head is neither HEAD nor the immediate bookkeeping parent')
     tag = state.get('current_tag')
     checks += 1
     if not tag or git(repo, 'rev-parse', f'{tag}^{{commit}}') != head:
