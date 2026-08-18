@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "49fc35adafd9c21e960ae7563d49395d8953d605",
-  "current_tag": "FAISAL-M189-WRITE-SIDE-LIFECYCLE-STRESS",
+  "current_head": "03a985419f25fdc8f6d0f08e56aa56e5407c66b2",
+  "current_tag": "FAISAL-M190-WRITE-SIDE-STATE-INVARIANTS",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1423,7 +1423,8 @@
     "FAISAL-M186-DRIVER-WARNING-CLEANUP",
     "FAISAL-M187-WORLD-QUEUE-DROP-HELPER",
     "FAISAL-M188-QUEUE-OVERFLOW-HARDENING",
-    "FAISAL-M189-WRITE-SIDE-LIFECYCLE-STRESS"
+    "FAISAL-M189-WRITE-SIDE-LIFECYCLE-STRESS",
+    "FAISAL-M190-WRITE-SIDE-STATE-INVARIANTS"
   ],
   "known_untracked_work": [
     "AGI-KERNEL-ARCHITECTURE.md",
@@ -1780,6 +1781,10 @@
     "m189_write_side_lifecycle_stress": "pass_valid_session_attach_64_graph_creates_64_graph_cancels_acpi_off_2vcpu_pass_acpi_on_1vcpu_pass_acpi_on_2vcpu_rejected_rcu_diagnostic",
     "m189_write_side_evidence": "tools/faisal-build/evidence/m189-write-side-lifecycle-validation.json",
     "m189_candidate_manifest": "/home/ubuntu/agi-kernel/build/m189-candidate/production-candidate.json sha256=9242bc7cd371f090b4d0cf9912054dfdbe203eaf7b86a514600b7ad1b1ebe6df",
-    "m189_release_scope": "bounded_write_side_lifecycle_qualification_pass_runner_rcu_diagnostics_hardened_acpi_on_smp_blocked_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
+    "m189_release_scope": "bounded_write_side_lifecycle_qualification_pass_runner_rcu_diagnostics_hardened_acpi_on_smp_blocked_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending",
+    "m190_write_side_state_invariants": "pass_graph_create_ready_and_cancel_cancelled_state_assertions_acpi_off_2vcpu_pass_acpi_on_1vcpu_pass_acpi_on_2vcpu_rejected_rcu_diagnostic",
+    "m190_write_side_state_evidence": "tools/faisal-build/evidence/m190-write-side-state-validation.json",
+    "m190_candidate_manifest": "/home/ubuntu/agi-kernel/build/m190-candidate/production-candidate.json sha256=31c3eb50deff565eb6d31d06a2b623de553a451779e01bac33374ccd599fa676",
+    "m190_release_scope": "bounded_write_side_state_invariant_qualification_pass_strict_rcu_diagnostic_gate_preserved_acpi_on_smp_blocked_and_external_operator_hardware_multihost_security_signing_deployment_and_cve_blockers_pending"
   }
 }
