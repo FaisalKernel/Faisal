@@ -1,0 +1,36 @@
+{
+  "project": "FAISAL",
+  "milestone": "M217-external-qualification-intake",
+  "recorded_at": "2026-08-18T10:41:30Z",
+  "status": "candidate_bound_signed_external_qualification_intake_and_rejection_tests_pass",
+  "implementation": {
+    "verifier": "tools/faisal-build/verify_external_qualification_intake.py",
+    "verifier_sha256": "b8d42186b359647a0a749013f431f154d72be072a58939bfec7d02b20ac2bc8d",
+    "test": "build/test_m217_external_qualification_intake.py",
+    "test_sha256": "739a243d3e907712f91869bf2ae6e2640419f77dc20e07b15ae53ed6d7dc88bb",
+    "checks": [
+      "active reviewer key and Ed25519 signature verification",
+      "candidate and provenance SHA-256 binding",
+      "source revision and expiry binding",
+      "independence and conflict-free declarations",
+      "project-affiliated self-review rejection",
+      "candidate-binding tamper rejection"
+    ]
+  },
+  "validation": {
+    "positive": "FAISAL_EXTERNAL_QUALIFICATION_INTAKE_OK checks=16",
+    "negative": [
+      "M217_NEGATIVE_SELF_REVIEW_REJECT_OK",
+      "M217_NEGATIVE_TAMPER_REJECT_OK",
+      "M217_NEGATIVE_TEST_EXIT=0"
+    ]
+  },
+  "boundary": {
+    "fixture_only": true,
+    "independent_external_review": false,
+    "production_approval": false,
+    "operator_signature": false,
+    "model_output_is_authority": false,
+    "note": "The fixture demonstrates intake semantics only. No independent organization, real reviewer key, signed external report, or production qualification was created."
+  }
+}
