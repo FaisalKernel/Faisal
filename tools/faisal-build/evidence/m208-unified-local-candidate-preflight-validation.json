@@ -2,7 +2,7 @@
   "project": "FAISAL",
   "milestone": "M208-unified-local-candidate-preflight",
   "schema": "org.faisal.unified-local-candidate-preflight-validation.v1",
-  "recorded_at": "2026-08-18T10:07:45Z",
+  "recorded_at": "2026-08-18T10:08:36Z",
   "status": "all_local_candidate_gates_agree_drift_blocks_pass",
   "implementation": {
     "preflight": "tools/faisal-build/run_candidate_local_preflight.py",
@@ -15,7 +15,11 @@
       "candidate/provenance alignment verifier",
       "production candidate consistency auditor",
       "candidate evidence freshness auditor"
-    ]
+    ],
+    "candidate_manifest": "build/m208-candidate/production-candidate.json",
+    "candidate_manifest_sha256": "cd68c3adcbebcc77160aac383fd7290bdbbf3843e1c1ffa4e2f7076648d6dc19",
+    "provenance_manifest": "build/m208-provenance/FAISAL-build-manifest.json",
+    "provenance_manifest_sha256": "dcfa3779373516370ce3bd28ee2e556926c972b0a4a2b09e3063bfd08c66b891"
   },
   "validation": {
     "positive": [
