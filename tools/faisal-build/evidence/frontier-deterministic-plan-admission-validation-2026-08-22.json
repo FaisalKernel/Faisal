@@ -1,0 +1,124 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-deterministic-plan-admission-2026-08-22",
+  "recorded_at": "2026-08-18T23:48:03Z",
+  "status": "bounded_deterministic_plan_admission_qualified",
+  "objective": "Validate model-generated execution plans before durable dispatch with deterministic DAG ordering, critical-path/slack analysis, aggregate budgets, capability coverage, approval barriers, and plan-digest verification.",
+  "research": [
+    {
+      "source": "https://developers.openai.com/api/docs/guides/agents",
+      "conclusion": "Current agent guidance emphasizes multi-step loops, handoffs, guardrails, approvals, tracing, sessions, and resumable workflows.",
+      "implementation_impact": "FAISAL adds a provider-neutral pre-dispatch plan-admission barrier; it does not treat a proposed plan or handoff as execution authority."
+    },
+    {
+      "source": "https://openai.github.io/openai-agents-python/",
+      "conclusion": "Agent orchestration exposes handoffs, agents-as-tools, guardrails, sessions, MCP integration, tracing, and resumable state.",
+      "implementation_impact": "FAISAL plan admission computes deterministic ordering and approval barriers before existing task, snapshot, and handoff services execute or transfer work."
+    },
+    {
+      "source": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "conclusion": "MCP defines asynchronous Tasks, capability negotiation, progress/cancellation, and explicit trust and safety boundaries.",
+      "implementation_impact": "MCP-originated tasks and skills remain untrusted plan inputs; admission checks capabilities, budgets, cycles, and approval requirements without executing them."
+    },
+    {
+      "source": "https://modelcontextprotocol.io/docs/2026-07-28/develop/build-with-agent-skills",
+      "conclusion": "Skills are portable instruction sets with progressive discovery and explicit deployment/auth/tool-design decisions.",
+      "implementation_impact": "Skill-derived plans receive the same deterministic DAG and approval analysis and cannot self-authorize irreversible actions."
+    },
+    {
+      "source": "https://developers.openai.com/api/docs/models",
+      "conclusion": "The paid-model catalog is changing provider metadata and capability input, not privileged authority.",
+      "implementation_impact": "The plan contract contains no hard-coded provider or model authority and records model metadata outside the authorization boundary."
+    }
+  ],
+  "implementation": {
+    "header": "tools/faisal-plan-admission/faisal_plan_admission.h",
+    "source": "tools/faisal-plan-admission/faisal_plan_admission.c",
+    "design": "tools/faisal-plan-admission/FAISAL-PLAN-ADMISSION-DESIGN.md",
+    "selftest": "tools/testing/selftests/faisal_plan_admission_test.c",
+    "benchmark": "tools/testing/selftests/faisal_plan_admission_benchmark.c",
+    "fuzz_test": "tools/testing/selftests/faisal_plan_admission_fuzz_test.c",
+    "runner": "tools/faisal-build/run_plan_admission_validation.sh",
+    "abi": 1,
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "bounded DAG validation",
+      "stable priority-then-node-ID topological ordering",
+      "cycle, missing-dependency, duplicate-node, and duplicate-dependency rejection",
+      "critical-path duration and earliest-finish analysis",
+      "minimum deadline slack calculation",
+      "aggregate CPU and cost budget checking",
+      "available capability coverage checking",
+      "risk and irreversible-node approval barriers",
+      "model-proposal approval barrier",
+      "SHA-256 plan digest and admission verification",
+      "separation from task execution, capability granting, and external side effects"
+    ]
+  },
+  "validation": {
+    "strict_build": true,
+    "compiler_flags": "-O2 -Wall -Wextra -Werror -std=c11 -pthread",
+    "selftest": "FPA_PLAN_ADMISSION_SELFTEST_OK cases=25 critical_path=300 slack_min=700 approval_barriers=2",
+    "fuzzing": "FPA_PLAN_ADMISSION_FUZZ_OK iterations=10000 rejected=7500 approval=1250 admitted=1250",
+    "asan_ubsan": "FPA_PLAN_ADMISSION_ASAN_UBSAN_OK",
+    "thread_sanitizer": "FPA_PLAN_ADMISSION_TSAN_OK",
+    "benchmark": {
+      "marker": "FPA_PLAN_ADMISSION_BENCHMARK_OK",
+      "rounds": 10000,
+      "nodes": 32,
+      "validation_ns": 114945442,
+      "raw_pass_baseline_ns": 141019,
+      "validation_ns_per_node": 359.20,
+      "raw_pass_baseline_ns_per_node": 0.44,
+      "admission_overhead_permille": 814106.06,
+      "interpretation": "The raw-pass loop is a previous-path proxy that copies/sums plan data without safety analysis. The validated path intentionally costs more because it performs graph checks, deterministic ordering, critical-path/slack analysis, budgets, capability checks, approval-barrier calculation, and SHA-256 digest generation. This is control-plane safety overhead, not an end-to-end inference or agent-throughput claim."
+    },
+    "real_workloads_and_regressions": {
+      "m95_durable_task_qemu": "FAISAL_M95_DURABLE_TASK_QEMU_PASS",
+      "m104_autonomy_control_qemu": "M104_AUTONOMY_CONTROL_QEMU_VALIDATION_OK",
+      "m98_mission_autonomy_qemu": "FAISAL_M98_MISSION_AUTONOMY_QEMU_PASS",
+      "runner": "FPA_PLAN_ADMISSION_VALIDATION_OK"
+    },
+    "live_model_catalog": {
+      "captured": true,
+      "model_count": 10,
+      "archive": "/home/ubuntu/agi-kernel/build/frontier/live-model-catalog-2026-08-22.json",
+      "sha256": "40054874a368d65dc021b80b2849ea92eb0398dcdac50e608280562bc286829f",
+      "interpretation": "The catalog was researched for provider-neutral planning and routing design only. No model output, model ID, price, or provider metadata grants authority."
+    }
+  },
+  "boundary": {
+    "production_approval": false,
+    "physical_hardware_qualification": false,
+    "live_robotics_qualification": false,
+    "live_model_execution": false,
+    "independent_external_security_review": false,
+    "independent_builder": false,
+    "model_output_is_authority": false,
+    "mcp_metadata_is_authority": false,
+    "plan_admission_is_execution_authority": false,
+    "plan_admission_grants_capabilities": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "security_boundaries": {
+    "cyclic_plan_admitted": false,
+    "missing_dependency_admitted": false,
+    "missing_capability_admitted": false,
+    "aggregate_budget_violation_admitted": false,
+    "deadline_infeasible_plan_admitted": false,
+    "model_proposal_self_approved": false,
+    "irreversible_node_self_approved": false,
+    "tampered_admission_accepted": false,
+    "tool_execution": false,
+    "privileged_kernel_code_changed": false
+  },
+  "qualification_limits": [
+    "The subsystem is a bounded userspace/control-plane plan validator; it does not generate plans, call models, execute tasks, grant capabilities, or authorize external side effects.",
+    "The benchmark compares plan admission with a raw-pass previous-path proxy and must not be interpreted as a claim of end-to-end latency, throughput, tokens/sec, or cost superiority.",
+    "No live paid-model call, MCP server, browser session, robotics device, physical accelerator, production cluster, or operator approval ceremony was used.",
+    "The existing task engine remains responsible for task leases, retries, recovery, and persistence; the plan contract is a pre-dispatch analysis layer.",
+    "Production approval remains blocked by the established independent builder, signing, physical hardware, secure boot/TPM, live multihost, independent security review, and CVE-ownership requirements."
+  ]
+}
