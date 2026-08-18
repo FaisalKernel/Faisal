@@ -164,6 +164,7 @@ esac
 [ -x "$LINUX/tools/faisal-build/verify_security_release_evidence.sh" ] || fail "security evidence verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_production_candidate_manifest.py" ] || fail "production candidate manifest verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/run_candidate_local_preflight.py" ] || fail "unified local candidate preflight unavailable"
+[ -x "$LINUX/tools/faisal-build/verify_release_gate_report.py" ] || fail "release-gate report integrity verifier unavailable"
 [ -r "$LINUX/tools/faisal-build/faisal_release_authority.py" ] || fail "release authority verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_signing_authority_operational_proof.py" ] || fail "signing-authority operational-proof verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/compare_reproducible_builds.sh" ] || fail "reproducibility comparator unavailable"
@@ -375,5 +376,11 @@ if [ "$RUN_ROLLBACK_QEMU" = 1 ]; then
 else
   printf 'rollback_qemu\tnot-run\tFAISAL_RUN_ROLLBACK_QEMU=1 required\n' >> "$REPORT"
 fi
+
+printf 'report_integrity\tpass\t%s\n' "$REPORT" >> "$REPORT"
+python3 "$LINUX/tools/faisal-build/verify_release_gate_report.py" --report "$REPORT" >/tmp/faisal-release-report-integrity.log 2>&1 || {
+  cat /tmp/faisal-release-report-integrity.log >&2
+  fail "release-gate report integrity"
+}
 
 printf 'FAISAL_PRODUCTION_RELEASE_GATE_OK\nreport=%s\n' "$REPORT"

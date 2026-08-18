@@ -1,0 +1,43 @@
+{
+  "project": "FAISAL",
+  "milestone": "M210-release-gate-report-integrity",
+  "schema": "org.faisal.release-gate-report-integrity-validation.v1",
+  "recorded_at": "2026-08-18T10:14:42Z",
+  "status": "report_integrity_checker_pass_self_consistency_integrated",
+  "implementation": {
+    "checker": "tools/faisal-build/verify_release_gate_report.py",
+    "checker_sha256": "b38719b913111929e7ff8969af5bb995fc390d50c5c459ffafc6dde4de14773f",
+    "production_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "production_gate_sha256": "ccfa34e89e8b4db624d95fa4f0cb20a9e03015a417b3a3d54895fb3b964b3a9f",
+    "negative_test": "build/test_m210_report_integrity_negative.py",
+    "negative_test_sha256": "5a7c9c3db4a3af1b9eb8d2f6b50f6e8f74bd3c5413896b914f0037dc1c9672b1",
+    "checks": [
+      "exact TSV header",
+      "known check-name contract",
+      "unique check rows",
+      "allowed status values",
+      "non-empty trustworthy pass details",
+      "required-check presence",
+      "final report_integrity self-check integration"
+    ]
+  },
+  "validation": {
+    "positive": "FAISAL_RELEASE_GATE_REPORT_OK checks=3",
+    "negative": [
+      "M210_NEGATIVE_MISSING_REQUIRED_REJECT_OK",
+      "M210_NEGATIVE_DUPLICATE_REJECT_OK",
+      "M210_NEGATIVE_UNKNOWN_REJECT_OK",
+      "M210_NEGATIVE_STATUS_REJECT_OK",
+      "M210_NEGATIVE_TEST_EXIT=0"
+    ],
+    "gate_integration_static": "gate_integration_static=ok",
+    "shell_syntax": "shell_syntax=ok"
+  },
+  "boundary": {
+    "report_integrity_only": true,
+    "independent_builder": false,
+    "operator_signature": false,
+    "production_approval": false,
+    "note": "A consistent report is not evidence that the underlying external gates passed; this checker only validates report structure and declared local execution contract."
+  }
+}
