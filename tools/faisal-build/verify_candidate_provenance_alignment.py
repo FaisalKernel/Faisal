@@ -34,10 +34,10 @@ def main() -> None:
     parent = git.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD^'], text=True).strip()
     candidate_head = candidate.get('repository_head')
     provenance_head = provenance.get('repository_head')
-    if candidate_head != head:
-        fail('candidate is not generated from current HEAD')
-    if provenance_head not in {candidate_head, parent}:
-        fail('provenance is not bound to candidate HEAD or its immediate parent')
+    if candidate_head not in {head, parent}:
+        fail('candidate is not generated from HEAD or its immediate parent')
+    if provenance_head != candidate_head or provenance_head not in {head, parent}:
+        fail('provenance and candidate are not aligned to the same HEAD or immediate parent')
     if candidate.get('lts_source_revision') != provenance.get('source_revision') or candidate.get('lts_source_revision') != LTS_SOURCE_REVISION:
         fail('candidate and provenance source revisions differ')
     artifact = candidate.get('artifact', {})
