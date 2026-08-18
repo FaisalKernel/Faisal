@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "72d8db7dab09ccd571c52865708518611a23ae58",
-  "current_tag": "FAISAL-M235-BROWSER-INTERACTION-VERIFICATION",
+  "current_head": "d8cdbbf115f6e619f2dee523ca5ad3c242871155",
+  "current_tag": "FAISAL-M236-MULTI-AGENT-COORDINATION",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1981,5 +1981,11 @@
   "m235_research_boundary": "researched_webdriver_bidi_chrome_devtools_protocol_playwright_locators_and_playwright_accessibility_testing",
   "m235_model_authority_boundary": "model_browser_proposals_provider_messages_and_browser_responses_are_untrusted_and_never_execution_authority",
   "m235_validation_boundary": "strict_userspace_selftest_sanitizer_100000_round_benchmark_acpi_on_one_vcpu_qemu_m234_m233_m232_m231_m230_m229_m228_regressions_and_industry_soak_pending_final_evidence_bind",
-  "m235_production_boundary": "production_approval_false_live_browser_webdriver_bidi_cdp_external_builder_physical_accelerator_external_security_review_and_independent_evidence_pending"
+  "m235_production_boundary": "production_approval_false_live_browser_webdriver_bidi_cdp_external_builder_physical_accelerator_external_security_review_and_independent_evidence_pending",
+  "m236_multi_agent_coordination": "pass_capability_negotiation_evidence_bound_delegation_quorum_challenge_generation_fencing_receipt_and_non_authority_contract",
+  "m236_multi_agent_coordination_evidence": "tools/faisal-build/evidence/m236-multi-agent-coordination-validation.json",
+  "m236_research_boundary": "researched_aios_vllm_openai_structured_outputs_anthropic_tool_use_gemini_structured_outputs_linux_sched_ext_mcp_temporal_openai_agents_sdk_and_kubernetes_scheduler",
+  "m236_model_authority_boundary": "model_outputs_tool_calls_handoffs_provider_protocols_and_agent_messages_are_untrusted_and_never_execution_authority",
+  "m236_validation_boundary": "strict_userspace_selftest_asan_ubsan_100000_round_benchmark_acpi_on_one_vcpu_qemu_industry_soak_and_m235_regression_pending_final_evidence_bind",
+  "m236_production_boundary": "production_approval_false_live_multihost_coordination_external_builder_physical_accelerator_external_security_review_production_pki_and_independent_evidence_pending"
 }
