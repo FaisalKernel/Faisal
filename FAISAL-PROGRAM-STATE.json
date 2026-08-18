@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "809596cd8867011612f0495809c978fe8727339a",
-  "current_tag": "FAISAL-M225-KUBERNETES-FLEET-INTENT",
+  "current_head": "e7567281aeea23fe5200024cc496b16994820be8",
+  "current_tag": "FAISAL-M226-ACCELERATOR-FABRIC",
   "current_abi": 38,
   "operating_loop": [
     "RESEARCH",
@@ -1922,5 +1922,9 @@
   "m225_kubernetes_fleet_intent": "pass_agent_lineage_authority_topology_resource_gang_placement_stale_generation_fencing_and_node_failure_recovery",
   "m225_kubernetes_fleet_intent_evidence": "tools/faisal-build/evidence/m225-kubernetes-fleet-intent-validation.json",
   "m225_comparison_boundary": "FAISAL_control_plane_fixture_complements_kubernetes_dra_kueue_gpu_operator_and_physical_fleet_without_replacing_or_beating_live_fleet_operations",
-  "m225_production_boundary": "production_approval_false_kubernetes_qualification_false_physical_accelerator_external_multinode_and_independent_evidence_pending"
+  "m225_production_boundary": "production_approval_false_kubernetes_qualification_false_physical_accelerator_external_multinode_and_independent_evidence_pending",
+  "m226_accelerator_fabric": "pass_provider_neutral_device_memory_topology_dma_peer_collective_provenance_generation_and_device_loss_contract",
+  "m226_accelerator_fabric_evidence": "tools/faisal-build/evidence/m226-accelerator-fabric-validation.json",
+  "m226_vendor_comparison_boundary": "FAISAL_adds_cross_provider_policy_and_evidence_semantics_without_replacing_nvidia_amd_intel_hardware_drivers_firmware_or_collective_kernels",
+  "m226_production_boundary": "production_approval_false_vendor_driver_qualification_false_physical_accelerator_dma_interconnect_and_external_evidence_pending"
 }
