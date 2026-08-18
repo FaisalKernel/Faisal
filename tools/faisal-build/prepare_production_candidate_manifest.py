@@ -73,6 +73,7 @@ def main() -> None:
         'm213-release-candidate-bundle-validation.json',
         'm214-release-candidate-archive-validation.json',
         'm215-release-attestation-validation.json',
+        'm216-release-gate-attestation-integration-validation.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:

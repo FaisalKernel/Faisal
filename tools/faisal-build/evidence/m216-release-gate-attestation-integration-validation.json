@@ -1,0 +1,40 @@
+{
+  "project": "FAISAL",
+  "milestone": "M216-release-gate-attestation-integration",
+  "recorded_at": "2026-08-18T10:39:30Z",
+  "status": "signed_attestation_enforcement_wired_into_release_gate_and_regression_tests_pass",
+  "implementation": {
+    "release_gate": "tools/faisal-build/run_production_release_gate.sh",
+    "release_gate_sha256": "fe7f2fac0302baff36e8ebd8abcb19c110346f13be4f4797e2f8a74b27181e6f",
+    "report_verifier": "tools/faisal-build/verify_release_gate_report.py",
+    "report_verifier_sha256": "d7b271cdeffae6502f5a999c60f8ee760d43b06603ee3a6915faa9111ad9d4b3",
+    "integration_test": "build/test_m216_release_gate_attestation.py",
+    "integration_test_sha256": "01cc96b9500e9e92c19f09ca7108eb5fe154e44d6b4e74127b1744e77eb150fb",
+    "checks": [
+      "production-mode signed-attestation input enforcement",
+      "local-mode not-enforced compatibility marker",
+      "signed_release_attestation report known-check contract",
+      "invalid enforcement-mode rejection",
+      "M215 cryptographic attestation regression"
+    ]
+  },
+  "validation": {
+    "positive": [
+      "M216_GATE_WIRING_STATIC_OK",
+      "M216_GATE_REPORT_MARKER_OK",
+      "M216_ATTESTATION_REGRESSION_OK",
+      "M216_NEGATIVE_TEST_EXIT=0"
+    ],
+    "syntax": "sh -n and Python compilation pass"
+  },
+  "boundary": {
+    "gate_integration_only": true,
+    "operator_signature": false,
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_hardware": false,
+    "external_security_review": false,
+    "model_output_is_authority": false,
+    "note": "The gate now has an enforcement path for a real trusted operator attestation, but no real operator key, ceremony, external approval, or production authorization was created."
+  }
+}

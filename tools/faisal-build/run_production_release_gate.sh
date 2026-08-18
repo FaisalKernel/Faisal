@@ -33,6 +33,10 @@ LIVE_DEPLOYMENT_PACKAGE=${FAISAL_LIVE_DEPLOYMENT_PACKAGE:-}
 EXTERNAL_SECURITY_REVIEW=${FAISAL_EXTERNAL_SECURITY_REVIEW:-}
 EXTERNAL_SECURITY_REVIEW_PACKAGE=${FAISAL_EXTERNAL_SECURITY_REVIEW_PACKAGE:-}
 EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY=${FAISAL_EXTERNAL_SECURITY_REVIEW_PUBLIC_KEY:-}
+RELEASE_CANDIDATE_BUNDLE=${FAISAL_RELEASE_CANDIDATE_BUNDLE:-}
+SIGNED_RELEASE_ATTESTATION=${FAISAL_SIGNED_RELEASE_ATTESTATION:-}
+SIGNED_ATTESTATION_KEYRING=${FAISAL_SIGNED_ATTESTATION_KEYRING:-}
+REQUIRE_SIGNED_RELEASE_ATTESTATION=${FAISAL_REQUIRE_SIGNED_RELEASE_ATTESTATION:-0}
 REQUIRE_PRODUCTION_LINE=${FAISAL_REQUIRE_PRODUCTION_LINE:-1}
 KERNEL_SOURCE=${FAISAL_KERNEL_SOURCE:-$LINUX}
 REQUIRED_KERNEL_LINE=${FAISAL_REQUIRED_KERNEL_LINE:-}
@@ -165,6 +169,7 @@ esac
 [ -x "$LINUX/tools/faisal-build/verify_production_candidate_manifest.py" ] || fail "production candidate manifest verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/run_candidate_local_preflight.py" ] || fail "unified local candidate preflight unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_release_gate_report.py" ] || fail "release-gate report integrity verifier unavailable"
+[ -r "$LINUX/tools/faisal-build/verify_release_attestation.py" ] || fail "signed release attestation verifier unavailable"
 [ -r "$LINUX/tools/faisal-build/faisal_release_authority.py" ] || fail "release authority verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/verify_signing_authority_operational_proof.py" ] || fail "signing-authority operational-proof verifier unavailable"
 [ -x "$LINUX/tools/faisal-build/compare_reproducible_builds.sh" ] || fail "reproducibility comparator unavailable"
@@ -203,6 +208,32 @@ FAISAL_PRODUCTION_CANDIDATE_MANIFEST="$PRODUCTION_CANDIDATE_MANIFEST" \
   fail "unified production candidate manifest verification"
 }
 printf 'production_candidate_manifest\tpass\t%s\n' "$PRODUCTION_CANDIDATE_MANIFEST" >> "$REPORT"
+if [ "$REQUIRE_SIGNED_RELEASE_ATTESTATION" != 0 ] && [ "$REQUIRE_SIGNED_RELEASE_ATTESTATION" != 1 ]; then
+  fail "invalid FAISAL_REQUIRE_SIGNED_RELEASE_ATTESTATION mode"
+fi
+if [ "$REQUIRE_SIGNED_RELEASE_ATTESTATION" = 1 ]; then
+  [ -n "$RELEASE_CANDIDATE_BUNDLE" ] || fail "FAISAL_RELEASE_CANDIDATE_BUNDLE is required for signed attestation enforcement"
+  [ -r "$RELEASE_CANDIDATE_BUNDLE/bundle.json" ] || fail "release candidate bundle is unreadable for signed attestation enforcement"
+  [ -n "$SIGNED_RELEASE_ATTESTATION" ] || fail "FAISAL_SIGNED_RELEASE_ATTESTATION is required for production signed attestation enforcement"
+  [ -r "$SIGNED_RELEASE_ATTESTATION" ] || fail "signed release attestation is unreadable"
+  [ -n "$SIGNED_ATTESTATION_KEYRING" ] || fail "FAISAL_SIGNED_ATTESTATION_KEYRING is required for production signed attestation enforcement"
+  [ -r "$SIGNED_ATTESTATION_KEYRING" ] || fail "signed attestation keyring is unreadable"
+  python3 "$LINUX/tools/faisal-build/verify_release_attestation.py" \
+    --repo "$LINUX" \
+    --attestation "$SIGNED_RELEASE_ATTESTATION" \
+    --trusted-keys "$SIGNED_ATTESTATION_KEYRING" \
+    --candidate "$PRODUCTION_CANDIDATE_MANIFEST" \
+    --provenance "$CANDIDATE_PROVENANCE_MANIFEST" \
+    --bundle "$RELEASE_CANDIDATE_BUNDLE" \
+    --require-production-approval >/tmp/faisal-release-signed-attestation.log 2>&1 || {
+    cat /tmp/faisal-release-signed-attestation.log >&2
+    fail "signed release attestation verification"
+  }
+  printf 'signed_release_attestation\tpass\t%s\n' "$SIGNED_RELEASE_ATTESTATION" >> "$REPORT"
+else
+  printf 'signed_release_attestation\tnot-enforced\tFAISAL_REQUIRE_SIGNED_RELEASE_ATTESTATION=0\n' >> "$REPORT"
+fi
+
 if [ "$REQUIRE_PRODUCTION_LINE" = 1 ]; then
   python3 "$LINUX/tools/faisal-build/run_candidate_local_preflight.py" \
     --repo "$LINUX" \
