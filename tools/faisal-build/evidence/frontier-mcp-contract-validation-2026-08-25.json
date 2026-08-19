@@ -1,6 +1,7 @@
 {
   "schema": "FAISAL-FRONTIER-EVIDENCE-1",
   "iteration": "frontier-mcp-contract-validation-2026-08-25",
+  "recorded_at": "2026-08-19T05:41:02Z",
   "status": "pass_bounded_user_space_control_plane",
   "implementation": {
     "module": "tools/faisal-mcp-contract/faisal_mcp_contract.py",
@@ -63,6 +64,15 @@
       "used_for": "preserving separation between contract admission and hardware/device qualification"
     }
   ],
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_hardware_qualification": false,
+    "model_output_is_authority": false,
+    "tool_annotations_are_authority": false,
+    "provider_metadata_is_authority": false,
+    "unrestricted_kernel_self_modification": false
+  },
   "authority_boundaries": {
     "model_output_is_authority": false,
     "tool_annotations_are_authority": false,
