@@ -1,0 +1,133 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-trace-segment-validation-2026-08-19",
+  "recorded_at": "2026-08-19T11:46:00Z",
+  "status": "bounded_trace_segment_checkpoint_qualified",
+  "objective": "Add provider-neutral trace-segment checkpoint receipts that bind ordered trace spans to lifecycle checkpoints, event counts, flush/cancellation boundaries, sensitive-data policy, generation, replay-safe resume evidence, and non-authority semantics without exporting traces or executing work.",
+  "research_inputs": [
+    {
+      "source": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool",
+      "finding": "The current memory tool is client-side and the application controls storage, path restrictions, and returned tool results; just-in-time retrieval avoids loading all persistent memory into active context.",
+      "implementation_impact": "FAISAL binds trace checkpoint receipts to caller-supplied lifecycle/state digests and keeps storage/export outside the contract."
+    },
+    {
+      "source": "https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents",
+      "finding": "Long-running agents require durable progress artifacts, clean incremental commits, explicit continuity across context windows, and end-to-end verification; compaction alone is insufficient.",
+      "implementation_impact": "FAISAL adds ordered trace-segment continuity and replay-safe resume evidence adjacent to task lifecycle and checkpoint receipts."
+    },
+    {
+      "source": "https://openai.github.io/openai-agents-python/tracing/",
+      "finding": "Current agent tracing records nested task, turn, generation, tool, guardrail, handoff, and custom spans, with immediate flush support and configurable sensitive-data capture.",
+      "implementation_impact": "FAISAL binds span sequence, flush status, cancellation boundary, and sensitive-data policy digest into deterministic checkpoint receipts without exporting traces."
+    },
+    {
+      "source": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "finding": "MCP supports progress, cancellation, error reporting, durable Tasks, and explicit user consent/control; tool descriptions remain untrusted.",
+      "implementation_impact": "The contract rejects unacknowledged cancellation boundaries and keeps trace/checkpoint data explicitly non-authoritative."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-trace-segment/faisal_trace_segment.py",
+    "tests": "tools/faisal-trace-segment/test_faisal_trace_segment.py",
+    "benchmark": "tools/faisal-trace-segment/bench_faisal_trace_segment.py",
+    "runner": "tools/faisal-build/run_trace_segment_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "ordered span and segment sequence continuity",
+      "previous-segment digest chaining",
+      "flush-required and flush-failed rejection",
+      "cancellation boundary acknowledgement enforcement",
+      "sensitive-data policy digest binding",
+      "lifecycle checkpoint and objective-state digest binding",
+      "generation and trace identity fences",
+      "checkpoint replay protection",
+      "segment tamper and sequence-gap rejection",
+      "explicit model/tool/trace/checkpoint non-authority boundaries"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "runner": "FAISAL_TRACE_SEGMENT_VALIDATION_OK",
+    "runner_record_digest": "d6557a7010ac149ef4943a19a2c96aa239535284662d884c914bbe295f5408ac",
+    "benchmark_iterations": 1000,
+    "admission_mean_ns": 98386.69,
+    "admission_p95_ns": 202208,
+    "continuity_mean_ns": 119136.16,
+    "continuity_p95_ns": 245550,
+    "benchmark_scope": "local_python_receipts_not_trace_export_or_model_latency",
+    "scenario_validation": {
+      "valid_segment": "passed",
+      "ordered_continuity": "passed",
+      "flush_boundary": "passed",
+      "cancellation_boundary": "passed",
+      "sensitive_data_policy": "passed",
+      "generation": "passed",
+      "replay": "passed",
+      "tamper": "passed",
+      "sequence_gap": "passed",
+      "authority": "passed"
+    },
+    "real_held_out_evaluation": {
+      "runner": "tools/faisal-build/run_agi_support_evaluation.sh",
+      "task_count": 8,
+      "baseline_pass_rate": 0.75,
+      "candidate_pass_rate": 1.0,
+      "pass_rate_delta": 0.25,
+      "baseline_safety_pass_rate": 1.0,
+      "candidate_safety_pass_rate": 1.0,
+      "trace_verification": "passed",
+      "promotion_without_authority": "rejected",
+      "promotion_with_local_test_authority": "passed_fixture_only",
+      "rollback": "passed",
+      "tamper_rejection": "passed",
+      "scope": "deterministic_local_fixture_adapter_on_held_out_task_pack_not_trace_segment_or_general_intelligence_evidence"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": {
+      "model_routing": "pass",
+      "memory_write": "pass",
+      "memory_read": "pass",
+      "checkpoint": "pass",
+      "delegation": "pass",
+      "trace_conformance": "pass",
+      "trace_certification": "pass",
+      "observation_trust": "pass",
+      "portable_memory": "pass",
+      "mcp_contract": "pass",
+      "snapshot_index": "pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"
+    }
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "tool_output_is_authority": false,
+    "trace_is_authority": false,
+    "checkpoint_is_production_authority": false,
+    "trace_receipt_is_trace_export": false,
+    "trace_receipt_is_tool_execution": false,
+    "resume_nonce_is_credential": false,
+    "ambient_authority": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The module emits checkpoint evidence but does not export traces, flush provider backends, access tracing dashboards, execute work, or validate external lifecycle state.",
+    "Span payload, lifecycle checkpoint, objective state, and sensitive-data policy digests are caller-supplied evidence and require independent trusted instrumentation for production trust.",
+    "A flushed status is a supplied status; it does not prove a remote exporter durably stored data unless an external exporter attests it.",
+    "The benchmark measures local Python receipt overhead and excludes model, network, trace-export, browser, tool, accelerator, storage, and kernel scheduling latency.",
+    "The real held-out evaluation uses deterministic fixture adapters and does not measure trace-segment efficacy, browser autonomy, robotics, frontier models, or general intelligence.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, superiority to Linux, or closure of existing external release blockers."
+  ]
+}
