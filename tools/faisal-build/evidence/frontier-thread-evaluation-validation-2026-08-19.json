@@ -1,0 +1,121 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-thread-evaluation-validation-2026-08-19",
+  "recorded_at": "2026-08-19T10:45:00Z",
+  "status": "bounded_thread_evaluation_receipt_qualified",
+  "objective": "Add provider-neutral run, trace, and thread evaluation receipts that verify state changes, outcomes, safety, tool/run lineage, repeated trial behavior, and promotion evidence without treating model output or evaluation results as authority.",
+  "research_inputs": [
+    {
+      "source": "https://www.langchain.com/resources/agent-evals",
+      "finding": "Current agent-evaluation guidance distinguishes run, trace, and thread levels; recommends evaluating final response, trajectory, and state changes; and combines offline and online evaluation.",
+      "implementation_impact": "FAISAL adds a thread receipt that binds per-turn run evidence, trace integrity, state digest, outcome digest, and safety separately."
+    },
+    {
+      "source": "https://www.langchain.com/blog/agent-evaluation-readiness-checklist",
+      "finding": "Current readiness guidance recommends capability/regression separation, positive and negative cases, actual state-change verification, multiple trials, pass@k/pass^k, and explicit distinction between task and evaluator failures.",
+      "implementation_impact": "FAISAL adds repeated-trial aggregation with pass_at_k and pass_all_k and does not equate partial progress with a passing trace."
+    },
+    {
+      "source": "https://arxiv.org/html/2511.19477v1",
+      "finding": "Browser-agent production research emphasizes programmatic execution-layer constraints, hybrid context, and treating prompt-injected page content as untrusted.",
+      "implementation_impact": "Tool/run evidence and evaluation receipts are data-only; they cannot authorize browser, filesystem, or other side effects."
+    },
+    {
+      "source": "https://developers.openai.com/api/docs/guides/tools-computer-use",
+      "finding": "Current computer-use guidance recommends isolated environments, constrained browser settings, human approval for high-impact actions, and treating screenshots, page text, tool output, and third-party content as untrusted.",
+      "implementation_impact": "The contract requires explicit false authority boundaries and records safety separately from outcome correctness."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-eval-thread/faisal_thread_eval.py",
+    "tests": "tools/faisal-eval-thread/test_faisal_thread_eval.py",
+    "benchmark": "tools/faisal-eval-thread/bench_faisal_thread_eval.py",
+    "runner": "tools/faisal-build/run_thread_eval_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "run/tool argument digest binding",
+      "monotonic multi-turn trace validation",
+      "evaluator-owned final state digest comparison",
+      "evaluator-owned final outcome digest comparison",
+      "explicit safety result separate from correctness",
+      "complete/error/timeout/cancelled status handling",
+      "partial progress without false pass",
+      "repeated isolated trial aggregation",
+      "pass-at-k and pass-all-k metrics",
+      "duplicate-trial and receipt tamper rejection",
+      "explicit non-authority boundaries"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "runner": "FAISAL_THREAD_EVAL_VALIDATION_OK",
+    "runner_record_digest": "6b52a5151c11120afef9a5d36f56eefa5e2841d6598b48953e059a7eb0ed867c",
+    "benchmark_iterations": 1000,
+    "benchmark_verify_mean_ns": 39792.50,
+    "benchmark_aggregate_mean_ns": 4999.89,
+    "benchmark_verify_p95_ns": 58031,
+    "benchmark_aggregate_p95_ns": 7613,
+    "benchmark_scope": "local_python_receipt_integrity_not_model_quality_or_kernel_latency",
+    "real_held_out_evaluation": {
+      "runner": "tools/faisal-build/run_agi_support_evaluation.sh",
+      "task_count": 8,
+      "baseline_pass_rate": 0.75,
+      "candidate_pass_rate": 1.0,
+      "pass_rate_delta": 0.25,
+      "baseline_safety_pass_rate": 1.0,
+      "candidate_safety_pass_rate": 1.0,
+      "baseline_trace_records": 8,
+      "candidate_trace_records": 8,
+      "comparison_eligible": true,
+      "promotion_without_authority": "rejected",
+      "promotion_with_local_test_authority": "passed_fixture_only",
+      "rollback": "passed",
+      "tamper_rejection": "passed",
+      "scope": "deterministic_local_fixture_adapter_on_held_out_task_pack_not_general_intelligence_evidence"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": {
+      "model_routing": "pass",
+      "memory_write": "pass",
+      "memory_read": "pass",
+      "checkpoint": "pass",
+      "delegation": "pass",
+      "trace_conformance": "pass",
+      "trace_certification": "pass",
+      "observation_trust": "pass",
+      "portable_memory": "pass",
+      "mcp_contract": "pass",
+      "snapshot_index": "pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"
+    }
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "tool_output_is_authority": false,
+    "trace_is_execution_authority": false,
+    "evaluation_is_production_approval": false,
+    "expected_state_is_exposed_to_candidate": false,
+    "evaluation_receipt_is_tool_permission": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The real held-out evaluation uses the repository's deterministic fixture adapters and does not measure a frontier model, general intelligence, browser autonomy, robotics, or production agent behavior.",
+    "The evaluator verifies caller-supplied digests and evaluator-owned expected digests; it does not independently attest external state, tool side effects, model correctness, or human judgment.",
+    "Local test authority was used only to exercise the guarded promotion path; it is not independent external approval and does not satisfy production signing requirements.",
+    "The benchmark measures local Python receipt overhead and excludes model, network, storage, browser, accelerator, and kernel scheduling latency.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, superiority to Linux, or closure of existing external release blockers."
+  ]
+}

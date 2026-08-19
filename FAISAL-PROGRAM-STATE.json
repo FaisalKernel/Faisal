@@ -2232,5 +2232,13 @@
   "frontier_route_budget_benchmark": "tools/faisal-route-budget/bench_faisal_route_budget.py",
   "frontier_route_budget_runner": "tools/faisal-build/run_route_budget_validation.sh",
   "frontier_route_budget_rollback_checkpoint": "FAISAL-FRONTIER-TASK-LIFECYCLE-2026-08-19",
-  "frontier_route_budget_authority_boundary": "route_budget_receipts_are_admission_and_usage_evidence_only_model_output_provider_metadata_runtime_profiles_and_caller_usage_never_become_execution_or_privilege_authority_the_contract_contacts_no_provider_and_production_approval_remains_false"
+  "frontier_route_budget_authority_boundary": "route_budget_receipts_are_admission_and_usage_evidence_only_model_output_provider_metadata_runtime_profiles_and_caller_usage_never_become_execution_or_privilege_authority_the_contract_contacts_no_provider_and_production_approval_remains_false",
+  "frontier_thread_evaluation": "pass_run_trace_thread_receipts_bind_tool_run_digests_state_change_outcome_safety_trace_integrity_repeated_trials_pass_at_k_pass_all_k_and_non_authority_boundaries",
+  "frontier_thread_evaluation_evidence": "tools/faisal-build/evidence/frontier-thread-evaluation-validation-2026-08-19.json",
+  "frontier_thread_evaluation_module": "tools/faisal-eval-thread/faisal_thread_eval.py",
+  "frontier_thread_evaluation_tests": "tools/faisal-eval-thread/test_faisal_thread_eval.py",
+  "frontier_thread_evaluation_benchmark": "tools/faisal-eval-thread/bench_faisal_thread_eval.py",
+  "frontier_thread_evaluation_runner": "tools/faisal-build/run_thread_eval_validation.sh",
+  "frontier_thread_evaluation_rollback_checkpoint": "FAISAL-FRONTIER-ROUTE-BUDGET-2026-08-19",
+  "frontier_thread_evaluation_authority_boundary": "thread_evaluation_receipts_are_quality_and_regression_evidence_only_model_output_tool_output_trace_state_and_evaluation_results_never_become_execution_or_privilege_authority_the_contract_does_not_invoke_models_or_tools_and_production_approval_remains_false"
 }
