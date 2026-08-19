@@ -2224,5 +2224,13 @@
   "frontier_task_lifecycle_benchmark": "tools/faisal-task-lifecycle/bench_faisal_task_lifecycle.py",
   "frontier_task_lifecycle_runner": "tools/faisal-build/run_task_lifecycle_validation.sh",
   "frontier_task_lifecycle_rollback_checkpoint": "FAISAL-FRONTIER-HANDOFF-RECEIPT-2026-08-19",
-  "frontier_task_lifecycle_authority_boundary": "task_lifecycle_receipts_are_admission_and_observation_evidence_only_the_module_does_not_execute_tasks_contact_remote_agents_mint_credentials_or_promote_model_provider_checkpoint_or_result_data_to_authority_and_production_approval_remains_false"
+  "frontier_task_lifecycle_authority_boundary": "task_lifecycle_receipts_are_admission_and_observation_evidence_only_the_module_does_not_execute_tasks_contact_remote_agents_mint_credentials_or_promote_model_provider_checkpoint_or_result_data_to_authority_and_production_approval_remains_false",
+  "frontier_route_budget": "pass_fail_closed_multi_window_route_cost_input_output_token_concurrency_reservation_settlement_release_overrun_generation_expiry_replay_tamper_and_non_authority_admission",
+  "frontier_route_budget_evidence": "tools/faisal-build/evidence/frontier-route-budget-validation-2026-08-19.json",
+  "frontier_route_budget_module": "tools/faisal-route-budget/faisal_route_budget.py",
+  "frontier_route_budget_tests": "tools/faisal-route-budget/test_faisal_route_budget.py",
+  "frontier_route_budget_benchmark": "tools/faisal-route-budget/bench_faisal_route_budget.py",
+  "frontier_route_budget_runner": "tools/faisal-build/run_route_budget_validation.sh",
+  "frontier_route_budget_rollback_checkpoint": "FAISAL-FRONTIER-TASK-LIFECYCLE-2026-08-19",
+  "frontier_route_budget_authority_boundary": "route_budget_receipts_are_admission_and_usage_evidence_only_model_output_provider_metadata_runtime_profiles_and_caller_usage_never_become_execution_or_privilege_authority_the_contract_contacts_no_provider_and_production_approval_remains_false"
 }

@@ -1,0 +1,105 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-route-budget-validation-2026-08-19",
+  "recorded_at": "2026-08-19T10:35:00Z",
+  "status": "bounded_fail_closed_route_budget_qualified",
+  "objective": "Provide provider-neutral multi-window budget, token, concurrency, reservation, settlement, release, and overrun controls for model routing without contacting providers or treating model/runtime metadata as authority.",
+  "research_inputs": [
+    {
+      "source": "https://docs.vllm.ai/en/latest/features/disagg_prefill/",
+      "finding": "Current vLLM documentation describes experimental prefill/decode disaggregation, KV-cache transfer connectors, and independent TTFT/ITL tuning while explicitly noting that disaggregation alone does not improve throughput.",
+      "implementation_impact": "Runtime/cache facts remain caller-supplied route evidence; the budget contract does not infer performance or authority from provider claims."
+    },
+    {
+      "source": "https://docs.litellm.ai/docs/mcp",
+      "finding": "LiteLLM documents provider-agnostic MCP gateway routing, key/team permissions, multiple transports, OAuth, end-user tracking, and explicit tool approval behavior.",
+      "implementation_impact": "Route budget, tool authorization, credentials, and model execution remain separate control-plane decisions."
+    },
+    {
+      "source": "https://docs.litellm.ai/docs/proxy/users",
+      "finding": "Current budget documentation describes multi-window cost limits, token/request rate limits, concurrency, agent/session caps, fallbacks, and fail-closed enforcement when authoritative spend cannot be verified.",
+      "implementation_impact": "FAISAL adds bounded local reservation and settlement with multi-window capacity and overrun rejection, without importing a provider gateway."
+    },
+    {
+      "source": "https://github.com/sgl-project/sglang",
+      "finding": "SGLang documents prefix/radix caching, zero-overhead scheduling, disaggregation, speculative decoding, continuous batching, structured outputs, and heterogeneous hardware support.",
+      "implementation_impact": "Cache and runtime characteristics are kept as route evidence and never become privilege, correctness, or execution authority."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-route-budget/faisal_route_budget.py",
+    "tests": "tools/faisal-route-budget/test_faisal_route_budget.py",
+    "benchmark": "tools/faisal-route-budget/bench_faisal_route_budget.py",
+    "runner": "tools/faisal-build/run_route_budget_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "multi-window estimated cost reservation",
+      "multi-window input/output token reservation",
+      "bounded concurrency reservation",
+      "route digest and generation binding",
+      "expiry and caller-observed settlement",
+      "fail-closed actual-usage-over-reservation rejection",
+      "explicit release path that returns reservation capacity",
+      "nonce replay protection and full reservation-body tamper detection",
+      "provider/model/output non-authority semantics"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "runner": "FAISAL_ROUTE_BUDGET_VALIDATION_OK",
+    "runner_record_digest": "713ce168d470e511ed0df6d1f55d42e9a804e0ebc4f4f772ad77a3d94fb6b116",
+    "benchmark_iterations": 1000,
+    "benchmark_reserve_mean_ns": 21961.52,
+    "benchmark_settle_mean_ns": 29784.6,
+    "benchmark_release_mean_ns": 23614.35,
+    "benchmark_reserve_p95_ns": 32211,
+    "benchmark_settle_p95_ns": 44500,
+    "benchmark_release_p95_ns": 34946,
+    "benchmark_scope": "local_python_budget_receipts_not_provider_network_model_or_kernel_latency",
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": {
+      "model_routing": "pass",
+      "memory_write": "pass",
+      "memory_read": "pass",
+      "checkpoint": "pass",
+      "delegation": "pass",
+      "trace_conformance": "pass",
+      "trace_certification": "pass",
+      "observation_trust": "pass",
+      "portable_memory": "pass",
+      "mcp_contract": "pass",
+      "snapshot_index": "incomplete_timeout_after_prior_selftest_benchmark_fuzz_asan_ubsan_tsan_and_m82_markers; no pass claim"
+    }
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "budget_is_execution": false,
+    "reservation_is_tool_permission": false,
+    "route_metadata_is_hardware_proof": false,
+    "actual_usage_is_model_correctness_proof": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The ledger is a bounded userspace/control-plane primitive and does not contact model providers, invoke inference engines, execute tools, or enforce budgets across distributed nodes.",
+    "Cost, token, concurrency, route, generation, and time values are caller-supplied evidence; this local implementation does not independently attest provider billing or usage.",
+    "Settlement rejects usage over the reservation rather than claiming it can undo external provider consumption; an external supervisor must handle provider-side reconciliation.",
+    "The benchmark measures local Python receipt overhead and excludes network, storage, provider, model, accelerator, and kernel latency.",
+    "The snapshot-index adjacent regression was not claimed as passed because its bounded run timed out after earlier successful markers; the other ten adjacent suites passed.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, superiority to Linux, or resolution of existing external release blockers."
+  ]
+}
