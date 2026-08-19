@@ -1,0 +1,104 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-interaction-ledger-validation-2026-08-19",
+  "recorded_at": "2026-08-19T19:20:00Z",
+  "status": "interaction_segment_commitment_qualified",
+  "objective": "Add a bounded append-only interaction-segment commitment ledger binding ordered span commitments to capability freshness, delegation chain, route, task/artifact context, policy generation, expiry, and terminal verification without storing raw content or claiming behavioral reproducibility.",
+  "research_inputs": [
+    {
+      "source": "https://arxiv.org/html/2603.14332v1",
+      "finding": "Agent governance separates capability integrity, behavioral verifiability, and interaction auditability; verifiable interaction ledgers can bind identity/capability evidence to hash-linked records, while reproducibility assumptions remain model-dependent.",
+      "implementation_impact": "FAISAL implements only commitment and continuity checks and explicitly records that models were not replayed and behavior was not independently reproduced."
+    },
+    {
+      "source": "https://a2a-protocol.org/latest/specification/",
+      "finding": "A2A tasks and artifacts provide durable task/context lineage and artifacts persist through task completion or explicit deletion.",
+      "implementation_impact": "The ledger binds trace segments to task and artifact identifiers and terminal evidence without creating tasks, mutating artifacts, or replacing A2A transport semantics."
+    },
+    {
+      "source": "https://opentelemetry.io/docs/concepts/observability-primer/",
+      "finding": "OpenTelemetry provides interoperable traces, metrics, and logs, but telemetry is an observation and not kernel-level ground truth.",
+      "implementation_impact": "The contract accepts caller-supplied span commitments without ingesting OTLP, storing raw prompts/outputs, or promoting telemetry into truth or authority."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-interaction-ledger/faisal_interaction_ledger.py",
+    "tests": "tools/faisal-interaction-ledger/test_faisal_interaction_ledger.py",
+    "benchmark": "tools/faisal-interaction-ledger/bench_faisal_interaction_ledger.py",
+    "runner": "tools/faisal-build/run_interaction_ledger_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "append-only segment digest commitments",
+      "trace sequence starts at one and remains contiguous",
+      "parent segment digest continuity",
+      "task/artifact/capability/delegation/route/audience/policy binding",
+      "bounded segment/request expiry and trace span count",
+      "mandatory terminal verification for the active policy",
+      "request/nonce/terminal replay protection",
+      "raw-content minimization and explicit non-authority boundary"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 5,
+    "unit_tests_passed": 5,
+    "runner": "FAISAL_INTERACTION_LEDGER_OK",
+    "runner_record_digest": "sha256:081e032e2891f6d8a34843ffd4d95008967e513fd3fb3105560cb362186be0b6",
+    "real_task": {
+      "valid_ordered_two_span": "passed",
+      "segment_count": 2,
+      "raw_content_stored": false,
+      "models_replayed": false,
+      "tools_executed": false,
+      "negative_cases": 5,
+      "negative_cases_denied": 5,
+      "denials": ["sequence_gap", "missing_terminal", "replay", "tamper", "authority"]
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 70029.07,
+      "baseline_ungoverned_p95_ns": 107006.65,
+      "ledger_verify_admit_mean_ns": 581529.39,
+      "ledger_verify_admit_p95_ns": 1201639.00,
+      "scope": "local Python control-plane commitment overhead; excludes signatures, OTLP ingestion, model replay, network, tools, storage, accelerator, and kernel scheduling latency"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_sha256_8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
+    "adjacent_regressions": {"model_routing":"pass","memory_write":"pass","memory_read":"pass","checkpoint":"pass","delegation":"pass","trace_conformance":"pass","trace_certification":"pass","observation_trust":"pass","portable_memory":"pass","mcp_contract":"pass","snapshot_index":"pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"}
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "telemetry_is_kernel_ground_truth": false,
+    "span_content_is_truth": false,
+    "ledger_receipt_is_execution_authority": false,
+    "ledger_receipt_is_policy_authority": false,
+    "ledger_receipt_is_production_authority": false,
+    "raw_content_stored": false,
+    "telemetry_ingested": false,
+    "models_replayed": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-CAPABILITY-FRESHNESS-2026-08-19",
+    "rollback_scope": "remove the interaction-ledger module, tests, runner, evidence registration, and metadata; retain prior tagged capability-freshness release"
+  },
+  "limitations": [
+    "The ledger validates caller-supplied span commitments and does not verify that a span corresponds to a real process, model, tool, or network event.",
+    "No cryptographic signatures, independent verifier, remote anchor, OTLP ingestion, model replay, or behavioral reproducibility test was performed.",
+    "The benchmark measures local Python commitment overhead and excludes cryptography, network, storage, model, tool, accelerator, and kernel scheduler performance.",
+    "The real-task validation is a deterministic local fixture and does not establish multi-host interoperability, agent quality, general intelligence, browser autonomy, robotics, or production efficacy.",
+    "No physical accelerator, TPM, secure enclave, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ]
+}
