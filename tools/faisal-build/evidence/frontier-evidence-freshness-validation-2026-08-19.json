@@ -1,0 +1,109 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-evidence-freshness-validation-2026-08-19",
+  "recorded_at": "2026-08-19T23:20:00Z",
+  "status": "evidence_freshness_admission_qualified",
+  "objective": "Add a bounded qualification-evidence freshness lease that binds evidence to a qualification surface and drift vector, enforces maximum age/generation/TTL, supports quarantine and revocation, and rejects stale/replayed/tampered leases without executing qualification or granting production authority.",
+  "research_inputs": [
+    {
+      "source": "https://developers.openai.com/api/docs/guides/evals",
+      "finding": "Hosted Evals guidance describes repeatable test data, graders, and runs, while documenting a deprecation timeline that makes provider-neutral evidence lifecycle important.",
+      "implementation_impact": "Lease verification binds evidence and provenance digests to a provider-neutral qualification surface rather than a vendor-hosted eval identity."
+    },
+    {
+      "source": "https://developers.openai.com/api/docs/guides/agent-evals",
+      "finding": "Traces are useful for diagnosing workflow behavior, while repeatable datasets and evaluation runs support change benchmarking over time.",
+      "implementation_impact": "The contract accepts caller-supplied qualification evidence and prevents reuse after qualification-surface, policy, ABI, generation, or time drift."
+    },
+    {
+      "source": "https://arxiv.org/html/2607.29405v1",
+      "finding": "Agentic validation must include temporal validity and runtime evidence maintenance; assurance evidence can degrade after updates, drift, and changing workflows.",
+      "implementation_impact": "The lease includes evidence age, expiry, generation, drift components, critical-drift requalification, quarantine, and revocation controls."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-evidence-freshness/faisal_evidence_freshness.py",
+    "tests": "tools/faisal-evidence-freshness/test_faisal_evidence_freshness.py",
+    "benchmark": "tools/faisal-evidence-freshness/bench_faisal_evidence_freshness.py",
+    "runner": "tools/faisal-build/run_evidence_freshness_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "qualification surface model/tool/route/policy/hardware/environment/benchmark digest binding",
+      "evidence and provenance digest binding",
+      "policy generation and platform ABI binding",
+      "maximum evidence age and bounded lease TTL",
+      "critical drift requalification gate",
+      "quarantine and revocation",
+      "lease and nonce replay protection",
+      "digest tamper protection",
+      "explicit no-qualification/no-attestation/no-production-authority boundary"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "FAISAL_EVIDENCE_FRESHNESS_OK",
+    "runner_record_digest": "sha256:2a14ebecc1acd05cf4de8d760edafb6165c99bae01ededec07c256003c2a6a15",
+    "real_tasks": {
+      "valid_fresh_lease": "passed",
+      "revocation": "passed",
+      "qualification_executed": false,
+      "attestation_performed": false,
+      "production_approved": false,
+      "negative_cases": 10,
+      "negative_cases_denied": 10,
+      "denials": ["stale", "critical_drift", "surface_mismatch", "generation", "abi", "expiry", "ttl", "quarantine", "revoked", "authority"]
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 20003.96,
+      "baseline_ungoverned_p95_ns": 28481.45,
+      "freshness_admit_mean_ns": 191423.36,
+      "freshness_admit_p95_ns": 373445.60,
+      "quarantine_mean_ns": 194986.84,
+      "quarantine_p95_ns": 389588.70,
+      "revoke_mean_ns": 200614.68,
+      "revoke_p95_ns": 366510.90,
+      "scope": "local Python control-plane freshness verification overhead; excludes qualification, attestation, network, storage, accelerators, kernel scheduling, and production approval latency"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_sha256_8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
+    "adjacent_regressions": "pass_11_suites_model_routing_memory_write_memory_read_checkpoint_delegation_trace_conformance_trace_cert_observation_trust_portable_memory_mcp_snapshot"
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "evidence_is_truth": false,
+    "evidence_is_execution_authority": false,
+    "evidence_is_policy_authority": false,
+    "evidence_is_production_authority": false,
+    "qualification_receipt_is_attestation": false,
+    "qualification_executed": false,
+    "attestation_performed": false,
+    "production_approved": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-EVALUATOR-CONSENSUS-2026-08-19",
+    "rollback_scope": "remove the evidence-freshness module, tests, runner, evidence registration, and metadata; retain prior tagged evaluator-consensus release"
+  },
+  "limitations": [
+    "The ledger verifies caller-supplied qualification surfaces and leases; it does not inspect live models, tools, routes, hardware, environments, or benchmark services.",
+    "Drift labels are caller-supplied evidence and are not independently detected by this contract.",
+    "Freshness is not truth: an unexpired lease may still refer to incorrect, incomplete, or fraudulent qualification evidence.",
+    "No physical accelerator, TPM, secure enclave, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "The benchmark measures local Python control-plane overhead and excludes qualification execution, attestation, network, storage, accelerator, kernel scheduler, and approval latency.",
+    "The real-task validation is a deterministic local fixture and does not establish agent quality, general intelligence, browser autonomy, robotics, or production efficacy.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ]
+}
