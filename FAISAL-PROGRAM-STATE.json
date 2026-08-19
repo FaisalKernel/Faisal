@@ -2184,5 +2184,13 @@
   "frontier_model_routing_runtime_profile_benchmark": "tools/faisal-model-routing/bench_faisal_model_routing.py",
   "frontier_model_routing_runtime_profile_runner": "tools/faisal-build/run_model_routing_validation.sh",
   "frontier_model_routing_runtime_profile_rollback_checkpoint": "FAISAL-FRONTIER-HARDWARE-QUALIFICATION-EVIDENCE-QUALITY-2026-08-19",
-  "frontier_model_routing_runtime_profile_authority_boundary": "runtime_profile_is_caller_supplied_runtime_evidence_not_provider_authority_hardware_proof_model_correctness_or_tool_execution_permission_and_production_approval_remains_false"
+  "frontier_model_routing_runtime_profile_authority_boundary": "runtime_profile_is_caller_supplied_runtime_evidence_not_provider_authority_hardware_proof_model_correctness_or_tool_execution_permission_and_production_approval_remains_false",
+  "frontier_checkpoint_receipt": "pass_bounded_objective_checkpoint_chain_bound_to_execution_generation_lease_trace_state_world_resource_event_sequence_freshness_and_replay_safe_resume_admission",
+  "frontier_checkpoint_receipt_evidence": "tools/faisal-build/evidence/frontier-checkpoint-receipt-validation-2026-08-19.json",
+  "frontier_checkpoint_receipt_module": "tools/faisal-checkpoint-receipt/faisal_checkpoint_receipt.py",
+  "frontier_checkpoint_receipt_tests": "tools/faisal-checkpoint-receipt/test_faisal_checkpoint_receipt.py",
+  "frontier_checkpoint_receipt_benchmark": "tools/faisal-checkpoint-receipt/bench_faisal_checkpoint_receipt.py",
+  "frontier_checkpoint_receipt_runner": "tools/faisal-build/run_checkpoint_receipt_validation.sh",
+  "frontier_checkpoint_receipt_rollback_checkpoint": "FAISAL-FRONTIER-MODEL-ROUTING-RUNTIME-PROFILE-2026-08-19",
+  "frontier_checkpoint_receipt_authority_boundary": "checkpoint_receipts_are_evidence_not_execution_or_model_correctness_proof_resume_requires_caller_policy_and_no_authority_server_credentials_or_unrestricted_kernel_self_modification_is_used_production_approval_remains_false"
 }

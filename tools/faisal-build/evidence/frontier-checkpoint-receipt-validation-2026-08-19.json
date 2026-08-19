@@ -1,0 +1,90 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-checkpoint-receipt-validation-2026-08-19",
+  "recorded_at": "2026-08-19T09:04:22Z",
+  "status": "pass_bounded_durable_checkpoint_receipts_with_lease_trace_event_generation_and_resume_replay_fencing",
+  "implementation": {
+    "module": "tools/faisal-checkpoint-receipt/faisal_checkpoint_receipt.py",
+    "tests": "tools/faisal-checkpoint-receipt/test_faisal_checkpoint_receipt.py",
+    "benchmark": "tools/faisal-checkpoint-receipt/bench_faisal_checkpoint_receipt.py",
+    "runner": "tools/faisal-build/run_checkpoint_receipt_validation.sh",
+    "upgrade": "provider-neutral checkpoint receipts bind objective state, execution generation, lease identity, trace digest, state/world/resource digests, event sequence, predecessor digest, freshness, and replay-safe resume admission"
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "pass",
+    "chain_creation": "pass",
+    "restart_style_offline_verification": "pass",
+    "resume_admission": "pass",
+    "resume_replay_rejection": "pass",
+    "receipt_tamper_rejection": "pass",
+    "generation_fence_rejection": "pass",
+    "lease_fence_rejection": "pass",
+    "event_sequence_monotonicity_rejection": "pass",
+    "freshness_rejection": "pass",
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": "pass_model_routing_delegation_trace_conformance_trace_cert_observation_trust_portable_memory_mcp_snapshot_browser",
+    "benchmark_iterations": 1000,
+    "benchmark_raw_digest_mean_ns": 26156.70,
+    "benchmark_record_mean_ns": 30775.58,
+    "benchmark_verify_mean_ns": 23477.50,
+    "benchmark_resume_mean_ns": 28438.31,
+    "benchmark_record_p95_ns": 73430,
+    "benchmark_verify_p95_ns": 32672,
+    "benchmark_resume_p95_ns": 41102,
+    "benchmark_record_overhead_ratio": 1.1766,
+    "benchmark_verify_overhead_ratio": 0.8976,
+    "benchmark_resume_overhead_ratio": 1.0872,
+    "benchmark_ledger_digest": "sha256:3566ba200543a55a29238bbb612ecf4b493d02c1ea848a358da802a81ecaccfb",
+    "runner_record_digest": "21050d7dd0c4ad3a42da2017e9a5e23d4ba8f332c86c646f9067fbee1f0b32c3",
+    "benchmark_scope": "local_python_digest_chain_record_offline_verify_and_resume_admission_not_storage_network_model_or_kernel_latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://docs.langchain.com/oss/python/langgraph/overview",
+      "finding": "Current LangGraph documentation describes low-level orchestration for long-running stateful agents with persistence, checkpoints, stores, fault tolerance, event streaming, interrupts, time travel, memory, testing, and human-in-the-loop controls.",
+      "used_for": "checkpoint state versioning and explicit recovery-admission boundaries"
+    },
+    {
+      "url": "https://temporal.io/blog/durable-execution-meets-ai-why-temporal-is-the-perfect-foundation-for-ai",
+      "finding": "Temporal describes durable execution through event sourcing and state management, recording workflow and activity history and returned values so a restarted process can recreate state and resume.",
+      "used_for": "event sequence, predecessor digest, restart verification, and deterministic resume design"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/latest/",
+      "finding": "vLLM documents persistent inference runtime concerns including cache management, continuous batching, disaggregated execution, and broad model/accelerator support.",
+      "used_for": "provider-neutral checkpoint state and resource-digest fields without importing engine authority"
+    },
+    {
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool",
+      "finding": "Anthropic documents versioned computer-use runtimes, isolated environments, minimal privileges, human confirmation, prompt-injection limitations, and action-loop verification.",
+      "used_for": "explicit non-authority and caller-policy requirements for recovery and side effects"
+    }
+  ],
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "checkpoint_is_execution": false,
+    "receipt_is_model_correctness_proof": false,
+    "recovery_requires_caller_policy": true,
+    "unrestricted_kernel_self_modification": false,
+    "fake_hardware_evidence": false,
+    "fake_external_review": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The contract records and verifies checkpoint evidence but does not perform storage replication, distributed consensus, migration, or actual task execution.",
+    "Checkpoint digests and lease identity are caller-supplied and are not hardware-attested or independently signed in this local implementation.",
+    "Resume admission is a control-plane decision record; it is not execution permission and requires a separate caller policy and execution engine.",
+    "The benchmark measures local Python control-plane overhead and excludes storage, network, kernel, model, accelerator, and crash-recovery latency.",
+    "This evidence does not claim AGI, production approval, physical hardware qualification, independent builder qualification, or independent external review."
+  ]
+}
