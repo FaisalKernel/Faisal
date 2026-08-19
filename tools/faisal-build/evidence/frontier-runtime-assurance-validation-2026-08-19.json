@@ -1,0 +1,100 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-runtime-assurance-validation-2026-08-19",
+  "recorded_at": "2026-08-19T23:50:00Z",
+  "status": "runtime_assurance_envelope_validated",
+  "objective": "Provide a bounded runtime-assurance decision ledger that evaluates fresh, surface-bound observations against an approved envelope and emits continue, restrict, quarantine, or terminate decisions without executing side effects or granting authority.",
+  "research_inputs": [
+    {
+      "source": "https://blogs.oracle.com/ai-and-datascience/oci-agent-evaluation-framework",
+      "finding": "Agent evaluation is a lifecycle spanning onboarding, development, release, production assurance, and recovery; production validation includes replay, canary, drift, runtime action, and incident replay.",
+      "implementation_impact": "FAISAL adds a runtime envelope ledger separate from qualification freshness, with decision receipts and fail-closed actions."
+    },
+    {
+      "source": "https://arxiv.org/html/2607.29405v1",
+      "finding": "Agentic behavior unfolds over long horizons and can drift with memory, updates, and changing workflows; validation must be lifecycle-oriented with post-deployment oversight and evidence refresh.",
+      "implementation_impact": "Observations are freshness-bounded, surface-bound, sequence-checked, digest-chained, and denied on replay, gaps, stale timestamps, missing metrics, or authority-boundary violations."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-runtime-assurance/faisal_runtime_assurance.py",
+    "tests": "tools/faisal-runtime-assurance/test_faisal_runtime_assurance.py",
+    "benchmark": "tools/faisal-runtime-assurance/bench_faisal_runtime_assurance.py",
+    "runner": "tools/faisal-build/run_runtime_assurance_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "approved runtime envelope with surface and policy generation binding",
+      "bounded observation freshness and envelope lifetime",
+      "monotonic sequence and nonce replay protection",
+      "digest-linked observation/decision chain",
+      "required metric and soft/hard limit checks",
+      "continue/restrict/quarantine/terminate action classes",
+      "fail-closed missing, stale, future, mismatched, replayed, and over-limit observations",
+      "decision receipts are not execution, policy, attestation, or production authority"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "FAISAL_RUNTIME_ASSURANCE_OK",
+    "runner_record_digest": "sha256:bffa63134f98b0280eb8093bf750770e8f61f8eda123a89afdfc3b3a14460445",
+    "real_tasks": {
+      "continue": "passed",
+      "restrict_soft_limit": "passed",
+      "quarantine_stale": "passed",
+      "terminate_hard_limit": "passed",
+      "negative_cases_denied": 3,
+      "denials": ["nonce_replay", "sequence_gap", "authority_boundary"],
+      "execution_performed": false,
+      "production_approved": false
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 4114.22,
+      "baseline_ungoverned_p95_ns": 6128.00,
+      "continue_mean_ns": 21367.02,
+      "continue_p95_ns": 31269.00,
+      "restrict_mean_ns": 20345.72,
+      "restrict_p95_ns": 31103.00,
+      "quarantine_mean_ns": 22794.79,
+      "quarantine_p95_ns": 36518.00,
+      "terminate_mean_ns": 23214.51,
+      "terminate_p95_ns": 36648.00,
+      "scope": "local Python control-plane decision overhead; excludes tool execution, external services, attestation, kernel scheduling, network, storage, accelerators, and production approval latency"
+    },
+    "limitations": [
+      "The ledger evaluates caller-supplied observations; it does not independently observe hardware, tools, models, routes, or external state.",
+      "The contract emits decisions but does not pause, restrict, quarantine, migrate, or terminate a real workload.",
+      "Thresholds are explicit envelope policy values, not learned or self-modifying policy.",
+      "The benchmark is a local deterministic Python fixture and does not establish agent quality, general intelligence, production efficacy, or Linux superiority."
+    ]
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "observation_is_authority": false,
+    "tool_result_is_authority": false,
+    "assurance_receipt_is_execution_authority": false,
+    "assurance_receipt_is_production_authority": false,
+    "execution_performed": false,
+    "attestation_performed": false,
+    "production_approved": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-EVIDENCE-FRESHNESS-2026-08-19",
+    "rollback_scope": "remove the runtime-assurance module, tests, benchmark, runner, evidence registration, and metadata; retain the evidence-freshness release tag"
+  }
+}
