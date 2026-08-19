@@ -73,13 +73,18 @@
     }
   ],
   "boundary": {
-    "model_output_is_authority": false,
-    "endpoint_metadata_is_authority": false,
-    "provider_policy_is_caller_supplied": true,
-    "fallback_plan_is_execution": false,
-    "route_digest_is_authorization": false,
-    "network_or_model_call_performed": false,
+    "independent_builder": false,
+    "physical_hardware_qualification": false,
+    "operator_signing_ceremony": false,
     "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "optimizer_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "unrestricted_kernel_self_modification": false,
+    "fake_hardware_evidence": false,
+    "fake_external_review": false
   },
   "authority_boundaries": {
     "model_output_is_authority": false,
