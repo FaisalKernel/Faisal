@@ -5,7 +5,7 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "3129a556b2fed5529d34f8771ad941ff891fe08b",
+  "current_head": "2e35e395c029c631f28f67d5b3cc635ca361b531",
   "current_tag": "FAISAL-FRONTIER-VERIFIED-IMPROVEMENT-EVOLUTION-2026-08-23",
   "current_abi": 47,
   "operating_loop": [
@@ -2084,5 +2084,12 @@
   "frontier_verified_improvement_evolution_evidence": "tools/faisal-build/evidence/frontier-verified-improvement-evolution-validation-2026-08-23.json",
   "frontier_verified_improvement_evolution_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-2026-08-23.md",
   "frontier_verified_improvement_evolution_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-23",
-  "frontier_evolution_authority_boundary": "research_text_model_outputs_generated_code_mcp_metadata_and_benchmark_claims_remain_untrusted_data_and_the_evolution_transaction_never_self_modifies_privileged_kernel_code_or_self_authorizes_promotion"
+  "frontier_evolution_authority_boundary": "research_text_model_outputs_generated_code_mcp_metadata_and_benchmark_claims_remain_untrusted_data_and_the_evolution_transaction_never_self_modifies_privileged_kernel_code_or_self_authorizes_promotion",
+  "frontier_agi_support_evaluation": "pass_independent_held_out_task_pack_raw_sha256_trace_tracking_baseline_candidate_comparison_promotion_guard_and_rollback",
+  "frontier_agi_support_evaluation_evidence": "tools/faisal-build/evidence/frontier-agi-support-evaluation-validation-2026-08-24.json",
+  "frontier_agi_support_evaluation_design": "tools/faisal-eval/FAISAL-AGI-EVAL-DESIGN.md",
+  "frontier_agi_support_evaluation_runner": "tools/faisal-build/run_agi_support_evaluation.sh",
+  "frontier_agi_support_evaluation_task_pack": "external_sealed_held_out_pack_digest_4b257edf4c282565d3755d2bc3b2dd03427e4ce36c83e566f9f75a33dacdcbfb",
+  "frontier_agi_support_evaluation_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-24",
+  "frontier_agi_support_evaluation_authority_boundary": "evaluator_scoring_is_independent_from_adapter_output_model_proposals_cannot_self_promote_privileged_kernel_candidates_are_rejected_and_fixture_authority_is_not_production_approval"
 }
