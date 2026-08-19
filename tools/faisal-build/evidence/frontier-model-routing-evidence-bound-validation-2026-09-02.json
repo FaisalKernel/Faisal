@@ -1,7 +1,7 @@
 {
   "schema": "FAISAL-FRONTIER-EVIDENCE-1",
   "iteration": "frontier-model-routing-evidence-bound-validation-2026-09-02",
-  "recorded_at": "2026-08-19T07:47:03Z",
+  "recorded_at": "2026-08-19T08:06:15Z",
   "status": "pass_bounded_route_bound_outcome_receipts_replay_freshness_generation_and_endpoint_fencing",
   "implementation": {
     "module": "tools/faisal-model-routing/faisal_model_routing.py",
