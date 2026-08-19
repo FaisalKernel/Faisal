@@ -21,6 +21,16 @@ from typing import Any
 
 SCHEMA = "org.faisal.hardware-qualification.v1"
 CAPABILITIES = ("gpu", "npu", "iommu", "dma", "rdma", "cxl", "nvme", "numa", "tpm")
+KERNEL_FEATURES = {
+    "CONFIG_IOMMU_API": "iommu",
+    "CONFIG_IOMMUFD": "iommu",
+    "CONFIG_DMA_SHARED_BUFFER": "dma",
+    "CONFIG_INFINIBAND": "rdma",
+    "CONFIG_CXL_BUS": "cxl",
+    "CONFIG_BLK_DEV_NVME": "nvme",
+    "CONFIG_NUMA": "numa",
+    "CONFIG_TCG_TPM": "tpm",
+}
 
 
 def canon(value: Any) -> bytes:
@@ -67,6 +77,77 @@ def symlink_target(path: Path) -> str | None:
         return None
 
 
+def collect_dev_nodes(dev_root: Path) -> dict[str, list[str]]:
+    patterns = {
+        "gpu_render": "dri/renderD*",
+        "gpu_card": "dri/card*",
+        "tpm": "tpm*",
+        "tpm_resource": "tpmrm*",
+        "nvme": "nvme*",
+        "rdma": "infiniband/*",
+        "cxl": "cxl/*",
+        "dma_heap": "dma_heap/*",
+    }
+    result: dict[str, list[str]] = {}
+    for key, pattern in patterns.items():
+        try:
+            result[key] = sorted(str(path.relative_to(dev_root)) for path in dev_root.glob(pattern) if path.exists())
+        except OSError:
+            result[key] = []
+    return result
+
+
+def collect_kernel_features(kernel_config: Path | None) -> dict[str, Any]:
+    if kernel_config is None:
+        return {"state": "unknown", "path": None, "options": {key: "unknown" for key in KERNEL_FEATURES}}
+    text = read_text(kernel_config)
+    if text is None:
+        return {"state": "absent", "path": str(kernel_config), "options": {key: "unknown" for key in KERNEL_FEATURES}}
+    values: dict[str, str] = {}
+    for option in KERNEL_FEATURES:
+        match = re.search(rf"^(?:# )?{re.escape(option)}(?:=(y|m|n)| is not set)$", text, flags=re.MULTILINE)
+        values[option] = match.group(1) if match and match.group(1) else ("n" if match else "unknown")
+    return {"state": "present", "path": str(kernel_config), "digest": digest(text), "options": values}
+
+
+def capability_quality(name: str, item: dict[str, Any]) -> dict[str, Any]:
+    observed = item.get("state") == "present"
+    physical_signal = bool(item.get("pci_devices")) or bool(item.get("group_count")) or bool(item.get("class_devices")) or bool(item.get("devices")) or bool(item.get("nodes"))
+    if not observed:
+        status = "blocked_absent_or_unobservable"
+    elif name in {"gpu", "npu"} and not item.get("pci_devices"):
+        status = "observed_non_pci_signal_physical_qualification_pending"
+    else:
+        status = "observed_candidate_physical_qualification_pending" if physical_signal else "observed_without_physical_signal"
+    return {"status": status, "physical_signal": physical_signal, "qualified": False}
+
+
+def readiness_summary(devices: dict[str, Any]) -> dict[str, Any]:
+    observed = sorted(name for name, item in devices.items() if item.get("state") == "present")
+    blocked = sorted(name for name, item in devices.items() if item.get("state") != "present")
+    pending = sorted(name for name, item in devices.items() if item.get("qualification", {}).get("qualified") is not True)
+    return {
+        "observed_capabilities": observed,
+        "blocked_capabilities": blocked,
+        "physical_qualification_pending": pending,
+        "all_declared_capabilities_present": not blocked,
+        "physical_qualification": False,
+        "production_approval": False,
+    }
+
+
+def software_fallbacks(devices: dict[str, Any]) -> dict[str, Any]:
+    absent = [name for name, item in devices.items() if item.get("state") != "present"]
+    return {
+        "cpu_execution": {"status": "available", "basis": "host_cpu_observation"},
+        "host_memory": {"status": "available", "basis": "host_meminfo_observation"},
+        "accelerator_free_path": {"status": "available", "basis": "provider_neutral_cpu_or_host_memory_fallback", "does_not_emulate_hardware": True},
+        "blocked_physical_capabilities": absent,
+        "model_output_is_authority": False,
+        "production_approval": False,
+    }
+
+
 def command_version(command: str, argv: list[str]) -> dict[str, Any]:
     resolved = shutil.which(command)
     if not resolved:
@@ -92,7 +173,7 @@ def collect_pci(sys_root: Path) -> list[dict[str, Any]]:
     return devices
 
 
-def collect(sys_root: Path, proc_root: Path, dev_root: Path, no_commands: bool = False) -> dict[str, Any]:
+def collect(sys_root: Path, proc_root: Path, dev_root: Path, no_commands: bool = False, kernel_config: Path | None = None) -> dict[str, Any]:
     pci = collect_pci(sys_root)
     iommu_groups = list_dirs(sys_root / "kernel/iommu_groups")
     infiniband = list_dirs(sys_root / "class/infiniband")
@@ -115,6 +196,10 @@ def collect(sys_root: Path, proc_root: Path, dev_root: Path, no_commands: bool =
         "numa": {"state": state(bool(numa)), "nodes": [x.name for x in numa]},
         "tpm": {"state": state(bool(tpm)), "devices": [x.name for x in tpm]},
     }
+    for name, item in devices.items():
+        item["qualification"] = capability_quality(name, item)
+    dev_nodes = collect_dev_nodes(dev_root)
+    kernel_features = collect_kernel_features(kernel_config)
     host = {
         "kernel_release": platform.release(),
         "machine": platform.machine(),
@@ -142,6 +227,10 @@ def collect(sys_root: Path, proc_root: Path, dev_root: Path, no_commands: bool =
         "pci_devices": pci,
         "devices": devices,
         "provider_commands": provider_commands,
+        "dev_nodes": dev_nodes,
+        "kernel_features": kernel_features,
+        "readiness_summary": readiness_summary(devices),
+        "software_fallbacks": software_fallbacks(devices),
         "source_roots": {"proc": str(proc_root), "sys": str(sys_root), "dev": str(dev_root)},
         "collected_at_ns": time.time_ns(),
     }
@@ -177,6 +266,7 @@ def main() -> int:
     parser.add_argument("--sys-root", type=Path, default=Path("/sys"))
     parser.add_argument("--dev-root", type=Path, default=Path("/dev"))
     parser.add_argument("--no-commands", action="store_true")
+    parser.add_argument("--kernel-config", type=Path)
     args = parser.parse_args()
     if args.verify:
         record = json.loads(args.verify.read_text())
@@ -192,7 +282,7 @@ def main() -> int:
         return 0
     if args.output is None:
         parser.error("--output is required when collecting")
-    record = collect(args.sys_root, args.proc_root, args.dev_root, args.no_commands)
+    record = collect(args.sys_root, args.proc_root, args.dev_root, args.no_commands, args.kernel_config)
     result = validate(record, args.require)
     write_record(record, args.output)
     present = sum(1 for value in record["devices"].values() if value["state"] == "present")

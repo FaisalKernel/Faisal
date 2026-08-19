@@ -1,0 +1,109 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-hardware-qualification-evidence-quality-validation-2026-08-19",
+  "recorded_at": "2026-08-19T08:20:04Z",
+  "status": "pass_observation_quality_kernel_feature_binding_device_node_discovery_and_cpu_fallback_with_physical_qualification_blocked",
+  "implementation": {
+    "collector": "tools/faisal-hardware-qualify/faisal_hardware_qualify.py",
+    "tests": "tools/faisal-hardware-qualify/test_faisal_hardware_qualify.py",
+    "benchmark": "tools/faisal-hardware-qualify/bench_faisal_hardware_qualify.py",
+    "runner": "tools/faisal-build/run_hardware_qualification.sh",
+    "upgrade": [
+      "device-node discovery for GPU DRM, TPM, NVMe, RDMA, CXL, and DMA-heap paths",
+      "optional binding to the exact FAISAL kernel .config with feature-state recording",
+      "evidence-quality classification distinguishing absent or unobservable from observed physical candidates",
+      "explicit readiness summary separating observation from physical qualification",
+      "provider-neutral CPU, host-memory, and non-emulating accelerator-free fallback declaration",
+      "preserved fail-closed required-capability verification and digest integrity"
+    ]
+  },
+  "live_host_observation": {
+    "record_path": "build/frontier/hardware-qualification-upgrade-2026-08-19-final2/live-host-observation.json",
+    "kernel_release": "6.18.38+",
+    "machine": "x86_64",
+    "cpu_count": 6,
+    "observed_capabilities": ["numa"],
+    "absent_capabilities": ["gpu", "npu", "iommu", "dma", "rdma", "cxl", "nvme", "tpm"],
+    "numa_nodes": ["node0"],
+    "provider_command_observation": {
+      "nvidia_smi": "absent",
+      "rocminfo": "absent",
+      "xpu_smi": "absent",
+      "rdma": "installed_but_returned_no_device_success"
+    },
+    "kernel_features_bound_to_lts_config": {
+      "CONFIG_IOMMU_API": "y",
+      "CONFIG_IOMMUFD": "n",
+      "CONFIG_DMA_SHARED_BUFFER": "y",
+      "CONFIG_INFINIBAND": "n",
+      "CONFIG_CXL_BUS": "n",
+      "CONFIG_BLK_DEV_NVME": "n",
+      "CONFIG_NUMA": "y",
+      "CONFIG_TCG_TPM": "n"
+    },
+    "software_fallbacks": {
+      "cpu_execution": "available",
+      "host_memory": "available",
+      "accelerator_free_path": "available_without_hardware_emulation"
+    }
+  },
+  "measured_validation": {
+    "selftest": "pass_4_synthetic_cases_explicitly_non_physical",
+    "syntax_check": "pass",
+    "live_observation": "pass",
+    "live_digest_verify": "pass",
+    "required_gpu_fail_closed": "pass_expected_block",
+    "required_iommu_fail_closed": "pass_expected_block",
+    "runner": "pass",
+    "benchmark_iterations": 500,
+    "minimal_probe_mean_ns": 124654.26,
+    "full_collector_mean_ns": 5935673.43,
+    "minimal_probe_p95_ns": 276635,
+    "full_collector_p95_ns": 6637780,
+    "full_collector_overhead_ratio": 47.6171,
+    "benchmark_scope": "local_procfs_sysfs_devfs_observation_without_provider_commands_or_physical_workload"
+  },
+  "research_inputs": [
+    {
+      "url": "https://www.kernel.org/doc/html/next/userspace-api/iommufd.html",
+      "finding": "IOMMUFD controls IOMMU IO page tables through file descriptors; devices claim DMA ownership and attach to IO address spaces.",
+      "used_for": "requiring observed IOMMU and DMA evidence instead of treating software flags or command availability as isolation proof"
+    },
+    {
+      "url": "https://www.kernel.org/doc/html/latest/driver-api/cxl/linux/cxl-driver.html",
+      "finding": "CXL objects are exposed through /sys/bus/cxl/devices and /dev/cxl, including ports, decoders, endpoints, memory devices, and regions.",
+      "used_for": "device-node and topology evidence requirements for CXL qualification"
+    },
+    {
+      "url": "https://docs.nvidia.com/cuda/gpudirect-rdma/",
+      "finding": "GPU-direct RDMA depends on real GPU, RDMA, peer-memory, topology, and driver paths.",
+      "used_for": "preserving physical GPU/RDMA qualification blockers"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/",
+      "finding": "Device plugins advertise actual allocatable devices to workloads; software control-plane metadata is not a substitute for device presence.",
+      "used_for": "separating resource fallback declarations from physical device qualification"
+    }
+  ],
+  "boundary": {
+    "fake_hardware_evidence": false,
+    "physical_gpu_qualification": false,
+    "physical_npu_qualification": false,
+    "physical_iommu_dma_qualification": false,
+    "physical_rdma_cxl_nvme_qualification": false,
+    "physical_tpm_qualification": false,
+    "physical_power_thermal_qualification": false,
+    "provider_metadata_is_authority": false,
+    "production_approval": false,
+    "independent_external_review": false,
+    "model_output_is_authority": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "limitations": [
+    "The current sandbox has no observed physical GPU, NPU, PCI device, IOMMU group, DMA class device, RDMA device, CXL device, NVMe device, or TPM device.",
+    "NUMA node0 is observed, but that is not physical accelerator qualification and does not prove multi-node NUMA behavior.",
+    "The collector improves observability and fallback selection; it cannot create absent hardware or prove driver correctness, isolation, reset, performance, power, thermal, or recovery behavior.",
+    "Synthetic fixtures validate parser and fail-closed behavior only and are not production hardware evidence.",
+    "Physical qualification still requires the exact target hardware, firmware, drivers, topology, workload, fault injection, power, thermal, reset, and recovery evidence from an independently controlled environment."
+  ]
+}
