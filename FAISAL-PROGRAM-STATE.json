@@ -2400,5 +2400,13 @@
   "frontier_tool_attestation_benchmark": "tools/faisal-tool-attestation/bench_faisal_tool_attestation.py",
   "frontier_tool_attestation_runner": "tools/faisal-build/run_tool_attestation_validation.sh",
   "frontier_tool_attestation_rollback_checkpoint": "FAISAL-FRONTIER-KV-CACHE-ADMISSION-2026-08-19",
-  "frontier_tool_attestation_authority_boundary": "tool_attestation_receipts_are_verification_evidence_only_model_output_tool_metadata_and_tool_results_never_become_truth_execution_policy_invocation_attestation_or_production_authority_the_contract_does_not_invoke_tools_or_contact_servers"
+  "frontier_tool_attestation_authority_boundary": "tool_attestation_receipts_are_verification_evidence_only_model_output_tool_metadata_and_tool_results_never_become_truth_execution_policy_invocation_attestation_or_production_authority_the_contract_does_not_invoke_tools_or_contact_servers",
+  "frontier_intent_repair": "pass_global_intent_constraint_subtask_lineage_checkpoint_trace_verifier_repair_budget_expiry_replay_and_non_authority_controls",
+  "frontier_intent_repair_evidence": "tools/faisal-build/evidence/frontier-intent-repair-validation-2026-08-19.json",
+  "frontier_intent_repair_module": "tools/faisal-intent-repair/faisal_intent_repair.py",
+  "frontier_intent_repair_tests": "tools/faisal-intent-repair/test_faisal_intent_repair.py",
+  "frontier_intent_repair_benchmark": "tools/faisal-intent-repair/bench_faisal_intent_repair.py",
+  "frontier_intent_repair_runner": "tools/faisal-build/run_intent_repair_validation.sh",
+  "frontier_intent_repair_rollback_checkpoint": "FAISAL-FRONTIER-TOOL-ATTESTATION-2026-08-19",
+  "frontier_intent_repair_authority_boundary": "intent_and_repair_receipts_are_verification_evidence_only_model_output_verifier_output_and_artifacts_never_become_truth_execution_policy_or_production_authority_the_contract_does_not_plan_execute_repair_or_modify_artifacts"
 }

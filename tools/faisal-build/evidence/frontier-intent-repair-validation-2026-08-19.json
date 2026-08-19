@@ -1,0 +1,98 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-intent-repair-validation-2026-08-19",
+  "recorded_at": "2026-08-19T23:59:00Z",
+  "status": "long_horizon_intent_and_repair_admission_validated",
+  "objective": "Admit bounded long-horizon subtasks and repair proposals only when they remain bound to immutable global intent, required constraints, checkpoint lineage, trace position, verifier evidence, generation, freshness, and repair budgets.",
+  "research_inputs": [
+    {
+      "source": "https://arxiv.org/html/2608.05013v1",
+      "finding": "OneDayAgent treats long-horizon work as a managed process with bounded task decomposition, execution memory under context pressure, global verification, and targeted repair across cross-environment and multimodal tasks.",
+      "implementation_impact": "FAISAL adds intent-bound subtask and repair receipts without embedding a model, executing tools, or modifying artifacts."
+    },
+    {
+      "source": "https://arxiv.org/html/2604.23775v1",
+      "finding": "Vision-language-action systems face irreversible consequences, multimodal attack surfaces, real-time safety constraints, compounding trajectory errors, and supply-chain risks; deployment requires runtime monitoring, traceability, human oversight, and standardized evaluation.",
+      "implementation_impact": "The contract fences subtasks and repairs to explicit intent, constraints, checkpoints, trace positions, verifier digests, and bounded repair counts while keeping receipts non-authoritative."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-intent-repair/faisal_intent_repair.py",
+    "tests": "tools/faisal-intent-repair/test_faisal_intent_repair.py",
+    "benchmark": "tools/faisal-intent-repair/bench_faisal_intent_repair.py",
+    "runner": "tools/faisal-build/run_intent_repair_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "immutable global intent digest binding",
+      "required constraint digest containment",
+      "bounded subtask count and monotonic trace positions",
+      "checkpoint and artifact lineage binding",
+      "verifier digest and failed-constraint repair binding",
+      "bounded repair index and repair budget",
+      "generation, expiry, replay, stale, and authority-boundary fences",
+      "receipt-only output with execution_performed=false and artifact_modified=false"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "FAISAL_INTENT_REPAIR_OK",
+    "runner_record_digest": "sha256:ab734961acf397019524b12dfca47603c29035edfe83f22bdc549fb7b26bb3f8",
+    "real_tasks": {
+      "subtask_1": "passed",
+      "subtask_2": "passed",
+      "repair_admission": "passed",
+      "negative_cases_denied": 5,
+      "denials": ["intent_drift", "constraint_missing", "repair_after_pass", "authority", "replay"],
+      "execution_performed": false,
+      "artifact_modified": false,
+      "verification_performed": false,
+      "production_approved": false
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 4140.20,
+      "baseline_ungoverned_p95_ns": 5990.00,
+      "subtask_admission_mean_ns": 30494.85,
+      "subtask_admission_p95_ns": 47997.00,
+      "repair_admission_mean_ns": 34024.25,
+      "repair_admission_p95_ns": 66521.00,
+      "scope": "local Python control-plane admission overhead; excludes model planning, tool execution, artifact mutation, verifier execution, external services, and production approval latency"
+    },
+    "limitations": [
+      "The contract validates caller-supplied intent, constraints, checkpoints, trace positions, artifacts, and verifier digests; it does not independently inspect task state or deliverables.",
+      "The contract admits repair proposals but does not perform repair, verify artifacts, or execute tools.",
+      "The benchmark does not establish long-horizon task success, multimodal capability, robotics safety, AGI capability, production efficacy, or Linux superiority.",
+      "No physical hardware, external reviewer, independent builder, live multihost environment, or production approval was exercised."
+    ]
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "verifier_output_is_authority": false,
+    "artifact_is_authority": false,
+    "intent_receipt_is_execution_authority": false,
+    "intent_receipt_is_production_authority": false,
+    "execution_performed": false,
+    "artifact_modified": false,
+    "verification_performed": false,
+    "production_approved": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-TOOL-ATTESTATION-2026-08-19",
+    "rollback_scope": "remove the intent-repair module, tests, benchmark, runner, evidence registration, and metadata; retain the tool-attestation release tag"
+  }
+}
