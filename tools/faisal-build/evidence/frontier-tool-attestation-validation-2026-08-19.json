@@ -1,0 +1,97 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-tool-attestation-validation-2026-08-19",
+  "recorded_at": "2026-08-19T23:59:00Z",
+  "status": "tool_definition_attestation_validated",
+  "objective": "Admit bounded tool calls only when the tool definition, dependency graph, version, capability scope, argument data-flow labels, confirmation state, generation, and policy freshness match an approved contract.",
+  "research_inputs": [
+    {
+      "source": "https://arxiv.org/html/2604.05969",
+      "finding": "Formal MCP security controls require valid capabilities, argument containment, scope containment, expiry checks, tool-attestation verification, approved definition hashes, non-regressed versions, and known-good dependency hashes.",
+      "implementation_impact": "FAISAL adds a deterministic tool-definition and dependency attestation receipt separate from existing schema validation and tool authorization."
+    },
+    {
+      "source": "https://arxiv.org/html/2511.19477v1",
+      "finding": "Production browser agents require programmatic action constraints, semantic/accessibility-aware controls, explicit confirmation for high-impact operations, fresh error feedback, and resistance to prompt injection rather than relying on model judgment alone.",
+      "implementation_impact": "FAISAL verifies argument sensitivity labels and explicit confirmation before admitting a tool call; the contract never invokes the tool."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-tool-attestation/faisal_tool_attestation.py",
+    "tests": "tools/faisal-tool-attestation/test_faisal_tool_attestation.py",
+    "benchmark": "tools/faisal-tool-attestation/bench_faisal_tool_attestation.py",
+    "runner": "tools/faisal-build/run_tool_attestation_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "approved tool-definition digest verification",
+      "approved dependency digest verification",
+      "minimum tool-version and anti-regression enforcement",
+      "capability scope containment",
+      "argument sensitivity and destination data-flow labels",
+      "explicit confirmation gate",
+      "generation, expiry, replay, identity, and authority-boundary fences",
+      "decision receipt only; tool_invoked=false and execution_performed=false"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "FAISAL_TOOL_ATTESTATION_OK",
+    "runner_record_digest": "sha256:c808f16771615103f8ba4b6024b57a1b9bb1bd784d6a7f46353bf07371d81b69",
+    "real_tasks": {
+      "valid_tool_admission": "passed",
+      "definition_verified": true,
+      "dependency_verified": true,
+      "version_verified": true,
+      "scope_verified": true,
+      "data_flow_verified": true,
+      "confirmation_verified": true,
+      "tool_invoked": false,
+      "negative_cases_denied": 6,
+      "denials": ["definition_drift", "dependency_drift", "version_regression", "data_flow", "confirmation", "authority"],
+      "production_approved": false
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 4438.40,
+      "baseline_ungoverned_p95_ns": 6157.00,
+      "attestation_admission_mean_ns": 26159.17,
+      "attestation_admission_p95_ns": 53480.00,
+      "scope": "local Python control-plane admission overhead; excludes tool invocation, external servers, browser actions, network, storage, attestation hardware, and production approval latency"
+    },
+    "limitations": [
+      "The contract verifies caller-supplied definition and dependency digests; it does not retrieve or independently attest a live tool server.",
+      "Argument sensitivity labels are caller-supplied and require a trusted upstream labeling process.",
+      "The contract emits admission evidence but does not invoke tools, inspect browser state, enforce OS sandboxing, or observe tool results.",
+      "The benchmark does not establish browser-agent success, MCP security completeness, production efficacy, AGI capability, or Linux superiority."
+    ]
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "tool_metadata_is_authority": false,
+    "tool_result_is_authority": false,
+    "attestation_is_execution_authority": false,
+    "attestation_is_policy_authority": false,
+    "tool_invoked": false,
+    "execution_performed": false,
+    "production_approved": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-KV-CACHE-ADMISSION-2026-08-19",
+    "rollback_scope": "remove the tool-attestation module, tests, benchmark, runner, evidence registration, and metadata; retain the KV-cache admission release tag"
+  }
+}

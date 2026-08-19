@@ -2392,5 +2392,13 @@
   "frontier_kv_cache_admission_benchmark": "tools/faisal-kv-cache-admission/bench_faisal_kv_cache_admission.py",
   "frontier_kv_cache_admission_runner": "tools/faisal-build/run_kv_cache_admission_validation.sh",
   "frontier_kv_cache_admission_rollback_checkpoint": "FAISAL-FRONTIER-RUNTIME-ASSURANCE-2026-08-19",
-  "frontier_kv_cache_admission_authority_boundary": "cache_hint_recommendations_are_evidence_only_model_output_provider_metadata_and_cache_hints_never_become_truth_execution_policy_memory_pinning_attestation_or_production_authority_the_contract_does_not_execute_inference_or_pin_memory"
+  "frontier_kv_cache_admission_authority_boundary": "cache_hint_recommendations_are_evidence_only_model_output_provider_metadata_and_cache_hints_never_become_truth_execution_policy_memory_pinning_attestation_or_production_authority_the_contract_does_not_execute_inference_or_pin_memory",
+  "frontier_tool_attestation": "pass_definition_dependency_version_scope_data_flow_confirmation_expiry_replay_tamper_and_non_authority_controls",
+  "frontier_tool_attestation_evidence": "tools/faisal-build/evidence/frontier-tool-attestation-validation-2026-08-19.json",
+  "frontier_tool_attestation_module": "tools/faisal-tool-attestation/faisal_tool_attestation.py",
+  "frontier_tool_attestation_tests": "tools/faisal-tool-attestation/test_faisal_tool_attestation.py",
+  "frontier_tool_attestation_benchmark": "tools/faisal-tool-attestation/bench_faisal_tool_attestation.py",
+  "frontier_tool_attestation_runner": "tools/faisal-build/run_tool_attestation_validation.sh",
+  "frontier_tool_attestation_rollback_checkpoint": "FAISAL-FRONTIER-KV-CACHE-ADMISSION-2026-08-19",
+  "frontier_tool_attestation_authority_boundary": "tool_attestation_receipts_are_verification_evidence_only_model_output_tool_metadata_and_tool_results_never_become_truth_execution_policy_invocation_attestation_or_production_authority_the_contract_does_not_invoke_tools_or_contact_servers"
 }
