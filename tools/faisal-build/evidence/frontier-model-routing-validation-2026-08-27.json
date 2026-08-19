@@ -1,0 +1,92 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-model-routing-validation-2026-08-27",
+  "recorded_at": "2026-08-19T06:09:53Z",
+  "status": "pass_bounded_provider_neutral_health_aware_model_route_plan",
+  "implementation": {
+    "module": "tools/faisal-model-routing/faisal_model_routing.py",
+    "tests": "tools/faisal-model-routing/test_faisal_model_routing.py",
+    "benchmark": "tools/faisal-model-routing/bench_faisal_model_routing.py",
+    "runner": "tools/faisal-build/run_model_routing_validation.sh",
+    "capabilities": [
+      "provider-neutral endpoint inventory contract",
+      "capability privacy context cost latency and concurrency admission filters",
+      "health-state and health-generation fencing",
+      "caller-supplied provider allowlist",
+      "deterministic preference health cache locality latency cost and load scoring",
+      "bounded fallback plan generation",
+      "generation and route-digest verification",
+      "immutable-snapshot route-plan cache with health-generation invalidation"
+    ]
+  },
+  "measured_validation": {
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "syntax_check": "pass",
+    "positive_route_selection": "pass",
+    "deterministic_fallback_ordering": "pass",
+    "capability_filtering": "pass",
+    "privacy_filtering": "pass",
+    "health_filtering": "pass",
+    "concurrency_filtering": "pass",
+    "region_filtering": "pass",
+    "generation_fence": "pass",
+    "route_digest_tamper_rejection": "pass",
+    "provider_allowlist_rejection": "pass",
+    "route_cache_hit": "pass",
+    "route_cache_health_generation_invalidation": "pass",
+    "routing_runner": "pass",
+    "routing_record_digest": "33b019b73d7d8bd4aeec882ec414134b453c7a31d5c691fe86423dae12001996",
+    "benchmark_inventory_endpoints": 128,
+    "benchmark_iterations": 5000,
+    "benchmark_baseline_mean_ns": 349.58,
+    "benchmark_uncached_planner_mean_ns": 210902.79,
+    "benchmark_cached_planner_mean_ns": 56768.28,
+    "benchmark_baseline_p95_ns": 482,
+    "benchmark_uncached_planner_p95_ns": 337579,
+    "benchmark_cached_planner_p95_ns": 89755,
+    "benchmark_uncached_overhead_ratio": 603.2958,
+    "benchmark_cached_overhead_ratio": 162.3879,
+    "benchmark_cached_mean_reduction_vs_uncached_percent": 73.095,
+    "benchmark_scope": "local_128_endpoint_deterministic_filter_score_fallback_plan_not_model_or_network_latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://docs.vllm.ai/en/latest/deployment/integrations/production-stack/",
+      "finding": "vLLM Production Stack documents multimodel, model-aware and prefix-aware routing, observability, fast bootstrapping, and KV-cache offloading.",
+      "used_for": "model-aware routing and cache/locality scoring as provider-neutral control-plane inputs"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/simple_proxy",
+      "finding": "LiteLLM documents unified multi-provider access, routing, load balancing, fallbacks, budgets, and user/team controls.",
+      "used_for": "provider-neutral fallback planning and caller-supplied policy boundaries"
+    },
+    {
+      "url": "https://docs.ray.io/en/latest/serve/model-multiplexing.html",
+      "finding": "Ray Serve documents model-ID-aware routing over shared replicas, LRU model placement, and fallback when matching replicas are unavailable.",
+      "used_for": "cache-hit preference, bounded route caching, and generation-aware snapshot replacement"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/stable/usage/security/",
+      "finding": "vLLM warns that distributed and KV-cache communications are insecure by default, API-key coverage is incomplete, and reverse-proxy allowlists and resource limits are required.",
+      "used_for": "keeping routing separate from execution/network authorization and preserving fail-closed boundaries"
+    }
+  ],
+  "authority_boundaries": {
+    "model_output_is_authority": false,
+    "endpoint_metadata_is_authority": false,
+    "provider_policy_is_caller_supplied": true,
+    "fallback_plan_is_execution": false,
+    "route_digest_is_authorization": false,
+    "network_or_model_call_performed": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The module plans routes but never calls a provider or inference engine.",
+    "Health values are caller-observed snapshots and are not independent attestation.",
+    "The benchmark is local control-plane overhead, not model quality, tokens per second, network latency, accelerator utilization, or production cost.",
+    "The cache is an in-process optimization keyed by immutable endpoint/request snapshot identity; distributed cache coherence is out of scope.",
+    "No physical GPU/NPU or external provider qualification is implied.",
+    "This upgrade does not claim AGI, model superiority, learning, model retraining, or production approval."
+  ]
+}
