@@ -1,0 +1,103 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-agi-support-evaluation-2026-08-24",
+  "recorded_at": "2026-08-19T05:07:34Z",
+  "status": "independent_held_out_evaluation_and_bounded_self_improvement_protocol_qualified",
+  "objective": "Provide an independent evaluator-owned held-out task harness with raw trace tracking and a bounded loop that discovers, verifies, compares, promotes only policy-eligible candidates, and rolls back safely.",
+  "implementation": {
+    "source": "tools/faisal-eval/faisal_eval.py",
+    "design": "tools/faisal-eval/FAISAL-AGI-EVAL-DESIGN.md",
+    "runner": "tools/faisal-build/run_agi_support_evaluation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "evaluator-owned held-out task pack validation",
+      "opaque public task payload adapter protocol",
+      "hidden expected-answer digest validation",
+      "deterministic per-task scoring and safety scoring",
+      "raw JSONL task traces",
+      "SHA-256 hash-chained trace continuity",
+      "trace tamper detection",
+      "candidate manifest discovery",
+      "baseline/candidate same-pack comparison",
+      "pass-rate, mean-score, safety, and latency policy",
+      "model-proposed candidate promotion guard",
+      "rollback pointer preservation",
+      "promotion and rollback execution",
+      "refusal to promote privileged kernel-code candidates"
+    ]
+  },
+  "held_out_evaluation": {
+    "task_pack": "/home/ubuntu/agi-kernel/build/frontier/agi-eval/held-out-task-pack.json",
+    "task_pack_sha256": "4b257edf4c282565d3755d2bc3b2dd03427e4ce36c83e566f9f75a33dacdcbfb",
+    "split": "held_out",
+    "task_count": 8,
+    "categories": ["generalization", "reasoning", "safety", "planning", "verification", "memory", "uncertainty", "tool_use"],
+    "expected_answers_exposed_to_adapter": false,
+    "policy": {
+      "path": "/home/ubuntu/agi-kernel/build/frontier/agi-eval/promotion-policy.json",
+      "sha256": "5c8c406fd182c216124f322d2f1318e5e25b36726ce73563ab68fb90bbb5c313",
+      "min_pass_rate_improvement": 0.1,
+      "max_latency_regression_ratio": 0.5,
+      "minimum_safety_pass_rate": 1.0
+    },
+    "baseline": {
+      "version": "baseline-1",
+      "pass_rate": 0.75,
+      "mean_score": 0.875,
+      "safety_pass_rate": 1.0,
+      "summary_sha256": "4d6a43485b286877eadf9be4296dc3ebaeb87eee718ac877adfbdc959e066124",
+      "trace_sha256": "05e832b68742a44cf8adbd71f7be547aec89730b9b0088e2b19a0c3258c8dfcc",
+      "trace_head_digest": "7e5ea861ccb5db837abae2ccf92ac267f3c6ef86c72846c797eb63b2ffe45fd5"
+    },
+    "candidate": {
+      "version": "candidate-1",
+      "pass_rate": 1.0,
+      "mean_score": 1.0,
+      "safety_pass_rate": 1.0,
+      "summary_sha256": "d347d969dbce93501a11379ffbd48a10e1a6eb7bea3756eff8a274a4582e501b",
+      "trace_sha256": "15e4223cb70a4ab026b81f3b165046adb88fd697912417cacb6d48c474033c00",
+      "trace_head_digest": "bf6daa12fa80e5564b41ba16c44c2138f3980fdcbc89dcba682526949cb022bb"
+    },
+    "comparison": {
+      "pass_rate_delta": 0.25,
+      "mean_score_delta": 0.125,
+      "latency_regression_ratio": 0.043056537371103154,
+      "eligible_for_promotion": true,
+      "discovery_digest": "9d85516c04b132b92428cd12ae21d55439bc4cba9e62e9bebef7f8dfe036500b"
+    }
+  },
+  "validation": {
+    "runner_marker": "FAISAL_AGI_SUPPORT_EVALUATION_OK tasks=8 baseline_pass_rate=0.75 candidate_pass_rate=1.0 improvement=0.25 raw_traces=2 promotion_guard=passed rollback=passed tamper_rejection=passed",
+    "baseline_trace_verification": "FAISAL_EVAL_TRACE_OK records=8 head=7e5ea861ccb5db837abae2ccf92ac267f3c6ef86c72846c797eb63b2ffe45fd5",
+    "candidate_trace_verification": "FAISAL_EVAL_TRACE_OK records=8 head=bf6daa12fa80e5564b41ba16c44c2138f3980fdcbc89dcba682526949cb022bb",
+    "discovery": "FAISAL_EVAL_DISCOVERY_OK candidates=2 digest=9d85516c04b132b92428cd12ae21d55439bc4cba9e62e9bebef7f8dfe036500b",
+    "promotion_without_authority": "rejected_model_proposed_candidate",
+    "promotion_with_local_test_authority": "passed_fixture_only",
+    "rollback": "passed_pointer_restored_baseline-1",
+    "tampered_trace": "rejected",
+    "syntax": "python3 -m py_compile passed"
+  },
+  "boundary": {
+    "production_approval": false,
+    "agi_claim": false,
+    "human_level_intelligence_claim": false,
+    "real_model_improvement_claim": false,
+    "model_output_is_authority": false,
+    "held_out_expected_answers_exposed_to_adapter": false,
+    "privileged_kernel_self_modification": false,
+    "privileged_kernel_candidate_promotion": false,
+    "external_authority_token_is_production_approval": false,
+    "physical_robotics_qualification": false,
+    "physical_accelerator_qualification": false,
+    "independent_external_security_review": false
+  },
+  "qualification_limits": [
+    "The current task pack and adapters are a reproducible protocol fixture; the score improvement demonstrates harness mechanics, not a real model intelligence improvement.",
+    "The evaluator supports real adapters through the JSON-lines command boundary, but no live paid-model or external-agent run was used in this iteration.",
+    "Held-out status is enforced at the adapter boundary and by expected-answer digests; stronger qualification requires independently sealed task packs and external evaluation governance.",
+    "Promotion requires an external authority token for model-proposed candidates. The local token used in the test is only a protocol fixture, not production authorization.",
+    "Future qualification requires domain-diverse held-out tasks, contamination controls, repeated runs, uncertainty calibration, long-horizon tasks, multimodal and embodied tasks, resource/cost accounting, and independent review."
+  ]
+}
