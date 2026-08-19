@@ -1,7 +1,7 @@
 {
   "schema": "FAISAL-FRONTIER-EVIDENCE-1",
   "iteration": "frontier-memory-write-gate-validation-2026-08-19",
-  "recorded_at": "2026-08-19T09:21:05Z",
+  "recorded_at": "2026-08-19T09:25:51Z",
   "status": "pass_bounded_memory_write_admission_with_source_provenance_taint_quarantine_scope_generation_expiry_replay_and_verified_promotion",
   "implementation": {
     "module": "tools/faisal-memory-write-gate/faisal_memory_write_gate.py",
