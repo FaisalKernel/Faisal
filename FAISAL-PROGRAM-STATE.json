@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "97b4cb5ce1fd786a423896981d817a719361e561",
-  "current_tag": "FAISAL-FRONTIER-MCP-CONTRACT-2026-08-25",
+  "current_head": "79fc425fce457a17cf984f2a8b40d5fa18fb48ea",
+  "current_tag": "FAISAL-FRONTIER-PORTABLE-MEMORY-2026-08-26",
   "current_abi": 47,
   "operating_loop": [
     "RESEARCH",
@@ -2106,5 +2106,13 @@
   "frontier_mcp_contract_validation_runner": "tools/faisal-build/run_mcp_contract_validation.sh",
   "frontier_mcp_contract_validation_benchmark": "tools/faisal-mcp-contract/bench_faisal_mcp_contract.py",
   "frontier_mcp_contract_validation_rollback_checkpoint": "FAISAL-FRONTIER-HARDWARE-QUALIFICATION-2026-08-24",
-  "frontier_mcp_contract_validation_authority_boundary": "model_output_tool_annotations_provider_metadata_and_tool_results_remain_untrusted_data_scope_policy_is_caller_supplied_tool_execution_is_out_of_scope_and_production_approval_remains_false"
+  "frontier_mcp_contract_validation_authority_boundary": "model_output_tool_annotations_provider_metadata_and_tool_results_remain_untrusted_data_scope_policy_is_caller_supplied_tool_execution_is_out_of_scope_and_production_approval_remains_false",
+  "frontier_portable_memory": "pass_bounded_provider_neutral_five_component_signed_merkle_dag_capability_scoped_selective_rehydration_injection_safe_framing_and_digest_cache",
+  "frontier_portable_memory_evidence": "tools/faisal-build/evidence/frontier-portable-memory-validation-2026-08-26.json",
+  "frontier_portable_memory_module": "tools/faisal-portable-memory/faisal_portable_memory.py",
+  "frontier_portable_memory_tests": "tools/faisal-portable-memory/test_faisal_portable_memory.py",
+  "frontier_portable_memory_benchmark": "tools/faisal-portable-memory/bench_faisal_portable_memory.py",
+  "frontier_portable_memory_runner": "tools/faisal-build/run_portable_memory_validation.sh",
+  "frontier_portable_memory_rollback_checkpoint": "FAISAL-FRONTIER-MCP-CONTRACT-2026-08-25",
+  "frontier_portable_memory_authority_boundary": "memory_payloads_capability_metadata_model_outputs_and_provider_claims_remain_untrusted_data_ed25519_trust_roots_are_caller_supplied_rehydration_never_executes_content_and_production_approval_remains_false"
 }
