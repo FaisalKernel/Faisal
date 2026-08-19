@@ -77,7 +77,12 @@
     "promotion_with_local_test_authority": "passed_fixture_only",
     "rollback": "passed_pointer_restored_baseline-1",
     "tampered_trace": "rejected",
-    "syntax": "python3 -m py_compile passed"
+    "syntax": "python3 -m py_compile passed",
+    "adjacent_regressions": {
+      "durable_task_qemu": "FAISAL_M95_DURABLE_TASK_QEMU_PASS",
+      "mission_autonomy_qemu": "FAISAL_M98_MISSION_AUTONOMY_QEMU_PASS",
+      "combined_marker": "FAISAL_AGI_EVAL_ADJACENT_REGRESSIONS_OK"
+    }
   },
   "boundary": {
     "production_approval": false,
