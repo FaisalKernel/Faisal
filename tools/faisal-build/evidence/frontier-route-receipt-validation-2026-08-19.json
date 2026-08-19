@@ -1,0 +1,96 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-route-receipt-validation-2026-08-19",
+  "recorded_at": "2026-08-19T23:59:00Z",
+  "status": "trajectory_confidence_and_route_receipt_admission_validated",
+  "objective": "Admit auditable route receipts only when requested and effective route facts, approved model/version/provider constraints, fallback depth, trajectory confidence/stability, tool-use state, freshness, generation, and route budget remain within policy.",
+  "research_inputs": [
+    {
+      "source": "https://arxiv.org/html/2601.15778v1",
+      "finding": "Agentic confidence is a trajectory-level reliability property affected by compounding step uncertainty, tool/environment uncertainty, and masked intermediate failures; process-level confidence and stability signals are needed for interpretable calibration.",
+      "implementation_impact": "FAISAL admits trajectory summaries with confidence, stability, tool uncertainty, step count, and fallback depth thresholds, while treating confidence as evidence rather than truth."
+    },
+    {
+      "source": "https://arxiv.org/html/2605.01710",
+      "finding": "Adaptive routing should produce route receipts that record material requested versus effective route facts, version/alias resolution, service tier, fallback behavior, tool use, and redaction-safe runtime conditions without exposing hidden reasoning or proprietary routing logic.",
+      "implementation_impact": "FAISAL adds a portable route-receipt admission contract that verifies approved effective route facts and emits an auditable receipt without selecting models or invoking inference."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-route-receipt/faisal_route_receipt.py",
+    "tests": "tools/faisal-route-receipt/test_faisal_route_receipt.py",
+    "benchmark": "tools/faisal-route-receipt/bench_faisal_route_receipt.py",
+    "runner": "tools/faisal-build/run_route_receipt_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "requested versus effective model/version/provider recording",
+      "approved model/version/provider and fallback-chain enforcement",
+      "service-tier and tool-use transparency fields",
+      "trajectory step, confidence, stability, tool-uncertainty, and fallback-depth checks",
+      "route cost budget, freshness, generation, replay, and intent/session fences",
+      "receipt-only output with inference_executed=false and model_selected=false"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "FAISAL_ROUTE_RECEIPT_OK",
+    "runner_record_digest": "sha256:1ebe230c8c41bb33fad74b8e42641c37968fe40f68eea183dbc419a7b9259884",
+    "real_tasks": {
+      "valid_route_receipt": "passed",
+      "requested_model": "model-small",
+      "effective_model": "model-large",
+      "fallback_chain": ["model-large"],
+      "route_verified": true,
+      "confidence_calibrated": true,
+      "tool_use_recorded": true,
+      "inference_executed": false,
+      "model_selected": false,
+      "negative_cases_denied": 8,
+      "denials": ["confidence", "stability", "fallback_depth", "unapproved_model", "route_budget", "intent_scope", "authority", "replay"],
+      "production_approved": false
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 5662.82,
+      "baseline_ungoverned_p95_ns": 7439.00,
+      "route_receipt_admission_mean_ns": 37102.40,
+      "route_receipt_admission_p95_ns": 59756.00,
+      "scope": "local Python control-plane admission overhead; excludes model selection, inference, provider calls, tool execution, network, storage, and production approval latency"
+    },
+    "limitations": [
+      "The contract verifies caller-supplied route facts and trajectory summaries; it does not independently observe the serving provider or model runtime.",
+      "Confidence and stability values are evidence inputs, not calibrated truth; a trained calibrator and held-out production trajectory labels are not supplied by this contract.",
+      "The benchmark does not establish calibration error, routing quality, cost savings, latency improvement, tool success, AGI capability, production efficacy, or Linux superiority.",
+      "No physical hardware, external reviewer, independent builder, live multihost environment, or production approval was exercised."
+    ]
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "confidence_is_truth": false,
+    "route_receipt_is_execution_authority": false,
+    "route_receipt_is_policy_authority": false,
+    "inference_executed": false,
+    "model_selected": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approved": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-MEMORY-INTERVENTION-2026-08-19",
+    "rollback_scope": "remove the route-receipt module, tests, benchmark, runner, evidence registration, and metadata; retain the memory-intervention release tag"
+  }
+}

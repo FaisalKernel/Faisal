@@ -2416,5 +2416,13 @@
   "frontier_memory_intervention_benchmark": "tools/faisal-memory-intervention/bench_faisal_memory_intervention.py",
   "frontier_memory_intervention_runner": "tools/faisal-build/run_memory_intervention_validation.sh",
   "frontier_memory_intervention_rollback_checkpoint": "FAISAL-FRONTIER-INTENT-REPAIR-2026-08-19",
-  "frontier_memory_intervention_authority_boundary": "memory_intervention_receipts_are_recommendation_evidence_only_model_output_and_memory_never_become_truth_execution_prompt_policy_or_production_authority_the_contract_does_not_retrieve_memory_inject_prompts_execute_tools_or_contact_external_services"
+  "frontier_memory_intervention_authority_boundary": "memory_intervention_receipts_are_recommendation_evidence_only_model_output_and_memory_never_become_truth_execution_prompt_policy_or_production_authority_the_contract_does_not_retrieve_memory_inject_prompts_execute_tools_or_contact_external_services",
+  "frontier_route_receipt": "pass_requested_effective_route_model_version_provider_tier_fallback_tool_use_trajectory_confidence_stability_cost_freshness_replay_and_non_authority_controls",
+  "frontier_route_receipt_evidence": "tools/faisal-build/evidence/frontier-route-receipt-validation-2026-08-19.json",
+  "frontier_route_receipt_module": "tools/faisal-route-receipt/faisal_route_receipt.py",
+  "frontier_route_receipt_tests": "tools/faisal-route-receipt/test_faisal_route_receipt.py",
+  "frontier_route_receipt_benchmark": "tools/faisal-route-receipt/bench_faisal_route_receipt.py",
+  "frontier_route_receipt_runner": "tools/faisal-build/run_route_receipt_validation.sh",
+  "frontier_route_receipt_rollback_checkpoint": "FAISAL-FRONTIER-MEMORY-INTERVENTION-2026-08-19",
+  "frontier_route_receipt_authority_boundary": "route_receipts_are_auditable_evidence_only_model_output_provider_metadata_and_confidence_never_become_truth_execution_policy_or_production_authority_the_contract_does_not_select_models_invoke_inference_or_expose_hidden_reasoning"
 }
