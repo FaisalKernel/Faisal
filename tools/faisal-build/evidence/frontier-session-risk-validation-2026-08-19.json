@@ -1,0 +1,129 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-session-risk-validation-2026-08-19",
+  "recorded_at": "2026-08-19T11:34:00Z",
+  "status": "bounded_session_risk_policy_qualified",
+  "objective": "Add provider-neutral fail-closed session policy decisions that accumulate taint/capability evidence, detect lethal-trifecta combinations, require blocking approval for high-risk transitions, deny critical taint, and bind policy/generation/context/authorization evidence without executing tools.",
+  "research_inputs": [
+    {
+      "source": "https://developers.openai.com/api/docs/guides/agent-builder-safety",
+      "finding": "Current agent safety guidance recommends structured outputs, enabled MCP tool approvals, input guardrails, and trace graders; it warns prompt injection and private-data leakage remain possible even with mitigations.",
+      "implementation_impact": "FAISAL adds deterministic preflight policy decisions that do not rely on model output or untrusted input to authorize high-risk transitions."
+    },
+    {
+      "source": "https://openai.github.io/openai-agents-python/guardrails/",
+      "finding": "Agent SDK guardrails distinguish input, output, and per-tool checks; blocking tripwires can halt execution before expensive models/tools start, while tool guardrails can run before and after tool calls.",
+      "implementation_impact": "FAISAL models a provider-neutral blocking approval verdict and retains an auditable decision receipt without executing the guarded action."
+    },
+    {
+      "source": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "finding": "Agent evals should combine transcript/tool-call checks with actual environment outcome checks, multiple trials, capability/regression suites, and explicit treatment of nondeterminism.",
+      "implementation_impact": "The session-risk contract records capability/taint evidence and policy decisions separately from agent claims and is validated alongside held-out traces and regressions."
+    },
+    {
+      "source": "https://blog.modelcontextprotocol.io/posts/2026-03-16-tool-annotations/",
+      "finding": "MCP annotations are hints rather than enforcement; untrusted servers can lie, and risk is determined by combinations across a session, including private data, untrusted content, and external communication.",
+      "implementation_impact": "FAISAL tracks session-level capability combinations, detects the lethal trifecta, requires blocking approval, and keeps tool metadata non-authoritative."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-session-risk/faisal_session_risk.py",
+    "tests": "tools/faisal-session-risk/test_faisal_session_risk.py",
+    "benchmark": "tools/faisal-session-risk/bench_faisal_session_risk.py",
+    "runner": "tools/faisal-build/run_session_risk_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "monotonic generation-fenced risk events",
+      "session capability and taint accumulation",
+      "private-data/untrusted-content/external-communication lethal-trifecta detection",
+      "blocking approval requirement for lethal-trifecta and unknown behavior",
+      "critical-taint fail-closed denial even with approval evidence",
+      "policy-version and policy-digest binding",
+      "context and authorization digest binding",
+      "decision replay and event replay protection",
+      "tamper-detectable decision receipts",
+      "explicit model/tool-description/tool-result/policy-receipt non-authority boundaries"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "runner": "FAISAL_SESSION_RISK_VALIDATION_OK",
+    "runner_record_digest": "41ed638a50b64e3f0cfb8c73348d18258de2f6ba0ea8e9950ac5e90888f845b7",
+    "benchmark_iterations": 1000,
+    "safe_decision_mean_ns": 30364.06,
+    "safe_decision_p95_ns": 46709,
+    "trifecta_decision_mean_ns": 32347.32,
+    "trifecta_decision_p95_ns": 52325,
+    "benchmark_scope": "local_python_policy_receipts_not_model_network_or_tool_latency",
+    "scenario_verdicts": {
+      "safe": "allow_with_policy",
+      "lethal_trifecta_without_approval": "require_blocking_approval",
+      "lethal_trifecta_with_approval": "allow_with_policy",
+      "critical_taint_with_approval": "deny",
+      "unknown_tool_behavior_without_approval": "require_blocking_approval",
+      "generation_replay_authority_negatives": "passed"
+    },
+    "real_held_out_evaluation": {
+      "runner": "tools/faisal-build/run_agi_support_evaluation.sh",
+      "task_count": 8,
+      "baseline_pass_rate": 0.75,
+      "candidate_pass_rate": 1.0,
+      "pass_rate_delta": 0.25,
+      "baseline_safety_pass_rate": 1.0,
+      "candidate_safety_pass_rate": 1.0,
+      "trace_verification": "passed",
+      "promotion_without_authority": "rejected",
+      "promotion_with_local_test_authority": "passed_fixture_only",
+      "rollback": "passed",
+      "tamper_rejection": "passed",
+      "scope": "deterministic_local_fixture_adapter_on_held_out_task_pack_not_session_risk_or_general_intelligence_evidence"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": {
+      "model_routing": "pass",
+      "memory_write": "pass",
+      "memory_read": "pass",
+      "checkpoint": "pass",
+      "delegation": "pass",
+      "trace_conformance": "pass",
+      "trace_certification": "pass",
+      "observation_trust": "pass",
+      "portable_memory": "pass",
+      "mcp_contract": "pass",
+      "snapshot_index": "pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"
+    }
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "tool_description_is_authority": false,
+    "tool_result_is_authority": false,
+    "policy_receipt_is_production_authority": false,
+    "policy_decision_is_tool_execution": false,
+    "blocking_approval_digest_is_human_approval_proof": false,
+    "ambient_authority": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The module emits policy decisions and receipts but does not execute tools, inspect credentials, validate OAuth tokens, enforce network egress, or provide sandbox isolation.",
+    "Capability and taint labels are caller-supplied evidence and require independent trusted instrumentation and authorization systems for production trust.",
+    "A matching blocking approval digest proves only linkage of supplied evidence; it does not prove a human approved the action unless an external operator system attests it.",
+    "The lethal-trifecta policy is a bounded deterministic rule and is not a complete prompt-injection, data-loss-prevention, sandbox, or exfiltration defense.",
+    "The benchmark measures local Python receipt overhead and excludes models, networks, browsers, tools, accelerators, storage, and kernel scheduling latency.",
+    "The real held-out evaluation uses deterministic fixture adapters and does not measure session-risk efficacy, browser autonomy, robotics, frontier models, or general intelligence.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, superiority to Linux, or closure of existing external release blockers."
+  ]
+}
