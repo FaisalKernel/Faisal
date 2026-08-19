@@ -2128,5 +2128,13 @@
   "frontier_model_routing_adaptive_runner": "tools/faisal-build/run_model_routing_validation.sh",
   "frontier_model_routing_adaptive_benchmark": "tools/faisal-model-routing/bench_faisal_model_routing.py",
   "frontier_model_routing_adaptive_rollback_checkpoint": "FAISAL-FRONTIER-MODEL-ROUTING-2026-08-27",
-  "frontier_model_routing_adaptive_authority_boundary": "caller_observed_outcomes_are_not_authority_model_output_cannot_write_outcomes_adaptive_feedback_cannot_modify_privileged_kernel_code_and_production_approval_remains_false"
+  "frontier_model_routing_adaptive_authority_boundary": "caller_observed_outcomes_are_not_authority_model_output_cannot_write_outcomes_adaptive_feedback_cannot_modify_privileged_kernel_code_and_production_approval_remains_false",
+  "frontier_observation_trust": "pass_provider_neutral_browser_visual_media_and_tool_observation_allowlist_redirect_size_generation_injection_signal_safe_framing_and_side_effect_escalation_controls",
+  "frontier_observation_trust_evidence": "tools/faisal-build/evidence/frontier-observation-trust-validation-2026-08-29.json",
+  "frontier_observation_trust_module": "tools/faisal-observation-trust/faisal_observation_trust.py",
+  "frontier_observation_trust_tests": "tools/faisal-observation-trust/test_faisal_observation_trust.py",
+  "frontier_observation_trust_benchmark": "tools/faisal-observation-trust/bench_faisal_observation_trust.py",
+  "frontier_observation_trust_runner": "tools/faisal-build/run_observation_trust_validation.sh",
+  "frontier_observation_trust_rollback_checkpoint": "FAISAL-FRONTIER-MODEL-ROUTING-ADAPTIVE-2026-08-28",
+  "frontier_observation_trust_authority_boundary": "observations_and_injection_signals_are_untrusted_data_model_output_is_not_authority_side_effect_decisions_are_not_execution_and_production_approval_remains_false"
 }

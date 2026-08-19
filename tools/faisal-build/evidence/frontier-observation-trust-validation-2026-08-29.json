@@ -1,0 +1,93 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-observation-trust-validation-2026-08-29",
+  "recorded_at": "2026-08-19T06:49:39Z",
+  "status": "pass_bounded_provider_neutral_observation_trust_and_side_effect_escalation",
+  "implementation": {
+    "module": "tools/faisal-observation-trust/faisal_observation_trust.py",
+    "tests": "tools/faisal-observation-trust/test_faisal_observation_trust.py",
+    "benchmark": "tools/faisal-observation-trust/bench_faisal_observation_trust.py",
+    "runner": "tools/faisal-build/run_observation_trust_validation.sh",
+    "capabilities": [
+      "HTTP(S) source and hostname allowlisting",
+      "content type and bounded byte-size validation",
+      "redirect count validation",
+      "decoded pixel and media duration bounds",
+      "source-generation fencing",
+      "deterministic content and receipt digests",
+      "instruction-like content signal flagging without authority",
+      "injection-resistant observation framing",
+      "capability and confirmation checks for side-effect plans",
+      "explicit no-execution decision receipts"
+    ]
+  },
+  "measured_validation": {
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "syntax_check": "pass",
+    "runner": "pass",
+    "admission_digest": "pass",
+    "domain_allowlist_rejection": "pass",
+    "redirect_limit_rejection": "pass",
+    "byte_size_limit_rejection": "pass",
+    "pixel_limit_rejection": "pass",
+    "generation_fence_rejection": "pass",
+    "injection_signal_flagging": "pass",
+    "safe_framing": "pass",
+    "high_risk_confirmation_gate": "pass",
+    "side_effect_not_executed": "pass",
+    "runner_record_digest": "sha256:804674e3e08c34c8870d8d16801c013af451fbc2b3bbff8269b54ea22afa5ef4",
+    "benchmark_iterations": 5000,
+    "benchmark_baseline_mean_ns": 896.16,
+    "benchmark_validated_mean_ns": 27228.48,
+    "benchmark_baseline_p95_ns": 1324,
+    "benchmark_validated_p95_ns": 42184,
+    "benchmark_overhead_ratio": 30.3837,
+    "benchmark_scope": "local_hash_vs_policy_admission_framing_and_side_effect_decision_not_browser_or_model_latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://arxiv.org/html/2506.02456v2",
+      "finding": "VPI-Bench models visual prompt injection as a chained threat against browser-use and computer-use agents and reports high vulnerability in interactive environments.",
+      "used_for": "treating rendered/page content as untrusted observation and separating observation from side-effect authority"
+    },
+    {
+      "url": "https://arxiv.org/html/2605.11032v1",
+      "finding": "Portable Agent Memory uses signed provenance, scoped capabilities, and injection-resistant framing for cross-agent memory transfer.",
+      "used_for": "digest, capability, framing, and non-authority design alignment"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/stable/usage/security/",
+      "finding": "Inference deployments require network isolation, endpoint allowlists, media-domain restrictions, redirect controls, and decode/resource bounds.",
+      "used_for": "source, redirect, content, and media-size policy controls"
+    },
+    {
+      "url": "https://docs.nvidia.com/openshell/about/overview",
+      "finding": "Agent sandboxing benefits from defense in depth across filesystem, network, process, and inference policy domains.",
+      "used_for": "side-effect escalation and policy-boundary separation"
+    }
+  ],
+  "boundary": {
+    "independent_builder": false,
+    "physical_hardware_qualification": false,
+    "operator_signing_ceremony": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "observation_is_authority": false,
+    "page_content_is_instruction": false,
+    "model_output_is_authority": false,
+    "injection_signals_are_complete_detection": false,
+    "side_effect_decision_is_execution": false,
+    "fake_hardware_evidence": false,
+    "fake_external_review": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "limitations": [
+    "Regex-based injection signals are advisory indicators, not complete detection or proof of safety.",
+    "The module does not inspect pixels, run a browser, contact a remote URL, call a model, execute a tool, or perform a side effect.",
+    "Allowlisting and size checks do not replace network sandboxing, TLS validation, filesystem policy, seccomp, or independent security review.",
+    "Benchmark values measure local Python control-plane overhead only.",
+    "This evidence does not claim browser-agent safety, multimodal robustness, robotics capability, AGI, or production approval."
+  ]
+}
