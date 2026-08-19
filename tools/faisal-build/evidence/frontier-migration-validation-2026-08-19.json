@@ -1,0 +1,136 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-migration-validation-2026-08-19",
+  "recorded_at": "2026-08-19T11:56:00Z",
+  "status": "bounded_workload_migration_admission_qualified",
+  "objective": "Add provider-neutral fail-closed workload-migration admission receipts that bind source/destination identities, objective/task/lifecycle/checkpoint/trace/state/artifact/memory generations, capability attenuation, readiness evidence, idempotency, expiry, rollback, and non-authority boundaries without moving workloads or contacting nodes.",
+  "research_inputs": [
+    {
+      "source": "https://a2a-protocol.org/latest/specification/",
+      "finding": "A2A v1.0 defines opaque agent collaboration, context and task identifiers, streaming status/artifact updates, cancellation, idempotency, capability validation, signed agent-card support, and in-task authorization without sharing internal agent state.",
+      "implementation_impact": "FAISAL binds migration handoff evidence to objective/task/lifecycle/checkpoint/trace identities and preserves idempotency, capability, cancellation/rollback boundaries without treating agent metadata as authority."
+    },
+    {
+      "source": "https://developers.openai.com/cookbook/examples/agents_sdk/migrate-from-claude-agent-sdk/readme",
+      "finding": "Current agent architecture separates trusted harness ownership of tools, approvals, secrets, guardrails, tracing, and business access from scoped sandbox compute; conversation continuation, paused-run resume, and sandbox-session resume are distinct state strategies.",
+      "implementation_impact": "FAISAL requires explicit state/checkpoint/trace digests and does not execute or transfer sandbox state; migration receipts remain admission evidence only."
+    },
+    {
+      "source": "https://vllm.ai/blog/2026-04-07-moriio-kv-connector",
+      "finding": "Current prefill/decode disaggregation uses producer/consumer roles, metadata exchange, per-request KV transfer identifiers, readiness states, cleanup, and availability detection. Reported goodput is hardware- and configuration-specific.",
+      "implementation_impact": "FAISAL models provider-neutral transfer/readiness evidence and explicit destination capability attenuation but does not move KV cache, access RDMA, or claim accelerator support."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-migration/faisal_migration.py",
+    "tests": "tools/faisal-migration/test_faisal_migration.py",
+    "benchmark": "tools/faisal-migration/bench_faisal_migration.py",
+    "runner": "tools/faisal-build/run_migration_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "two-phase prepare/commit migration receipts",
+      "source and destination identity binding",
+      "objective/task/lifecycle/checkpoint/trace/state/artifact digest linkage",
+      "memory generation and capability attenuation",
+      "network/storage/sandbox/observability readiness evidence",
+      "destination allowlist and source-destination distinction",
+      "generation and bounded TTL fences",
+      "idempotency and migration replay protection",
+      "rollback checkpoint requirement",
+      "destination state/checkpoint/trace commit linkage",
+      "explicit model/agent-card/readiness/receipt non-authority boundaries"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "runner": "FAISAL_MIGRATION_VALIDATION_OK",
+    "runner_record_digest": "0dd73438d5d38bc6bbcd62afbb8ab9bf8478c510081ab32a937e94c36d969e9c",
+    "benchmark_iterations": 1000,
+    "prepare_mean_ns": 53494.48,
+    "prepare_p95_ns": 92773,
+    "commit_mean_ns": 54607.64,
+    "commit_p95_ns": 101133,
+    "deny_mean_ns": 3840.46,
+    "deny_p95_ns": 8312,
+    "benchmark_scope": "local_python_receipts_not_network_memory_kv_device_or_process_migration_latency",
+    "scenario_validation": {
+      "valid_prepare": "passed",
+      "valid_commit": "passed",
+      "migration_executed": false,
+      "capability_attenuation": "passed",
+      "readiness": "passed",
+      "destination_allowlist": "passed",
+      "source_destination_fence": "passed",
+      "generation": "passed",
+      "expiry": "passed",
+      "rollback": "passed",
+      "replay_idempotency": "passed",
+      "tamper": "passed",
+      "authority": "passed"
+    },
+    "real_held_out_evaluation": {
+      "runner": "tools/faisal-build/run_agi_support_evaluation.sh",
+      "task_count": 8,
+      "baseline_pass_rate": 0.75,
+      "candidate_pass_rate": 1.0,
+      "pass_rate_delta": 0.25,
+      "baseline_safety_pass_rate": 1.0,
+      "candidate_safety_pass_rate": 1.0,
+      "trace_verification": "passed",
+      "promotion_without_authority": "rejected",
+      "promotion_with_local_test_authority": "passed_fixture_only",
+      "rollback": "passed",
+      "tamper_rejection": "passed",
+      "scope": "deterministic_local_fixture_adapter_on_held_out_task_pack_not_migration_or_general_intelligence_evidence"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": {
+      "model_routing": "pass",
+      "memory_write": "pass",
+      "memory_read": "pass",
+      "checkpoint": "pass",
+      "delegation": "pass",
+      "trace_conformance": "pass",
+      "trace_certification": "pass",
+      "observation_trust": "pass",
+      "portable_memory": "pass",
+      "mcp_contract": "pass",
+      "snapshot_index": "pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"
+    }
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "source_agent_card_is_authority": false,
+    "destination_agent_card_is_authority": false,
+    "readiness_evidence_is_hardware_qualification": false,
+    "migration_receipt_is_execution_authority": false,
+    "state_manifest_is_trust_root": false,
+    "migration_executed": false,
+    "ambient_authority": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The module emits migration admission evidence but does not move processes, containers, agent state, memory, KV cache, files, sockets, credentials, or accelerator allocations.",
+    "Source/destination identity, capability, readiness, state, checkpoint, trace, artifact, and memory digests are caller-supplied evidence and require independently trusted node agents and attestation for production trust.",
+    "Readiness flags do not prove physical network, storage, accelerator, IOMMU, DMA, RDMA, or vendor-driver qualification.",
+    "A committed receipt is not proof that a remote migration occurred; the contract deliberately sets migration_executed=false.",
+    "Capability attenuation is a set relation and does not replace OS capabilities, sandbox enforcement, network policy, or hardware isolation.",
+    "The benchmark measures local Python receipt overhead and excludes network, memory, KV, device, process, container, storage, and kernel scheduling latency.",
+    "The real held-out evaluation uses deterministic fixture adapters and does not measure migration efficacy, browser autonomy, robotics, frontier models, or general intelligence.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, superiority to Linux, or closure of existing external release blockers."
+  ]
+}
