@@ -1,0 +1,107 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-task-lifecycle-validation-2026-08-19",
+  "recorded_at": "2026-08-19T10:25:00Z",
+  "status": "bounded_delegated_task_lifecycle_qualified",
+  "objective": "Bind long-running delegated-task status transitions, progress, cancellation, checkpoint lineage, trace position, terminal results, replay protection, and explicit non-authority semantics to an admitted cross-agent handoff without executing remote work.",
+  "research_inputs": [
+    {
+      "source": "https://github.com/a2aproject/A2A",
+      "finding": "A2A provides provider-neutral communication for opaque agents, Agent Cards, synchronous and streaming interactions, asynchronous notifications, rich artifacts, and long-running collaboration without exposing internal memory or tools.",
+      "implementation_impact": "FAISAL adds lifecycle receipts around admitted handoffs while preserving opacity and preventing Agent Card or remote-result metadata from becoming authority."
+    },
+    {
+      "source": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "finding": "MCP defines stateless requests, capability negotiation, progress, cancellation, and opt-in asynchronous Tasks with durable handles; tool descriptions and annotations require explicit trust controls.",
+      "implementation_impact": "The lifecycle state machine models bounded progress, cancellation, durable receipt state, and explicit non-authority flags without importing MCP as a privileged dependency."
+    },
+    {
+      "source": "https://developers.openai.com/api/docs/guides/agents",
+      "finding": "The Agents SDK guidance separates orchestration, handoffs, guardrails, resumable approval flows, tracing, sessions, sandbox workspaces, and evaluation.",
+      "implementation_impact": "FAISAL binds lifecycle transitions to existing handoff, checkpoint, and trace boundaries while keeping execution and approval outside this receipt module."
+    },
+    {
+      "source": "https://openai.github.io/openai-agents-python/",
+      "finding": "The SDK exposes resumable run state, tracing, handoffs, MCP integration, sessions, sandbox agents, and human-in-the-loop controls as runtime features.",
+      "implementation_impact": "The contract provides provider-neutral evidence for resumable delegated task state and terminal result linkage without depending on a provider SDK."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-task-lifecycle/faisal_task_lifecycle.py",
+    "tests": "tools/faisal-task-lifecycle/test_faisal_task_lifecycle.py",
+    "benchmark": "tools/faisal-task-lifecycle/bench_faisal_task_lifecycle.py",
+    "runner": "tools/faisal-build/run_task_lifecycle_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "admitted-handoff digest binding",
+      "bounded task expiry and generation fencing",
+      "admitted, running, paused, cancel-requested, cancelled, completed, and failed states",
+      "monotonic trace positions and non-regressing progress",
+      "checkpoint digest required for pause and advancing checkpoint lineage",
+      "terminal result digest required for completion",
+      "replay protection and task-record body tamper detection",
+      "explicit model/provider/task/production non-authority semantics"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 7,
+    "unit_tests_passed": 7,
+    "runner": "FAISAL_TASK_LIFECYCLE_VALIDATION_OK",
+    "runner_record_digest": "9019e320f4b902be61e64fac1cd2618ed89f1aec724a5c3db843d2a4ff525467",
+    "benchmark_iterations": 1000,
+    "benchmark_admission_mean_ns": 36538.84,
+    "benchmark_event_sequence_mean_ns": 133031.64,
+    "benchmark_terminal_completion_mean_ns": 59318.01,
+    "benchmark_admission_p95_ns": 55908,
+    "benchmark_event_sequence_p95_ns": 196370,
+    "benchmark_terminal_completion_p95_ns": 88782,
+    "benchmark_scope": "local_python_lifecycle_receipts_not_remote_agent_network_model_or_kernel_latency",
+    "previous_handoff_admission_mean_ns": 25588.78,
+    "comparison_interpretation": "The lifecycle admission path is slower than the prior handoff-only receipt because it adds task record integrity, lifecycle state, and event-lineage fields. This is a control-plane overhead measurement, not an end-to-end agent performance claim.",
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": {
+      "model_routing": "pass",
+      "memory_write": "pass",
+      "memory_read": "pass",
+      "checkpoint": "pass",
+      "delegation": "pass",
+      "trace_conformance": "pass",
+      "trace_certification": "pass",
+      "observation_trust": "pass",
+      "portable_memory": "pass",
+      "mcp_contract": "pass",
+      "snapshot_index": "incomplete_timeout_after_selftest_benchmark_fuzz_asan_ubsan_tsan_and_m82_markers; no pass claim"
+    }
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "task_is_execution": false,
+    "executed_by_this_module": false,
+    "remote_agent_contact": false,
+    "credential_minting": false,
+    "checkpoint_is_execution_permission": false,
+    "result_is_authority": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The module is a bounded userspace/control-plane receipt contract; it does not execute tasks, contact remote agents, transport A2A or MCP messages, invoke models, or mint credentials.",
+    "Identity, handoff digest, checkpoint digest, result digest, and timestamps are caller-supplied evidence and are not independently hardware-attested or externally signed by this local implementation.",
+    "The benchmark measures local Python receipt overhead and excludes network, storage, model, accelerator, and kernel latency.",
+    "The snapshot-index adjacent regression was not claimed as passed because its long fixture exceeded the bounded execution window after emitting earlier successful markers; the other ten adjacent suites passed.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, superiority to Linux, or resolution of existing external release blockers."
+  ]
+}
