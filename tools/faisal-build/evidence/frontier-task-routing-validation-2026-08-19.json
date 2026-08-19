@@ -1,0 +1,106 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-task-routing-validation-2026-08-19",
+  "recorded_at": "2026-08-19T14:20:00Z",
+  "status": "task_consistent_routing_lease_qualified",
+  "objective": "Add provider-neutral fail-closed task-level routing leases that pin one selected backend across a bounded multi-turn task trace, enforce sequence/generation/expiry/replay fences, and accept delayed terminal outcome evidence without invoking models or granting authority.",
+  "research_inputs": [
+    {
+      "source": "https://developers.openai.com/api/docs/guides/tools-computer-use",
+      "finding": "Computer-use systems should isolate execution, retain human oversight for high-impact actions, and treat screenshots, page text, tool outputs, PDFs, emails, chats, and third-party content as untrusted input.",
+      "implementation_impact": "Task routing receipts remain evidence-only and do not authorize tools, browser actions, external side effects, or model-generated permissions."
+    },
+    {
+      "source": "https://arxiv.org/html/2606.04990v1",
+      "finding": "Agent accountability requires provenance connecting tools, memory, observations, claims, actions, and agent interactions rather than relying only on final-answer accuracy.",
+      "implementation_impact": "Leases bind task context, route evidence, turn request digests, terminal trace, terminal outcome evidence, and delayed feedback state."
+    },
+    {
+      "source": "https://arxiv.org/html/2607.22465",
+      "finding": "TRACE-Router identifies request-level routing as misaligned with long-horizon agent tasks because quality feedback is observed only at task termination; sticky task-level assignment improves credit-assignment coherence and preserves model-specific state across a trace.",
+      "implementation_impact": "FAISAL adds a bounded task lease that pins one selected endpoint for all turns and records terminal quality/latency evidence without changing the existing request-level router."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-task-routing/faisal_task_routing.py",
+    "tests": "tools/faisal-task-routing/test_faisal_task_routing.py",
+    "benchmark": "tools/faisal-task-routing/bench_faisal_task_routing.py",
+    "runner": "tools/faisal-build/run_task_routing_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "task-level route lease admission",
+      "single backend pin across bounded multi-turn trace",
+      "first-turn and monotonic sequence fences",
+      "route/task/generation/expiry identity binding",
+      "terminal quality and latency delayed-feedback receipt",
+      "terminal trace and evidence linkage",
+      "task/turn/terminal replay and tamper protection",
+      "explicit model/endpoint/outcome/receipt non-authority boundary"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "runner": "FAISAL_TASK_ROUTING_OK",
+    "runner_record_digest": "sha256:e196645a4caafc3d7f9fbfdfd8aae3d89efedb50fb742cbefdfbf8da44f96493",
+    "real_task": {
+      "multi_turn_trace": "3 turns admitted to one pinned backend and terminal delayed feedback completed",
+      "negative_cases": 4,
+      "negative_cases_denied": 4,
+      "backend_mismatch": "denied",
+      "sequence_gap": "denied",
+      "expiry": "denied",
+      "terminal_replay": "denied"
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 14706.97,
+      "baseline_ungoverned_p95_ns": 21286.90,
+      "lease_admit_mean_ns": 47290.68,
+      "lease_admit_p95_ns": 67905.45,
+      "sticky_turn_mean_ns": 73922.88,
+      "sticky_turn_p95_ns": 105402.15,
+      "terminal_complete_mean_ns": 102075.67,
+      "terminal_complete_p95_ns": 151077.00,
+      "scope": "local Python control-plane receipt overhead; excludes model calls, provider routing, network, memory, accelerator, and kernel scheduling latency"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_sha256_8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
+    "adjacent_regressions": {"model_routing":"pass","memory_write":"pass","memory_read":"pass","checkpoint":"pass","delegation":"pass","trace_conformance":"pass","trace_certification":"pass","observation_trust":"pass","portable_memory":"pass","mcp_contract":"pass","snapshot_index":"pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"}
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "endpoint_metadata_is_authority": false,
+    "route_outcome_is_authority": false,
+    "task_routing_receipt_is_execution_authority": false,
+    "task_routing_receipt_is_production_authority": false,
+    "models_invoked": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "routing_statistics_updated": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-INTERVENTION-2026-08-19",
+    "rollback_scope": "remove the task-routing module, tests, runner, evidence registration, and metadata; retain prior tagged intervention release"
+  },
+  "limitations": [
+    "The contract pins evidence to a backend but does not invoke models or guarantee that an external runtime honors the pin.",
+    "Terminal quality and latency are caller-supplied observations and do not independently prove model quality or task correctness.",
+    "The benchmark measures local Python receipt overhead and excludes actual model inference, network, KV-cache, accelerator, and kernel scheduler behavior.",
+    "The real-task validation uses a deterministic local multi-turn fixture and does not establish general intelligence, browser autonomy, robotics, or production agent efficacy.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ]
+}
