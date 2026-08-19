@@ -1,0 +1,104 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-delegation-chain-validation-2026-08-19",
+  "recorded_at": "2026-08-19T17:20:00Z",
+  "status": "delegation_chain_capability_verification_qualified",
+  "objective": "Add provider-neutral fail-closed verification for multi-hop delegation chains with parent digest linkage, strict capability attenuation, audience/task/route binding, bounded execution count, generation/expiry/revocation fences, replay/tamper protection, and explicit non-authority boundaries.",
+  "research_inputs": [
+    {
+      "source": "https://a2a-protocol.org/latest/specification/",
+      "finding": "A2A v1.0 defines signed agent metadata, server identity verification, client/server/in-task authorization, capability validation, idempotency, asynchronous tasks, and security objects for opaque agent collaboration.",
+      "implementation_impact": "FAISAL verifies a task-scoped, audience-bound delegation chain as a local admission contract without implementing A2A transport, credential issuance, or external identity discovery."
+    },
+    {
+      "source": "https://www.ietf.org/archive/id/draft-klrc-aiagent-auth-00.html",
+      "finding": "AI agents are workloads requiring stable identifiers, cryptographically bound short-lived credentials, attestation, runtime provisioning/rotation, proof of possession, audience/expiry/nonce binding, observability/remediation, and compliance.",
+      "implementation_impact": "The verifier binds each hop and use request to issuer/subject, audience, task, route digest, generation, expiry, execution count, revocation epoch, and nonce, while explicitly marking cryptographic attestation as not performed."
+    },
+    {
+      "source": "https://arxiv.org/html/2605.05440v1",
+      "finding": "Authorization propagation spans transitive delegation, aggregation inference, and temporal validity; invocation-bound capabilities fuse identity, attenuation, and provenance; authorization should be evaluated at every interaction boundary.",
+      "implementation_impact": "The chain is append-only, each child scope is a subset of its parent, parent subject must equal child issuer, use scope is intersected across hops, and execution-count ceilings complement time-based expiry."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-delegation-chain/faisal_delegation_chain.py",
+    "tests": "tools/faisal-delegation-chain/test_faisal_delegation_chain.py",
+    "benchmark": "tools/faisal-delegation-chain/bench_faisal_delegation_chain.py",
+    "runner": "tools/faisal-build/run_delegation_chain_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "append-only hop digest lineage",
+      "parent subject to child issuer continuity",
+      "monotonic capability attenuation",
+      "audience/task/route/generation binding",
+      "execution-count ceiling independent of TTL",
+      "bounded depth and TTL",
+      "monotonic hop revocation epoch",
+      "use and nonce replay protection",
+      "explicit credential/attestation/execution non-authority boundary"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 5,
+    "unit_tests_passed": 5,
+    "runner": "FAISAL_DELEGATION_CHAIN_OK",
+    "runner_record_digest": "sha256:d9156d0915cd9302d3cf0bead3c94e1014a20fc94f100c399243b2fe5a31a3dd",
+    "real_task": {
+      "valid_two_hop_chain": "passed",
+      "chain_depth": 2,
+      "effective_capabilities": ["read:catalog"],
+      "credentials_issued": false,
+      "tools_executed": false,
+      "negative_cases": 5,
+      "negative_cases_denied": 5,
+      "denials": ["execution_count", "revocation", "audience", "expiry", "replay"]
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 4898.47,
+      "baseline_ungoverned_p95_ns": 7220.65,
+      "chain_verify_admit_mean_ns": 117908.02,
+      "chain_verify_admit_p95_ns": 169878.25,
+      "scope": "local Python control-plane receipt overhead; excludes credential issuance, cryptographic attestation, network, identity provider, tool execution, model inference, storage, and kernel scheduling latency"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_sha256_8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
+    "adjacent_regressions": {"model_routing":"pass","memory_write":"pass","memory_read":"pass","checkpoint":"pass","delegation":"pass","trace_conformance":"pass","trace_certification":"pass","observation_trust":"pass","portable_memory":"pass","mcp_contract":"pass","snapshot_index":"pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"}
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "agent_claim_is_authority": false,
+    "credential_metadata_is_authority": false,
+    "delegation_receipt_is_execution_authority": false,
+    "delegation_receipt_is_policy_authority": false,
+    "delegation_receipt_is_production_authority": false,
+    "credentials_issued": false,
+    "cryptographic_attestation_verified": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-ARTIFACT-LINEAGE-2026-08-19",
+    "rollback_scope": "remove the delegation-chain module, tests, runner, evidence registration, and metadata; retain prior tagged artifact-lineage release"
+  },
+  "limitations": [
+    "The verifier validates caller-supplied chain evidence and does not issue or cryptographically verify workload credentials or hardware attestation.",
+    "Revocation state, hop identity, capability scope, task/route binding, and execution counts require a trusted authoritative store and enforcement point in production.",
+    "The benchmark measures local Python receipt overhead and excludes identity-provider, cryptography, network, distributed-consensus, tool, model, storage, accelerator, and kernel scheduler performance.",
+    "The real-task validation is a deterministic local fixture and does not establish multi-host interoperability, agent quality, general intelligence, browser autonomy, robotics, or production efficacy.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ]
+}
