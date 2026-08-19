@@ -2408,5 +2408,13 @@
   "frontier_intent_repair_benchmark": "tools/faisal-intent-repair/bench_faisal_intent_repair.py",
   "frontier_intent_repair_runner": "tools/faisal-build/run_intent_repair_validation.sh",
   "frontier_intent_repair_rollback_checkpoint": "FAISAL-FRONTIER-TOOL-ATTESTATION-2026-08-19",
-  "frontier_intent_repair_authority_boundary": "intent_and_repair_receipts_are_verification_evidence_only_model_output_verifier_output_and_artifacts_never_become_truth_execution_policy_or_production_authority_the_contract_does_not_plan_execute_repair_or_modify_artifacts"
+  "frontier_intent_repair_authority_boundary": "intent_and_repair_receipts_are_verification_evidence_only_model_output_verifier_output_and_artifacts_never_become_truth_execution_policy_or_production_authority_the_contract_does_not_plan_execute_repair_or_modify_artifacts",
+  "frontier_memory_intervention": "pass_task_session_intent_evidence_trigger_confidence_novelty_token_sensitivity_cooldown_freshness_replay_and_non_authority_controls",
+  "frontier_memory_intervention_evidence": "tools/faisal-build/evidence/frontier-memory-intervention-validation-2026-08-19.json",
+  "frontier_memory_intervention_module": "tools/faisal-memory-intervention/faisal_memory_intervention.py",
+  "frontier_memory_intervention_tests": "tools/faisal-memory-intervention/test_faisal_memory_intervention.py",
+  "frontier_memory_intervention_benchmark": "tools/faisal-memory-intervention/bench_faisal_memory_intervention.py",
+  "frontier_memory_intervention_runner": "tools/faisal-build/run_memory_intervention_validation.sh",
+  "frontier_memory_intervention_rollback_checkpoint": "FAISAL-FRONTIER-INTENT-REPAIR-2026-08-19",
+  "frontier_memory_intervention_authority_boundary": "memory_intervention_receipts_are_recommendation_evidence_only_model_output_and_memory_never_become_truth_execution_prompt_policy_or_production_authority_the_contract_does_not_retrieve_memory_inject_prompts_execute_tools_or_contact_external_services"
 }

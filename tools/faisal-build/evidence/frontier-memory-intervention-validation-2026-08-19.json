@@ -1,0 +1,93 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-memory-intervention-validation-2026-08-19",
+  "recorded_at": "2026-08-19T23:59:00Z",
+  "status": "proactive_memory_intervention_admission_validated",
+  "objective": "Admit selective memory-intervention recommendations only when a candidate reminder is bound to task, session, intent, source evidence, freshness, confidence, novelty, token, sensitivity, cooldown, and replay policies.",
+  "research_inputs": [
+    {
+      "source": "https://arxiv.org/html/2607.08716v1",
+      "finding": "Proactive memory is an intervention decision: a memory policy updates structured state and decides whether a concise memory-grounded reminder should influence the next action-agent decision or remain silent. Selective intervention is distinguished from passive retrieval and always-on injection.",
+      "implementation_impact": "FAISAL adds a receipt-only selective intervention admission contract with trigger, confidence, novelty, provenance, token, sensitivity, cooldown, and replay controls."
+    },
+    {
+      "source": "https://arxiv.org/html/2601.14192",
+      "finding": "Efficient agents require bounded memory lifecycle management, trigger-driven maintenance, selective retrieval, structured memory, and controlled memory/tool invocation to balance correctness, latency, token cost, and retrieval ambiguity.",
+      "implementation_impact": "The contract uses deterministic budgets and policy gates without requiring a provider, model, retrieval backend, prompt injection, or tool invocation."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-memory-intervention/faisal_memory_intervention.py",
+    "tests": "tools/faisal-memory-intervention/test_faisal_memory_intervention.py",
+    "benchmark": "tools/faisal-memory-intervention/bench_faisal_memory_intervention.py",
+    "runner": "tools/faisal-build/run_memory_intervention_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "task/session/intent scope binding",
+      "source evidence digest requirement",
+      "trigger reason and confidence/novelty thresholds",
+      "token and memory-sensitivity budgets",
+      "cooldown, intervention-count, freshness, generation, and replay fences",
+      "receipt-only selective recommendation with memory_retrieved=false and prompt_injected=false"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "FAISAL_MEMORY_INTERVENTION_OK",
+    "runner_record_digest": "sha256:cf4c200b444bc586a03ce9756a797e350f207347a81c31d57656e6b334c56393",
+    "real_tasks": {
+      "valid_intervention": "passed",
+      "trigger_reason": "failed-attempt-diagnosis",
+      "source_evidence_present": true,
+      "memory_retrieved": false,
+      "prompt_injected": false,
+      "tools_executed": false,
+      "negative_cases_denied": 8,
+      "denials": ["confidence", "novelty", "token_budget", "cooldown", "cross_task", "empty_evidence", "authority", "replay"],
+      "production_approved": false
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 4576.84,
+      "baseline_ungoverned_p95_ns": 6502.00,
+      "intervention_admission_mean_ns": 27853.23,
+      "intervention_admission_p95_ns": 42486.00,
+      "scope": "local Python control-plane admission overhead; excludes memory retrieval, prompt construction, model inference, tool invocation, external services, and production approval latency"
+    },
+    "limitations": [
+      "The contract validates caller-supplied memory and evidence digests; it does not retrieve or independently verify memory content.",
+      "The contract admits a recommendation but does not inject a reminder into an agent context, execute a model, or measure behavioral state decay.",
+      "The benchmark does not establish long-horizon task success, token savings, latency improvement, memory quality, AGI capability, production efficacy, or Linux superiority.",
+      "No physical hardware, external reviewer, independent builder, live multihost environment, or production approval was exercised."
+    ]
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "memory_is_authority": false,
+    "intervention_is_execution_authority": false,
+    "intervention_is_policy_authority": false,
+    "memory_retrieved": false,
+    "prompt_injected": false,
+    "execution_performed": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approved": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-INTENT-REPAIR-2026-08-19",
+    "rollback_scope": "remove the memory-intervention module, tests, benchmark, runner, evidence registration, and metadata; retain the intent-repair release tag"
+  }
+}
