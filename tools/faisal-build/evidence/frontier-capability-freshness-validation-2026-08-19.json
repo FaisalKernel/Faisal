@@ -1,0 +1,102 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-capability-freshness-validation-2026-08-19",
+  "recorded_at": "2026-08-19T18:20:00Z",
+  "status": "capability_manifest_freshness_qualified",
+  "objective": "Detect capability-envelope drift between agent/model/tool/route admission and use by comparing bound manifest digests, generations, key epochs, task/audience/route identities, lifecycle state, and revocation evidence without fabricating cryptographic attestation.",
+  "research_inputs": [
+    {
+      "source": "https://spiffe.io/docs/latest/spiffe/concepts/",
+      "finding": "SPIFFE provides stable workload identifiers, short-lived X.509/JWT SVIDs, automatically rotated keys, and trust bundles; workload identity and attestation are infrastructure responsibilities.",
+      "implementation_impact": "FAISAL binds manifest freshness to agent/task/audience/route and marks cryptographic attestation as not performed; it remains compatible with future SPIFFE-backed enforcement."
+    },
+    {
+      "source": "https://arxiv.org/html/2603.14332v1",
+      "finding": "Capability-bound agent certificates and a skills-manifest hash address silent capability escalation when tools or models change after authorization; governance also needs verifiable interaction records.",
+      "implementation_impact": "FAISAL compares admitted and observed manifest digests, model identity/version, tool set, route, generation, and key epoch, rejecting drift before a use receipt is admitted."
+    },
+    {
+      "source": "https://arxiv.org/html/2603.24775v1",
+      "finding": "Verifiable delegation across MCP/A2A benefits from self-certifying or resolved identities, signed identity documents, key rotation, capability attenuation, lifecycle expiry, and provenance-bound completion records.",
+      "implementation_impact": "FAISAL accepts a delegation-hop digest, enforces bounded expiry and key epochs, and composes with the existing delegation-chain verifier without issuing credentials or implementing transport bindings."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-capability-freshness/faisal_capability_freshness.py",
+    "tests": "tools/faisal-capability-freshness/test_faisal_capability_freshness.py",
+    "benchmark": "tools/faisal-capability-freshness/bench_faisal_capability_freshness.py",
+    "runner": "tools/faisal-build/run_capability_freshness_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "agent/model/version/tool-set/route manifest digest binding",
+      "admitted-versus-observed manifest comparison",
+      "same-generation snapshot handling with generation rollback rejection",
+      "task/audience/route/delegation-hop binding",
+      "key epoch and monotonic revocation evidence",
+      "manifest/request expiry and TTL fences",
+      "use/nonce replay and digest tamper protection",
+      "explicit non-attestation/non-credential/non-execution boundary"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 5,
+    "unit_tests_passed": 5,
+    "runner": "FAISAL_CAPABILITY_FRESHNESS_OK",
+    "runner_record_digest": "sha256:071cab09b3a1abdad59298a9beeea11c2d64b6dcbf7a2ea672a2d0811728f3b8",
+    "real_task": {
+      "unchanged_manifest": "passed",
+      "capability_drift": false,
+      "cryptographic_attestation_verified": false,
+      "tools_executed": false,
+      "negative_cases": 5,
+      "negative_cases_denied": 5,
+      "denials": ["tool_drift", "model_drift", "route_drift", "revocation", "expiry"]
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 14781.87,
+      "baseline_ungoverned_p95_ns": 21499.80,
+      "freshness_verify_admit_mean_ns": 118472.79,
+      "freshness_verify_admit_p95_ns": 170908.20,
+      "scope": "local Python control-plane receipt overhead; excludes cryptographic attestation, identity providers, live process inspection, network, tools, models, storage, and kernel scheduling latency"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_sha256_8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
+    "adjacent_regressions": {"model_routing":"pass","memory_write":"pass","memory_read":"pass","checkpoint":"pass","delegation":"pass","trace_conformance":"pass","trace_certification":"pass","observation_trust":"pass","portable_memory":"pass","mcp_contract":"pass","snapshot_index":"pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"}
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "tool_metadata_is_authority": false,
+    "manifest_claim_is_attestation": false,
+    "freshness_receipt_is_execution_authority": false,
+    "freshness_receipt_is_policy_authority": false,
+    "freshness_receipt_is_production_authority": false,
+    "credentials_issued": false,
+    "cryptographic_attestation_verified": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-DELEGATION-CHAIN-2026-08-19",
+    "rollback_scope": "remove the capability-freshness module, tests, runner, evidence registration, and metadata; retain prior tagged delegation-chain release"
+  },
+  "limitations": [
+    "This verifier compares caller-supplied manifest snapshots; it does not inspect a live agent process, model binary, tool implementation, route, or workload identity provider.",
+    "The evidence does not perform X.509/JWT/Ed25519 verification, TPM/TEE attestation, SPIFFE issuance, key rotation, or revocation distribution.",
+    "The benchmark measures local Python receipt overhead and excludes cryptographic, identity-provider, network, storage, model, tool, accelerator, and kernel scheduler performance.",
+    "The real-task validation is a deterministic local fixture and does not establish production capability integrity, multi-host interoperability, agent quality, general intelligence, browser autonomy, or robotics.",
+    "No physical accelerator, TPM, secure enclave, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ]
+}
