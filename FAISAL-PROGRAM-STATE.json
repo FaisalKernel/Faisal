@@ -2160,5 +2160,13 @@
   "frontier_delegation_benchmark": "tools/faisal-delegation/bench_faisal_delegation.py",
   "frontier_delegation_runner": "tools/faisal-build/run_delegation_validation.sh",
   "frontier_delegation_rollback_checkpoint": "FAISAL-FRONTIER-TRACE-CONFORMANCE-2026-08-31",
-  "frontier_delegation_authority_boundary": "delegation_records_are_authorization_inputs_not_execution_model_output_is_not_authority_proof_digests_are_not_production_signatures_revocation_distribution_is_unproven_no_ambient_authority_and_production_approval_remains_false"
+  "frontier_delegation_authority_boundary": "delegation_records_are_authorization_inputs_not_execution_model_output_is_not_authority_proof_digests_are_not_production_signatures_revocation_distribution_is_unproven_no_ambient_authority_and_production_approval_remains_false",
+  "frontier_model_routing_evidence_bound": "pass_route_bound_caller_observed_outcome_receipts_route_digest_request_identity_model_digest_generation_freshness_endpoint_membership_evidence_binding_and_replay_rejection",
+  "frontier_model_routing_evidence_bound_evidence": "tools/faisal-build/evidence/frontier-model-routing-evidence-bound-validation-2026-09-02.json",
+  "frontier_model_routing_evidence_bound_module": "tools/faisal-model-routing/faisal_model_routing.py",
+  "frontier_model_routing_evidence_bound_tests": "tools/faisal-model-routing/test_faisal_model_routing.py",
+  "frontier_model_routing_evidence_bound_benchmark": "tools/faisal-model-routing/bench_faisal_model_routing.py",
+  "frontier_model_routing_evidence_bound_runner": "tools/faisal-build/run_model_routing_validation.sh",
+  "frontier_model_routing_evidence_bound_rollback_checkpoint": "FAISAL-FRONTIER-DELEGATION-2026-09-01",
+  "frontier_model_routing_evidence_bound_authority_boundary": "caller_observed_receipts_are_integrity_inputs_not_model_correctness_or_tool_authority_route_plans_are_not_executions_provider_metadata_is_not_authority_no_distributed_quorum_or_production_attestation_and_production_approval_remains_false"
 }

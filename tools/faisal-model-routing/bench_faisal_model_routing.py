@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from faisal_model_routing import Endpoint, OutcomeLedger, RoutePlanCache, RouteRequest, plan_route
 
 ITERATIONS = 5000
+BOUND_ITERATIONS = 1000
 
 def ep(i, *, health="healthy", latency=20, cost=10, cache=False):
     return Endpoint(endpoint_id=f"endpoint-{i}", model_id=f"model-{i}", model_digest=f"sha256:{i}", provider_class="local", capabilities=frozenset({"text"}), privacy_class="internal", region="us-east", max_context_tokens=8192, estimated_cost_milli=cost, estimated_latency_ms=latency, health=health, health_generation=4, active_requests=0, max_concurrency=4, cache_hit=cache)
@@ -32,6 +33,9 @@ for _ in range(3):
     ledger.record(endpoint_id="endpoint-17", request_class=route_class, success=False, latency_ms=100, observed_at=20, current_generation=4, sample_generation=4)
 adaptive_cache = RoutePlanCache(max_entries=4)
 adaptive_cache.plan(endpoints, request, trusted_provider_classes={"local"}, observed_at=20, outcome_ledger=ledger)
+bound_ledger = OutcomeLedger(max_keys=128, max_samples=BOUND_ITERATIONS + 1, cooldown_seconds=30)
+bound_route = plan_route(endpoints, request, trusted_provider_classes={"local"}, observed_at=20, outcome_ledger=bound_ledger)
+bound_index = 0
 
 def cached_routed():
     return route_cache.plan(endpoints, request, trusted_provider_classes={"local"}, observed_at=21)["route_digest"]
@@ -42,10 +46,19 @@ def adaptive_routed():
 def cached_adaptive_routed():
     return adaptive_cache.plan(endpoints, request, trusted_provider_classes={"local"}, observed_at=21, outcome_ledger=ledger)["route_digest"]
 
-def measure(fn):
+
+def bound_outcome_recorded():
+    global bound_index
+    bound_index += 1
+    digest = "sha256:" + format(bound_index, "064x")
+    return bound_ledger.record_bound_outcome(route=bound_route, request=request, endpoint_id=bound_route["primary"]["endpoint_id"], success=True, latency_ms=18, observed_at=21, current_generation=4, sample_generation=4, evidence_digest=digest)["binding_digest"]
+
+
+def measure(fn, iterations=ITERATIONS):
+
     samples = []
     result = None
-    for _ in range(ITERATIONS):
+    for _ in range(iterations):
         start = time.perf_counter_ns()
         result = fn()
         samples.append(time.perf_counter_ns() - start)
@@ -56,25 +69,31 @@ route, route_result = measure(routed)
 cached, cached_result = measure(cached_routed)
 adaptive, adaptive_result = measure(adaptive_routed)
 cached_adaptive, cached_adaptive_result = measure(cached_adaptive_routed)
+bound, bound_result = measure(bound_outcome_recorded, BOUND_ITERATIONS)
 print(f"FAISAL_MODEL_ROUTING_BENCHMARK_ITERATIONS={ITERATIONS}")
 print(f"FAISAL_MODEL_ROUTING_BASELINE_MEAN_NS={statistics.mean(base):.2f}")
 print(f"FAISAL_MODEL_ROUTING_PLANNER_MEAN_NS={statistics.mean(route):.2f}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_PLANNER_MEAN_NS={statistics.mean(cached):.2f}")
 print(f"FAISAL_MODEL_ROUTING_ADAPTIVE_PLANNER_MEAN_NS={statistics.mean(adaptive):.2f}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_ADAPTIVE_PLANNER_MEAN_NS={statistics.mean(cached_adaptive):.2f}")
+print(f"FAISAL_MODEL_ROUTING_BOUND_OUTCOME_ITERATIONS={BOUND_ITERATIONS}")
+print(f"FAISAL_MODEL_ROUTING_BOUND_OUTCOME_MEAN_NS={statistics.mean(bound):.2f}")
 print(f"FAISAL_MODEL_ROUTING_BASELINE_P95_NS={sorted(base)[int(ITERATIONS * .95) - 1]}")
 print(f"FAISAL_MODEL_ROUTING_PLANNER_P95_NS={sorted(route)[int(ITERATIONS * .95) - 1]}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_PLANNER_P95_NS={sorted(cached)[int(ITERATIONS * .95) - 1]}")
 print(f"FAISAL_MODEL_ROUTING_ADAPTIVE_PLANNER_P95_NS={sorted(adaptive)[int(ITERATIONS * .95) - 1]}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_ADAPTIVE_PLANNER_P95_NS={sorted(cached_adaptive)[int(ITERATIONS * .95) - 1]}")
+print(f"FAISAL_MODEL_ROUTING_BOUND_OUTCOME_P95_NS={sorted(bound)[int(BOUND_ITERATIONS * .95) - 1]}")
 print(f"FAISAL_MODEL_ROUTING_UNCACHED_OVERHEAD_RATIO={statistics.mean(route) / statistics.mean(base):.4f}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_OVERHEAD_RATIO={statistics.mean(cached) / statistics.mean(base):.4f}")
 print(f"FAISAL_MODEL_ROUTING_ADAPTIVE_OVERHEAD_RATIO={statistics.mean(adaptive) / statistics.mean(base):.4f}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_ADAPTIVE_OVERHEAD_RATIO={statistics.mean(cached_adaptive) / statistics.mean(base):.4f}")
+print(f"FAISAL_MODEL_ROUTING_BOUND_OUTCOME_OVERHEAD_RATIO={statistics.mean(bound) / statistics.mean(base):.4f}")
 print(f"FAISAL_MODEL_ROUTING_BASELINE_RESULT={base_result}")
 print(f"FAISAL_MODEL_ROUTING_PLANNER_DIGEST={route_result}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_DIGEST={cached_result}")
 print(f"FAISAL_MODEL_ROUTING_ADAPTIVE_DIGEST={adaptive_result}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_ADAPTIVE_DIGEST={cached_adaptive_result}")
+print(f"FAISAL_MODEL_ROUTING_BOUND_OUTCOME_DIGEST={bound_result}")
 print("FAISAL_MODEL_ROUTING_ADAPTIVE_PRIMARY_CHANGED=true")
-print("FAISAL_MODEL_ROUTING_BENCHMARK_SCOPE=local_deterministic_filter_score_fallback_plan_not_model_or_network_latency")
+print("FAISAL_MODEL_ROUTING_BENCHMARK_SCOPE=local_deterministic_filter_score_fallback_plan_and_route_bound_outcome_admission_not_model_or_network_latency")

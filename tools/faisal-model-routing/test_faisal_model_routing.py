@@ -91,6 +91,31 @@ class ModelRoutingTests(unittest.TestCase):
         with self.assertRaises(RoutingContractError):
             ledger.record(endpoint_id="a", request_class="text:confidential", success=True, latency_ms=1, observed_at=100, current_generation=4, sample_generation=3)
 
+    def test_bound_outcome_receipt_requires_route_identity_and_rejects_replay(self):
+        ledger = OutcomeLedger(max_keys=4, max_samples=16, cooldown_seconds=30)
+        request = self.request(request_id="bound-1", generation=3)
+        route = plan_route([endpoint("a", "a"), endpoint("b", "b", latency=30)], request, trusted_provider_classes={"local"}, observed_at=100, outcome_ledger=ledger)
+        receipt = ledger.record_bound_outcome(route=route, request=request, endpoint_id=route["primary"]["endpoint_id"], success=False, latency_ms=44, observed_at=101, current_generation=3, sample_generation=3, evidence_digest="sha256:" + "e" * 64)
+        self.assertTrue(receipt["verified"])
+        self.assertFalse(receipt["outcomes_are_authority"])
+        self.assertEqual(receipt["route_digest"], route["route_digest"])
+        with self.assertRaises(RoutingContractError):
+            ledger.record_bound_outcome(route=route, request=request, endpoint_id=route["primary"]["endpoint_id"], success=False, latency_ms=44, observed_at=101, current_generation=3, sample_generation=3, evidence_digest="sha256:" + "e" * 64)
+
+    def test_bound_outcome_rejects_stale_future_or_nonroute_inputs(self):
+        ledger = OutcomeLedger(max_keys=4, max_samples=16, cooldown_seconds=30)
+        request = self.request(request_id="bound-2", generation=3)
+        route = plan_route([endpoint("a", "a"), endpoint("b", "b")], request, trusted_provider_classes={"local"}, observed_at=100, outcome_ledger=ledger)
+        cases = [
+            dict(observed_at=99, current_generation=3, sample_generation=3, endpoint_id="a"),
+            dict(observed_at=401, current_generation=3, sample_generation=3, endpoint_id="a"),
+            dict(observed_at=101, current_generation=4, sample_generation=4, endpoint_id="a"),
+            dict(observed_at=101, current_generation=3, sample_generation=3, endpoint_id="outside"),
+        ]
+        for case in cases:
+            with self.assertRaises(RoutingContractError):
+                ledger.record_bound_outcome(route=route, request=request, success=True, latency_ms=1, evidence_digest="sha256:" + "f" * 64, max_age_seconds=300, **case)
+
     def test_duplicate_endpoint_and_empty_policy_rejected(self):
         with self.assertRaises(RoutingContractError):
             plan_route([endpoint("a", "one"), endpoint("a", "two")], self.request(), trusted_provider_classes={"local"})

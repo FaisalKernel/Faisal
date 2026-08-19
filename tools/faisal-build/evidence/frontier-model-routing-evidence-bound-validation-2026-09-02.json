@@ -1,0 +1,86 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-model-routing-evidence-bound-validation-2026-09-02",
+  "recorded_at": "2026-08-19T07:47:03Z",
+  "status": "pass_bounded_route_bound_outcome_receipts_replay_freshness_generation_and_endpoint_fencing",
+  "implementation": {
+    "module": "tools/faisal-model-routing/faisal_model_routing.py",
+    "tests": "tools/faisal-model-routing/test_faisal_model_routing.py",
+    "benchmark": "tools/faisal-model-routing/bench_faisal_model_routing.py",
+    "runner": "tools/faisal-build/run_model_routing_validation.sh",
+    "upgrade": "route-bound caller-observed outcome receipts with route digest, request identity, model digest, generation, freshness, endpoint membership, evidence digest, replay detection, and explicit non-authority semantics"
+  },
+  "measured_validation": {
+    "unit_tests": 9,
+    "unit_tests_passed": 9,
+    "syntax_check": "pass",
+    "runner": "pass",
+    "positive_route_verification": "pass",
+    "positive_bound_outcome_receipt": "pass",
+    "adaptive_rerouting_after_failures": "pass",
+    "replay_rejection": "pass",
+    "freshness_rejection": "pass",
+    "generation_rejection": "pass",
+    "endpoint_membership_rejection": "pass",
+    "route_digest_tamper_rejection": "pass",
+    "stale_outcome_generation_rejection": "pass",
+    "benchmark_planner_iterations": 5000,
+    "benchmark_bound_outcome_iterations": 1000,
+    "benchmark_baseline_mean_ns": 356.46,
+    "benchmark_bound_outcome_mean_ns": 43176.01,
+    "benchmark_baseline_p95_ns": 454,
+    "benchmark_bound_outcome_p95_ns": 66058,
+    "benchmark_bound_outcome_overhead_ratio": 121.1260,
+    "benchmark_uncached_planner_overhead_ratio": 583.9153,
+    "benchmark_cached_adaptive_overhead_ratio": 149.1117,
+    "benchmark_scope": "local_deterministic_route planning and route-bound receipt admission; excludes model, network, cryptographic-provider, tool, accelerator, and kernel latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://docs.nvidia.com/dynamo/",
+      "finding": "NVIDIA Dynamo documents disaggregated serving, KV-aware routing, cache management, autoscaling, and integration with vLLM, SGLang, and TensorRT-LLM.",
+      "used_for": "provider-neutral route and cache-affinity signal boundary without embedding a vendor runtime in kernel space"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/stable/",
+      "finding": "vLLM documents PagedAttention, continuous batching, prefix caching, speculative decoding, disaggregated prefill/decode/encode, parallelism, tool calling, reasoning parsers, and multimodal/hardware support.",
+      "used_for": "request and runtime signal requirements; no provider-specific authority is imported"
+    },
+    {
+      "url": "https://docs.langchain.com/oss/python/langgraph/overview",
+      "finding": "LangGraph documents durable execution, persistence, checkpointing, human-in-the-loop interruption, long-term memory, streaming, fault tolerance, and observability for stateful agents.",
+      "used_for": "binding route feedback to durable request identity and execution generation rather than free-floating heuristics"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-06-18",
+      "finding": "MCP treats tools as arbitrary code-execution paths, tool annotations as untrusted unless trusted, and emphasizes consent, privacy, authorization, and user control.",
+      "used_for": "explicit non-authority boundary: route outcomes and provider metadata cannot authorize tools or side effects"
+    }
+  ],
+  "boundary": {
+    "independent_builder": false,
+    "physical_hardware_qualification": false,
+    "operator_signing_ceremony": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "outcome_observations_are_authority": false,
+    "bound_outcome_receipts_are_authority": false,
+    "endpoint_metadata_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "fallbacks_are_executions": false,
+    "unrestricted_kernel_self_modification": false,
+    "fake_hardware_evidence": false,
+    "fake_external_review": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "Outcome receipts are caller-observed integrity records, not proof of model correctness, truth, or task completion.",
+    "Evidence digests are caller-supplied content bindings; production cryptographic attestation and proof of possession are not implemented by this upgrade.",
+    "The route ledger remains local and bounded; distributed synchronization, quorum, and cross-node clock discipline are not claimed.",
+    "The benchmark measures Python control-plane overhead only and does not establish end-to-end inference performance.",
+    "No model, tool, browser, network, accelerator, authorization server, or external side effect was contacted.",
+    "This evidence does not claim AGI, production approval, hardware qualification, independent build qualification, or external security review."
+  ]
+}

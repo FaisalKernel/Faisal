@@ -33,6 +33,10 @@ adaptive = plan_route(endpoints, request, trusted_provider_classes={"local"}, ob
 assert adaptive["primary"]["endpoint_id"] != "preferred"
 assert adaptive["rejections"].get("preferred") == "outcome_cooldown"
 assert adaptive["selection_policy"]["outcome_ledger_digest"]
+bound_ledger = OutcomeLedger(max_keys=8, max_samples=32, cooldown_seconds=30)
+bound_route = plan_route(endpoints, request, trusted_provider_classes={"local"}, observed_at=20, outcome_ledger=bound_ledger)
+bound_receipt = bound_ledger.record_bound_outcome(route=bound_route, request=request, endpoint_id=bound_route["primary"]["endpoint_id"], success=False, latency_ms=41, observed_at=21, current_generation=4, sample_generation=4, evidence_digest="sha256:" + "a" * 64)
+assert bound_receipt["verified"] and not bound_receipt["outcomes_are_authority"]
 negative = {}
 try:
     verify_route(route, expected_request_id="runner-1", expected_generation=5)
@@ -56,12 +60,29 @@ try:
     verify_route(tampered, expected_request_id="runner-1", expected_generation=4)
 except RoutingContractError as exc:
     negative["digest_tamper"] = str(exc)
-assert len(negative) == 5
+try:
+    bound_ledger.record_bound_outcome(route=bound_route, request=request, endpoint_id=bound_route["primary"]["endpoint_id"], success=False, latency_ms=41, observed_at=21, current_generation=4, sample_generation=4, evidence_digest="sha256:" + "a" * 64)
+except RoutingContractError as exc:
+    negative["bound_outcome_replay"] = str(exc)
+try:
+    bound_ledger.record_bound_outcome(route=bound_route, request=request, endpoint_id=bound_route["primary"]["endpoint_id"], success=True, latency_ms=1, observed_at=500, current_generation=4, sample_generation=4, evidence_digest="sha256:" + "b" * 64)
+except RoutingContractError as exc:
+    negative["bound_outcome_stale"] = str(exc)
+try:
+    bound_ledger.record_bound_outcome(route=bound_route, request=request, endpoint_id=bound_route["primary"]["endpoint_id"], success=True, latency_ms=1, observed_at=21, current_generation=5, sample_generation=5, evidence_digest="sha256:" + "c" * 64)
+except RoutingContractError as exc:
+    negative["bound_outcome_generation"] = str(exc)
+try:
+    bound_ledger.record_bound_outcome(route=bound_route, request=request, endpoint_id="missing", success=True, latency_ms=1, observed_at=21, current_generation=4, sample_generation=4, evidence_digest="sha256:" + "d" * 64)
+except RoutingContractError as exc:
+    negative["bound_outcome_endpoint"] = str(exc)
+assert len(negative) == 9
 payload = {
     "schema": "FAISAL-MODEL-ROUTING-VALIDATION-1",
     "module": "tools/faisal-model-routing/faisal_model_routing.py",
     "route_digest": route["route_digest"],
     "adaptive_route_digest": adaptive["route_digest"],
+    "bound_outcome_receipt": bound_receipt,
     "adaptive_primary_endpoint": adaptive["primary"]["endpoint_id"],
     "outcome_ledger_digest": adaptive["selection_policy"]["outcome_ledger_digest"],
     "primary_endpoint": route["primary"]["endpoint_id"],
@@ -72,11 +93,17 @@ payload = {
       "failed_primary_cooled_down": True,
       "route_changed": adaptive["primary"]["endpoint_id"] != route["primary"]["endpoint_id"],
       "outcomes_are_caller_observed": True,
-      "model_output_is_not_outcome_authority": True
+      "model_output_is_not_outcome_authority": True,
+      "bound_outcome_is_route_scoped": True,
+      "bound_outcome_replay_rejected": "bound_outcome_replay" in negative,
+      "bound_outcome_freshness_rejected": "bound_outcome_stale" in negative,
+      "bound_outcome_generation_rejected": "bound_outcome_generation" in negative,
+      "bound_outcome_endpoint_rejected": "bound_outcome_endpoint" in negative
     },
     "authority_boundaries": {
         "model_output_is_authority": False,
         "outcome_observations_are_authority": False,
+        "bound_outcome_receipts_are_authority": False,
         "endpoint_metadata_is_authority": False,
         "fallbacks_are_executions": False,
         "provider_policy_is_caller_supplied": True,

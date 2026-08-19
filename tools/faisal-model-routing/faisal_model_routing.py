@@ -18,9 +18,11 @@ MAX_ENDPOINTS = 256
 MAX_FALLBACKS = 8
 MAX_OUTCOME_KEYS = 256
 MAX_OUTCOME_SAMPLES = 4096
+MAX_OUTCOME_AGE_SECONDS = 3600
 COOLDOWN_FAILURE_THRESHOLD = 3
 COOLDOWN_SECONDS = 30
 SCHEMA = "org.faisal.model-route.v1"
+OUTCOME_SCHEMA = "org.faisal.model-route-outcome.v1"
 PRIVACY_ORDER = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
 CAPABILITIES = {"text", "reasoning", "coding", "vision", "audio", "embedding", "multimodal", "tool_calling"}
 HEALTH_STATES = {"healthy", "degraded", "unhealthy", "unknown"}
@@ -53,6 +55,7 @@ class OutcomeLedger:
         self.max_samples = max_samples
         self.cooldown_seconds = cooldown_seconds
         self._stats: dict[tuple[str, str], _OutcomeStats] = {}
+        self._bound_receipt_digests: set[str] = set()
         self._samples = 0
         self._version = 0
 
@@ -93,6 +96,51 @@ class OutcomeLedger:
         self._version += 1
         return self.stats(endpoint_id=endpoint_id, request_class=request_class, observed_at=observed_at)
 
+    def record_bound_outcome(self, *, route: Mapping[str, Any], request: "RouteRequest", endpoint_id: str, success: bool, latency_ms: int, observed_at: int, current_generation: int, sample_generation: int, evidence_digest: str, max_age_seconds: int = 300) -> dict[str, Any]:
+        """Record only a caller-observed result bound to one verified route snapshot.
+
+        The receipt is an integrity record, not proof that a model was correct and
+        not permission to execute a tool or side effect. Replay, stale-route,
+        future-generation, endpoint-mismatch, and stale-observation inputs fail
+        closed before they can influence adaptive routing.
+        """
+        verified = verify_route(route, expected_request_id=request.request_id, expected_generation=request.generation)
+        if not isinstance(max_age_seconds, int) or not 0 <= max_age_seconds <= MAX_OUTCOME_AGE_SECONDS:
+            raise RoutingContractError("max_age_seconds is outside bounds")
+        if not isinstance(observed_at, int) or observed_at < 0:
+            raise RoutingContractError("observed_at is invalid")
+        if observed_at < int(route.get("observed_at", 0)):
+            raise RoutingContractError("outcome predates route snapshot")
+        if observed_at - int(route.get("observed_at", 0)) > max_age_seconds:
+            raise RoutingContractError("outcome exceeds freshness window")
+        if current_generation != request.generation or sample_generation != request.generation:
+            raise RoutingContractError("bound outcome generation mismatch")
+        _require_digest(evidence_digest, "evidence_digest")
+        candidates = [route["primary"], *route["fallbacks"]]
+        endpoint = next((item for item in candidates if item.get("endpoint_id") == endpoint_id), None)
+        if endpoint is None:
+            raise RoutingContractError("outcome endpoint is not in route")
+        body = {
+            "schema": OUTCOME_SCHEMA,
+            "route_digest": verified["route_digest"],
+            "request_id": request.request_id,
+            "generation": request.generation,
+            "endpoint_id": endpoint_id,
+            "model_digest": endpoint.get("model_digest"),
+            "request_class": self.route_class(request),
+            "success": success,
+            "latency_ms": latency_ms,
+            "observed_at": observed_at,
+            "sample_generation": sample_generation,
+            "evidence_digest": evidence_digest,
+        }
+        binding_digest = _digest(body)
+        if binding_digest in self._bound_receipt_digests:
+            raise RoutingContractError("bound outcome replay detected")
+        self.record(endpoint_id=endpoint_id, request_class=self.route_class(request), success=success, latency_ms=latency_ms, observed_at=observed_at, current_generation=current_generation, sample_generation=sample_generation)
+        self._bound_receipt_digests.add(binding_digest)
+        return {**body, "binding_digest": binding_digest, "verified": True, "outcomes_are_authority": False}
+
     def stats(self, *, endpoint_id: str, request_class: str, observed_at: int | None = None) -> dict[str, Any]:
         stats = self._stats.get((endpoint_id, request_class))
         if stats is None:
@@ -118,7 +166,7 @@ class OutcomeLedger:
         rows = []
         for key in sorted(self._stats):
             rows.append([key[0], key[1], self.stats(endpoint_id=key[0], request_class=key[1])])
-        return _digest({"version": self._version, "samples": self._samples, "rows": rows})
+        return _digest({"version": self._version, "samples": self._samples, "bound_receipts": sorted(self._bound_receipt_digests), "rows": rows})
 
 
 def _canonical(value: Any) -> bytes:
@@ -132,6 +180,13 @@ def _digest(value: Any) -> str:
 def _require_text(value: Any, name: str, limit: int = 128) -> str:
     if not isinstance(value, str) or not value or len(value) > limit:
         raise RoutingContractError(f"{name}: invalid")
+    return value
+
+
+def _require_digest(value: Any, name: str) -> str:
+    _require_text(value, name, 256)
+    if not value.startswith("sha256:") or len(value) != 71:
+        raise RoutingContractError(f"{name}: invalid digest")
     return value
 
 
