@@ -1,0 +1,82 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-mcp-contract-validation-2026-08-25",
+  "status": "pass_bounded_user_space_control_plane",
+  "implementation": {
+    "module": "tools/faisal-mcp-contract/faisal_mcp_contract.py",
+    "tests": "tools/faisal-mcp-contract/test_faisal_mcp_contract.py",
+    "runner": "tools/faisal-build/run_mcp_contract_validation.sh",
+    "capabilities": [
+      "bounded JSON Schema validation",
+      "deterministic qualified-name ordering",
+      "duplicate collision rejection",
+      "caller-supplied scope filtering",
+      "opaque bounded pagination",
+      "input validation before tool invocation",
+      "output validation after tool execution",
+      "x-mcp-header safety validation",
+      "untrusted annotation boundary",
+      "canonical SHA-256 contract digests"
+    ]
+  },
+  "measured_validation": {
+    "unit_tests": 8,
+    "unit_tests_passed": 8,
+    "syntax_check": "pass",
+    "positive_admission_fixture": "pass",
+    "deterministic_order_fixture": "pass",
+    "scope_filter_fixture": "pass",
+    "pagination_fixture": "pass",
+    "input_rejection_fixture": "pass",
+    "output_rejection_fixture": "pass",
+    "schema_rejection_fixture": "pass",
+    "header_rejection_fixture": "pass",
+    "record_digest": "b87ce74c3e049fb4797e961d8d3cacc4f5970fc4706c978556a846a725400f0e",
+    "benchmark_iterations": 5000,
+    "benchmark_baseline_mean_ns": 13201.47,
+    "benchmark_validated_mean_ns": 46765.93,
+    "benchmark_validated_p95_ns": 70989,
+    "benchmark_overhead_ratio": 3.5425,
+    "benchmark_scope": "local_two_tool_contract_validation_not_model_or_network_latency",
+    "benchmark_runner": "tools/faisal-mcp-contract/bench_faisal_mcp_contract.py",
+    "runner_record": "/home/ubuntu/agi-kernel/build/frontier/mcp-contract-validation-2026-08-25/mcp-contract-validation.json"
+  },
+  "research_inputs": [
+    {
+      "url": "https://docs.vllm.ai/en/latest/",
+      "finding": "Current serving systems emphasize continuous batching, prefix caching, structured outputs, tool calling, multimodal execution, and heterogeneous hardware plugins.",
+      "used_for": "kept FAISAL’s control-plane contract provider-neutral and focused on deterministic admission rather than embedding a model runtime in kernel space"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+      "finding": "MCP tools require schemas, deterministic listing is useful for caching, output schemas can be validated, and annotations are untrusted unless from trusted servers.",
+      "used_for": "schema validation, deterministic ordering, output validation, and explicit annotation boundary"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices",
+      "finding": "MCP deployments must address confused deputy, token passthrough, SSRF, state-handle authorization, local-server compromise, and tool input/output controls.",
+      "used_for": "caller-supplied scope policy and fail-closed contract validation; network execution remains outside this bounded module"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/",
+      "finding": "Production device management separates resource discovery, registration, health, allocation, and topology-aware scheduling.",
+      "used_for": "preserving separation between contract admission and hardware/device qualification"
+    }
+  ],
+  "authority_boundaries": {
+    "model_output_is_authority": false,
+    "tool_annotations_are_authority": false,
+    "provider_metadata_is_authority": false,
+    "contract_validation_is_tool_execution": false,
+    "production_approval": false,
+    "physical_hardware_qualification": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "limitations": [
+    "This is a user-space control-plane validator and does not execute tools.",
+    "The bounded validator is not a complete JSON Schema implementation.",
+    "It does not establish external identity, OAuth token validity, or network egress safety by itself.",
+    "It does not qualify physical accelerators or production hardware.",
+    "It does not claim AGI, model quality, or production approval."
+  ]
+}
