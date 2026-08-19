@@ -3,24 +3,33 @@
   "benchmark": {
     "baseline_manifest_digest": {
       "iterations": 250,
-      "mean_ns": 6763.33,
-      "p95_ns": 9350.0
+      "mean_ns": 7173.43,
+      "p95_ns": 11232.0
     },
     "evidence_snapshot_build": {
       "iterations": 250,
-      "mean_ns": 78173.26,
-      "p95_ns": 109680.0
+      "mean_ns": 78188.68,
+      "p95_ns": 108648.0
     },
     "evidence_snapshot_verify": {
       "iterations": 250,
-      "mean_ns": 92382.88,
-      "p95_ns": 121267.0
+      "mean_ns": 104674.25,
+      "p95_ns": 150875.0
     }
   },
   "boundary": {
+    "distributed_workloads_executed_live": false,
     "external_evidence_verified": false,
+    "fault_recovery_verified": false,
+    "independent_security_review_verified": false,
+    "live_multihost_qualification": false,
     "local_index_verified": true,
-    "production_approval": false
+    "migration_rollback_verified": false,
+    "node_identity_attested": false,
+    "operator_signing_ceremony_verified": false,
+    "physical_hardware_qualified": false,
+    "production_approval": false,
+    "transport_and_quorum_verified": false
   },
   "limitations": [
     "The snapshot checks evidence file integrity and policy binding but does not authenticate external organizations or elevate any local record to production authority.",
@@ -36,13 +45,13 @@
   },
   "receipt": {
     "nonce": "evidence-index-nonce",
-    "receipt_digest": "sha256:d3cd3c9ff2e58c494b34c7ef8292c6ca81ccb84b18756e5e31dff9a758432dcf",
+    "receipt_digest": "sha256:08a038f6a63b510873eced75abc07e855b8f0bdb0cdbfabf071ba59f57e4649f",
     "sequence": 1,
-    "snapshot_digest": "sha256:975174669e008e28afd3a0d1db54b5df3d5d155fda97a5f4481cce7b7aeb407b"
+    "snapshot_digest": "sha256:03ec9f2781766ec0fdcdc4b4b31283317065bd770570bbb8d563ec20ab729133"
   },
-  "record_digest": "sha256:cd60b0e5dff74c169f4e6d453d575c154d49f5089c557bca0a2aec67b4946dd1",
+  "record_digest": "sha256:54457e7fbab50203c7f5f231ba29df5463f8f16f0982dee9e32d3fe89b8bc68c",
   "recorded_at": "2026-08-19T23:59:00Z",
-  "release_head": "43aa965e6dfab9c1d4ccf7f343a7f1b17abec282",
+  "release_head": "66719fdab2e41419b2bc525f30d67625c26b7ac2",
   "rollback_checkpoint": "FAISAL-FRONTIER-LIVE-MULTIHOST-QUALIFICATION-2026-08-19",
   "schema": "org.faisal.frontier-validation.v1",
   "security_boundaries": {
@@ -153,6 +162,15 @@
         "production_approval": false,
         "record_digest": "unbound",
         "sha256": "8460eee06b1ec3d45ae2342d86c89e95945c77b7b4b12e37bd620df2f16db0c6"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-evidence-index-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "sha256:cd60b0e5dff74c169f4e6d453d575c154d49f5089c557bca0a2aec67b4946dd1",
+        "sha256": "4042dcb1429b32f8c8c9f3472224d57a190f72c766b3205e4b56b641e5d20fbc"
       },
       {
         "boundary_present": true,
@@ -1285,8 +1303,8 @@
     },
     "release": {
       "artifact_digest": "sha256:8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
-      "candidate_manifest_digest": "sha256:ed8a0ae142b21259da8124dc4eca5d16e394761d28bfeefb8de763ecac4ce332",
-      "head": "43aa965e6dfab9c1d4ccf7f343a7f1b17abec282",
+      "candidate_manifest_digest": "sha256:1f77a98ba1a32531ff91662c178136ce3ebd4b7f8cb8c2c04c916420f3ef144e",
+      "head": "66719fdab2e41419b2bc525f30d67625c26b7ac2",
       "tag": "FAISAL-FRONTIER-EVIDENCE-INDEX-2026-08-19"
     },
     "release_blockers": [
@@ -1299,7 +1317,7 @@
       "operator_owned_cve_workflow_upstream_sync_external_feedback"
     ],
     "schema": "org.faisal.release-evidence-index.v1",
-    "snapshot_digest": "sha256:975174669e008e28afd3a0d1db54b5df3d5d155fda97a5f4481cce7b7aeb407b",
+    "snapshot_digest": "sha256:03ec9f2781766ec0fdcdc4b4b31283317065bd770570bbb8d563ec20ab729133",
     "state": {
       "evidence_receipt_is_production_authority": false,
       "external_evidence_verified": false,
@@ -1309,6 +1327,6 @@
       "production_ready": false
     }
   },
-  "source_candidate_manifest_digest": "sha256:ed8a0ae142b21259da8124dc4eca5d16e394761d28bfeefb8de763ecac4ce332",
+  "source_candidate_manifest_digest": "sha256:1f77a98ba1a32531ff91662c178136ce3ebd4b7f8cb8c2c04c916420f3ef144e",
   "upgrade": "release-evidence-index-export-and-verify"
 }
