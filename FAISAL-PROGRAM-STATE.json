@@ -2208,5 +2208,13 @@
   "frontier_memory_read_gate_benchmark": "tools/faisal-memory-read-gate/bench_faisal_memory_read_gate.py",
   "frontier_memory_read_gate_runner": "tools/faisal-build/run_memory_read_gate_validation.sh",
   "frontier_memory_read_gate_rollback_checkpoint": "FAISAL-FRONTIER-MEMORY-WRITE-GATE-2026-08-19",
-  "frontier_memory_read_gate_authority_boundary": "memory_retrieval_is_caller_policy_bound_and_emits_data_only_projections_quarantined_entries_are_excluded_from_execution_contexts_and_no_projection_grants_tool_permission_or_instruction_authority_production_approval_remains_false"
+  "frontier_memory_read_gate_authority_boundary": "memory_retrieval_is_caller_policy_bound_and_emits_data_only_projections_quarantined_entries_are_excluded_from_execution_contexts_and_no_projection_grants_tool_permission_or_instruction_authority_production_approval_remains_false",
+  "frontier_handoff_receipt": "pass_provider_neutral_cross_agent_handoff_identity_scope_generation_ttl_approval_trust_trace_result_linkage_quarantine_replay_tamper_and_non_authority_admission",
+  "frontier_handoff_receipt_evidence": "tools/faisal-build/evidence/frontier-handoff-receipt-validation-2026-08-19.json",
+  "frontier_handoff_receipt_module": "tools/faisal-handoff-receipt/faisal_handoff_receipt.py",
+  "frontier_handoff_receipt_tests": "tools/faisal-handoff-receipt/test_faisal_handoff_receipt.py",
+  "frontier_handoff_receipt_benchmark": "tools/faisal-handoff-receipt/bench_faisal_handoff_receipt.py",
+  "frontier_handoff_receipt_runner": "tools/faisal-build/run_handoff_receipt_validation.sh",
+  "frontier_handoff_receipt_rollback_checkpoint": "FAISAL-FRONTIER-MEMORY-READ-GATE-2026-08-19",
+  "frontier_handoff_receipt_authority_boundary": "handoff_receipts_are_admission_evidence_only_model_output_provider_metadata_remote_results_and_handoff_reasons_never_become_execution_or_privilege_authority_the_contract_contacts_no_remote_agent_mints_no_credentials_and_production_approval_remains_false"
 }

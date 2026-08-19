@@ -1,0 +1,111 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-handoff-receipt-validation-2026-08-19",
+  "recorded_at": "2026-08-19T10:05:52Z",
+  "status": "bounded_cross_agent_handoff_receipt_qualified",
+  "objective": "Provide a provider-neutral cross-agent handoff receipt admission primitive that binds agent identity, delegated scope, generation, freshness, approval, trust, trace position, result linkage, replay protection, and explicit non-authority semantics without executing remote work or minting authority.",
+  "implementation": {
+    "module": "tools/faisal-handoff-receipt/faisal_handoff_receipt.py",
+    "tests": "tools/faisal-handoff-receipt/test_faisal_handoff_receipt.py",
+    "benchmark": "tools/faisal-handoff-receipt/bench_faisal_handoff_receipt.py",
+    "runner": "tools/faisal-build/run_handoff_receipt_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "provider-neutral source and target agent identity binding",
+      "capability-scope subset and policy allowlist enforcement",
+      "generation fencing and bounded TTL freshness checks",
+      "monotonic trace-position admission",
+      "operator approval requirement for privileged handoff scope",
+      "remote model/provider result quarantine",
+      "verified result admission with handoff/result digest linkage",
+      "nonce replay protection",
+      "tamper detection for admitted handoff records and result linkage",
+      "explicit model-output, provider-metadata, handoff, and result non-authority boundaries"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "runner": "FAISAL_HANDOFF_RECEIPT_VALIDATION_OK",
+    "runner_record_digest": "024b09471449211ffa54a30b8e250e72da6841fcf2e7e140849ce4ff6d70cd9d",
+    "admitted_handoff": "pass",
+    "operator_scope_approval": "pass",
+    "verified_result_admission": "pass",
+    "remote_result_quarantine": "pass",
+    "scope_generation_ttl_trace_rejection": "pass",
+    "authority_boundary_rejection": "pass",
+    "replay_rejection": "pass",
+    "tamper_rejection": "pass",
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": "pass_model_routing_memory_write_memory_read_checkpoint_delegation_trace_conformance_trace_cert_observation_trust_portable_memory_mcp_snapshot_browser",
+    "benchmark_iterations": 1000,
+    "benchmark_raw_digest_mean_ns": 14674.08,
+    "benchmark_admission_mean_ns": 25588.78,
+    "benchmark_result_admission_mean_ns": 18275.83,
+    "benchmark_quarantine_mean_ns": 16879.33,
+    "benchmark_admission_p95_ns": 36684,
+    "benchmark_result_admission_p95_ns": 25630,
+    "benchmark_quarantine_p95_ns": 24738,
+    "benchmark_admission_overhead_ratio": 1.7438,
+    "benchmark_result_overhead_ratio": 1.2454,
+    "benchmark_quarantine_overhead_ratio": 1.1503,
+    "benchmark_raw_result": "sha256:215baac104a79fb3a028167d9fb60fe6f4dfbd68e491deb1062a4944ca16beda",
+    "benchmark_scope": "local_python_handoff_and_result_admission_not_network_remote_agent_model_or_kernel_latency"
+  },
+  "research_inputs": [
+    {
+      "source": "https://a2a-protocol.org/latest/specification/",
+      "finding": "The Agent2Agent protocol defines provider-neutral agent discovery, task-oriented interactions, streaming or polling task state, and explicit artifact-oriented exchanges between independent agents.",
+      "implementation_impact": "Handoff receipts bind source and target identity, task/objective scope, generation, trace position, and result linkage while keeping protocol metadata outside the authority boundary."
+    },
+    {
+      "source": "https://openai.github.io/openai-agents-python/",
+      "finding": "The Agents SDK documents handoffs, guardrails, approvals, sessions, tracing, MCP tool calling, and resumable agent state as runtime composition mechanisms.",
+      "implementation_impact": "FAISAL separates handoff admission from execution, requires explicit policy and approval, and records deterministic receipt evidence independent of a provider SDK."
+    },
+    {
+      "source": "https://arxiv.org/html/2606.04329v1",
+      "finding": "The memory-poisoning study identifies persistent memory and multiple write channels as cross-session attack surfaces that require provenance and trust controls.",
+      "implementation_impact": "Remote model/provider results are quarantined by default and cannot become execution authority merely through a cross-agent handoff."
+    },
+    {
+      "source": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+      "finding": "Context engineering recommends bounded, high-signal context assembly and separation of instructions from external data.",
+      "implementation_impact": "Handoff receipts expose bounded, policy-checked evidence and retain explicit non-authority semantics for delegated content and results."
+    }
+  ],
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "handoff_is_execution": false,
+    "handoff_mints_credentials": false,
+    "remote_result_is_authority": false,
+    "remote_result_executes_tasks": false,
+    "operator_approval_is_forgeable": false,
+    "scope_escalation": false,
+    "generation_rollback": false,
+    "expired_receipt_admission": false,
+    "replay_admission": false,
+    "tampered_receipt_admission": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The implementation is a bounded userspace/control-plane admission contract and does not contact remote agents, execute delegated tasks, mint credentials, or provide network transport, PKI, or distributed consensus.",
+    "Identity, trust, approval evidence, and provider metadata are caller-supplied inputs; this local contract does not provide hardware attestation, independent signatures, or external identity verification.",
+    "The benchmark measures local Python control-plane overhead and excludes network, storage, model, accelerator, and kernel latency.",
+    "The validation used deterministic local fixtures and does not qualify physical GPUs or NPUs, TPM or secure-enclave keys, production KMS, independent builders, live multi-host deployment, or external security review.",
+    "This evidence does not claim AGI capability, production approval, superiority to Linux, independent qualification, or completion of the existing external release blockers."
+  ]
+}
