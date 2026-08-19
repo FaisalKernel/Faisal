@@ -2152,5 +2152,13 @@
   "frontier_trace_conformance_benchmark": "tools/faisal-trace-conformance/bench_faisal_trace_conformance.py",
   "frontier_trace_conformance_runner": "tools/faisal-build/run_trace_conformance_validation.sh",
   "frontier_trace_conformance_rollback_checkpoint": "FAISAL-FRONTIER-TRACE-CERTIFICATION-2026-08-30",
-  "frontier_trace_conformance_authority_boundary": "receipt_chain_is_unsigned_local_integrity_evidence_not_signature_or_correctness_proof_failed_or_divergent_traces_cannot_complete_and_production_approval_remains_false"
+  "frontier_trace_conformance_authority_boundary": "receipt_chain_is_unsigned_local_integrity_evidence_not_signature_or_correctness_proof_failed_or_divergent_traces_cannot_complete_and_production_approval_remains_false",
+  "frontier_delegation": "pass_bounded_scope_attenuation_depth_ttl_call_budget_lineage_revocation_offline_chain_verification_and_invocation_authorization",
+  "frontier_delegation_evidence": "tools/faisal-build/evidence/frontier-delegation-attenuation-validation-2026-09-01.json",
+  "frontier_delegation_module": "tools/faisal-delegation/faisal_delegation.py",
+  "frontier_delegation_tests": "tools/faisal-delegation/test_faisal_delegation.py",
+  "frontier_delegation_benchmark": "tools/faisal-delegation/bench_faisal_delegation.py",
+  "frontier_delegation_runner": "tools/faisal-build/run_delegation_validation.sh",
+  "frontier_delegation_rollback_checkpoint": "FAISAL-FRONTIER-TRACE-CONFORMANCE-2026-08-31",
+  "frontier_delegation_authority_boundary": "delegation_records_are_authorization_inputs_not_execution_model_output_is_not_authority_proof_digests_are_not_production_signatures_revocation_distribution_is_unproven_no_ambient_authority_and_production_approval_remains_false"
 }

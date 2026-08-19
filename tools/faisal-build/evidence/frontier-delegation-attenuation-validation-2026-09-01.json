@@ -1,0 +1,98 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-delegation-attenuation-validation-2026-09-01",
+  "recorded_at": "2026-08-19T07:26:55Z",
+  "status": "pass_bounded_delegation_attenuation_revocation_and_invocation_authorization_contract",
+  "implementation": {
+    "module": "tools/faisal-delegation/faisal_delegation.py",
+    "tests": "tools/faisal-delegation/test_faisal_delegation.py",
+    "benchmark": "tools/faisal-delegation/bench_faisal_delegation.py",
+    "runner": "tools/faisal-build/run_delegation_validation.sh",
+    "capabilities": [
+      "root delegation scope construction",
+      "child scope intersection and non-amplifying attenuation",
+      "delegation depth monotonicity",
+      "delegation TTL monotonicity",
+      "tool/resource/argument constraint scoping",
+      "call-budget attenuation",
+      "lineage-scoped revocation by id or record digest",
+      "offline delegation-chain verification",
+      "invocation-bound authorization checks",
+      "explicit no-execution semantics"
+    ]
+  },
+  "measured_validation": {
+    "unit_tests": 7,
+    "unit_tests_passed": 7,
+    "syntax_check": "pass",
+    "runner": "pass",
+    "root_child_attenuation": "pass",
+    "scope_amplification_rejection": "pass",
+    "ttl_and_depth_monotonicity": "pass",
+    "call_budget_enforcement": "pass",
+    "lineage_revocation": "pass",
+    "offline_chain_verification": "pass",
+    "invocation_scope_enforcement": "pass",
+    "adjacent_trace_conformance_regression": "pass",
+    "adjacent_trace_certification_regression": "pass",
+    "adjacent_observation_trust_regression": "pass",
+    "adjacent_adaptive_routing_regression": "pass",
+    "adjacent_portable_memory_regression": "pass",
+    "adjacent_mcp_regression": "pass",
+    "adjacent_snapshot_index_regression": "pass",
+    "adjacent_browser_verification_regression": "pass",
+    "runner_record_digest": "sha256:2d5a261e4ccde0b866f58264bb09cd9ff05fb18d0911279304e6d80d239fbc4f",
+    "benchmark_iterations": 5000,
+    "benchmark_baseline_mean_ns": 285.45,
+    "benchmark_validated_mean_ns": 50835.83,
+    "benchmark_baseline_p95_ns": 297,
+    "benchmark_validated_p95_ns": 73911,
+    "benchmark_overhead_ratio": 178.0896,
+    "benchmark_scope": "local_leaf_scope_lookup_vs_offline_delegation_chain_verification_and_invocation_authorization_not_network_or_tool_latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://arxiv.org/html/2606.03518v1",
+      "finding": "Agentic delegation should be a contextual governance term with progressive resource-scope attenuation and continuously evaluated authorization state.",
+      "used_for": "deterministic parent-child scope intersection and contextual chain verification"
+    },
+    {
+      "url": "https://datatracker.ietf.org/doc/draft-niyikiza-oauth-attenuating-agent-tokens/",
+      "finding": "This work-in-progress Internet-Draft proposes holder-derivable tool-scoped tokens with depth, TTL, capability, cryptographic-linkage, and offline chain-verification invariants; it has no formal IETF standing.",
+      "used_for": "non-amplifying scope, depth, TTL, and offline verification design; not treated as an adopted standard"
+    },
+    {
+      "url": "https://arxiv.org/html/2605.05440v1",
+      "finding": "Authorization propagation is distinct from prompt injection and includes transitive delegation, aggregation inference, and temporal validity across multi-agent workflows.",
+      "used_for": "lineage checks, temporal windows, and invocation-bound enforcement"
+    },
+    {
+      "url": "https://www.ietf.org/archive/id/draft-klrc-aiagent-auth-00.html",
+      "finding": "AI agents should have stable workload identity, short-lived credentials, proof of possession, attestation-aware provisioning, and authorization evaluated at every interaction boundary.",
+      "used_for": "explicit holder-proof input, short bounded windows, and per-invocation checks"
+    }
+  ],
+  "boundary": {
+    "independent_builder": false,
+    "physical_hardware_qualification": false,
+    "operator_signing_ceremony": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "proof_digest_is_signature": false,
+    "model_output_is_authority": false,
+    "delegation_is_execution": false,
+    "ambient_authority": false,
+    "revocation_distribution_is_proven": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "Proof digests are trusted-input placeholders and not production signatures or proof-of-possession artifacts.",
+    "Revocation sets are caller-supplied and require a trusted distribution and freshness mechanism in production.",
+    "The contract does not contact an authorization server, mint credentials, call a model, tool, browser, network, or accelerator, or perform a side effect.",
+    "The local benchmark measures Python control-plane overhead only.",
+    "The cited Internet-Drafts are work in progress and are not adopted standards.",
+    "This evidence does not claim AGI, correctness of external results, or production approval."
+  ]
+}
