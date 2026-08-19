@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "b34283f01e843cc537642a97fa2399cf96d7dc46",
-  "current_tag": "FAISAL-FRONTIER-PORTABLE-MEMORY-2026-08-26",
+  "current_head": "c9a0c4bb26ca1bb42089067ccdcc051785091686",
+  "current_tag": "FAISAL-FRONTIER-MODEL-ROUTING-2026-08-27",
   "current_abi": 47,
   "operating_loop": [
     "RESEARCH",
@@ -2114,5 +2114,13 @@
   "frontier_portable_memory_benchmark": "tools/faisal-portable-memory/bench_faisal_portable_memory.py",
   "frontier_portable_memory_runner": "tools/faisal-build/run_portable_memory_validation.sh",
   "frontier_portable_memory_rollback_checkpoint": "FAISAL-FRONTIER-MCP-CONTRACT-2026-08-25",
-  "frontier_portable_memory_authority_boundary": "memory_payloads_capability_metadata_model_outputs_and_provider_claims_remain_untrusted_data_ed25519_trust_roots_are_caller_supplied_rehydration_never_executes_content_and_production_approval_remains_false"
+  "frontier_portable_memory_authority_boundary": "memory_payloads_capability_metadata_model_outputs_and_provider_claims_remain_untrusted_data_ed25519_trust_roots_are_caller_supplied_rehydration_never_executes_content_and_production_approval_remains_false",
+  "frontier_model_routing": "pass_bounded_provider_neutral_capability_privacy_cost_latency_context_health_generation_concurrency_region_and_fallback_route_planning_with_immutable_snapshot_cache",
+  "frontier_model_routing_evidence": "tools/faisal-build/evidence/frontier-model-routing-validation-2026-08-27.json",
+  "frontier_model_routing_module": "tools/faisal-model-routing/faisal_model_routing.py",
+  "frontier_model_routing_tests": "tools/faisal-model-routing/test_faisal_model_routing.py",
+  "frontier_model_routing_benchmark": "tools/faisal-model-routing/bench_faisal_model_routing.py",
+  "frontier_model_routing_runner": "tools/faisal-build/run_model_routing_validation.sh",
+  "frontier_model_routing_rollback_checkpoint": "FAISAL-FRONTIER-PORTABLE-MEMORY-2026-08-26",
+  "frontier_model_routing_authority_boundary": "model_output_and_endpoint_metadata_remain_untrusted_data_provider_allowlist_is_caller_supplied_routes_are_plans_not_executions_health_snapshots_are_not_attestation_and_production_approval_remains_false"
 }
