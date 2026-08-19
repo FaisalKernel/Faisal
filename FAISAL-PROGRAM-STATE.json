@@ -2432,5 +2432,13 @@
   "frontier_handoff_authorization_benchmark": "tools/faisal-handoff-authorization/bench_faisal_handoff_authorization.py",
   "frontier_handoff_authorization_runner": "tools/faisal-build/run_handoff_authorization_validation.sh",
   "frontier_handoff_authorization_rollback_checkpoint": "FAISAL-FRONTIER-ROUTE-RECEIPT-2026-08-19",
-  "frontier_handoff_authorization_authority_boundary": "handoff_authorization_receipts_are_verdict_evidence_only_original_agent_claims_and_memory_never_become_truth_execution_policy_or_production_authority_the_contract_does_not_transfer_memory_issue_capabilities_execute_tools_or_contact_external_services"
+  "frontier_handoff_authorization_authority_boundary": "handoff_authorization_receipts_are_verdict_evidence_only_original_agent_claims_and_memory_never_become_truth_execution_policy_or_production_authority_the_contract_does_not_transfer_memory_issue_capabilities_execute_tools_or_contact_external_services",
+  "frontier_interrupt_fence": "pass_pause_revise_retract_resume_rollback_checkpoint_side_effect_watermark_generation_sequence_fork_required_replay_and_non_authority_controls",
+  "frontier_interrupt_fence_evidence": "tools/faisal-build/evidence/frontier-interrupt-fence-validation-2026-08-19.json",
+  "frontier_interrupt_fence_module": "tools/faisal-interrupt-fence/faisal_interrupt_fence.py",
+  "frontier_interrupt_fence_tests": "tools/faisal-interrupt-fence/test_faisal_interrupt_fence.py",
+  "frontier_interrupt_fence_benchmark": "tools/faisal-interrupt-fence/bench_faisal_interrupt_fence.py",
+  "frontier_interrupt_fence_runner": "tools/faisal-build/run_interrupt_fence_validation.sh",
+  "frontier_interrupt_fence_rollback_checkpoint": "FAISAL-FRONTIER-HANDOFF-AUTHORIZATION-2026-08-19",
+  "frontier_interrupt_fence_authority_boundary": "interrupt_and_rollback_receipts_are_control_evidence_only_the_contract_does_not_pause_processes_revoke_credentials_execute_rollback_undo_external_effects_or_treat_model_output_side_effect_watermarks_as_authority"
 }
