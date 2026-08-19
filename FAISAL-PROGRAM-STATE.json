@@ -2144,5 +2144,13 @@
   "frontier_trace_certification_benchmark": "tools/faisal-trace-cert/bench_faisal_trace_cert.py",
   "frontier_trace_certification_runner": "tools/faisal-build/run_trace_cert_validation.sh",
   "frontier_trace_certification_rollback_checkpoint": "FAISAL-FRONTIER-OBSERVATION-TRUST-2026-08-29",
-  "frontier_trace_certification_authority_boundary": "certificate_is_permission_record_not_execution_or_formal_world_proof_model_output_and_evidence_are_not_authority_and_production_approval_remains_false"
+  "frontier_trace_certification_authority_boundary": "certificate_is_permission_record_not_execution_or_formal_world_proof_model_output_and_evidence_are_not_authority_and_production_approval_remains_false",
+  "frontier_trace_conformance": "pass_post_execution_certified_trace_conformance_realized_step_identity_generation_failure_completion_and_hash_chained_receipt_verification",
+  "frontier_trace_conformance_evidence": "tools/faisal-build/evidence/frontier-trace-conformance-validation-2026-08-31.json",
+  "frontier_trace_conformance_module": "tools/faisal-trace-conformance/faisal_trace_conformance.py",
+  "frontier_trace_conformance_tests": "tools/faisal-trace-conformance/test_faisal_trace_conformance.py",
+  "frontier_trace_conformance_benchmark": "tools/faisal-trace-conformance/bench_faisal_trace_conformance.py",
+  "frontier_trace_conformance_runner": "tools/faisal-build/run_trace_conformance_validation.sh",
+  "frontier_trace_conformance_rollback_checkpoint": "FAISAL-FRONTIER-TRACE-CERTIFICATION-2026-08-30",
+  "frontier_trace_conformance_authority_boundary": "receipt_chain_is_unsigned_local_integrity_evidence_not_signature_or_correctness_proof_failed_or_divergent_traces_cannot_complete_and_production_approval_remains_false"
 }

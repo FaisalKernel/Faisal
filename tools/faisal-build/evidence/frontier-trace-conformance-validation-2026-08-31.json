@@ -1,0 +1,93 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-trace-conformance-validation-2026-08-31",
+  "recorded_at": "2026-08-19T07:13:33Z",
+  "status": "pass_bounded_post_execution_trace_conformance_and_hash_chained_receipts",
+  "implementation": {
+    "module": "tools/faisal-trace-conformance/faisal_trace_conformance.py",
+    "tests": "tools/faisal-trace-conformance/test_faisal_trace_conformance.py",
+    "benchmark": "tools/faisal-trace-conformance/bench_faisal_trace_conformance.py",
+    "runner": "tools/faisal-build/run_trace_conformance_validation.sh",
+    "capabilities": [
+      "realized-step to certified-proposal matching",
+      "exact order, action, target, capability, and generation checks",
+      "extra, reordered, missing, and divergent step rejection",
+      "complete versus incomplete versus failed conformance states",
+      "halt, rollback, or escalation recommendation on failed steps",
+      "deterministic per-step hash-chained receipt construction",
+      "offline receipt-chain verification and tamper rejection",
+      "explicit non-execution and non-correctness semantics"
+    ]
+  },
+  "measured_validation": {
+    "unit_tests": 7,
+    "unit_tests_passed": 7,
+    "syntax_check": "pass",
+    "runner": "pass",
+    "complete_conformance": "pass",
+    "incomplete_trace_no_completion": "pass",
+    "failed_trace_halt_required": "pass",
+    "extra_reordered_mismatch_rejection": "pass",
+    "generation_and_certificate_fencing": "pass",
+    "receipt_chain_tamper_and_reorder_rejection": "pass",
+    "adjacent_trace_certification_regression": "pass",
+    "adjacent_observation_trust_regression": "pass",
+    "adjacent_adaptive_routing_regression": "pass",
+    "adjacent_portable_memory_regression": "pass",
+    "adjacent_mcp_regression": "pass",
+    "adjacent_snapshot_index_regression": "pass",
+    "adjacent_browser_verification_regression": "pass",
+    "runner_record_digest": "sha256:07e188df877255a9617f6a70c6e552d275369d3559b47ab76ec89f7be91d4ce4",
+    "benchmark_iterations": 5000,
+    "benchmark_baseline_mean_ns": 438.88,
+    "benchmark_validated_mean_ns": 121333.64,
+    "benchmark_baseline_p95_ns": 546,
+    "benchmark_validated_p95_ns": 173130,
+    "benchmark_overhead_ratio": 276.4620,
+    "benchmark_scope": "local_realized_step_projection_vs_post_execution_conformance_and_hash_chain_verification_not_tool_or_execution_latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://arxiv.org/html/2607.13716",
+      "finding": "Canonical action verification binds approvals and receipts to normalized action semantics rather than runtime-specific raw text.",
+      "used_for": "exact realized-step identity matching and canonical proposal digest binding"
+    },
+    {
+      "url": "https://datatracker.ietf.org/doc/draft-nelson-agent-delegation-receipts/10/",
+      "finding": "The work-in-progress delegation receipt draft describes pre-execution verification, scope boundaries, validity windows, model commitments, and narrowing-only delegated authority.",
+      "used_for": "generation fencing and explicit boundary separation; not treated as an adopted standard"
+    },
+    {
+      "url": "https://microsoft.github.io/ai-agents-for-beginners/18-securing-ai-agents/",
+      "finding": "Cryptographic receipts can provide offline-verifiable attribution, integrity, and ordering, but do not prove correctness or policy compliance.",
+      "used_for": "hash-chained receipts and explicit result-correctness false boundary"
+    },
+    {
+      "url": "https://www.diagrid.io/blog/what-is-agentic-durable-execution",
+      "finding": "Durable agent execution requires persisted step records, idempotent boundaries, recovery, and avoiding false success after failed tool execution.",
+      "used_for": "halt-required failure state and no-completion semantics"
+    }
+  ],
+  "boundary": {
+    "independent_builder": false,
+    "physical_hardware_qualification": false,
+    "operator_signing_ceremony": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "receipt_is_signature": false,
+    "receipt_is_execution": false,
+    "result_correctness": false,
+    "model_output_is_authority": false,
+    "evidence_is_authority": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "Conformance verifies structural agreement between a certified proposal and caller-supplied realized records; it does not prove external result correctness.",
+    "No tool, browser, model, network, accelerator, or side effect was executed by this module.",
+    "Receipts are unsigned local hash-chain records in this implementation; production signing, key custody, and independent attestation remain external requirements.",
+    "The local benchmark measures Python control-plane overhead only.",
+    "This evidence does not claim autonomous execution safety, AGI, robotics capability, or production approval."
+  ]
+}
