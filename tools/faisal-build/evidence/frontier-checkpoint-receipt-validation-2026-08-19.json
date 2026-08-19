@@ -1,7 +1,7 @@
 {
   "schema": "FAISAL-FRONTIER-EVIDENCE-1",
   "iteration": "frontier-checkpoint-receipt-validation-2026-08-19",
-  "recorded_at": "2026-08-19T09:04:22Z",
+  "recorded_at": "2026-08-19T09:10:21Z",
   "status": "pass_bounded_durable_checkpoint_receipts_with_lease_trace_event_generation_and_resume_replay_fencing",
   "implementation": {
     "module": "tools/faisal-checkpoint-receipt/faisal_checkpoint_receipt.py",
