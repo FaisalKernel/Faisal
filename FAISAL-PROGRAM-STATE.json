@@ -2192,5 +2192,13 @@
   "frontier_checkpoint_receipt_benchmark": "tools/faisal-checkpoint-receipt/bench_faisal_checkpoint_receipt.py",
   "frontier_checkpoint_receipt_runner": "tools/faisal-build/run_checkpoint_receipt_validation.sh",
   "frontier_checkpoint_receipt_rollback_checkpoint": "FAISAL-FRONTIER-MODEL-ROUTING-RUNTIME-PROFILE-2026-08-19",
-  "frontier_checkpoint_receipt_authority_boundary": "checkpoint_receipts_are_evidence_not_execution_or_model_correctness_proof_resume_requires_caller_policy_and_no_authority_server_credentials_or_unrestricted_kernel_self_modification_is_used_production_approval_remains_false"
+  "frontier_checkpoint_receipt_authority_boundary": "checkpoint_receipts_are_evidence_not_execution_or_model_correctness_proof_resume_requires_caller_policy_and_no_authority_server_credentials_or_unrestricted_kernel_self_modification_is_used_production_approval_remains_false",
+  "frontier_memory_write_gate": "pass_bounded_source_provenance_taint_quarantine_scope_generation_expiry_replay_and_explicit_verified_promotion_before_durable_memory_admission",
+  "frontier_memory_write_gate_evidence": "tools/faisal-build/evidence/frontier-memory-write-gate-validation-2026-08-19.json",
+  "frontier_memory_write_gate_module": "tools/faisal-memory-write-gate/faisal_memory_write_gate.py",
+  "frontier_memory_write_gate_tests": "tools/faisal-memory-write-gate/test_faisal_memory_write_gate.py",
+  "frontier_memory_write_gate_benchmark": "tools/faisal-memory-write-gate/bench_faisal_memory_write_gate.py",
+  "frontier_memory_write_gate_runner": "tools/faisal-build/run_memory_write_gate_validation.sh",
+  "frontier_memory_write_gate_rollback_checkpoint": "FAISAL-FRONTIER-CHECKPOINT-RECEIPT-2026-08-19",
+  "frontier_memory_write_gate_authority_boundary": "untrusted_tool_browser_model_metadata_and_retrieved_content_may_be_quarantined_as_evidence_but_never_self_promote_to_durable_policy_or_memory_authority_and_production_approval_remains_false"
 }

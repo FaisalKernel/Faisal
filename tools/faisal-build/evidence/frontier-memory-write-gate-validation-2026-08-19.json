@@ -1,0 +1,91 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-memory-write-gate-validation-2026-08-19",
+  "recorded_at": "2026-08-19T09:21:05Z",
+  "status": "pass_bounded_memory_write_admission_with_source_provenance_taint_quarantine_scope_generation_expiry_replay_and_verified_promotion",
+  "implementation": {
+    "module": "tools/faisal-memory-write-gate/faisal_memory_write_gate.py",
+    "tests": "tools/faisal-memory-write-gate/test_faisal_memory_write_gate.py",
+    "benchmark": "tools/faisal-memory-write-gate/bench_faisal_memory_write_gate.py",
+    "runner": "tools/faisal-build/run_memory_write_gate_validation.sh",
+    "upgrade": "provider-neutral memory-write admission quarantines untrusted model, tool, browser, visual, media, metadata, retrieved, and injection-signaled content before durable promotion"
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 5,
+    "unit_tests_passed": 5,
+    "runner": "pass",
+    "verified_bounded_tool_admission": "pass",
+    "model_output_quarantine": "pass",
+    "browser_injection_quarantine": "pass",
+    "explicit_verified_promotion": "pass",
+    "scope_rejection": "pass",
+    "generation_rejection": "pass",
+    "freshness_rejection": "pass",
+    "candidate_replay_rejection": "pass",
+    "promotion_replay_rejection": "pass",
+    "tamper_rejection": "pass",
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": "pass_model_routing_checkpoint_receipt_delegation_trace_conformance_trace_cert_observation_trust_portable_memory_mcp_snapshot_browser",
+    "benchmark_iterations": 1000,
+    "benchmark_raw_digest_mean_ns": 14708.76,
+    "benchmark_admit_mean_ns": 24830.15,
+    "benchmark_quarantine_mean_ns": 24204.84,
+    "benchmark_promotion_mean_ns": 28310.62,
+    "benchmark_admit_p95_ns": 35029,
+    "benchmark_quarantine_p95_ns": 35280,
+    "benchmark_promotion_p95_ns": 40333,
+    "benchmark_admit_overhead_ratio": 1.6881,
+    "benchmark_quarantine_overhead_ratio": 1.6456,
+    "benchmark_promotion_overhead_ratio": 1.9247,
+    "runner_record_digest": "ec786d423d6a7dfe18ac50e3e30da74b552fa52880d107e36cb02ece5f7194f7",
+    "benchmark_scope": "local_python_canonical_digest_admission_quarantine_and_verified_promotion_not_database_network_model_or_kernel_latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://www.microsoft.com/en-us/security/blog/2026/06/30/securing-ai-agents-ai-tools-move-from-reading-acting/",
+      "finding": "Microsoft documents MCP tool-description poisoning, plausible malicious tool output, and the trust boundary between external tools, agent context, and high-impact actions.",
+      "used_for": "source-kind taint, injection quarantine, least-agency memory admission, and explicit promotion"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/tools-computer-use",
+      "finding": "OpenAI documents screenshots, page text, tool outputs, PDFs, emails, chats, and third-party content as untrusted input, with isolated environments and human confirmation for high-impact actions.",
+      "used_for": "browser and observation source quarantine and non-authority boundaries"
+    },
+    {
+      "url": "https://docs.langchain.com/oss/python/langgraph/overview",
+      "finding": "LangGraph documents persistent state, memory, checkpointing, fault tolerance, interrupts, and human-in-the-loop controls for long-running agents.",
+      "used_for": "durable memory promotion and caller-policy separation"
+    },
+    {
+      "url": "https://modelcontextprotocol.io/specification/2025-06-18",
+      "finding": "MCP defines interoperable tools/resources and emphasizes explicit security and user-consent boundaries.",
+      "used_for": "provider-neutral tool metadata and result handling without authority promotion"
+    }
+  ],
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "memory_is_execution": false,
+    "memory_is_policy_authority": false,
+    "quarantine_is_data_loss": false,
+    "unrestricted_kernel_self_modification": false,
+    "fake_hardware_evidence": false,
+    "fake_external_review": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The gate is a bounded in-process control-plane contract and does not itself persist to a database or replicate memory across nodes.",
+    "Source identity, digests, trust, and verification receipts are caller-supplied; external signatures and hardware attestation are outside this implementation.",
+    "Quarantine preserves evidence metadata but does not inspect natural-language content for every possible injection pattern; upstream observation and tool validators remain required.",
+    "Promotion requires an explicit verification receipt and caller policy but does not itself establish human identity or execute high-impact actions.",
+    "The benchmark measures local Python control-plane overhead and excludes storage, network, model, accelerator, and kernel latency.",
+    "This evidence does not claim AGI, production approval, physical hardware qualification, independent builder qualification, or independent external review."
+  ]
+}
