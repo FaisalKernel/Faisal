@@ -1,0 +1,84 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-hardware-qualification-2026-08-24",
+  "recorded_at": "2026-08-19T05:15:00Z",
+  "status": "hardware_observation_and_fail_closed_qualification_collector_verified",
+  "research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-production-hardware-2026-08-24.md",
+  "implementation": {
+    "collector": "tools/faisal-hardware-qualify/faisal_hardware_qualify.py",
+    "selftest": "tools/faisal-hardware-qualify/test_faisal_hardware_qualify.py",
+    "design": "tools/faisal-hardware-qualify/FAISAL-HARDWARE-QUALIFICATION-DESIGN.md",
+    "runner": "tools/faisal-build/run_hardware_qualification.sh",
+    "schema": "org.faisal.hardware-qualification.v1",
+    "features": [
+      "procfs and sysfs host observation",
+      "PCI BDF vendor device class driver NUMA and IOMMU-group collection",
+      "GPU and NPU candidate discovery",
+      "IOMMU DMA RDMA CXL NVMe NUMA and TPM state classification",
+      "optional vendor command observation",
+      "canonical SHA-256 record digest",
+      "synthetic topology parser tests",
+      "digest tamper rejection",
+      "required-capability fail-closed exit",
+      "no-fake-hardware boundary"
+    ]
+  },
+  "live_host_observation": {
+    "path": "/home/ubuntu/agi-kernel/build/frontier/hardware-qualification-2026-08-24/live-host-observation.json",
+    "record_digest": "17490837645c59c88dbcf70493d85b91431d9c2b5e8799e8e9074591dab5ced0",
+    "capabilities": {
+      "gpu": "absent",
+      "npu": "absent",
+      "iommu": "absent",
+      "dma": "absent",
+      "rdma": "absent",
+      "cxl": "absent",
+      "nvme": "absent",
+      "numa": "present",
+      "tpm": "absent"
+    },
+    "numa_nodes": ["node0"],
+    "kernel_release": "6.18.38+",
+    "machine": "x86_64",
+    "cpu_count": 6,
+    "provider_tools": {
+      "nvidia_smi": "absent",
+      "rocminfo": "absent",
+      "xpu_smi": "absent",
+      "rdma_command": "present_but_no_observed_rdma_device"
+    }
+  },
+  "validation": {
+    "selftest": "FAISAL_HARDWARE_SELFTEST_OK cases=4 synthetic_only=true",
+    "runner": "FAISAL_HARDWARE_QUALIFICATION_RUN_OK synthetic_selftest=passed live_observation=passed live_digest_verify=passed absent_capability_fail_closed=passed fake_hardware=not_claimed",
+    "live_verify": "FAISAL_HARDWARE_VERIFY_OK required=0",
+    "required_gpu": "blocked_as_expected",
+    "required_iommu": "blocked_as_expected",
+    "strict_python_syntax": "passed",
+    "synthetic_fixtures_are_production_evidence": false
+  },
+  "research_sources": [
+    "https://docs.nvidia.com/cuda/gpudirect-rdma/",
+    "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/",
+    "https://docs.kernel.org/livepatch/livepatch.html"
+  ],
+  "boundary": {
+    "fake_hardware_evidence": false,
+    "physical_gpu_qualification": false,
+    "physical_npu_qualification": false,
+    "physical_iommu_dma_qualification": false,
+    "physical_rdma_cxl_nvme_qualification": false,
+    "physical_power_thermal_qualification": false,
+    "provider_metadata_is_authority": false,
+    "production_approval": false,
+    "independent_external_review": false,
+    "model_output_is_authority": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "qualification_limits": [
+    "The live sandbox has no observed physical GPU, NPU, PCI device, IOMMU group, DMA class device, RDMA device, CXL device, NVMe device, or TPM device.",
+    "The collector proves observation and fail-closed behavior, not hardware safety, driver correctness, accelerator isolation, performance, or production compatibility.",
+    "Synthetic topology tests validate parser behavior only and are explicitly excluded from physical qualification evidence.",
+    "Physical qualification still requires exact hardware, firmware, driver, kernel, topology, workload, fault-injection, power, thermal, reset, and recovery evidence produced and reviewed independently."
+  ]
+}
