@@ -114,6 +114,7 @@ def main() -> None:
         'frontier-agi-support-evaluation-validation-2026-08-24.json',
         'frontier-hardware-qualification-validation-2026-08-24.json',
         'frontier-mcp-contract-validation-2026-08-25.json',
+        'frontier-portable-memory-validation-2026-08-26.json',
         # M182 records the manifest digest; excluding it avoids a hash cycle.
     ]
     for name in names:

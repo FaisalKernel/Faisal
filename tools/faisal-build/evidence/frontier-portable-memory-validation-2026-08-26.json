@@ -1,0 +1,90 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-portable-memory-validation-2026-08-26",
+  "recorded_at": "2026-08-19T05:54:35Z",
+  "status": "pass_bounded_userspace_signed_portable_memory_contract",
+  "implementation": {
+    "module": "tools/faisal-portable-memory/faisal_portable_memory.py",
+    "tests": "tools/faisal-portable-memory/test_faisal_portable_memory.py",
+    "benchmark": "tools/faisal-portable-memory/bench_faisal_portable_memory.py",
+    "runner": "tools/faisal-build/run_portable_memory_validation.sh",
+    "capabilities": [
+      "five-component episodic semantic procedural working identity artifact envelope",
+      "content-addressed SHA-256 entry identifiers",
+      "Merkle-DAG parent integrity and cycle rejection",
+      "operator-supplied Ed25519 root signature verification",
+      "scoped capability tokens with audience expiration and permissions",
+      "selective component and entry rehydration",
+      "injection-resistant data framing",
+      "bounded digest-keyed verification cache",
+      "canonical projection digest for replay and audit"
+    ]
+  },
+  "measured_validation": {
+    "unit_tests": 7,
+    "unit_tests_passed": 7,
+    "syntax_check": "pass",
+    "signed_artifact_verification": "pass",
+    "tamper_rejection": "pass",
+    "cycle_rejection": "pass",
+    "capability_scope_rejection": "pass",
+    "capability_expiry_rejection": "pass",
+    "selective_rehydration": "pass",
+    "injection_safe_framing": "pass",
+    "verification_cache_hit": "pass",
+    "portable_memory_runner": "pass",
+    "portable_memory_record_digest": "5c82e2f1c6a4439341bff3af30b16eb6ceb5638a8f486736c8c17bd1e6e99091",
+    "adjacent_snapshot_index_validation": "pass_selftest_benchmark_fuzz_asan_ubsan_tsan_qemu",
+    "benchmark_iterations": 1000,
+    "benchmark_baseline_mean_ns": 7534.40,
+    "benchmark_uncached_verified_rehydration_mean_ns": 527156.44,
+    "benchmark_cached_rehydration_mean_ns": 186978.02,
+    "benchmark_baseline_p95_ns": 9203,
+    "benchmark_uncached_verified_rehydration_p95_ns": 622082,
+    "benchmark_cached_rehydration_p95_ns": 244034,
+    "benchmark_uncached_overhead_ratio": 69.9666,
+    "benchmark_cached_overhead_ratio": 24.8166,
+    "benchmark_scope": "local_signed_merkle_verify_and_scoped_rehydration_not_model_or_storage_latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://arxiv.org/html/2605.11032v1",
+      "finding": "Portable Agent Memory proposes a five-component memory model, Merkle-DAG provenance, capability-scoped access, and injection-resistant rehydration.",
+      "used_for": "provider-neutral artifact format, signed provenance, capability filtering, and data-only framing"
+    },
+    {
+      "url": "https://proceedings.mlr.press/v317/wu26a.html",
+      "finding": "The Agent-Memory Protocol emphasizes deterministic redact-at-rest, pack-for-purpose, and hydrate-on-return operations to protect sensitive memory.",
+      "used_for": "purpose-bounded rehydration and explicit privacy/security boundary; full PII redaction remains a future bounded service"
+    },
+    {
+      "url": "https://arxiv.org/html/2608.00009",
+      "finding": "AgentMemBench evaluates memory strategies using recall, ranking, faithfulness, footprint, and latency, exposing an accuracy-efficiency trade-off.",
+      "used_for": "including a local footprint/latency benchmark and refusing unsupported end-to-end memory-quality claims"
+    },
+    {
+      "url": "https://docs.nvidia.com/openshell/about/overview",
+      "finding": "OpenShell uses sandbox, filesystem, network, process, and inference policy layers for autonomous agents.",
+      "used_for": "keeping portable-memory rehydration separate from execution and preserving capability/policy boundaries"
+    }
+  ],
+  "boundary": {
+    "production_approval": false,
+    "independent_builder": false,
+    "physical_hardware_qualification": false,
+    "memory_payload_is_authority": false,
+    "capability_metadata_is_authority": false,
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "rehydration_executes_content": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "limitations": [
+    "This is a bounded user-space portable-memory contract and does not replace the existing durable memory journals.",
+    "The implementation uses SHA-256 for standard-library portability; it does not claim BLAKE3 compatibility with any external protocol.",
+    "Ed25519 trust roots are supplied by the caller; no TPM, HSM, KMS, or external operator ceremony is implied.",
+    "Rehydration frames content as data but does not guarantee model-level prompt-injection immunity.",
+    "The benchmark is local control-plane overhead, not retrieval quality, model accuracy, storage latency, or production cost.",
+    "This upgrade does not claim AGI, learning, model retraining, physical hardware qualification, or production approval."
+  ]
+}
