@@ -2136,5 +2136,13 @@
   "frontier_observation_trust_benchmark": "tools/faisal-observation-trust/bench_faisal_observation_trust.py",
   "frontier_observation_trust_runner": "tools/faisal-build/run_observation_trust_validation.sh",
   "frontier_observation_trust_rollback_checkpoint": "FAISAL-FRONTIER-MODEL-ROUTING-ADAPTIVE-2026-08-28",
-  "frontier_observation_trust_authority_boundary": "observations_and_injection_signals_are_untrusted_data_model_output_is_not_authority_side_effect_decisions_are_not_execution_and_production_approval_remains_false"
+  "frontier_observation_trust_authority_boundary": "observations_and_injection_signals_are_untrusted_data_model_output_is_not_authority_side_effect_decisions_are_not_execution_and_production_approval_remains_false",
+  "frontier_trace_certification": "pass_bounded_proposal_certification_execution_trace_policy_evidence_capability_budget_generation_dependency_replay_and_approval_checks",
+  "frontier_trace_certification_evidence": "tools/faisal-build/evidence/frontier-trace-certification-validation-2026-08-30.json",
+  "frontier_trace_certification_module": "tools/faisal-trace-cert/faisal_trace_cert.py",
+  "frontier_trace_certification_tests": "tools/faisal-trace-cert/test_faisal_trace_cert.py",
+  "frontier_trace_certification_benchmark": "tools/faisal-trace-cert/bench_faisal_trace_cert.py",
+  "frontier_trace_certification_runner": "tools/faisal-build/run_trace_cert_validation.sh",
+  "frontier_trace_certification_rollback_checkpoint": "FAISAL-FRONTIER-OBSERVATION-TRUST-2026-08-29",
+  "frontier_trace_certification_authority_boundary": "certificate_is_permission_record_not_execution_or_formal_world_proof_model_output_and_evidence_are_not_authority_and_production_approval_remains_false"
 }

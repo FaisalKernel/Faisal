@@ -1,0 +1,94 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-trace-certification-validation-2026-08-30",
+  "recorded_at": "2026-08-19T07:03:35Z",
+  "status": "pass_bounded_proposal_certification_execution_contract",
+  "implementation": {
+    "module": "tools/faisal-trace-cert/faisal_trace_cert.py",
+    "tests": "tools/faisal-trace-cert/test_faisal_trace_cert.py",
+    "benchmark": "tools/faisal-trace-cert/bench_faisal_trace_cert.py",
+    "runner": "tools/faisal-build/run_trace_cert_validation.sh",
+    "capabilities": [
+      "typed pre-execution trace proposals",
+      "policy-version and source-generation fencing",
+      "topologically ordered dependency validation",
+      "caller-supplied capability scope checks",
+      "cumulative cost budget enforcement",
+      "trusted evidence digest binding",
+      "high-risk side-effect approval digest requirement",
+      "nonce replay protection",
+      "certificate digest verification",
+      "explicit no-execution certificate semantics"
+    ]
+  },
+  "measured_validation": {
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "syntax_check": "pass",
+    "runner": "pass",
+    "policy_and_generation_fencing": "pass",
+    "evidence_binding": "pass",
+    "dependency_ordering": "pass",
+    "capability_and_budget_denial": "pass",
+    "high_risk_approval_denial": "pass",
+    "replay_rejection": "pass",
+    "certificate_tamper_rejection": "pass",
+    "adjacent_observation_trust_regression": "pass",
+    "adjacent_adaptive_routing_regression": "pass",
+    "adjacent_portable_memory_regression": "pass",
+    "adjacent_mcp_regression": "pass",
+    "adjacent_snapshot_index_regression": "pass",
+    "adjacent_browser_verification_regression": "pass",
+    "runner_record_digest": "sha256:9658fcda035237febc18099198e0adba5fbc5f92a9d567eda84388717d62b035",
+    "benchmark_iterations": 5000,
+    "benchmark_baseline_mean_ns": 396.89,
+    "benchmark_validated_mean_ns": 44046.49,
+    "benchmark_baseline_p95_ns": 490,
+    "benchmark_validated_p95_ns": 67579,
+    "benchmark_overhead_ratio": 110.9797,
+    "benchmark_scope": "local_step_projection_vs_deterministic_trace_certification_and_verification_not_model_or_execution_latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://arxiv.org/html/2606.04990v4",
+      "finding": "Execution provenance should connect evidence, tool outputs, memory, observations, claims, actions, and agents in typed traces and support verification, safety, audit, debugging, and recovery.",
+      "used_for": "typed proposal steps, evidence digest binding, and explicit certificate record"
+    },
+    {
+      "url": "https://arxiv.org/html/2605.24462",
+      "finding": "The Proposal-Certification-Execution architecture argues that generated traces should execute only after a policy machine certifies them; local action permission does not imply trace permission.",
+      "used_for": "pre-execution certification, cumulative budgets, approvals, and no-execution certificate semantics"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns",
+      "finding": "Agent orchestration should use the lowest complexity that meets requirements, bound iteration loops, and use deterministic sequencing and maker-checker gates where appropriate.",
+      "used_for": "bounded steps, deterministic dependency ordering, and explicit high-risk approval gates"
+    },
+    {
+      "url": "https://arxiv.org/html/2607.22368",
+      "finding": "Agent benchmark validity depends on the complete environment, information flow, scoring, and verification protocol; exposed artifacts and feedback can create score-relevant shortcuts.",
+      "used_for": "evidence binding, policy fencing, and explicit limits on what certification establishes"
+    }
+  ],
+  "boundary": {
+    "independent_builder": false,
+    "physical_hardware_qualification": false,
+    "operator_signing_ceremony": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "evidence_is_authority": false,
+    "certificate_is_execution": false,
+    "certificate_is_formal_proof_of_world_state": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "Certification is bounded deterministic policy checking, not a formal proof of all external-world properties.",
+    "The module does not call a model, browser, tool, network, accelerator, or side effect.",
+    "Caller-supplied policy, capability, approval, and evidence registries must be provisioned by a trusted control-plane boundary; the module does not create their authority.",
+    "The local benchmark measures Python control-plane overhead only.",
+    "This evidence does not claim AGI, autonomous execution safety, browser safety, robotics capability, or production approval."
+  ]
+}
