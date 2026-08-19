@@ -1,0 +1,109 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-evaluator-consensus-validation-2026-08-19",
+  "recorded_at": "2026-08-19T22:20:00Z",
+  "status": "evaluator_consensus_admission_qualified",
+  "objective": "Add bounded multi-evaluator consensus admission for agent reliability evidence by binding evaluator identity/key epoch, common rubric, task/trace lineage, coverage, confidence, disagreement, safety failure, and harm severity under generation/expiry/replay/tamper controls without running graders or approving releases.",
+  "research_inputs": [
+    {
+      "source": "https://developers.openai.com/api/docs/guides/agent-evals",
+      "finding": "Trace debugging should precede repeatable dataset and evaluation runs when benchmarking workflow changes over time.",
+      "implementation_impact": "The contract accepts caller-supplied evaluator receipts bound to a stable evaluation-set identity and does not execute models or graders."
+    },
+    {
+      "source": "https://developers.openai.com/api/docs/guides/trace-grading",
+      "finding": "Structured trace labels can expose tool, handoff, instruction, and safety regressions, but they remain evaluation evidence.",
+      "implementation_impact": "The ledger requires common task/trace lineage and rejects evaluator disagreement, safety failure, and harm evidence beyond policy without promoting receipts to authority."
+    },
+    {
+      "source": "https://arxiv.org/html/2602.16666v3",
+      "finding": "Agent reliability is multi-dimensional: consistency, robustness, predictability, and safety; safety deterioration should be a hard constraint rather than averaged away.",
+      "implementation_impact": "The contract includes coverage, confidence, disagreement, safety-failure, and harm-severity gates and keeps safety checks separate from any quality score."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-evaluator-consensus/faisal_evaluator_consensus.py",
+    "tests": "tools/faisal-evaluator-consensus/test_faisal_evaluator_consensus.py",
+    "benchmark": "tools/faisal-evaluator-consensus/bench_faisal_evaluator_consensus.py",
+    "runner": "tools/faisal-build/run_evaluator_consensus_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "unique evaluator identity and key-epoch binding",
+      "common rubric generation requirement",
+      "common task/trace evidence lineage",
+      "minimum evaluator count and coverage",
+      "confidence and score-disagreement gates",
+      "hard safety-failure and harm-severity gates",
+      "policy generation, platform ABI, TTL and expiry binding",
+      "request and nonce replay protection",
+      "digest tamper protection",
+      "explicit no-grader/no-model/no-release-authority boundary"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "FAISAL_EVALUATOR_CONSENSUS_OK",
+    "runner_record_digest": "sha256:595fbe5c5e46759cbcb4f464a9d4989ef9fd10c91a2d35060b41ef8791e11e86",
+    "real_tasks": {
+      "valid_consensus": "passed",
+      "evaluator_count": 2,
+      "acknowledged": "passed",
+      "models_invoked": false,
+      "graders_invoked": false,
+      "release_approved": false,
+      "negative_cases": 9,
+      "negative_cases_denied": 9,
+      "denials": ["duplicate_identity", "rubric", "task_lineage", "score_disagreement", "confidence", "safety", "harm", "expiry", "authority"]
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 19791.56,
+      "baseline_ungoverned_p95_ns": 28895.20,
+      "consensus_admit_mean_ns": 122767.54,
+      "consensus_admit_p95_ns": 199100.80,
+      "consensus_acknowledge_mean_ns": 110779.89,
+      "consensus_acknowledge_p95_ns": 161581.80,
+      "scope": "local Python control-plane consensus verification overhead; excludes grader execution, model invocation, network, storage, accelerators, kernel scheduling, and release approval latency"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_sha256_8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
+    "adjacent_regressions": {"model_routing":"pass","memory_write":"pass","memory_read":"pass","checkpoint":"pass","delegation":"pass","trace_conformance":"pass","trace_certification":"pass","observation_trust":"pass","portable_memory":"pass","mcp_contract":"pass","snapshot_index":"pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"}
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "evaluator_output_is_authority": false,
+    "consensus_receipt_is_deployment_authority": false,
+    "consensus_receipt_is_policy_authority": false,
+    "consensus_receipt_is_production_authority": false,
+    "confidence_is_truth": false,
+    "models_invoked": false,
+    "graders_invoked": false,
+    "release_approved": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-EVALUATION-SET-2026-08-19",
+    "rollback_scope": "remove the evaluator-consensus module, tests, runner, evidence registration, and metadata; retain prior tagged evaluation-set release"
+  },
+  "limitations": [
+    "The ledger verifies caller-supplied evaluator receipts and does not run graders, independently identify evaluators, verify rubric quality, or prove that receipts reflect real traces.",
+    "Consensus between evaluators does not establish truth; it only satisfies the configured evidence-consistency policy.",
+    "The benchmark measures local Python control-plane overhead and excludes grading, model, tool, network, storage, accelerator, kernel scheduler, and approval latency.",
+    "The real-task validation is a deterministic local fixture and does not establish agent quality, general intelligence, browser autonomy, robotics, or production efficacy.",
+    "No physical accelerator, TPM, secure enclave, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ]
+}
