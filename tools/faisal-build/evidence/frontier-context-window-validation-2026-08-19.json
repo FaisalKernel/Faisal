@@ -1,0 +1,121 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-context-window-validation-2026-08-19",
+  "recorded_at": "2026-08-19T11:08:00Z",
+  "status": "bounded_context_window_admission_qualified",
+  "objective": "Provide provider-neutral bounded context admission for long-horizon agents with trust filtering, token-aware deterministic selection, compaction lineage, generation fencing, replay/tamper protection, and explicit non-authority semantics.",
+  "research_inputs": [
+    {
+      "source": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+      "finding": "Current context-engineering guidance treats context as a finite attention budget and recommends just-in-time retrieval, progressive disclosure, compaction, structured note-taking, and high-signal context curation.",
+      "implementation_impact": "FAISAL adds deterministic bounded selection and records omitted context plus optional exact-source compaction evidence without performing model summarization."
+    },
+    {
+      "source": "https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents",
+      "finding": "Current long-running-agent guidance recommends incremental progress, persistent progress artifacts, clean checkpoints, and explicit testing to prevent one-shot work and premature completion.",
+      "implementation_impact": "Context plans are generation-bound, replay-protected, and auditable as control-plane artifacts for long-horizon continuation."
+    },
+    {
+      "source": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "finding": "The current MCP specification defines opt-in asynchronous Tasks and emphasizes consent, privacy, tool safety, and treating tool descriptions/annotations as untrusted unless trusted by policy.",
+      "implementation_impact": "Context evidence and compaction receipts remain data-only and cannot authorize tool invocation or side effects."
+    },
+    {
+      "source": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "finding": "Current persistence guidance separates thread-scoped checkpoints from cross-thread stores, warns that in-memory persistence is lost on restart, and recommends retention/pruning for unbounded checkpoint growth.",
+      "implementation_impact": "FAISAL context admission bounds items/tokens and binds selected and omitted digests to generation and observed time."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-context-window/faisal_context_window.py",
+    "tests": "tools/faisal-context-window/test_faisal_context_window.py",
+    "benchmark": "tools/faisal-context-window/bench_faisal_context_window.py",
+    "runner": "tools/faisal-build/run_context_window_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "trust, quarantine, generation, and expiry filtering",
+      "deterministic pinned/priority/recency/token selection",
+      "bounded item and token budgets",
+      "required-item fail-closed rejection",
+      "omitted-item and partial-context recording",
+      "exact-source compaction receipt verification",
+      "generation-bound context digests",
+      "context-plan tamper verification",
+      "admission replay protection",
+      "explicit model/compaction/context non-authority boundaries"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "runner": "FAISAL_CONTEXT_WINDOW_VALIDATION_OK",
+    "runner_record_digest": "287374939297689c9cd776258113c003475e7b7711b20981961ec3a3a8a2e478",
+    "benchmark_iterations": 1000,
+    "benchmark_plan_mean_ns": 165360.90,
+    "benchmark_verify_mean_ns": 36557.05,
+    "benchmark_admit_mean_ns": 29745.65,
+    "benchmark_plan_p95_ns": 231587,
+    "benchmark_verify_p95_ns": 53920,
+    "benchmark_admit_p95_ns": 45262,
+    "benchmark_scope": "local_python_context_receipts_not_model_context_quality_or_kernel_latency",
+    "real_held_out_evaluation": {
+      "runner": "tools/faisal-build/run_agi_support_evaluation.sh",
+      "task_count": 8,
+      "baseline_pass_rate": 0.75,
+      "candidate_pass_rate": 1.0,
+      "pass_rate_delta": 0.25,
+      "baseline_safety_pass_rate": 1.0,
+      "candidate_safety_pass_rate": 1.0,
+      "trace_verification": "passed",
+      "promotion_without_authority": "rejected",
+      "promotion_with_local_test_authority": "passed_fixture_only",
+      "rollback": "passed",
+      "tamper_rejection": "passed",
+      "scope": "deterministic_local_fixture_adapter_on_held_out_task_pack_not_context_quality_or_general_intelligence_evidence"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": {
+      "model_routing": "pass",
+      "memory_write": "pass",
+      "memory_read": "pass",
+      "checkpoint": "pass",
+      "delegation": "pass",
+      "trace_conformance": "pass",
+      "trace_certification": "pass",
+      "observation_trust": "pass",
+      "portable_memory": "pass",
+      "mcp_contract": "pass",
+      "snapshot_index": "pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"
+    }
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "compaction_is_authority": false,
+    "context_is_execution_authority": false,
+    "context_is_hardware_proof": false,
+    "context_is_model_correctness_proof": false,
+    "context_admission_is_tool_permission": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The contract selects references and verifies digests; it does not retrieve data, summarize context, call models, execute tools, or enforce distributed quotas.",
+    "Token estimates, trust ranks, source digests, and compaction receipts are caller-supplied evidence and are not independently attested by this local module.",
+    "A compaction receipt proves only exact source-digest coverage and bounded summary metadata; it does not prove semantic faithfulness of the summary.",
+    "The benchmark measures local Python receipt overhead and excludes model, network, storage, browser, accelerator, and kernel latency.",
+    "The real held-out evaluation uses deterministic fixture adapters and does not measure context quality, frontier models, general intelligence, browser autonomy, or robotics capability.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, superiority to Linux, or closure of existing external release blockers."
+  ]
+}
