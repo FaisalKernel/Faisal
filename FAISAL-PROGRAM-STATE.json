@@ -2440,5 +2440,14 @@
   "frontier_interrupt_fence_benchmark": "tools/faisal-interrupt-fence/bench_faisal_interrupt_fence.py",
   "frontier_interrupt_fence_runner": "tools/faisal-build/run_interrupt_fence_validation.sh",
   "frontier_interrupt_fence_rollback_checkpoint": "FAISAL-FRONTIER-HANDOFF-AUTHORIZATION-2026-08-19",
-  "frontier_interrupt_fence_authority_boundary": "interrupt_and_rollback_receipts_are_control_evidence_only_the_contract_does_not_pause_processes_revoke_credentials_execute_rollback_undo_external_effects_or_treat_model_output_side_effect_watermarks_as_authority"
+  "frontier_interrupt_fence_authority_boundary": "interrupt_and_rollback_receipts_are_control_evidence_only_the_contract_does_not_pause_processes_revoke_credentials_execute_rollback_undo_external_effects_or_treat_model_output_side_effect_watermarks_as_authority",
+  "frontier_qualification_intake": "pass_slsa_builder_independence_sigstore_signing_hardware_firmware_external_security_review_multihost_conformance_freshness_replay_and_non_authority_controls",
+  "frontier_qualification_intake_evidence": "tools/faisal-build/evidence/frontier-qualification-intake-validation-2026-08-19.json",
+  "frontier_qualification_intake_research": "build/frontier/qualification-research-2026-08-19.md",
+  "frontier_qualification_intake_module": "tools/faisal-qualification-intake/faisal_qualification_intake.py",
+  "frontier_qualification_intake_tests": "tools/faisal-qualification-intake/test_faisal_qualification_intake.py",
+  "frontier_qualification_intake_benchmark": "tools/faisal-qualification-intake/bench_faisal_qualification_intake.py",
+  "frontier_qualification_intake_runner": "tools/faisal-build/run_qualification_intake_validation.sh",
+  "frontier_qualification_intake_rollback_checkpoint": "FAISAL-FRONTIER-INTERRUPT-FENCE-2026-08-19",
+  "frontier_qualification_intake_authority_boundary": "qualification_intake_receipts_are_structural_evidence_only_synthetic_or_local_claims_never_satisfy_external_blockers_the_contract_does_not_create_signatures_reviewers_builders_hardware_or_multihost_results_and_never_issues_production_approval"
 }

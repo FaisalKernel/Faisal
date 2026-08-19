@@ -1,0 +1,119 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-qualification-intake-validation-2026-08-19",
+  "recorded_at": "2026-08-19T23:59:00Z",
+  "status": "qualification_evidence_intake_validated_production_still_blocked",
+  "objective": "Verify structured evidence for independent builders, operator signing, physical hardware, external security review, and live multihost qualification without fabricating external evidence or issuing production approval.",
+  "research_inputs": [
+    {
+      "source": "https://slsa.dev/spec/v1.2/build-provenance",
+      "finding": "SLSA Build Provenance uses an in-toto statement to bind subjects to a build definition, external parameters, resolved dependencies, builder identity, invocation metadata, and byproducts so consumers can verify how artifacts were produced and others can rebuild them.",
+      "implementation_impact": "FAISAL requires release-head, artifact, builder, independence-group, build-suite, evidence, attestation, verifier, and expiry fields for independent-builder claims."
+    },
+    {
+      "source": "https://slsa.dev/spec/v1.1/faq",
+      "finding": "Reproducible means bit-for-bit identical output from the same inputs; verified reproducible requires two or more independent build platforms. SLSA warns that shared pipelines or shared vulnerabilities can defeat independence and that reproducibility alone does not address source, dependency, or distribution threats.",
+      "implementation_impact": "FAISAL requires two distinct builder/independence-group pairs and keeps local claims separate from external-reference claims."
+    },
+    {
+      "source": "https://docs.sigstore.dev/cosign/signing/overview/",
+      "finding": "Sigstore binds identity to an artifact signature and records signing events in a timestamped Rekor transparency log; verification compares signature, certificate/key, artifact, and transparency-log entry under a trusted root.",
+      "implementation_impact": "FAISAL requires signer identity, transparency-log entry, and trusted-root identifiers for operator-signing claims, but does not create or verify a real signature locally."
+    },
+    {
+      "source": "https://csrc.nist.gov/pubs/sp/800/193/final",
+      "finding": "NIST SP 800-193 frames platform resiliency as protection against unauthorized changes, detection of changes, and rapid secure recovery for hardware and firmware rooted in trust.",
+      "implementation_impact": "FAISAL requires platform identity, firmware digest, secure-boot state, attestation reference, and qualification-suite digest for hardware claims."
+    },
+    {
+      "source": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "finding": "NIST SSDF provides a common vocabulary and high-level secure-development practices for reducing vulnerabilities, mitigating exploitation impact, addressing root causes, and supporting supplier/security assessment communication.",
+      "implementation_impact": "FAISAL requires independent reviewer identity, independence declaration, report/method/retest digests for external-security-review claims."
+    },
+    {
+      "source": "https://kubernetes.io/docs/setup/best-practices/node-conformance/",
+      "finding": "Kubernetes node conformance is a containerized system-verification and functionality test; a passing node is qualified to join a cluster, with architecture-specific tests and recorded result output.",
+      "implementation_impact": "FAISAL requires node IDs, topology digest, standardized test-suite digest, live execution, and an external-reference origin for multihost claims."
+    },
+    {
+      "source": "https://www.cncf.io/training/certification/software-conformance/",
+      "finding": "CNCF distinguishes standardized conformance results plus review/certification from vendor implementation claims; the standardized test application enables reproducibility across environments.",
+      "implementation_impact": "FAISAL records local qualification separately and never treats internal claims as external certification."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-qualification-intake/faisal_qualification_intake.py",
+    "tests": "tools/faisal-qualification-intake/test_faisal_qualification_intake.py",
+    "benchmark": "tools/faisal-qualification-intake/bench_faisal_qualification_intake.py",
+    "runner": "tools/faisal-build/run_qualification_intake_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "SLSA-style subject, release, builder, suite, attestation, and verifier binding",
+      "two-builder and independence-group structural requirement",
+      "operator signer, transparency-log, and trusted-root fields",
+      "hardware platform, firmware, secure-boot, attestation, and suite fields",
+      "external-reviewer independence, report, method, and retest fields",
+      "live multihost node, topology, and standardized test-suite fields",
+      "local versus external-reference origin separation",
+      "freshness, replay, nonce, release binding, and authority fences",
+      "production_approval is always false; external evidence completeness never issues approval"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "FAISAL_QUALIFICATION_INTAKE_OK",
+    "runner_record_digest": "sha256:db8115ce009a941692b4c327ea8e56248f35cd268ed737be32850b4084c89140",
+    "external_reference_fixture": {
+      "claims_admitted": 6,
+      "structurally_complete": true,
+      "production_approval": false,
+      "blockers": ["production_authority_not_issued"]
+    },
+    "local_fixture": {
+      "local_qualification": false,
+      "external_evidence_structurally_complete": false,
+      "blockers": ["external_security_review", "hardware", "independent_builder", "multihost", "operator_signing", "production_authority_not_issued"]
+    },
+    "negative_cases_denied": 6,
+    "denials": ["builder_missing_independence", "signing_missing_transparency", "hardware_no_secure_boot", "review_not_independent", "multihost_not_external", "authority"],
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 4910.79,
+      "baseline_ungoverned_p95_ns": 6776.00,
+      "claim_admission_mean_ns": 54787.40,
+      "claim_admission_p95_ns": 74630.00,
+      "status_evaluation_mean_ns": 62447.68,
+      "status_evaluation_p95_ns": 85009.00,
+      "scope": "local Python evidence-intake overhead; excludes external signatures, independent builders, physical hardware, external reviewers, multihost execution, network, and production approval"
+    },
+    "limitations": [
+      "All external-reference claims in the validation fixture are synthetic structural fixtures and are not real external evidence.",
+      "The ledger verifies required fields and relationships but does not contact Sigstore/Rekor, independent builders, hardware attestation services, reviewers, or multihost clusters.",
+      "The ledger never issues production approval; it only reports structural completeness and remaining blockers.",
+      "No external signature, physical hardware, independent review, independent build, or live multihost result was created or claimed."
+    ]
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "evidence_claim_is_authority": false,
+    "qualification_receipt_is_production_authority": false,
+    "external_attestation_independently_verified": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-INTERRUPT-FENCE-2026-08-19",
+    "rollback_scope": "remove the qualification-intake module, tests, benchmark, runner, evidence registration, and metadata; retain the interrupt-fence release tag"
+  }
+}
