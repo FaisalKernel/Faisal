@@ -6,7 +6,7 @@
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
   "current_head": "2e35e395c029c631f28f67d5b3cc635ca361b531",
-  "current_tag": "FAISAL-FRONTIER-VERIFIED-IMPROVEMENT-EVOLUTION-2026-08-23",
+  "current_tag": "FAISAL-FRONTIER-AGI-SUPPORT-EVALUATION-2026-08-24",
   "current_abi": 47,
   "operating_loop": [
     "RESEARCH",
