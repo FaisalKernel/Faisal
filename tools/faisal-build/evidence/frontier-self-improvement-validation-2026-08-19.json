@@ -1,0 +1,116 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-self-improvement-validation-2026-08-19",
+  "recorded_at": "2026-08-19T20:20:00Z",
+  "status": "bounded_self_improvement_candidate_admission_qualified",
+  "objective": "Add provider-neutral fail-closed admission for reversible scaffold-only self-improvement candidates using baseline/candidate digests, held-out evaluation evidence, quality/safety/regression thresholds, approval, canary, expiry, generation, ABI, and rollback controls without modifying code, weights, privileged kernel, or production policy.",
+  "research_inputs": [
+    {
+      "source": "https://developers.openai.com/api/docs/guides/agents/guardrails-approvals",
+      "finding": "Guardrails validate inputs, outputs, and tool behavior; human review pauses before side effects; approval state is resumable; sensitive actions should fail closed when review is unavailable.",
+      "implementation_impact": "Candidate admission requires explicit approval, and canary verification is separate from admission. The ledger emits no deployment action and rejects rollback-requested or incomplete canaries."
+    },
+    {
+      "source": "https://openai.github.io/openai-agents-python/guardrails/",
+      "finding": "Blocking guardrails can prevent expensive or side-effecting execution from starting; tool guardrails are needed at each custom tool boundary; tripwires halt execution and preserve relevant state without accepting a rejected output.",
+      "implementation_impact": "The contract separates candidate evidence admission from canary verification, requires a bounded scaffold component, and explicitly records that no code, weights, policy, model, or tool execution occurred."
+    },
+    {
+      "source": "https://arxiv.org/html/2607.13104v1",
+      "finding": "Self-improving agents can modify foundation models or operational scaffolds such as prompts, memory, tools, and control logic; update signals, update substrate, and evaluation must be distinguished, with reversibility and evaluation central to safe evolution.",
+      "implementation_impact": "FAISAL restricts this contract to named scaffold components, binds separate baseline/candidate/evaluation digests, requires zero recorded regressions and bounded metric thresholds, and requires a rollback checkpoint."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-self-improvement/faisal_self_improvement.py",
+    "tests": "tools/faisal-self-improvement/test_faisal_self_improvement.py",
+    "benchmark": "tools/faisal-self-improvement/bench_faisal_self_improvement.py",
+    "runner": "tools/faisal-build/run_self_improvement_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "scaffold-only component allowlist",
+      "baseline/candidate/diff digest binding",
+      "held-out task and trace evidence binding",
+      "quality delta and safety regression thresholds",
+      "zero recorded regression gate",
+      "platform ABI and policy generation binding",
+      "explicit approval and bounded canary budget",
+      "rollback checkpoint and rollback-request rejection",
+      "candidate/canary expiry and request/nonce replay protection",
+      "explicit no-code/no-weights/no-privileged/no-policy-modification boundary"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 5,
+    "unit_tests_passed": 5,
+    "runner": "FAISAL_SELF_IMPROVEMENT_OK",
+    "runner_record_digest": "sha256:4bb04e1fd8fca141d88fa626993e53ac298a2011893fcc08b190255ecdade7bd",
+    "real_task": {
+      "valid_candidate": "passed",
+      "canary": "passed",
+      "component": "routing_policy",
+      "quality_delta_per_mille": 20,
+      "safety_delta_per_mille": 0,
+      "code_modified": false,
+      "weights_modified": false,
+      "privileged_kernel_modified": false,
+      "production_policy_modified": false,
+      "deployment_executed": false,
+      "negative_cases": 7,
+      "negative_cases_denied": 7,
+      "denials": ["approval", "quality", "safety", "regressions", "abi", "component", "rollback"]
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 20558.44,
+      "baseline_ungoverned_p95_ns": 31236.50,
+      "candidate_admit_mean_ns": 101284.71,
+      "candidate_admit_p95_ns": 155916.55,
+      "canary_verify_mean_ns": 199639.68,
+      "canary_verify_p95_ns": 344457.85,
+      "scope": "local Python control-plane admission overhead; excludes deployment, model inference, tools, network, storage, accelerators, kernel scheduling, and human approval latency"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_sha256_8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
+    "adjacent_regressions": {"model_routing":"pass","memory_write":"pass","memory_read":"pass","checkpoint":"pass","delegation":"pass","trace_conformance":"pass","trace_certification":"pass","observation_trust":"pass","portable_memory":"pass","mcp_contract":"pass","snapshot_index":"pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"}
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "candidate_claim_is_authority": false,
+    "evaluation_receipt_is_deployment_authority": false,
+    "self_improvement_receipt_is_policy_authority": false,
+    "self_improvement_receipt_is_production_authority": false,
+    "autonomous_privileged_modification_allowed": false,
+    "code_modified": false,
+    "weights_modified": false,
+    "privileged_kernel_modified": false,
+    "production_policy_modified": false,
+    "deployment_executed": false,
+    "models_invoked": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-INTERACTION-LEDGER-2026-08-19",
+    "rollback_scope": "remove the bounded self-improvement module, tests, runner, evidence registration, and metadata; retain prior tagged interaction-ledger release"
+  },
+  "limitations": [
+    "The ledger evaluates caller-supplied evidence and does not itself run the candidate, generate benchmarks, verify held-out traces, or deploy a canary.",
+    "No model weights, privileged kernel code, source tree, production policy, runtime memory, or tools were changed by the contract.",
+    "The benchmark measures local Python control-plane overhead and excludes deployment, model, tool, network, storage, accelerator, kernel scheduler, and approval latency.",
+    "The real-task validation is a deterministic local fixture and does not establish autonomous learning, general intelligence, model improvement, browser autonomy, robotics, or production efficacy.",
+    "No physical accelerator, TPM, secure enclave, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ]
+}
