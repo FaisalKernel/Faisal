@@ -1,0 +1,124 @@
+{
+  "boundary": {
+    "independent_builder": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "production_approval": false
+  },
+  "implementation": {
+    "benchmark": "tools/faisal-path-governance/bench_faisal_path_governance.py",
+    "features": [
+      "ordered path-step digest chain",
+      "path-sensitive prior-label and next-label rules",
+      "bounded cumulative risk budget",
+      "require-blocking-approval verdict",
+      "cross-agent actor-transition handoff fence",
+      "terminal result and trace linkage",
+      "generation, monotonic-time, replay, and tamper protection",
+      "explicit model/tool/observation/receipt non-authority boundary"
+    ],
+    "kernel_abi_changed": false,
+    "module": "tools/faisal-path-governance/faisal_path_governance.py",
+    "platform_abi": 47,
+    "privileged_kernel_code_changed": false,
+    "runner": "tools/faisal-build/run_path_governance_validation.sh",
+    "tests": "tools/faisal-path-governance/test_faisal_path_governance.py"
+  },
+  "limitations": [
+    "The contract evaluates caller-supplied path evidence and does not execute or prevent OS actions by itself; an enforcement adapter must bind the receipt to trusted policy enforcement.",
+    "Risk labels and action labels are explicit caller inputs; the module does not infer risk from model output or content.",
+    "The benchmark measures local Python receipt overhead and excludes real model serving, network, memory, accelerator, or kernel scheduler performance.",
+    "The real-task scenarios are deterministic control-plane fixtures, not evidence of general intelligence, model quality, browser autonomy, robotics, or production agent efficacy.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ],
+  "measured_validation": {
+    "adjacent_regressions": {
+      "checkpoint": "pass",
+      "delegation": "pass",
+      "mcp_contract": "pass",
+      "memory_read": "pass",
+      "memory_write": "pass",
+      "model_routing": "pass",
+      "observation_trust": "pass",
+      "portable_memory": "pass",
+      "snapshot_index": "pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83",
+      "trace_certification": "pass",
+      "trace_conformance": "pass"
+    },
+    "benchmark": {
+      "allow": {
+        "iterations": 1000,
+        "mean_ns": 76969.06,
+        "p95_ns": 108985.25
+      },
+      "baseline_ungoverned": {
+        "iterations": 1000,
+        "mean_ns": 22814.24,
+        "p95_ns": 33218.85
+      },
+      "deny": {
+        "iterations": 1000,
+        "mean_ns": 73191.09,
+        "p95_ns": 103018.95
+      },
+      "rule_match": {
+        "iterations": 1000,
+        "mean_ns": 89820.53,
+        "p95_ns": 129259.4
+      }
+    },
+    "benchmark_comparison": "baseline_ungoverned_is_a_control_plane_construction_only_baseline_not_a_throughput_or_quality_claim",
+    "benchmark_iterations": 1000,
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "real_tasks": {
+      "approval_pending_then_approved": true,
+      "external_services_contacted": false,
+      "sensitive_to_external_sequence_denied": true,
+      "tools_executed": false
+    },
+    "runner": "FAISAL_PATH_GOVERNANCE_OK",
+    "runner_record_digest": "sha256:c8ce17bd49bfd8b8e9e2103c7c89e3ae051d7954e1f0c2ec8bf30c26d9bcce1b",
+    "syntax_check": "pass",
+    "unit_tests": 7,
+    "unit_tests_passed": 7
+  },
+  "milestone": "frontier-path-governance-validation-2026-08-19",
+  "objective": "Add provider-neutral fail-closed runtime governance that evaluates ordered agent actions against the observed execution path, path-sensitive rules, bounded risk budgets, approval requirements, terminal evidence linkage, replay/tamper fences, and non-authority boundaries without executing actions or contacting external services.",
+  "project": "FAISAL",
+  "recorded_at": "2026-08-19T12:20:00Z",
+  "research_inputs": [
+    {
+      "finding": "Dynamo separates prefill and decode, uses KV-aware worker selection, transfers backend-specific metadata, and supports runtime worker registration and drain-based removal.",
+      "implementation_impact": "FAISAL remains provider-neutral and records ordered action/resource evidence rather than importing backend metadata or treating serving claims as authority.",
+      "source": "https://docs.nvidia.com/dynamo/v1.2.1/design-docs/disaggregated-serving"
+    },
+    {
+      "finding": "Durable agent execution must survive transient API failures, application errors, restarts, asynchronous workflows, and human-in-the-loop pauses.",
+      "implementation_impact": "Path decisions are immutable, replay-protected, generation-fenced, and linkable to terminal result and trace digests.",
+      "source": "https://pydantic.dev/docs/ai/capabilities/durable_execution/overview/"
+    },
+    {
+      "finding": "Runtime governance must evaluate a proposed action against the partial execution path and organizational state because individually permitted steps can form a prohibited sequence.",
+      "implementation_impact": "FAISAL adds ordered path steps, path-sensitive rule matching, bounded risk budgets, approval gates, actor-transition fencing, and deterministic admission receipts.",
+      "source": "https://arxiv.org/html/2603.16586v1"
+    }
+  ],
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-MIGRATION-2026-08-19",
+    "rollback_scope": "remove the path-governance module, tests, runner, evidence registration, and metadata; retain prior tagged migration release"
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "observation_is_authority": false,
+    "path_receipt_is_execution_authority": false,
+    "path_receipt_is_production_authority": false,
+    "production_approval": false,
+    "tool_description_is_authority": false,
+    "tool_result_is_authority": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "status": "bounded_path_governance_admission_qualified"
+}
