@@ -1,0 +1,101 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-model-routing-runtime-profile-validation-2026-08-19",
+  "recorded_at": "2026-08-19T08:37:12Z",
+  "status": "pass_runtime_profile_bound_route_evidence_engine_version_cache_parallelism_modality_quantization_accelerator_and_replay_fencing",
+  "implementation": {
+    "module": "tools/faisal-model-routing/faisal_model_routing.py",
+    "tests": "tools/faisal-model-routing/test_faisal_model_routing.py",
+    "benchmark": "tools/faisal-model-routing/bench_faisal_model_routing.py",
+    "runner": "tools/faisal-build/run_model_routing_validation.sh",
+    "upgrade": "bounded caller-supplied inference runtime profile normalized and hashed into route plans and bound outcome receipts; profile mismatch, missing profile, unsupported values, route tampering, generation errors, freshness errors, and replay fail closed"
+  },
+  "runtime_profile_schema": {
+    "schema": "org.faisal.model-runtime-profile.v1",
+    "fields": [
+      "engine",
+      "engine_version",
+      "cache_mode",
+      "parallelism.tensor",
+      "parallelism.pipeline",
+      "parallelism.data",
+      "parallelism.expert",
+      "parallelism.context",
+      "quantization",
+      "modalities",
+      "accelerator_class",
+      "tool_calling",
+      "structured_output",
+      "speculative_decoding"
+    ],
+    "allowed_engine_classes": ["vllm", "sglang", "tensorrt-llm", "llama.cpp", "custom", "unknown"],
+    "allowed_accelerator_classes": ["cpu", "gpu", "npu", "tpu", "fpga", "unknown"],
+    "authority": "caller-supplied runtime evidence only; not provider authority, hardware proof, model correctness, or execution permission"
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 11,
+    "unit_tests_passed": 11,
+    "runner": "pass",
+    "positive_profile_route": "pass",
+    "positive_profile_bound_receipt": "pass",
+    "profile_missing_rejection": "pass",
+    "profile_mismatch_rejection": "pass",
+    "profile_tamper_rejection": "pass",
+    "profile_cache_separation": "pass",
+    "existing_route_bound_replay_rejection": "pass",
+    "existing_generation_and_freshness_rejections": "pass",
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "benchmark_planner_iterations": 5000,
+    "benchmark_bound_outcome_iterations": 1000,
+    "benchmark_profile_bound_outcome_iterations": 1000,
+    "benchmark_baseline_mean_ns": 353.06,
+    "benchmark_bound_outcome_mean_ns": 55346.35,
+    "benchmark_profile_bound_outcome_mean_ns": 106843.88,
+    "benchmark_profile_bound_outcome_p95_ns": 187047,
+    "benchmark_profile_bound_outcome_overhead_ratio": 302.6250,
+    "benchmark_cached_adaptive_overhead_ratio": 149.3965,
+    "benchmark_scope": "local deterministic route planning, profile normalization, digest binding, and receipt admission; excludes model, network, cryptographic-provider, browser, tool, accelerator, and kernel inference latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://docs.vllm.ai/en/latest/",
+      "finding": "Current vLLM documentation identifies v0.27.1 developer-preview docs and documents PagedAttention, continuous batching, prefix caching, speculative decoding, disaggregated prefill/decode/encode, multiple parallelism modes, tool and reasoning parsers, quantization, multimodal models, and multi-accelerator plugins.",
+      "used_for": "runtime-profile fields for engine/version/cache/parallelism/quantization/modality/accelerator without embedding vLLM authority"
+    },
+    {
+      "url": "https://docs.nvidia.com/dynamo/latest/getting-started/feature-matrix",
+      "finding": "The requested feature-matrix route redirects to the current official Dynamo documentation root, which reports current v1.4.0 documentation and official ai-dynamo/dynamo linkage; search results describe Dynamo as orchestration above inference engines.",
+      "used_for": "provider-neutral orchestration boundary and engine-adapter separation"
+    },
+    {
+      "url": "https://openai.com/index/computer-using-agent/",
+      "finding": "OpenAI documents confirmation before external side effects, watch mode, cautious navigation, monitoring, and layered safety controls for computer-using agents.",
+      "used_for": "runtime evidence remains non-authoritative and side effects remain outside routing receipts"
+    },
+    {
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool",
+      "finding": "Anthropic documents a versioned beta computer-use tool, isolated environments, minimal privileges, allowlists, human confirmation, prompt-injection limitations, and an agent loop with action handlers and verification.",
+      "used_for": "versioned runtime identity and explicit security boundary around tool and browser execution"
+    }
+  ],
+  "boundary": {
+    "model_output_is_authority": false,
+    "runtime_profile_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "route_plan_is_execution": false,
+    "outcome_receipt_is_model_correctness_proof": false,
+    "runtime_profile_is_hardware_proof": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false,
+    "fake_hardware_evidence": false,
+    "fake_external_review": false
+  },
+  "limitations": [
+    "Runtime profiles are caller-supplied descriptions and are not attested observations of an engine, cache, accelerator, quantization mode, or model behavior.",
+    "The profile contract does not call vLLM, SGLang, Dynamo, OpenAI, Anthropic, or any other provider and does not mint credentials or authorize tools.",
+    "The benchmark measures Python control-plane overhead only; runtime-profile binding adds material overhead and requires future optimization or caching.",
+    "No physical accelerator qualification, distributed profile consensus, remote attestation, KMS proof, or cross-node clock discipline is claimed.",
+    "This evidence does not claim AGI, production approval, inference superiority, model correctness, or real-world task completion."
+  ]
+}

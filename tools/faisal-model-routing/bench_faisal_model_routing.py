@@ -9,6 +9,7 @@ from faisal_model_routing import Endpoint, OutcomeLedger, RoutePlanCache, RouteR
 
 ITERATIONS = 5000
 BOUND_ITERATIONS = 1000
+PROFILE_BOUND_ITERATIONS = 1000
 
 def ep(i, *, health="healthy", latency=20, cost=10, cache=False):
     return Endpoint(endpoint_id=f"endpoint-{i}", model_id=f"model-{i}", model_digest=f"sha256:{i}", provider_class="local", capabilities=frozenset({"text"}), privacy_class="internal", region="us-east", max_context_tokens=8192, estimated_cost_milli=cost, estimated_latency_ms=latency, health=health, health_generation=4, active_requests=0, max_concurrency=4, cache_hit=cache)
@@ -36,6 +37,22 @@ adaptive_cache.plan(endpoints, request, trusted_provider_classes={"local"}, obse
 bound_ledger = OutcomeLedger(max_keys=128, max_samples=BOUND_ITERATIONS + 1, cooldown_seconds=30)
 bound_route = plan_route(endpoints, request, trusted_provider_classes={"local"}, observed_at=20, outcome_ledger=bound_ledger)
 bound_index = 0
+runtime_profile = {
+    "schema": "org.faisal.model-runtime-profile.v1",
+    "engine": "vllm",
+    "engine_version": "0.27.1",
+    "cache_mode": "paged",
+    "parallelism": {"tensor": 1, "pipeline": 1, "data": 1, "expert": 1, "context": 1},
+    "quantization": "none",
+    "modalities": ["text"],
+    "accelerator_class": "cpu",
+    "tool_calling": False,
+    "structured_output": True,
+    "speculative_decoding": False,
+}
+profile_ledger = OutcomeLedger(max_keys=128, max_samples=PROFILE_BOUND_ITERATIONS + 1, cooldown_seconds=30)
+profile_route = plan_route(endpoints, request, trusted_provider_classes={"local"}, observed_at=20, outcome_ledger=profile_ledger, runtime_profile=runtime_profile)
+profile_index = 0
 
 def cached_routed():
     return route_cache.plan(endpoints, request, trusted_provider_classes={"local"}, observed_at=21)["route_digest"]
@@ -54,6 +71,13 @@ def bound_outcome_recorded():
     return bound_ledger.record_bound_outcome(route=bound_route, request=request, endpoint_id=bound_route["primary"]["endpoint_id"], success=True, latency_ms=18, observed_at=21, current_generation=4, sample_generation=4, evidence_digest=digest)["binding_digest"]
 
 
+def profile_bound_outcome_recorded():
+    global profile_index
+    profile_index += 1
+    digest = "sha256:" + format(profile_index + 100000, "064x")
+    return profile_ledger.record_bound_outcome(route=profile_route, request=request, endpoint_id=profile_route["primary"]["endpoint_id"], success=True, latency_ms=18, observed_at=21, current_generation=4, sample_generation=4, evidence_digest=digest, runtime_profile=runtime_profile)["binding_digest"]
+
+
 def measure(fn, iterations=ITERATIONS):
 
     samples = []
@@ -70,6 +94,7 @@ cached, cached_result = measure(cached_routed)
 adaptive, adaptive_result = measure(adaptive_routed)
 cached_adaptive, cached_adaptive_result = measure(cached_adaptive_routed)
 bound, bound_result = measure(bound_outcome_recorded, BOUND_ITERATIONS)
+profile_bound, profile_bound_result = measure(profile_bound_outcome_recorded, PROFILE_BOUND_ITERATIONS)
 print(f"FAISAL_MODEL_ROUTING_BENCHMARK_ITERATIONS={ITERATIONS}")
 print(f"FAISAL_MODEL_ROUTING_BASELINE_MEAN_NS={statistics.mean(base):.2f}")
 print(f"FAISAL_MODEL_ROUTING_PLANNER_MEAN_NS={statistics.mean(route):.2f}")
@@ -78,22 +103,27 @@ print(f"FAISAL_MODEL_ROUTING_ADAPTIVE_PLANNER_MEAN_NS={statistics.mean(adaptive)
 print(f"FAISAL_MODEL_ROUTING_CACHED_ADAPTIVE_PLANNER_MEAN_NS={statistics.mean(cached_adaptive):.2f}")
 print(f"FAISAL_MODEL_ROUTING_BOUND_OUTCOME_ITERATIONS={BOUND_ITERATIONS}")
 print(f"FAISAL_MODEL_ROUTING_BOUND_OUTCOME_MEAN_NS={statistics.mean(bound):.2f}")
+print(f"FAISAL_MODEL_ROUTING_PROFILE_BOUND_OUTCOME_ITERATIONS={PROFILE_BOUND_ITERATIONS}")
+print(f"FAISAL_MODEL_ROUTING_PROFILE_BOUND_OUTCOME_MEAN_NS={statistics.mean(profile_bound):.2f}")
 print(f"FAISAL_MODEL_ROUTING_BASELINE_P95_NS={sorted(base)[int(ITERATIONS * .95) - 1]}")
 print(f"FAISAL_MODEL_ROUTING_PLANNER_P95_NS={sorted(route)[int(ITERATIONS * .95) - 1]}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_PLANNER_P95_NS={sorted(cached)[int(ITERATIONS * .95) - 1]}")
 print(f"FAISAL_MODEL_ROUTING_ADAPTIVE_PLANNER_P95_NS={sorted(adaptive)[int(ITERATIONS * .95) - 1]}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_ADAPTIVE_PLANNER_P95_NS={sorted(cached_adaptive)[int(ITERATIONS * .95) - 1]}")
 print(f"FAISAL_MODEL_ROUTING_BOUND_OUTCOME_P95_NS={sorted(bound)[int(BOUND_ITERATIONS * .95) - 1]}")
+print(f"FAISAL_MODEL_ROUTING_PROFILE_BOUND_OUTCOME_P95_NS={sorted(profile_bound)[int(PROFILE_BOUND_ITERATIONS * .95) - 1]}")
 print(f"FAISAL_MODEL_ROUTING_UNCACHED_OVERHEAD_RATIO={statistics.mean(route) / statistics.mean(base):.4f}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_OVERHEAD_RATIO={statistics.mean(cached) / statistics.mean(base):.4f}")
 print(f"FAISAL_MODEL_ROUTING_ADAPTIVE_OVERHEAD_RATIO={statistics.mean(adaptive) / statistics.mean(base):.4f}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_ADAPTIVE_OVERHEAD_RATIO={statistics.mean(cached_adaptive) / statistics.mean(base):.4f}")
 print(f"FAISAL_MODEL_ROUTING_BOUND_OUTCOME_OVERHEAD_RATIO={statistics.mean(bound) / statistics.mean(base):.4f}")
+print(f"FAISAL_MODEL_ROUTING_PROFILE_BOUND_OUTCOME_OVERHEAD_RATIO={statistics.mean(profile_bound) / statistics.mean(base):.4f}")
 print(f"FAISAL_MODEL_ROUTING_BASELINE_RESULT={base_result}")
 print(f"FAISAL_MODEL_ROUTING_PLANNER_DIGEST={route_result}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_DIGEST={cached_result}")
 print(f"FAISAL_MODEL_ROUTING_ADAPTIVE_DIGEST={adaptive_result}")
 print(f"FAISAL_MODEL_ROUTING_CACHED_ADAPTIVE_DIGEST={cached_adaptive_result}")
 print(f"FAISAL_MODEL_ROUTING_BOUND_OUTCOME_DIGEST={bound_result}")
+print(f"FAISAL_MODEL_ROUTING_PROFILE_BOUND_OUTCOME_DIGEST={profile_bound_result}")
 print("FAISAL_MODEL_ROUTING_ADAPTIVE_PRIMARY_CHANGED=true")
-print("FAISAL_MODEL_ROUTING_BENCHMARK_SCOPE=local_deterministic_filter_score_fallback_plan_and_route_bound_outcome_admission_not_model_or_network_latency")
+print("FAISAL_MODEL_ROUTING_BENCHMARK_SCOPE=local_deterministic_filter_score_fallback_plan_route_bound_outcome_and_runtime_profile_validation_not_model_or_network_latency")

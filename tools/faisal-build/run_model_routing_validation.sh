@@ -21,6 +21,19 @@ def ep(eid, mid, *, health="healthy", generation=4, cost=10, latency=20, region=
 
 request = RouteRequest(request_id="runner-1", required_capability="text", privacy_class="confidential", context_tokens=1024, max_cost_milli=100, max_latency_ms=500, region="us-east", generation=4, preferred_models=("preferred",), max_fallbacks=2)
 endpoints = [ep("slow", "slow", latency=100), ep("preferred", "preferred", cache=True, cost=20), ep("cheap", "cheap", cost=5, latency=30), ep("bad", "bad", health="unknown")]
+runtime_profile = {
+    "schema": "org.faisal.model-runtime-profile.v1",
+    "engine": "vllm",
+    "engine_version": "0.27.1",
+    "cache_mode": "paged",
+    "parallelism": {"tensor": 1, "pipeline": 1, "data": 1, "expert": 1, "context": 1},
+    "quantization": "none",
+    "modalities": ["text"],
+    "accelerator_class": "cpu",
+    "tool_calling": False,
+    "structured_output": True,
+    "speculative_decoding": False,
+}
 route = plan_route(endpoints, request, trusted_provider_classes={"local"}, observed_at=20)
 verified = verify_route(route, expected_request_id="runner-1", expected_generation=4)
 assert route["primary"]["endpoint_id"] == "preferred"
@@ -37,6 +50,10 @@ bound_ledger = OutcomeLedger(max_keys=8, max_samples=32, cooldown_seconds=30)
 bound_route = plan_route(endpoints, request, trusted_provider_classes={"local"}, observed_at=20, outcome_ledger=bound_ledger)
 bound_receipt = bound_ledger.record_bound_outcome(route=bound_route, request=request, endpoint_id=bound_route["primary"]["endpoint_id"], success=False, latency_ms=41, observed_at=21, current_generation=4, sample_generation=4, evidence_digest="sha256:" + "a" * 64)
 assert bound_receipt["verified"] and not bound_receipt["outcomes_are_authority"]
+profile_ledger = OutcomeLedger(max_keys=8, max_samples=32, cooldown_seconds=30)
+profile_route = plan_route(endpoints, request, trusted_provider_classes={"local"}, observed_at=20, outcome_ledger=profile_ledger, runtime_profile=runtime_profile)
+profile_receipt = profile_ledger.record_bound_outcome(route=profile_route, request=request, endpoint_id=profile_route["primary"]["endpoint_id"], success=True, latency_ms=22, observed_at=21, current_generation=4, sample_generation=4, evidence_digest="sha256:" + "p" * 64, runtime_profile=runtime_profile)
+assert profile_receipt["verified"] and profile_receipt["runtime_profile_bound"]
 negative = {}
 try:
     verify_route(route, expected_request_id="runner-1", expected_generation=5)
@@ -76,13 +93,30 @@ try:
     bound_ledger.record_bound_outcome(route=bound_route, request=request, endpoint_id="missing", success=True, latency_ms=1, observed_at=21, current_generation=4, sample_generation=4, evidence_digest="sha256:" + "d" * 64)
 except RoutingContractError as exc:
     negative["bound_outcome_endpoint"] = str(exc)
-assert len(negative) == 9
+try:
+    profile_ledger.record_bound_outcome(route=profile_route, request=request, endpoint_id=profile_route["primary"]["endpoint_id"], success=True, latency_ms=1, observed_at=21, current_generation=4, sample_generation=4, evidence_digest="sha256:" + "q" * 64)
+except RoutingContractError as exc:
+    negative["profile_missing"] = str(exc)
+try:
+    mismatched_profile = dict(runtime_profile, engine="sglang")
+    profile_ledger.record_bound_outcome(route=profile_route, request=request, endpoint_id=profile_route["primary"]["endpoint_id"], success=True, latency_ms=1, observed_at=21, current_generation=4, sample_generation=4, evidence_digest="sha256:" + "r" * 64, runtime_profile=mismatched_profile)
+except RoutingContractError as exc:
+    negative["profile_mismatch"] = str(exc)
+try:
+    tampered_profile = copy.deepcopy(profile_route)
+    tampered_profile["runtime_profile"]["engine"] = "sglang"
+    verify_route(tampered_profile, expected_request_id="runner-1", expected_generation=4)
+except RoutingContractError as exc:
+    negative["profile_tamper"] = str(exc)
+assert len(negative) == 12
 payload = {
     "schema": "FAISAL-MODEL-ROUTING-VALIDATION-1",
     "module": "tools/faisal-model-routing/faisal_model_routing.py",
     "route_digest": route["route_digest"],
     "adaptive_route_digest": adaptive["route_digest"],
     "bound_outcome_receipt": bound_receipt,
+    "runtime_profile_route_digest": profile_route["route_digest"],
+    "runtime_profile_receipt": profile_receipt,
     "adaptive_primary_endpoint": adaptive["primary"]["endpoint_id"],
     "outcome_ledger_digest": adaptive["selection_policy"]["outcome_ledger_digest"],
     "primary_endpoint": route["primary"]["endpoint_id"],
@@ -98,12 +132,17 @@ payload = {
       "bound_outcome_replay_rejected": "bound_outcome_replay" in negative,
       "bound_outcome_freshness_rejected": "bound_outcome_stale" in negative,
       "bound_outcome_generation_rejected": "bound_outcome_generation" in negative,
-      "bound_outcome_endpoint_rejected": "bound_outcome_endpoint" in negative
+      "bound_outcome_endpoint_rejected": "bound_outcome_endpoint" in negative,
+      "runtime_profile_bound": True,
+      "runtime_profile_missing_rejected": "profile_missing" in negative,
+      "runtime_profile_mismatch_rejected": "profile_mismatch" in negative,
+      "runtime_profile_tamper_rejected": "profile_tamper" in negative
     },
     "authority_boundaries": {
         "model_output_is_authority": False,
         "outcome_observations_are_authority": False,
         "bound_outcome_receipts_are_authority": False,
+        "runtime_profile_is_authority": False,
         "endpoint_metadata_is_authority": False,
         "fallbacks_are_executions": False,
         "provider_policy_is_caller_supplied": True,
@@ -119,4 +158,4 @@ print("FAISAL_MODEL_ROUTING_VALIDATION_OK")
 print("FAISAL_MODEL_ROUTING_RECORD", os.path.join(out, "model-routing-validation.json"))
 print("FAISAL_MODEL_ROUTING_RECORD_DIGEST", payload["record_digest"])
 PY
-printf 'FAISAL_MODEL_ROUTING_VALIDATION_OK tests=passed fallback=passed health_capability_privacy=passed generation_fence=passed digest=passed\n' > "$OUT/validation.marker"
+printf 'FAISAL_MODEL_ROUTING_VALIDATION_OK tests=passed fallback=passed health_capability_privacy=passed generation_fence=passed runtime_profile_binding=passed digest=passed\n' > "$OUT/validation.marker"

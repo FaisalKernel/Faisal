@@ -19,6 +19,23 @@ class ModelRoutingTests(unittest.TestCase):
         values.update(kwargs)
         return RouteRequest(**values)
 
+    def runtime_profile(self, **overrides):
+        profile = {
+            "schema": "org.faisal.model-runtime-profile.v1",
+            "engine": "vllm",
+            "engine_version": "0.27.1",
+            "cache_mode": "paged",
+            "parallelism": {"tensor": 1, "pipeline": 1, "data": 1, "expert": 1, "context": 1},
+            "quantization": "none",
+            "modalities": ["text"],
+            "accelerator_class": "cpu",
+            "tool_calling": False,
+            "structured_output": True,
+            "speculative_decoding": False,
+        }
+        profile.update(overrides)
+        return profile
+
     def test_deterministic_preference_cache_and_fallback_order(self):
         endpoints = [
             endpoint("b", "small", cost=5, latency=30),
@@ -115,6 +132,36 @@ class ModelRoutingTests(unittest.TestCase):
         for case in cases:
             with self.assertRaises(RoutingContractError):
                 ledger.record_bound_outcome(route=route, request=request, success=True, latency_ms=1, evidence_digest="sha256:" + "f" * 64, max_age_seconds=300, **case)
+
+    def test_runtime_profile_is_bound_to_route_and_receipt(self):
+        ledger = OutcomeLedger(max_keys=4, max_samples=16, cooldown_seconds=30)
+        request = self.request(request_id="profile-1", generation=3)
+        profile = self.runtime_profile()
+        route = plan_route([endpoint("a", "a")], request, trusted_provider_classes={"local"}, observed_at=100, outcome_ledger=ledger, runtime_profile=profile)
+        self.assertTrue(route["runtime_profile_digest"].startswith("sha256:"))
+        self.assertTrue(route["selection_policy"]["runtime_profile_is_caller_supplied"])
+        receipt = ledger.record_bound_outcome(route=route, request=request, endpoint_id="a", success=True, latency_ms=12, observed_at=101, current_generation=3, sample_generation=3, evidence_digest="sha256:" + "1" * 64, runtime_profile=profile)
+        self.assertTrue(receipt["runtime_profile_bound"])
+        self.assertEqual(receipt["runtime_profile_digest"], route["runtime_profile_digest"])
+        with self.assertRaises(RoutingContractError):
+            ledger.record_bound_outcome(route=route, request=request, endpoint_id="a", success=True, latency_ms=12, observed_at=102, current_generation=3, sample_generation=3, evidence_digest="sha256:" + "2" * 64)
+        changed = self.runtime_profile(engine="sglang")
+        with self.assertRaises(RoutingContractError):
+            ledger.record_bound_outcome(route=route, request=request, endpoint_id="a", success=True, latency_ms=12, observed_at=102, current_generation=3, sample_generation=3, evidence_digest="sha256:" + "3" * 64, runtime_profile=changed)
+
+    def test_runtime_profile_validation_and_cache_separation(self):
+        profile = self.runtime_profile()
+        with self.assertRaises(RoutingContractError):
+            plan_route([endpoint("a", "a")], self.request(), trusted_provider_classes={"local"}, runtime_profile={"schema": "bad"})
+        cache = RoutePlanCache(max_entries=4)
+        first = cache.plan([endpoint("a", "a")], self.request(), trusted_provider_classes={"local"}, observed_at=10, runtime_profile=profile)
+        second = cache.plan([endpoint("a", "a")], self.request(), trusted_provider_classes={"local"}, observed_at=20, runtime_profile=self.runtime_profile(cache_mode="prefix"))
+        self.assertNotEqual(first["runtime_profile_digest"], second["runtime_profile_digest"])
+        self.assertEqual(len(cache), 2)
+        tampered = copy.deepcopy(first)
+        tampered["runtime_profile"]["engine"] = "sglang"
+        with self.assertRaises(RoutingContractError):
+            verify_route(tampered, expected_request_id="req-1", expected_generation=3)
 
     def test_duplicate_endpoint_and_empty_policy_rejected(self):
         with self.assertRaises(RoutingContractError):

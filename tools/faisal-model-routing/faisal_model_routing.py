@@ -23,6 +23,11 @@ COOLDOWN_FAILURE_THRESHOLD = 3
 COOLDOWN_SECONDS = 30
 SCHEMA = "org.faisal.model-route.v1"
 OUTCOME_SCHEMA = "org.faisal.model-route-outcome.v1"
+RUNTIME_PROFILE_SCHEMA = "org.faisal.model-runtime-profile.v1"
+RUNTIME_PROFILE_ENGINES = {"vllm", "sglang", "tensorrt-llm", "llama.cpp", "custom", "unknown"}
+RUNTIME_PROFILE_CACHE_MODES = {"none", "paged", "prefix", "kv", "unknown"}
+RUNTIME_PROFILE_ACCELERATORS = {"cpu", "gpu", "npu", "tpu", "fpga", "unknown"}
+RUNTIME_PROFILE_MODALITIES = {"text", "vision", "audio", "embedding", "multimodal"}
 PRIVACY_ORDER = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
 CAPABILITIES = {"text", "reasoning", "coding", "vision", "audio", "embedding", "multimodal", "tool_calling"}
 HEALTH_STATES = {"healthy", "degraded", "unhealthy", "unknown"}
@@ -96,7 +101,7 @@ class OutcomeLedger:
         self._version += 1
         return self.stats(endpoint_id=endpoint_id, request_class=request_class, observed_at=observed_at)
 
-    def record_bound_outcome(self, *, route: Mapping[str, Any], request: "RouteRequest", endpoint_id: str, success: bool, latency_ms: int, observed_at: int, current_generation: int, sample_generation: int, evidence_digest: str, max_age_seconds: int = 300) -> dict[str, Any]:
+    def record_bound_outcome(self, *, route: Mapping[str, Any], request: "RouteRequest", endpoint_id: str, success: bool, latency_ms: int, observed_at: int, current_generation: int, sample_generation: int, evidence_digest: str, max_age_seconds: int = 300, runtime_profile: Mapping[str, Any] | None = None) -> dict[str, Any]:
         """Record only a caller-observed result bound to one verified route snapshot.
 
         The receipt is an integrity record, not proof that a model was correct and
@@ -116,6 +121,19 @@ class OutcomeLedger:
         if current_generation != request.generation or sample_generation != request.generation:
             raise RoutingContractError("bound outcome generation mismatch")
         _require_digest(evidence_digest, "evidence_digest")
+        route_profile = route.get("runtime_profile")
+        route_profile_digest = route.get("runtime_profile_digest")
+        if route_profile is not None:
+            normalized_profile, computed_profile_digest = validate_runtime_profile(route_profile)
+            if route_profile_digest != computed_profile_digest:
+                raise RoutingContractError("runtime profile digest mismatch")
+            if runtime_profile is None:
+                raise RoutingContractError("runtime profile is required for this route")
+            supplied_profile, supplied_profile_digest = validate_runtime_profile(runtime_profile)
+            if supplied_profile_digest != computed_profile_digest or supplied_profile != normalized_profile:
+                raise RoutingContractError("runtime profile does not match route")
+        elif runtime_profile is not None:
+            raise RoutingContractError("runtime profile supplied for an unprofiled route")
         candidates = [route["primary"], *route["fallbacks"]]
         endpoint = next((item for item in candidates if item.get("endpoint_id") == endpoint_id), None)
         if endpoint is None:
@@ -133,13 +151,14 @@ class OutcomeLedger:
             "observed_at": observed_at,
             "sample_generation": sample_generation,
             "evidence_digest": evidence_digest,
+            "runtime_profile_digest": route_profile_digest,
         }
         binding_digest = _digest(body)
         if binding_digest in self._bound_receipt_digests:
             raise RoutingContractError("bound outcome replay detected")
         self.record(endpoint_id=endpoint_id, request_class=self.route_class(request), success=success, latency_ms=latency_ms, observed_at=observed_at, current_generation=current_generation, sample_generation=sample_generation)
         self._bound_receipt_digests.add(binding_digest)
-        return {**body, "binding_digest": binding_digest, "verified": True, "outcomes_are_authority": False}
+        return {**body, "binding_digest": binding_digest, "verified": True, "outcomes_are_authority": False, "runtime_profile_bound": route_profile_digest is not None}
 
     def stats(self, *, endpoint_id: str, request_class: str, observed_at: int | None = None) -> dict[str, Any]:
         stats = self._stats.get((endpoint_id, request_class))
@@ -188,6 +207,58 @@ def _require_digest(value: Any, name: str) -> str:
     if not value.startswith("sha256:") or len(value) != 71:
         raise RoutingContractError(f"{name}: invalid digest")
     return value
+
+
+def validate_runtime_profile(profile: Mapping[str, Any]) -> tuple[dict[str, Any], str]:
+    """Validate a caller-supplied inference execution profile and return its digest.
+
+    The profile describes runtime conditions only. It is not provider authority,
+    hardware proof, model correctness, or permission to execute side effects.
+    """
+    if not isinstance(profile, Mapping) or profile.get("schema") != RUNTIME_PROFILE_SCHEMA:
+        raise RoutingContractError("runtime profile schema unsupported")
+    engine = _require_text(profile.get("engine"), "runtime_profile.engine", 64)
+    if engine not in RUNTIME_PROFILE_ENGINES:
+        raise RoutingContractError("runtime_profile.engine unsupported")
+    engine_version = _require_text(profile.get("engine_version"), "runtime_profile.engine_version", 64)
+    cache_mode = _require_text(profile.get("cache_mode"), "runtime_profile.cache_mode", 32)
+    if cache_mode not in RUNTIME_PROFILE_CACHE_MODES:
+        raise RoutingContractError("runtime_profile.cache_mode unsupported")
+    accelerator_class = _require_text(profile.get("accelerator_class"), "runtime_profile.accelerator_class", 32)
+    if accelerator_class not in RUNTIME_PROFILE_ACCELERATORS:
+        raise RoutingContractError("runtime_profile.accelerator_class unsupported")
+    modalities = profile.get("modalities")
+    if not isinstance(modalities, (list, tuple)) or not modalities or len(modalities) > len(RUNTIME_PROFILE_MODALITIES):
+        raise RoutingContractError("runtime_profile.modalities invalid")
+    normalized_modalities = sorted({_require_text(item, "runtime_profile.modality", 32) for item in modalities})
+    if not set(normalized_modalities).issubset(RUNTIME_PROFILE_MODALITIES):
+        raise RoutingContractError("runtime_profile.modalities unsupported")
+    parallelism = profile.get("parallelism", {})
+    if not isinstance(parallelism, Mapping):
+        raise RoutingContractError("runtime_profile.parallelism invalid")
+    normalized_parallelism: dict[str, int] = {}
+    for name in ("tensor", "pipeline", "data", "expert", "context"):
+        value = parallelism.get(name, 1)
+        if not isinstance(value, int) or not 1 <= value <= 1024:
+            raise RoutingContractError(f"runtime_profile.parallelism.{name} invalid")
+        normalized_parallelism[name] = value
+    for name in ("tool_calling", "structured_output", "speculative_decoding"):
+        if not isinstance(profile.get(name, False), bool):
+            raise RoutingContractError(f"runtime_profile.{name} invalid")
+    normalized = {
+        "schema": RUNTIME_PROFILE_SCHEMA,
+        "engine": engine,
+        "engine_version": engine_version,
+        "cache_mode": cache_mode,
+        "parallelism": normalized_parallelism,
+        "quantization": _require_text(profile.get("quantization", "none"), "runtime_profile.quantization", 64),
+        "modalities": normalized_modalities,
+        "accelerator_class": accelerator_class,
+        "tool_calling": profile.get("tool_calling", False),
+        "structured_output": profile.get("structured_output", False),
+        "speculative_decoding": profile.get("speculative_decoding", False),
+    }
+    return normalized, _digest(normalized)
 
 
 @dataclass(frozen=True)
@@ -337,7 +408,7 @@ def _legacy_score(endpoint: Endpoint, request: RouteRequest) -> tuple[Any, ...]:
     return (preferred, health, cache, locality, endpoint.estimated_latency_ms, endpoint.estimated_cost_milli, endpoint.active_requests, endpoint.endpoint_id)
 
 
-def plan_route(endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_provider_classes: Iterable[str], observed_at: int | None = None, outcome_ledger: OutcomeLedger | None = None) -> dict[str, Any]:
+def plan_route(endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_provider_classes: Iterable[str], observed_at: int | None = None, outcome_ledger: OutcomeLedger | None = None, runtime_profile: Mapping[str, Any] | None = None) -> dict[str, Any]:
     if len(endpoints) == 0 or len(endpoints) > MAX_ENDPOINTS:
         raise RoutingContractError("endpoint inventory is outside bounds")
     trusted = frozenset(_require_text(x, "trusted_provider_class") for x in trusted_provider_classes)
@@ -346,6 +417,10 @@ def plan_route(endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_
         raise RoutingContractError("observed_at is invalid")
     if not trusted:
         raise RoutingContractError("trusted provider policy is empty")
+    normalized_profile = None
+    profile_digest = None
+    if runtime_profile is not None:
+        normalized_profile, profile_digest = validate_runtime_profile(runtime_profile)
     eligible: list[Endpoint] = []
     rejections: dict[str, str] = {}
     seen: set[str] = set()
@@ -370,11 +445,14 @@ def plan_route(endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_
         "primary": selected[0].canonical(),
         "fallbacks": [endpoint.canonical() for endpoint in selected[1:]],
         "rejections": dict(sorted(rejections.items())),
+        "runtime_profile": normalized_profile,
+        "runtime_profile_digest": profile_digest,
         "selection_policy": {
             "trusted_provider_classes": sorted(trusted),
             "model_output_is_authority": False,
             "endpoint_metadata_is_authority": False,
             "outcome_observations_are_authority": False,
+            "runtime_profile_is_caller_supplied": runtime_profile is not None,
             "fallbacks_are_plans_not_executions": True,
             "outcome_ledger_digest": outcome_ledger.digest() if outcome_ledger is not None else None,
         },
@@ -392,16 +470,17 @@ class RoutePlanCache:
         self.max_entries = max_entries
         self._items: OrderedDict[str, dict[str, Any]] = OrderedDict()
 
-    def plan(self, endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_provider_classes: Iterable[str], observed_at: int | None = None, outcome_ledger: OutcomeLedger | None = None) -> dict[str, Any]:
+    def plan(self, endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_provider_classes: Iterable[str], observed_at: int | None = None, outcome_ledger: OutcomeLedger | None = None, runtime_profile: Mapping[str, Any] | None = None) -> dict[str, Any]:
         trusted = tuple(sorted(set(trusted_provider_classes)))
         # Endpoint and request objects are immutable snapshots. Replacing a health
         # snapshot or request therefore changes identity and invalidates the cache.
-        key = (tuple(id(endpoint) for endpoint in endpoints), id(request), trusted, outcome_ledger.version if outcome_ledger is not None else -1)
+        profile_key = _canonical(runtime_profile) if runtime_profile is not None else None
+        key = (tuple(id(endpoint) for endpoint in endpoints), id(request), trusted, outcome_ledger.version if outcome_ledger is not None else -1, profile_key)
         cached = self._items.get(key)
         if cached is not None:
             self._items.move_to_end(key)
             return copy.deepcopy(cached)
-        route = plan_route(endpoints, request, trusted_provider_classes=trusted, observed_at=observed_at, outcome_ledger=outcome_ledger)
+        route = plan_route(endpoints, request, trusted_provider_classes=trusted, observed_at=observed_at, outcome_ledger=outcome_ledger, runtime_profile=runtime_profile)
         self._items[key] = route
         self._items.move_to_end(key)
         while len(self._items) > self.max_entries:
@@ -431,4 +510,15 @@ def verify_route(route: Mapping[str, Any], *, expected_request_id: str, expected
     policy = route.get("selection_policy")
     if not isinstance(policy, Mapping) or policy.get("model_output_is_authority") is not False or policy.get("endpoint_metadata_is_authority") is not False:
         raise RoutingContractError("authority boundary missing")
+    route_profile = route.get("runtime_profile")
+    route_profile_digest = route.get("runtime_profile_digest")
+    if route_profile is None:
+        if route_profile_digest is not None:
+            raise RoutingContractError("runtime profile digest without profile")
+    else:
+        _, computed_profile_digest = validate_runtime_profile(route_profile)
+        if route_profile_digest != computed_profile_digest:
+            raise RoutingContractError("runtime profile digest mismatch")
+    if policy.get("runtime_profile_is_caller_supplied") is not (route_profile is not None):
+        raise RoutingContractError("runtime profile authority boundary missing")
     return {"verified": True, "request_id": expected_request_id, "generation": expected_generation, "endpoint_count": len(ids), "route_digest": declared}
