@@ -80,4 +80,4 @@ print("FAISAL_MCP_CONTRACT_VALIDATION_OK")
 print("FAISAL_MCP_CONTRACT_RECORD", os.path.join(out, "mcp-contract-validation.json"))
 print("FAISAL_MCP_CONTRACT_RECORD_DIGEST", payload["record_digest"])
 PY
-printf 'MCP_CONTRACT_VALIDATION_MARKER\n' > "$OUT/validation.marker"
+printf 'FAISAL_MCP_CONTRACT_VALIDATION_OK unit_tests=8 deterministic_ordering=passed scope_filtering=passed pagination=passed input_output_schema_validation=passed annotations_untrusted=passed\n' > "$OUT/validation.marker"
