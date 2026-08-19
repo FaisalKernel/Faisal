@@ -1,0 +1,92 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-memory-read-gate-validation-2026-08-19",
+  "recorded_at": "2026-08-19T09:36:18Z",
+  "status": "pass_bounded_memory_read_trust_projection_with_quarantine_exclusion_audit_visibility_scope_generation_expiry_budget_data_only_and_replay_fencing",
+  "implementation": {
+    "module": "tools/faisal-memory-read-gate/faisal_memory_read_gate.py",
+    "tests": "tools/faisal-memory-read-gate/test_faisal_memory_read_gate.py",
+    "benchmark": "tools/faisal-memory-read-gate/bench_faisal_memory_read_gate.py",
+    "runner": "tools/faisal-build/run_memory_read_gate_validation.sh",
+    "upgrade": "provider-neutral memory-read admission filters quarantined, stale, out-of-scope, under-verified, and generation-mismatched memory before execution contexts receive it; audit contexts receive data-only evidence projections"
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 5,
+    "unit_tests_passed": 5,
+    "runner": "pass",
+    "trusted_projection": "pass",
+    "execution_quarantine_exclusion": "pass",
+    "audit_quarantine_visibility": "pass",
+    "scope_rejection": "pass",
+    "generation_rejection": "pass",
+    "freshness_and_expiry_rejection": "pass",
+    "entry_and_byte_budget_filtering": "pass",
+    "data_only_projection": "pass",
+    "projection_replay_rejection": "pass",
+    "projection_tamper_rejection": "pass",
+    "context_mismatch_rejection": "pass",
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": "pass_model_routing_memory_write_checkpoint_receipt_delegation_trace_conformance_trace_cert_observation_trust_portable_memory_mcp_snapshot_browser",
+    "benchmark_iterations": 1000,
+    "benchmark_raw_digest_mean_ns": 16059.61,
+    "benchmark_trusted_projection_mean_ns": 27529.20,
+    "benchmark_quarantine_filter_mean_ns": 23357.06,
+    "benchmark_audit_projection_mean_ns": 27160.60,
+    "benchmark_trusted_projection_p95_ns": 40870,
+    "benchmark_quarantine_filter_p95_ns": 36121,
+    "benchmark_audit_projection_p95_ns": 39854,
+    "benchmark_trusted_overhead_ratio": 1.7142,
+    "benchmark_quarantine_overhead_ratio": 1.4544,
+    "benchmark_audit_overhead_ratio": 1.6912,
+    "runner_record_digest": "055fe17848a9c80f3bdfd41d60fcd0c7aac505c6fa3d9309cf9f5942bc529575",
+    "benchmark_scope": "local_python_projection_filtering_and_data_only_framing_not_database_network_model_or_kernel_latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://arxiv.org/html/2606.04329v1",
+      "finding": "The systematic memory-poisoning study identifies persistent long-term memory as a cross-session attack surface, multiple write channels, structural vulnerabilities, and incomplete coverage from ordinary prompt-injection defenses.",
+      "used_for": "retrieval-time provenance, trust, verification, generation, expiry, and quarantine filtering"
+    },
+    {
+      "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+      "finding": "Anthropic describes context as finite and recommends iterative curation of instructions, tools, external data, and history, selecting the smallest high-signal context and separating data from instructions.",
+      "used_for": "bounded context budgets and deterministic data-only projection framing"
+    },
+    {
+      "url": "https://www.microsoft.com/en-us/security/blog/2026/06/30/securing-ai-agents-ai-tools-move-from-reading-acting/",
+      "finding": "Microsoft documents MCP tool-description poisoning and recommends allowlists, metadata review, least agency, human approval, and correlated telemetry.",
+      "used_for": "tool and metadata provenance labels and instruction-authority suppression"
+    },
+    {
+      "url": "https://developers.openai.com/api/docs/guides/tools-computer-use",
+      "finding": "OpenAI treats screenshots, page text, tool outputs, documents, emails, chats, and third-party content as untrusted input and recommends isolated environments and human oversight for high-impact actions.",
+      "used_for": "browser and observation memory exclusion from execution context"
+    }
+  ],
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "memory_is_execution": false,
+    "memory_is_instruction_authority": false,
+    "projection_is_tool_permission": false,
+    "unrestricted_kernel_self_modification": false,
+    "fake_hardware_evidence": false,
+    "fake_external_review": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The gate filters and frames memory metadata but does not itself persist, replicate, rank semantically, or retrieve from a database.",
+    "Source identity, trust, verification, and digests are caller-supplied and are not hardware-attested or independently signed by this local implementation.",
+    "The data-only projection intentionally emits digests and provenance metadata rather than raw memory content; a separate trusted content fetcher must preserve the same policy and digest bindings.",
+    "The contract does not detect every natural-language injection pattern; upstream observation, tool, and memory-write validators remain required.",
+    "The benchmark measures local Python control-plane overhead and excludes storage, network, model, accelerator, and kernel latency.",
+    "This evidence does not claim AGI, production approval, physical hardware qualification, independent builder qualification, or independent external review."
+  ]
+}
