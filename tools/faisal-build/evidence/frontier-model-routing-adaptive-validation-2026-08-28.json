@@ -1,0 +1,105 @@
+{
+  "schema": "FAISAL-FRONTIER-EVIDENCE-1",
+  "iteration": "frontier-model-routing-adaptive-validation-2026-08-28",
+  "recorded_at": "2026-08-19T06:20:00Z",
+  "status": "pass_bounded_outcome_aware_model_routing_with_cooldown_failover",
+  "implementation": {
+    "module": "tools/faisal-model-routing/faisal_model_routing.py",
+    "tests": "tools/faisal-model-routing/test_faisal_model_routing.py",
+    "benchmark": "tools/faisal-model-routing/bench_faisal_model_routing.py",
+    "runner": "tools/faisal-build/run_model_routing_validation.sh",
+    "capabilities": [
+      "caller-observed bounded outcome ledger",
+      "success failure and EWMA latency statistics",
+      "request-class scoped adaptive scoring",
+      "three-failure circuit-breaker cooldown",
+      "stale outcome generation rejection",
+      "route-plan cache invalidation on outcome version changes",
+      "deterministic fallback planning remains CPU-only and inference-free"
+    ]
+  },
+  "measured_validation": {
+    "unit_tests": 7,
+    "unit_tests_passed": 7,
+    "syntax_check": "pass",
+    "runner": "pass",
+    "positive_route_selection": "pass",
+    "adaptive_route_change_after_three_failures": "pass",
+    "cooldown_failover": "pass",
+    "stale_outcome_generation_rejection": "pass",
+    "outcome_cache_invalidation": "pass",
+    "route_digest_tamper_rejection": "pass",
+    "provider_allowlist_rejection": "pass",
+    "runner_record_digest": "92b81205456ac25ab70af0c4efc184be4fa58aca55b1af0065aa1ea046d62dfd",
+    "benchmark_inventory_endpoints": 128,
+    "benchmark_iterations": 5000,
+    "benchmark_baseline_mean_ns": 509.87,
+    "benchmark_static_planner_mean_ns": 200558.84,
+    "benchmark_cached_static_planner_mean_ns": 48813.47,
+    "benchmark_adaptive_planner_mean_ns": 293330.56,
+    "benchmark_cached_adaptive_planner_mean_ns": 50827.37,
+    "benchmark_baseline_p95_ns": 542,
+    "benchmark_static_planner_p95_ns": 254947,
+    "benchmark_cached_static_planner_p95_ns": 66513,
+    "benchmark_adaptive_planner_p95_ns": 335497,
+    "benchmark_cached_adaptive_planner_p95_ns": 76249,
+    "benchmark_cached_static_overhead_ratio": 95.7367,
+    "benchmark_cached_adaptive_overhead_ratio": 99.6865,
+    "benchmark_scope": "local_128_endpoint_deterministic_adaptive_route_planning_not_model_or_network_latency"
+  },
+  "research_inputs": [
+    {
+      "url": "https://arxiv.org/html/2603.13426v1",
+      "finding": "Outcome-Aware Tool Selection separates offline outcome refinement from a low-latency CPU serving path and warns that learned rerankers can hurt with sparse data.",
+      "used_for": "bounded caller-observed feedback and no-LLM-in-routing-path design"
+    },
+    {
+      "url": "https://arxiv.org/html/2601.01743v1",
+      "finding": "Agent systems require explicit policy, memory, planners, tool routers, verifiers, trace-first evaluation, and bounded side effects.",
+      "used_for": "verification, traceability, and keeping feedback separate from authority"
+    },
+    {
+      "url": "https://docs.litellm.ai/docs/routing-load-balancing",
+      "finding": "Production gateway patterns include cooldowns, fallbacks, health-check routing, budgets, adaptive routing, and request prioritization.",
+      "used_for": "circuit-breaker cooldown, fallback, and adaptive score design"
+    },
+    {
+      "url": "https://docs.vllm.ai/en/latest/deployment/integrations/production-stack/",
+      "finding": "vLLM documents model-aware and prefix-aware routing, multimodel serving, observability, and KV-cache offloading.",
+      "used_for": "model-aware cache/locality and fleet-routing context"
+    }
+  ],
+  "boundary": {
+    "independent_builder": false,
+    "physical_hardware_qualification": false,
+    "operator_signing_ceremony": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "optimizer_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "outcome_observations_are_authority": false,
+    "unrestricted_kernel_self_modification": false,
+    "fake_hardware_evidence": false,
+    "fake_external_review": false
+  },
+  "authority_boundaries": {
+    "model_output_is_authority": false,
+    "endpoint_metadata_is_authority": false,
+    "outcome_observations_are_authority": false,
+    "route_digest_is_authorization": false,
+    "fallback_plan_is_execution": false,
+    "health_snapshot_is_attestation": false,
+    "provider_policy_is_caller_supplied": true,
+    "production_approval": false
+  },
+  "limitations": [
+    "Outcome records are caller-observed control-plane data and are not independently attested truth.",
+    "The adaptive score is bounded request-class feedback, not model retraining or autonomous privileged-code modification.",
+    "Cooldowns are local in-process circuit-breaker state; distributed quorum synchronization is out of scope.",
+    "Benchmarks measure local routing overhead only, not model quality, tokens per second, network performance, accelerator utilization, or production cost.",
+    "No external provider call, model inference, browser action, robotics action, GPU/NPU test, or physical qualification was performed.",
+    "This evidence does not claim AGI, learning of a foundation model, model superiority, or production approval."
+  ]
+}

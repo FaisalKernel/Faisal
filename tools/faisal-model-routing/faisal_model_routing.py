@@ -16,6 +16,10 @@ from typing import Any, Iterable, Mapping, Sequence
 
 MAX_ENDPOINTS = 256
 MAX_FALLBACKS = 8
+MAX_OUTCOME_KEYS = 256
+MAX_OUTCOME_SAMPLES = 4096
+COOLDOWN_FAILURE_THRESHOLD = 3
+COOLDOWN_SECONDS = 30
 SCHEMA = "org.faisal.model-route.v1"
 PRIVACY_ORDER = {"public": 0, "internal": 1, "confidential": 2, "restricted": 3}
 CAPABILITIES = {"text", "reasoning", "coding", "vision", "audio", "embedding", "multimodal", "tool_calling"}
@@ -24,6 +28,97 @@ HEALTH_STATES = {"healthy", "degraded", "unhealthy", "unknown"}
 
 class RoutingContractError(ValueError):
     pass
+
+
+@dataclass
+class _OutcomeStats:
+    attempts: int = 0
+    successes: int = 0
+    failures: int = 0
+    failure_streak: int = 0
+    ewma_latency_ms: int = 0
+    last_observed_at: int = 0
+    cooldown_until: int = 0
+
+
+class OutcomeLedger:
+    """Bounded caller-observed feedback; observations are never authorization."""
+
+    def __init__(self, *, max_keys: int = MAX_OUTCOME_KEYS, max_samples: int = MAX_OUTCOME_SAMPLES, cooldown_seconds: int = COOLDOWN_SECONDS):
+        if not 1 <= max_keys <= MAX_OUTCOME_KEYS or not 1 <= max_samples <= MAX_OUTCOME_SAMPLES:
+            raise RoutingContractError("outcome ledger bounds are invalid")
+        if not 1 <= cooldown_seconds <= 3600:
+            raise RoutingContractError("cooldown_seconds is invalid")
+        self.max_keys = max_keys
+        self.max_samples = max_samples
+        self.cooldown_seconds = cooldown_seconds
+        self._stats: dict[tuple[str, str], _OutcomeStats] = {}
+        self._samples = 0
+        self._version = 0
+
+    @property
+    def version(self) -> int:
+        return self._version
+
+    def record(self, *, endpoint_id: str, request_class: str, success: bool, latency_ms: int, observed_at: int, current_generation: int, sample_generation: int) -> dict[str, Any]:
+        _require_text(endpoint_id, "endpoint_id")
+        _require_text(request_class, "request_class")
+        if not isinstance(success, bool):
+            raise RoutingContractError("success must be boolean")
+        if not isinstance(latency_ms, int) or not 0 <= latency_ms <= 86_400_000:
+            raise RoutingContractError("latency_ms is outside bounds")
+        if not isinstance(observed_at, int) or observed_at < 0:
+            raise RoutingContractError("observed_at is invalid")
+        if not isinstance(current_generation, int) or current_generation < 0 or not isinstance(sample_generation, int) or sample_generation < current_generation:
+            raise RoutingContractError("outcome generation is stale")
+        key = (endpoint_id, request_class)
+        if key not in self._stats and len(self._stats) >= self.max_keys:
+            raise RoutingContractError("outcome ledger key bound exceeded")
+        if self._samples >= self.max_samples:
+            raise RoutingContractError("outcome ledger sample bound exceeded")
+        stats = self._stats.setdefault(key, _OutcomeStats())
+        stats.attempts += 1
+        if success:
+            stats.successes += 1
+            stats.failure_streak = 0
+            stats.cooldown_until = 0
+        else:
+            stats.failures += 1
+            stats.failure_streak += 1
+            if stats.failure_streak >= COOLDOWN_FAILURE_THRESHOLD:
+                stats.cooldown_until = observed_at + self.cooldown_seconds
+        stats.ewma_latency_ms = latency_ms if stats.attempts == 1 else (stats.ewma_latency_ms * 3 + latency_ms) // 4
+        stats.last_observed_at = observed_at
+        self._samples += 1
+        self._version += 1
+        return self.stats(endpoint_id=endpoint_id, request_class=request_class, observed_at=observed_at)
+
+    def stats(self, *, endpoint_id: str, request_class: str, observed_at: int | None = None) -> dict[str, Any]:
+        stats = self._stats.get((endpoint_id, request_class))
+        if stats is None:
+            return {"attempts": 0, "successes": 0, "failures": 0, "failure_rate_permille": 500, "failure_streak": 0, "ewma_latency_ms": 0, "cooldown_until": 0}
+        return {
+            "attempts": stats.attempts,
+            "successes": stats.successes,
+            "failures": stats.failures,
+            "failure_rate_permille": (stats.failures * 1000 + 500) // (stats.attempts + 1),
+            "failure_streak": stats.failure_streak,
+            "ewma_latency_ms": stats.ewma_latency_ms,
+            "cooldown_until": stats.cooldown_until,
+        }
+
+    def is_cooled_down(self, endpoint_id: str, request_class: str, observed_at: int) -> bool:
+        stats = self._stats.get((endpoint_id, request_class))
+        return bool(stats and stats.cooldown_until > observed_at)
+
+    def route_class(self, request: "RouteRequest") -> str:
+        return request.required_capability + ":" + request.privacy_class
+
+    def digest(self) -> str:
+        rows = []
+        for key in sorted(self._stats):
+            rows.append([key[0], key[1], self.stats(endpoint_id=key[0], request_class=key[1])])
+        return _digest({"version": self._version, "samples": self._samples, "rows": rows})
 
 
 def _canonical(value: Any) -> bytes:
@@ -135,7 +230,7 @@ def _health_rank(health: str) -> int:
     return {"healthy": 0, "degraded": 1, "unknown": 2, "unhealthy": 3}[health]
 
 
-def _eligible(endpoint: Endpoint, request: RouteRequest, trusted_provider_classes: frozenset[str]) -> tuple[bool, str]:
+def _eligible(endpoint: Endpoint, request: RouteRequest, trusted_provider_classes: frozenset[str], outcome_ledger: OutcomeLedger | None, observed_at: int) -> tuple[bool, str]:
     if endpoint.provider_class not in trusted_provider_classes:
         return False, "provider_class_not_allowed"
     if request.required_capability not in endpoint.capabilities:
@@ -156,10 +251,30 @@ def _eligible(endpoint: Endpoint, request: RouteRequest, trusted_provider_classe
         return False, "region_mismatch"
     if endpoint.health_generation < request.generation:
         return False, "stale_health_generation"
+    if outcome_ledger is not None and outcome_ledger.is_cooled_down(endpoint.endpoint_id, outcome_ledger.route_class(request), observed_at):
+        return False, "outcome_cooldown"
     return True, "eligible"
 
 
-def _score(endpoint: Endpoint, request: RouteRequest) -> tuple[Any, ...]:
+def _score(endpoint: Endpoint, request: RouteRequest, outcome_ledger: OutcomeLedger | None) -> tuple[Any, ...]:
+    outcome = {"failure_rate_permille": 500, "ewma_latency_ms": 0, "attempts": 0}
+    if outcome_ledger is not None:
+        outcome = outcome_ledger.stats(endpoint_id=endpoint.endpoint_id, request_class=outcome_ledger.route_class(request))
+    adaptive_latency = outcome["ewma_latency_ms"] if outcome["attempts"] else endpoint.estimated_latency_ms
+    return (
+        0 if endpoint.model_id in request.preferred_models else 1,
+        _health_rank(endpoint.health),
+        0 if endpoint.cache_hit else 1,
+        outcome["failure_rate_permille"],
+        0 if endpoint.region == request.region else 1,
+        adaptive_latency,
+        endpoint.estimated_cost_milli,
+        endpoint.active_requests,
+        endpoint.endpoint_id,
+    )
+
+
+def _legacy_score(endpoint: Endpoint, request: RouteRequest) -> tuple[Any, ...]:
     preferred = 0 if endpoint.model_id in request.preferred_models else 1
     cache = 0 if endpoint.cache_hit else 1
     health = _health_rank(endpoint.health)
@@ -167,10 +282,13 @@ def _score(endpoint: Endpoint, request: RouteRequest) -> tuple[Any, ...]:
     return (preferred, health, cache, locality, endpoint.estimated_latency_ms, endpoint.estimated_cost_milli, endpoint.active_requests, endpoint.endpoint_id)
 
 
-def plan_route(endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_provider_classes: Iterable[str], observed_at: int | None = None) -> dict[str, Any]:
+def plan_route(endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_provider_classes: Iterable[str], observed_at: int | None = None, outcome_ledger: OutcomeLedger | None = None) -> dict[str, Any]:
     if len(endpoints) == 0 or len(endpoints) > MAX_ENDPOINTS:
         raise RoutingContractError("endpoint inventory is outside bounds")
     trusted = frozenset(_require_text(x, "trusted_provider_class") for x in trusted_provider_classes)
+    observed_time = int(time.time()) if observed_at is None else observed_at
+    if not isinstance(observed_time, int) or observed_time < 0:
+        raise RoutingContractError("observed_at is invalid")
     if not trusted:
         raise RoutingContractError("trusted provider policy is empty")
     eligible: list[Endpoint] = []
@@ -180,20 +298,20 @@ def plan_route(endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_
         if endpoint.endpoint_id in seen:
             raise RoutingContractError("duplicate endpoint_id")
         seen.add(endpoint.endpoint_id)
-        ok, reason = _eligible(endpoint, request, trusted)
+        ok, reason = _eligible(endpoint, request, trusted, outcome_ledger, observed_time)
         if ok:
             eligible.append(endpoint)
         else:
             rejections[endpoint.endpoint_id] = reason
     if not eligible:
         raise RoutingContractError("no eligible model endpoint")
-    ordered = sorted(eligible, key=lambda endpoint: _score(endpoint, request))
+    ordered = sorted(eligible, key=lambda endpoint: _score(endpoint, request, outcome_ledger))
     selected = ordered[: request.max_fallbacks + 1]
     route = {
         "schema": SCHEMA,
         "request_id": request.request_id,
         "generation": request.generation,
-        "observed_at": int(time.time()) if observed_at is None else observed_at,
+        "observed_at": observed_time,
         "primary": selected[0].canonical(),
         "fallbacks": [endpoint.canonical() for endpoint in selected[1:]],
         "rejections": dict(sorted(rejections.items())),
@@ -201,7 +319,9 @@ def plan_route(endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_
             "trusted_provider_classes": sorted(trusted),
             "model_output_is_authority": False,
             "endpoint_metadata_is_authority": False,
+            "outcome_observations_are_authority": False,
             "fallbacks_are_plans_not_executions": True,
+            "outcome_ledger_digest": outcome_ledger.digest() if outcome_ledger is not None else None,
         },
     }
     route["route_digest"] = _digest(route)
@@ -217,16 +337,16 @@ class RoutePlanCache:
         self.max_entries = max_entries
         self._items: OrderedDict[str, dict[str, Any]] = OrderedDict()
 
-    def plan(self, endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_provider_classes: Iterable[str], observed_at: int | None = None) -> dict[str, Any]:
+    def plan(self, endpoints: Sequence[Endpoint], request: RouteRequest, *, trusted_provider_classes: Iterable[str], observed_at: int | None = None, outcome_ledger: OutcomeLedger | None = None) -> dict[str, Any]:
         trusted = tuple(sorted(set(trusted_provider_classes)))
         # Endpoint and request objects are immutable snapshots. Replacing a health
         # snapshot or request therefore changes identity and invalidates the cache.
-        key = (tuple(id(endpoint) for endpoint in endpoints), id(request), trusted)
+        key = (tuple(id(endpoint) for endpoint in endpoints), id(request), trusted, outcome_ledger.version if outcome_ledger is not None else -1)
         cached = self._items.get(key)
         if cached is not None:
             self._items.move_to_end(key)
             return copy.deepcopy(cached)
-        route = plan_route(endpoints, request, trusted_provider_classes=trusted, observed_at=observed_at)
+        route = plan_route(endpoints, request, trusted_provider_classes=trusted, observed_at=observed_at, outcome_ledger=outcome_ledger)
         self._items[key] = route
         self._items.move_to_end(key)
         while len(self._items) > self.max_entries:

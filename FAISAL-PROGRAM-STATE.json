@@ -2122,5 +2122,11 @@
   "frontier_model_routing_benchmark": "tools/faisal-model-routing/bench_faisal_model_routing.py",
   "frontier_model_routing_runner": "tools/faisal-build/run_model_routing_validation.sh",
   "frontier_model_routing_rollback_checkpoint": "FAISAL-FRONTIER-PORTABLE-MEMORY-2026-08-26",
-  "frontier_model_routing_authority_boundary": "model_output_and_endpoint_metadata_remain_untrusted_data_provider_allowlist_is_caller_supplied_routes_are_plans_not_executions_health_snapshots_are_not_attestation_and_production_approval_remains_false"
+  "frontier_model_routing_authority_boundary": "model_output_and_endpoint_metadata_remain_untrusted_data_provider_allowlist_is_caller_supplied_routes_are_plans_not_executions_health_snapshots_are_not_attestation_and_production_approval_remains_false",
+  "frontier_model_routing_adaptive": "pass_bounded_caller_observed_outcome_ledger_ewma_latency_failure_rate_circuit_breaker_cooldown_adaptive_scoring_and_outcome_version_cache_invalidation",
+  "frontier_model_routing_adaptive_evidence": "tools/faisal-build/evidence/frontier-model-routing-adaptive-validation-2026-08-28.json",
+  "frontier_model_routing_adaptive_runner": "tools/faisal-build/run_model_routing_validation.sh",
+  "frontier_model_routing_adaptive_benchmark": "tools/faisal-model-routing/bench_faisal_model_routing.py",
+  "frontier_model_routing_adaptive_rollback_checkpoint": "FAISAL-FRONTIER-MODEL-ROUTING-2026-08-27",
+  "frontier_model_routing_adaptive_authority_boundary": "caller_observed_outcomes_are_not_authority_model_output_cannot_write_outcomes_adaptive_feedback_cannot_modify_privileged_kernel_code_and_production_approval_remains_false"
 }

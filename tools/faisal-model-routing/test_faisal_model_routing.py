@@ -5,7 +5,7 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.dirname(__file__))
-from faisal_model_routing import Endpoint, RoutePlanCache, RouteRequest, RoutingContractError, plan_route, verify_route
+from faisal_model_routing import Endpoint, OutcomeLedger, RoutePlanCache, RouteRequest, RoutingContractError, plan_route, verify_route
 
 
 def endpoint(endpoint_id, model_id, *, health="healthy", generation=3, cost=10, latency=20, region="us-east", privacy="internal", capability="text", active=0, max_concurrency=4, cache=False, provider="local"):
@@ -74,6 +74,22 @@ class ModelRoutingTests(unittest.TestCase):
         changed = cache.plan([endpoint("a", "model", generation=4)], request, trusted_provider_classes={"local"}, observed_at=20)
         self.assertNotEqual(first["observed_at"], changed["observed_at"])
         self.assertEqual(len(cache), 2)
+
+    def test_outcome_feedback_adapts_route_and_invalidates_cache(self):
+        ledger = OutcomeLedger(max_keys=4, max_samples=16, cooldown_seconds=30)
+        endpoints = [endpoint("a", "a", latency=10), endpoint("b", "b", latency=20)]
+        request = self.request()
+        cache = RoutePlanCache(max_entries=4)
+        first = cache.plan(endpoints, request, trusted_provider_classes={"local"}, observed_at=100, outcome_ledger=ledger)
+        self.assertEqual(first["primary"]["endpoint_id"], "a")
+        for _ in range(3):
+            ledger.record(endpoint_id="a", request_class=ledger.route_class(request), success=False, latency_ms=100, observed_at=100, current_generation=3, sample_generation=3)
+        second = cache.plan(endpoints, request, trusted_provider_classes={"local"}, observed_at=100, outcome_ledger=ledger)
+        self.assertEqual(second["primary"]["endpoint_id"], "b")
+        self.assertIn("outcome_cooldown", second["rejections"].values())
+        self.assertEqual(ledger.stats(endpoint_id="a", request_class=ledger.route_class(request))["failure_streak"], 3)
+        with self.assertRaises(RoutingContractError):
+            ledger.record(endpoint_id="a", request_class="text:confidential", success=True, latency_ms=1, observed_at=100, current_generation=4, sample_generation=3)
 
     def test_duplicate_endpoint_and_empty_policy_rejected(self):
         with self.assertRaises(RoutingContractError):

@@ -14,7 +14,7 @@ import os
 import sys
 module, out = sys.argv[1:]
 sys.path.insert(0, module)
-from faisal_model_routing import Endpoint, RouteRequest, RoutingContractError, plan_route, verify_route
+from faisal_model_routing import Endpoint, OutcomeLedger, RouteRequest, RoutingContractError, plan_route, verify_route
 
 def ep(eid, mid, *, health="healthy", generation=4, cost=10, latency=20, region="us-east", privacy="internal", caps=("text",), provider="local", active=0, maximum=4, cache=False):
     return Endpoint(endpoint_id=eid, model_id=mid, model_digest="sha256:" + eid, provider_class=provider, capabilities=frozenset(caps), privacy_class=privacy, region=region, max_context_tokens=8192, estimated_cost_milli=cost, estimated_latency_ms=latency, health=health, health_generation=generation, active_requests=active, max_concurrency=maximum, cache_hit=cache)
@@ -25,6 +25,14 @@ route = plan_route(endpoints, request, trusted_provider_classes={"local"}, obser
 verified = verify_route(route, expected_request_id="runner-1", expected_generation=4)
 assert route["primary"]["endpoint_id"] == "preferred"
 assert verified["verified"] and len(route["fallbacks"]) == 2
+ledger = OutcomeLedger(max_keys=8, max_samples=32, cooldown_seconds=30)
+route_class = ledger.route_class(request)
+for _ in range(3):
+    ledger.record(endpoint_id="preferred", request_class=route_class, success=False, latency_ms=100, observed_at=20, current_generation=4, sample_generation=4)
+adaptive = plan_route(endpoints, request, trusted_provider_classes={"local"}, observed_at=20, outcome_ledger=ledger)
+assert adaptive["primary"]["endpoint_id"] != "preferred"
+assert adaptive["rejections"].get("preferred") == "outcome_cooldown"
+assert adaptive["selection_policy"]["outcome_ledger_digest"]
 negative = {}
 try:
     verify_route(route, expected_request_id="runner-1", expected_generation=5)
@@ -39,22 +47,36 @@ try:
 except RoutingContractError as exc:
     negative["provider_no_eligible"] = str(exc)
 try:
+    ledger.record(endpoint_id="preferred", request_class=route_class, success=True, latency_ms=1, observed_at=20, current_generation=5, sample_generation=4)
+except RoutingContractError as exc:
+    negative["stale_outcome_generation"] = str(exc)
+try:
     tampered = copy.deepcopy(route)
     tampered["primary"]["model_id"] = "tampered"
     verify_route(tampered, expected_request_id="runner-1", expected_generation=4)
 except RoutingContractError as exc:
     negative["digest_tamper"] = str(exc)
-assert len(negative) == 4
+assert len(negative) == 5
 payload = {
     "schema": "FAISAL-MODEL-ROUTING-VALIDATION-1",
     "module": "tools/faisal-model-routing/faisal_model_routing.py",
     "route_digest": route["route_digest"],
+    "adaptive_route_digest": adaptive["route_digest"],
+    "adaptive_primary_endpoint": adaptive["primary"]["endpoint_id"],
+    "outcome_ledger_digest": adaptive["selection_policy"]["outcome_ledger_digest"],
     "primary_endpoint": route["primary"]["endpoint_id"],
     "fallback_endpoint_ids": [x["endpoint_id"] for x in route["fallbacks"]],
     "verified": verified,
     "negative_cases": negative,
+    "adaptive_feedback": {
+      "failed_primary_cooled_down": True,
+      "route_changed": adaptive["primary"]["endpoint_id"] != route["primary"]["endpoint_id"],
+      "outcomes_are_caller_observed": True,
+      "model_output_is_not_outcome_authority": True
+    },
     "authority_boundaries": {
         "model_output_is_authority": False,
+        "outcome_observations_are_authority": False,
         "endpoint_metadata_is_authority": False,
         "fallbacks_are_executions": False,
         "provider_policy_is_caller_supplied": True,
