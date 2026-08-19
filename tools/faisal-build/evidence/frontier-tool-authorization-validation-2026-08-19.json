@@ -1,0 +1,119 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-tool-authorization-validation-2026-08-19",
+  "recorded_at": "2026-08-19T11:22:00Z",
+  "status": "bounded_tool_authorization_admission_qualified",
+  "objective": "Add provider-neutral fail-closed tool invocation admission that binds resource/audience, exact tool descriptors, scopes, actor, argument digest, risk confirmation, generation, expiry, use limits, replay, and non-authority boundaries without executing tools or handling credentials.",
+  "research_inputs": [
+    {
+      "source": "https://openai.com/index/introducing-gpt-5-4/",
+      "finding": "Current frontier tool-use systems add native computer use, configurable confirmation policies, agentic tool calling, and tool search for large tool ecosystems; tool search reduces context overhead but model-selected actions remain untrusted.",
+      "implementation_impact": "FAISAL adds explicit resource, descriptor, scope, risk, confirmation, and argument-digest admission independent of model capability or tool-search behavior."
+    },
+    {
+      "source": "https://www.anthropic.com/news/prompt-injection-defenses",
+      "finding": "Browser pages, documents, ads, and dynamic content are adversarial inputs; even strong models are not immune to prompt injection, so classifier and red-team defenses do not replace execution-layer authorization.",
+      "implementation_impact": "Tool descriptions/annotations and model outputs remain explicitly untrusted and cannot authorize invocation."
+    },
+    {
+      "source": "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/authorization",
+      "finding": "Current MCP authorization guidance uses OAuth 2.1 conventions, Protected Resource Metadata, resource indicators/audience checks, scopes, consent, and server-side validation; it warns against token passthrough.",
+      "implementation_impact": "FAISAL binds exact resource URI, tool descriptor digest, scope subset, actor, confirmation digest, generation, expiry, and use limits."
+    },
+    {
+      "source": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "finding": "MCP safety guidance treats tool descriptions and annotations as untrusted unless trusted by policy and treats tools as arbitrary code/data access paths requiring explicit consent.",
+      "implementation_impact": "The contract requires annotations_untrusted=true and treats the grant/receipt as evidence rather than production authority."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-tool-authorization/faisal_tool_authorization.py",
+    "tests": "tools/faisal-tool-authorization/test_faisal_tool_authorization.py",
+    "benchmark": "tools/faisal-tool-authorization/bench_faisal_tool_authorization.py",
+    "runner": "tools/faisal-build/run_tool_authorization_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "exact resource URI/audience binding",
+      "exact server/tool descriptor digest binding",
+      "requested scope subset of grant and descriptor",
+      "actor identity binding",
+      "invocation argument digest binding",
+      "risk-level confirmation enforcement",
+      "generation and issued/expiry time fences",
+      "maximum grant-use limit",
+      "invocation replay protection",
+      "untrusted tool annotations enforcement",
+      "explicit model/tool-description/tool-result/grant non-authority boundaries"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "runner": "FAISAL_TOOL_AUTHORIZATION_VALIDATION_OK",
+    "runner_record_digest": "24db6506ca40c532aa39625616f147439b4fd40dcb4e49ce6b3da366c9db9fa5",
+    "benchmark_iterations": 1000,
+    "benchmark_admission_mean_ns": 60813.36,
+    "benchmark_admission_p95_ns": 121510,
+    "benchmark_scope": "local_python_authorization_receipts_not_oauth_network_or_tool_latency",
+    "real_held_out_evaluation": {
+      "runner": "tools/faisal-build/run_agi_support_evaluation.sh",
+      "task_count": 8,
+      "baseline_pass_rate": 0.75,
+      "candidate_pass_rate": 1.0,
+      "pass_rate_delta": 0.25,
+      "baseline_safety_pass_rate": 1.0,
+      "candidate_safety_pass_rate": 1.0,
+      "trace_verification": "passed",
+      "promotion_without_authority": "rejected",
+      "promotion_with_local_test_authority": "passed_fixture_only",
+      "rollback": "passed",
+      "tamper_rejection": "passed",
+      "scope": "deterministic_local_fixture_adapter_on_held_out_task_pack_not_tool_authorization_or_general_intelligence_evidence"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_ready",
+    "adjacent_regressions": {
+      "model_routing": "pass",
+      "memory_write": "pass",
+      "memory_read": "pass",
+      "checkpoint": "pass",
+      "delegation": "pass",
+      "trace_conformance": "pass",
+      "trace_certification": "pass",
+      "observation_trust": "pass",
+      "portable_memory": "pass",
+      "mcp_contract": "pass",
+      "snapshot_index": "pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"
+    }
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "tool_description_is_authority": false,
+    "tool_result_is_authority": false,
+    "grant_is_production_authority": false,
+    "tool_admission_is_tool_execution": false,
+    "authorization_receipt_is_credential": false,
+    "ambient_authority": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "limitations": [
+    "The contract admits an invocation receipt but never executes a tool, handles OAuth credentials, introspects tokens, or performs external resource authorization.",
+    "Resource URI, descriptor digest, scopes, risk, confirmation digest, and actor identity are caller-supplied evidence and require an external identity/authorization provider for production trust.",
+    "A matching confirmation digest proves only linkage of supplied evidence; it does not prove a human approved the action unless an independent operator system attests it.",
+    "The benchmark measures local Python receipt overhead and excludes OAuth, network, browser, tool, accelerator, storage, and kernel latency.",
+    "The real held-out evaluation uses deterministic fixture adapters and does not measure tool authorization quality, browser autonomy, robotics, frontier models, or general intelligence.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, superiority to Linux, or closure of existing external release blockers."
+  ]
+}
