@@ -1,0 +1,125 @@
+{
+  "all_negative_cases_denied": true,
+  "benchmark": {
+    "baseline_manifest_digest": {
+      "iterations": 1000,
+      "mean_ns": 4145.3,
+      "p95_ns": 4268.0
+    },
+    "review_evidence_admission": {
+      "iterations": 1000,
+      "mean_ns": 124187.28,
+      "p95_ns": 175643.0
+    },
+    "review_status_evaluation": {
+      "iterations": 1000,
+      "mean_ns": 131756.39,
+      "p95_ns": 184557.0
+    }
+  },
+  "boundary": {
+    "findings_disposition_verified": false,
+    "independent_external_security_review": false,
+    "production_approval": false,
+    "reviewer_identity_verified": false,
+    "reviewer_independence_verified": false
+  },
+  "limitations": [
+    "The external-reference fixture is synthetic and does not represent a real reviewer, organization, lab, accreditation, signed report, testing activity, findings disposition, or independent review.",
+    "This contract records evidence references but does not authenticate an assessor, verify a real signature, perform penetration testing, or contact an external registry.",
+    "A local preparation record cannot satisfy the independent external review blocker.",
+    "Production approval remains false until a real independent assessment and authorized disposition are supplied."
+  ],
+  "local_preparation_fixture": {
+    "blockers": [
+      "independent_external_assessment",
+      "production_authority_not_issued",
+      "reviewer_identity_and_independence_verification",
+      "signed_findings_disposition_and_retest"
+    ],
+    "external_review_evidence_structurally_complete": false,
+    "independent_external_review_completed": false,
+    "production_approval": false,
+    "structurally_complete": true
+  },
+  "negative_cases": {
+    "authority_violation": "denied",
+    "incomplete_methods": "denied",
+    "release_head_mismatch": "denied",
+    "scope_mismatch": "denied"
+  },
+  "policy": {
+    "artifact_digest": "sha256:403d3e047ea66739b2968686ea0b58c26b0a39f82cc33ddf3b0d7aa777cd8eb1",
+    "methodology_id": "nist-800-115-800-53a-ssdf",
+    "release_head": "a7cc9e26297e8dd19bf17a4c918ae5b1f8a495e8",
+    "release_tag": "FAISAL-FRONTIER-INDEPENDENT-SECURITY-REVIEW-2026-08-19",
+    "required_controls": [
+      "threat_model",
+      "secure_build",
+      "uapi_security",
+      "isolation",
+      "supply_chain",
+      "incident_response",
+      "release_governance"
+    ],
+    "required_methods": [
+      "architecture_review",
+      "source_review",
+      "dependency_review",
+      "adversarial_testing",
+      "configuration_review",
+      "findings_retest"
+    ],
+    "review_id": "security-review-2026-08-19",
+    "scope_id": "faIsal-control-plane-security-review",
+    "trusted_registry_id": "trusted-independent-reviewer-registry"
+  },
+  "record_digest": "sha256:a387cd478195a3b4b10af10f0dc9e169a278ff6e0fa95a4160f360dce9886b65",
+  "recorded_at": "2026-08-19T23:59:00Z",
+  "research_provenance": [
+    {
+      "scope": "security testing planning, execution, analysis, findings, and mitigation strategy",
+      "source": "https://csrc.nist.gov/pubs/sp/800/115/final"
+    },
+    {
+      "scope": "assessment plans, procedures, evidence, independent assessment, and risk-management analysis",
+      "source": "https://csrc.nist.gov/pubs/sp/800/53/a/r5/final"
+    },
+    {
+      "scope": "secure software development, vulnerability reduction, root-cause response, and supplier communication",
+      "source": "https://csrc.nist.gov/pubs/sp/800/218/final"
+    },
+    {
+      "scope": "third-party SSDF expectations and software supply-chain security",
+      "source": "https://www.cisa.gov/resources-tools/resources/nist-sp-800-218-secure-software-development-framework-v11-recommendations-mitigating-risk-software"
+    }
+  ],
+  "rollback_checkpoint": "FAISAL-FRONTIER-PHYSICAL-HARDWARE-MATRIX-2026-08-19-R2",
+  "schema": "org.faisal.frontier-validation.v1",
+  "security_boundaries": {
+    "fake_external_review": false,
+    "independent_external_review_completed": false,
+    "model_output_is_authority": false,
+    "production_approval": false,
+    "report_receipt_is_production_authority": false,
+    "reviewer_claim_is_authority": false,
+    "synthetic_fixture_authority": false
+  },
+  "synthetic_external_reference_fixture": {
+    "blockers": [
+      "production_authority_not_issued",
+      "reviewer_identity_and_independence_verification",
+      "signed_findings_disposition_and_retest"
+    ],
+    "external_review_evidence_structurally_complete": true,
+    "findings_disposition_verified": false,
+    "independent_external_review_completed": false,
+    "production_approval": false,
+    "record_digest": "sha256:a0bc09dd0e8d8115b2b090c96817022059747a06753c981d123c67b7556577b6",
+    "recorded": true,
+    "reviewer_identity_verified": false,
+    "structurally_complete": true,
+    "synthetic_fixture": true
+  },
+  "upgrade": "independent-external-security-review-evidence"
+}
