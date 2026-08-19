@@ -1,0 +1,111 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-memory-promotion-validation-2026-08-19",
+  "recorded_at": "2026-08-19T15:20:00Z",
+  "status": "provenance_bound_memory_promotion_qualified",
+  "objective": "Add provider-neutral fail-closed promotion admission that requires source lineage, finality threshold, explicit conflict disposition, identity and scope binding, generation and expiry fences, replay/tamper protection, and non-authority boundaries before a memory candidate can be considered promotion-eligible.",
+  "research_inputs": [
+    {
+      "source": "https://developers.openai.com/api/docs/guides/tools-computer-use",
+      "finding": "Computer-use execution should be isolated, high-impact actions should retain human oversight, and screenshots, page text, tool outputs, PDFs, emails, chats, and third-party content are untrusted input.",
+      "implementation_impact": "Promotion receipts do not authorize tools, browser actions, external effects, or policy changes."
+    },
+    {
+      "source": "https://arxiv.org/html/2606.04990v1",
+      "finding": "Evidence tracing should connect tools, memory, observations, claims, actions, and agent interactions for verification, safety, audit, and recovery.",
+      "implementation_impact": "Promotion binds candidate digest, source lineage digest/count, finality receipt, conflict disposition, principal, tenant, subject scope, generation, and expiry."
+    },
+    {
+      "source": "https://arxiv.org/html/2605.05440v1",
+      "finding": "Invocation-bound authorization should combine identity, attenuated scope, and provenance in an append-only chain.",
+      "implementation_impact": "Promotion requests are bound to principal, tenant, requested scope, candidate lineage, policy generation, and nonce replay protection."
+    },
+    {
+      "source": "https://arxiv.org/abs/2603.02240",
+      "finding": "Per-agent behavior and per-memory provenance are relevant defenses against memory poisoning in multi-agent systems.",
+      "implementation_impact": "Unresolved conflict, insufficient finality, identity mismatch, scope mismatch, stale generation, and expiry fail closed; local promotion never claims truth."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-memory-promotion/faisal_memory_promotion.py",
+    "tests": "tools/faisal-memory-promotion/test_faisal_memory_promotion.py",
+    "benchmark": "tools/faisal-memory-promotion/bench_faisal_memory_promotion.py",
+    "runner": "tools/faisal-build/run_memory_promotion_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "candidate lineage digest and bounded lineage count",
+      "finality threshold admission",
+      "explicit none/resolved/unresolved conflict disposition",
+      "principal/tenant/subject-scope binding",
+      "policy class and scope attenuation",
+      "generation/expiry/ttl fences",
+      "promotion and nonce replay/tamper protection",
+      "memory-write/retrieval/truth non-authority boundary"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 5,
+    "unit_tests_passed": 5,
+    "runner": "FAISAL_MEMORY_PROMOTION_OK",
+    "runner_record_digest": "sha256:c79ff9216576458a4a8bee81dd5a1786ecb8b4d908f8e102c77c2eb83ae4736e",
+    "real_task": {
+      "valid_promotion": "passed",
+      "valid_lineage_count": 3,
+      "valid_finality_count": 3,
+      "valid_conflict_state": "resolved",
+      "negative_cases": 5,
+      "negative_cases_denied": 5,
+      "denials": ["low_finality", "unresolved_conflict", "identity_mismatch", "scope_mismatch", "expiry"]
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 16360.99,
+      "baseline_ungoverned_p95_ns": 23756.15,
+      "promotion_admit_mean_ns": 98814.96,
+      "promotion_admit_p95_ns": 138149.90,
+      "finality_conflict_admit_mean_ns": 96957.41,
+      "finality_conflict_admit_p95_ns": 140369.65,
+      "scope": "local Python control-plane receipt overhead; excludes actual memory persistence, retrieval, model inference, network, accelerator, and kernel scheduling latency"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_sha256_8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
+    "adjacent_regressions": {"model_routing":"pass","memory_write":"pass","memory_read":"pass","checkpoint":"pass","delegation":"pass","trace_conformance":"pass","trace_certification":"pass","observation_trust":"pass","portable_memory":"pass","mcp_contract":"pass","snapshot_index":"pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"}
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "retrieved_content_is_authority": false,
+    "memory_content_is_authority": false,
+    "promotion_receipt_is_execution_authority": false,
+    "promotion_receipt_is_policy_authority": false,
+    "promotion_receipt_is_production_authority": false,
+    "memory_write_performed": false,
+    "retrieval_performed": false,
+    "models_invoked": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "truth_established": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-TASK-ROUTING-2026-08-19",
+    "rollback_scope": "remove the memory-promotion module, tests, runner, evidence registration, and metadata; retain prior tagged task-routing release"
+  },
+  "limitations": [
+    "Promotion admission does not write memory or make a candidate true; a separate trusted memory service must enforce the receipt.",
+    "Finality counts, conflict dispositions, lineage digests, and identity claims are caller-supplied evidence and require independent trusted collection for production use.",
+    "The benchmark measures local Python receipt overhead and excludes actual storage, retrieval, distributed consensus, model, network, accelerator, and kernel scheduler performance.",
+    "The real-task validation is a deterministic local fixture and does not establish memory quality, general intelligence, browser autonomy, robotics, or production agent efficacy.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ]
+}
