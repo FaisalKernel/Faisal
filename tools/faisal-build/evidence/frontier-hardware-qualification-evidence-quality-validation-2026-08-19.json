@@ -1,7 +1,7 @@
 {
   "schema": "FAISAL-FRONTIER-EVIDENCE-1",
   "iteration": "frontier-hardware-qualification-evidence-quality-validation-2026-08-19",
-  "recorded_at": "2026-08-19T08:20:04Z",
+  "recorded_at": "2026-08-19T08:23:37Z",
   "status": "pass_observation_quality_kernel_feature_binding_device_node_discovery_and_cpu_fallback_with_physical_qualification_blocked",
   "implementation": {
     "collector": "tools/faisal-hardware-qualify/faisal_hardware_qualify.py",
@@ -18,7 +18,8 @@
     ]
   },
   "live_host_observation": {
-    "record_path": "build/frontier/hardware-qualification-upgrade-2026-08-19-final2/live-host-observation.json",
+    "record_path": "build/frontier/hardware-qualification-upgrade-2026-08-19-final3/live-host-observation.json",
+    "record_digest": "c7dc61f82c02e81b6cf0be8aa9330f017d1c1670c15b915c6f3efc3fdbbebed6",
     "kernel_release": "6.18.38+",
     "machine": "x86_64",
     "cpu_count": 6,
@@ -56,11 +57,11 @@
     "required_iommu_fail_closed": "pass_expected_block",
     "runner": "pass",
     "benchmark_iterations": 500,
-    "minimal_probe_mean_ns": 124654.26,
-    "full_collector_mean_ns": 5935673.43,
-    "minimal_probe_p95_ns": 276635,
-    "full_collector_p95_ns": 6637780,
-    "full_collector_overhead_ratio": 47.6171,
+    "minimal_probe_mean_ns": 79456.33,
+    "full_collector_mean_ns": 6741400.47,
+    "minimal_probe_p95_ns": 106065,
+    "full_collector_p95_ns": 8868757,
+    "full_collector_overhead_ratio": 84.8441,
     "benchmark_scope": "local_procfs_sysfs_devfs_observation_without_provider_commands_or_physical_workload"
   },
   "research_inputs": [
