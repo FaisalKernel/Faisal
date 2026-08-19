@@ -1,7 +1,7 @@
 {
   "schema": "FAISAL-FRONTIER-EVIDENCE-1",
   "iteration": "frontier-model-routing-runtime-profile-validation-2026-08-19",
-  "recorded_at": "2026-08-19T08:44:36Z",
+  "recorded_at": "2026-08-19T08:47:01Z",
   "status": "pass_runtime_profile_bound_route_evidence_engine_version_cache_parallelism_modality_quantization_accelerator_and_replay_fencing",
   "implementation": {
     "module": "tools/faisal-model-routing/faisal_model_routing.py",
