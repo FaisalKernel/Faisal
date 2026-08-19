@@ -36,3 +36,14 @@ Vendor commands are observations only. Their output is represented by a digest a
 6. Keep the production gate blocked if any required evidence is absent, stale, unsigned, or not independently produced.
 
 The current sandbox can validate the collector and report its own environment, but it cannot substitute for physical accelerator qualification.
+
+
+## Physical hardware matrix contract
+
+The follow-on matrix contract is implemented in `faisal_physical_hardware_matrix.py` and covers GPU, NPU, IOMMU, DMA, RDMA, CXL, NVMe, NUMA, and TPM. Each capability evidence record is bound to the exact release tag, full release head, artifact digest, device identity, firmware digest, driver digest, topology digest, benchmark digest, fault-recovery digest, external-report digest, observer reference, validity window, and nonce.
+
+The required test set is fixed to `enumeration`, `isolation`, `io_path`, `performance`, `fault_recovery`, and `power_thermal`. Evidence is rejected when the matrix binding, identity, digest references, test set, validity window, sequence, nonce, or authority boundary is invalid. Replayed evidence is rejected by both nonce and record digest.
+
+A structurally complete external-reference fixture is useful for validating the contract, but it does not mark physical qualification complete. Host observation records are explicitly classified as observation-only and cannot satisfy external matrix evidence. The contract permanently reports `physical_qualification_completed: false` and `production_approval: false` until independently produced exact-hardware evidence and authorized release governance exist.
+
+The validation runner is `tools/faisal-build/run_physical_hardware_matrix_validation.sh`. It combines the existing host collector, synthetic topology tests, new matrix admission tests, benchmark measurements, the nine-capability fixture, local-observation denial, and negative cases. The fixture is not a physical hardware result and must never be copied into production approval evidence.

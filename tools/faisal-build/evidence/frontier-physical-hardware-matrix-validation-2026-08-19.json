@@ -1,0 +1,130 @@
+{
+  "all_negative_cases_denied": true,
+  "benchmark": {
+    "baseline_manifest_digest": {
+      "iterations": 1000,
+      "mean_ns": 5885.75,
+      "p95_ns": 12925.0
+    },
+    "nine_capability_admission": {
+      "iterations": 1000,
+      "mean_ns": 945263.34,
+      "p95_ns": 1191347.0
+    },
+    "nine_capability_status": {
+      "iterations": 1000,
+      "mean_ns": 954995.39,
+      "p95_ns": 1145750.0
+    }
+  },
+  "external_reference_fixture": {
+    "blockers": [
+      "independent_physical_execution_and_review",
+      "production_authority_not_issued"
+    ],
+    "external_hardware_evidence_structurally_complete": true,
+    "physical_qualification_completed": false,
+    "production_approval": false,
+    "records": 9,
+    "structurally_complete": true,
+    "synthetic_fixture": true
+  },
+  "limitations": [
+    "The external-reference fixture validates structure only and contains no real devices, operators, labs, signatures, firmware measurements, driver results, power measurements, thermal traces, or independent review.",
+    "Host observation proves only what this sandbox exposes; it cannot qualify absent GPU, NPU, IOMMU, DMA, RDMA, CXL, NVMe, or TPM hardware.",
+    "PCI-SIG compliance, vendor tool output, kernel API availability, and provider metadata are not FAISAL physical qualification authority.",
+    "Physical qualification remains blocked until exact hardware, firmware, driver, topology, functional, isolation, performance, fault-recovery, power/thermal, and independent-review evidence is supplied."
+  ],
+  "live_host_observation": {
+    "capabilities": {
+      "cxl": "absent",
+      "dma": "absent",
+      "gpu": "absent",
+      "iommu": "absent",
+      "npu": "absent",
+      "numa": "present",
+      "nvme": "absent",
+      "rdma": "absent",
+      "tpm": "absent"
+    },
+    "path": "/home/ubuntu/agi-kernel/build/frontier/physical-hardware-matrix-2026-08-19/host-observation/live-host-observation.json",
+    "physical_qualification": false,
+    "record_digest": "747682aba85efa47c785f4d51ae147ff7c57f5b82cb9b754fd133fb0bc9a4741"
+  },
+  "local_observation_fixture": {
+    "blockers": [
+      "complete_matrix_evidence",
+      "external_matrix_evidence",
+      "independent_physical_execution_and_review",
+      "production_authority_not_issued"
+    ],
+    "external_hardware_evidence_structurally_complete": false,
+    "physical_qualification_completed": false,
+    "production_approval": false,
+    "structurally_complete": false
+  },
+  "negative_cases": {
+    "authority_violation": "denied",
+    "missing_test": "denied",
+    "release_head_mismatch": "denied",
+    "replay_nonce": "denied"
+  },
+  "policy": {
+    "artifact_digest": "sha256:403d3e047ea66739b2968686ea0b58c26b0a39f82cc33ddf3b0d7aa777cd8eb1",
+    "matrix_id": "physical-matrix-2026-08-19",
+    "release_head": "d9970c5f4ede45dff7d3d82c96063fa53785a7a1",
+    "release_tag": "FAISAL-FRONTIER-PHYSICAL-HARDWARE-MATRIX-2026-08-19",
+    "required_capabilities": [
+      "gpu",
+      "npu",
+      "iommu",
+      "dma",
+      "rdma",
+      "cxl",
+      "nvme",
+      "numa",
+      "tpm"
+    ],
+    "required_tests": [
+      "enumeration",
+      "isolation",
+      "io_path",
+      "performance",
+      "fault_recovery",
+      "power_thermal"
+    ],
+    "trusted_observer_id": "independent-hardware-observer-required"
+  },
+  "record_digest": "sha256:41b4a0cacb5558f97676a746635c81293f0654d236d9ca0b26b608a7ffcd485d",
+  "recorded_at": "2026-08-19T23:59:00Z",
+  "research_provenance": [
+    {
+      "scope": "platform firmware protection, detection, recovery, and roots of trust; not physical device qualification",
+      "source": "https://csrc.nist.gov/pubs/sp/800/193/final"
+    },
+    {
+      "scope": "userspace I/O page tables, DMA mappings, device objects, and IOMMU fault/isolation semantics",
+      "source": "https://docs.kernel.org/userspace-api/iommufd.html"
+    },
+    {
+      "scope": "PCIe interoperability and compliance test areas and external compliance distinction",
+      "source": "https://pcisig.com/developers/compliance-program"
+    },
+    {
+      "scope": "CXL bus, firmware/ACPI handoff, topology, decoders, memory hotplug, and NUMA evidence",
+      "source": "https://docs.kernel.org/driver-api/cxl/index.html"
+    }
+  ],
+  "rollback_checkpoint": "FAISAL-FRONTIER-SIGNING-CEREMONY-2026-08-19",
+  "schema": "org.faisal.frontier-validation.v1",
+  "security_boundaries": {
+    "hardware_observation_is_qualification": false,
+    "model_output_is_authority": false,
+    "operator_claim_is_authority": false,
+    "physical_qualification_completed": false,
+    "production_approval": false,
+    "provider_metadata_is_authority": false,
+    "synthetic_fixture_authority": false
+  },
+  "upgrade": "physical-hardware-qualification-matrix"
+}
