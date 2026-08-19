@@ -1,0 +1,105 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-signing-ceremony-validation-2026-08-19",
+  "recorded_at": "2026-08-19T23:59:00Z",
+  "status": "ceremony_preparation_and_evidence_verification_validated_operator_action_required",
+  "objective": "Prepare a canonical release-signing ceremony manifest and verify witness, signer, threshold, transparency, trusted-root, phase, and replay evidence without creating a signature or claiming that an operator ceremony occurred.",
+  "research_inputs": [
+    {
+      "source": "https://csrc.nist.gov/pubs/sp/800/57/pt1/r5/final",
+      "finding": "NIST SP 800-57 covers keying-material protection, key-management functions, key inventory, key recovery, compromise, digital signatures, split knowledge, trust anchors, and usage periods.",
+      "implementation_impact": "FAISAL separates witness and operator rosters, binds key IDs and trusted roots to the manifest, enforces thresholds, expiry, replay protection, and explicit authority boundaries."
+    },
+    {
+      "source": "https://theupdateframework.github.io/specification/latest/",
+      "finding": "TUF root metadata identifies authorized keys and role thresholds; root key replacement/revocation changes root metadata, while snapshot and timestamp metadata bind versions and freshness.",
+      "implementation_impact": "FAISAL models a role, key roster, threshold, trusted-root ID, manifest digest, ordered phases, and transparency references."
+    },
+    {
+      "source": "https://docs.sigstore.dev/cosign/signing/overview/",
+      "finding": "Sigstore binds identity to an artifact signature and records signing events in a timestamped transparency log; verification compares the signature, certificate/key, artifact, and transparency record under a trusted root.",
+      "implementation_impact": "FAISAL requires signer key IDs, signature digests, transparency-log entries, trusted-root IDs, and verification references, while keeping cryptographic verification false until real evidence is supplied."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-signing-ceremony/faisal_signing_ceremony.py",
+    "tests": "tools/faisal-signing-ceremony/test_faisal_signing_ceremony.py",
+    "benchmark": "tools/faisal-signing-ceremony/bench_faisal_signing_ceremony.py",
+    "runner": "tools/faisal-build/run_signing_ceremony_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "canonical release-tag, full-head, artifact, role, key-roster, operator-roster, witness-roster, threshold, and trusted-root manifest binding",
+      "witness → sign → transparency phase evidence",
+      "witness/operator role separation",
+      "monotonic event sequence and nonce replay protection",
+      "local preparation versus external-reference origin separation",
+      "signature and transparency evidence fields without local cryptographic assertion",
+      "production_approval, operator_ceremony_completed, signature_cryptographically_verified, and transparency_log_verified remain false"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "FAISAL_SIGNING_CEREMONY_OK",
+    "runner_record_digest": "sha256:889905264bdfadb508ce334bf6dfc667add19bfbe2112f0c8e91e22cca3e1f7d",
+    "external_reference_fixture": {
+      "events_recorded": 6,
+      "structurally_complete": true,
+      "external_ceremony_evidence_structurally_complete": true,
+      "operator_ceremony_completed": false,
+      "signature_cryptographically_verified": false,
+      "transparency_log_verified": false,
+      "production_approval": false,
+      "blockers": ["production_authority_not_issued"]
+    },
+    "local_preparation_fixture": {
+      "structurally_complete": true,
+      "external_ceremony_evidence_structurally_complete": false,
+      "production_approval": false,
+      "blockers": ["external_ceremony_verification", "production_authority_not_issued"]
+    },
+    "negative_cases_denied": 6,
+    "denials": ["manifest_mismatch", "operator_role", "missing_signature", "wrong_root", "sequence_gap", "authority"],
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 14905.12,
+      "baseline_ungoverned_p95_ns": 23861.00,
+      "event_recording_mean_ns": 53133.07,
+      "event_recording_p95_ns": 79011.00,
+      "status_evaluation_mean_ns": 65826.38,
+      "status_evaluation_p95_ns": 96213.00,
+      "scope": "local Python ceremony-control-plane overhead; excludes real cryptographic signing, key custody, operator identity authentication, transparency-log contact, and production approval"
+    },
+    "limitations": [
+      "All external-reference events in the validation fixture are synthetic structural fixtures and are not real operator signatures, witnesses, transparency records, or external verification.",
+      "The contract does not access private keys, HSMs, KMS, Sigstore/Fulcio/Rekor, TUF roots, or operator identity providers.",
+      "The contract records evidence references but does not cryptographically verify signatures or transparency-log inclusion.",
+      "The contract never marks an operator ceremony complete and never issues production approval."
+    ]
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "operator_claim_is_authority": false,
+    "signature_receipt_is_production_authority": false,
+    "signature_created": false,
+    "signature_cryptographically_verified": false,
+    "transparency_log_verified": false,
+    "operator_ceremony_completed": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-QUALIFICATION-INTAKE-2026-08-19",
+    "rollback_scope": "remove the signing-ceremony module, tests, benchmark, runner, evidence registration, and metadata; retain the qualification-intake release tag"
+  }
+}

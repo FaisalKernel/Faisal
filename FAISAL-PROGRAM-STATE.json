@@ -2449,5 +2449,14 @@
   "frontier_qualification_intake_benchmark": "tools/faisal-qualification-intake/bench_faisal_qualification_intake.py",
   "frontier_qualification_intake_runner": "tools/faisal-build/run_qualification_intake_validation.sh",
   "frontier_qualification_intake_rollback_checkpoint": "FAISAL-FRONTIER-INTERRUPT-FENCE-2026-08-19",
-  "frontier_qualification_intake_authority_boundary": "qualification_intake_receipts_are_structural_evidence_only_synthetic_or_local_claims_never_satisfy_external_blockers_the_contract_does_not_create_signatures_reviewers_builders_hardware_or_multihost_results_and_never_issues_production_approval"
+  "frontier_qualification_intake_authority_boundary": "qualification_intake_receipts_are_structural_evidence_only_synthetic_or_local_claims_never_satisfy_external_blockers_the_contract_does_not_create_signatures_reviewers_builders_hardware_or_multihost_results_and_never_issues_production_approval",
+  "frontier_signing_ceremony": "pass_manifest_witness_operator_threshold_phase_transparency_trusted_root_replay_and_non_authority_controls",
+  "frontier_signing_ceremony_evidence": "tools/faisal-build/evidence/frontier-signing-ceremony-validation-2026-08-19.json",
+  "frontier_signing_ceremony_research": "build/frontier/operator-signing-research-2026-08-19.md",
+  "frontier_signing_ceremony_module": "tools/faisal-signing-ceremony/faisal_signing_ceremony.py",
+  "frontier_signing_ceremony_tests": "tools/faisal-signing-ceremony/test_faisal_signing_ceremony.py",
+  "frontier_signing_ceremony_benchmark": "tools/faisal-signing-ceremony/bench_faisal_signing_ceremony.py",
+  "frontier_signing_ceremony_runner": "tools/faisal-build/run_signing_ceremony_validation.sh",
+  "frontier_signing_ceremony_rollback_checkpoint": "FAISAL-FRONTIER-QUALIFICATION-INTAKE-2026-08-19",
+  "frontier_signing_ceremony_authority_boundary": "signing_ceremony_receipts_are_preparation_and_evidence_only_the_contract_does_not_access_private_keys_create_signatures_contact_transparency_logs_authenticate_operators_or_issue_production_approval_real_operator_ceremony_remains_required"
 }
