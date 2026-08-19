@@ -1,0 +1,1314 @@
+{
+  "all_negative_cases_denied": true,
+  "benchmark": {
+    "baseline_manifest_digest": {
+      "iterations": 250,
+      "mean_ns": 6763.33,
+      "p95_ns": 9350.0
+    },
+    "evidence_snapshot_build": {
+      "iterations": 250,
+      "mean_ns": 78173.26,
+      "p95_ns": 109680.0
+    },
+    "evidence_snapshot_verify": {
+      "iterations": 250,
+      "mean_ns": 92382.88,
+      "p95_ns": 121267.0
+    }
+  },
+  "boundary": {
+    "external_evidence_verified": false,
+    "local_index_verified": true,
+    "production_approval": false
+  },
+  "limitations": [
+    "The snapshot checks evidence file integrity and policy binding but does not authenticate external organizations or elevate any local record to production authority.",
+    "External categories are indexed as required but remain externally unverified until real signed and attributable evidence exists.",
+    "The exporter does not invoke models, contact inference servers, control workloads, or approve a release."
+  ],
+  "negative_cases": {
+    "authority_violation": "denied_by_unit_test",
+    "evidence_digest_tamper": "denied_by_unit_test",
+    "manifest_digest_tamper": "denied_by_unit_test",
+    "replay": "denied_by_unit_test",
+    "snapshot_digest_tamper": "denied_by_unit_test"
+  },
+  "receipt": {
+    "nonce": "evidence-index-nonce",
+    "receipt_digest": "sha256:d3cd3c9ff2e58c494b34c7ef8292c6ca81ccb84b18756e5e31dff9a758432dcf",
+    "sequence": 1,
+    "snapshot_digest": "sha256:975174669e008e28afd3a0d1db54b5df3d5d155fda97a5f4481cce7b7aeb407b"
+  },
+  "record_digest": "sha256:cd60b0e5dff74c169f4e6d453d575c154d49f5089c557bca0a2aec67b4946dd1",
+  "recorded_at": "2026-08-19T23:59:00Z",
+  "release_head": "43aa965e6dfab9c1d4ccf7f343a7f1b17abec282",
+  "rollback_checkpoint": "FAISAL-FRONTIER-LIVE-MULTIHOST-QUALIFICATION-2026-08-19",
+  "schema": "org.faisal.frontier-validation.v1",
+  "security_boundaries": {
+    "evidence_receipt_is_production_authority": false,
+    "external_evidence_verified": false,
+    "manifest_is_authority": false,
+    "model_output_is_authority": false,
+    "production_approval": false,
+    "synthetic_fixture_authority": false
+  },
+  "snapshot": {
+    "evidence": [
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-agi-support-evaluation-validation-2026-08-24.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "0e0857c8498ee690ef2e0179a426aec9d8914863d445597f8ce60ea454a9b215"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-artifact-lineage-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "6364dc3ade0395b1e6fc55bb0b54f82331bc01928bf95ef4ea02db57265c40af"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-capability-freshness-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "6b5b014aa3fbad7452f6cb7f960e8d2771bbcf5825d8fe9f197b2ac8b9c7aeac"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-checkpoint-receipt-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "6e531b67279363d06669ba5d311bef7422ab460e57fd095caa1c2d441df5069f"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-context-window-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "b2db94398b2feecfcfebe2ae8e8373b5a2ac2b7bac9e629df81e22461dda2f96"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-delegation-attenuation-validation-2026-09-01.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "437ccdc571f514183c9d224cf0bd04447d653ef219fa140c858ee3d08ee44fb6"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-delegation-chain-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "4d7317109c74139282848fbb7d4da5605739ab87eabdb78599c05ab1c8ad1864"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-deterministic-plan-admission-validation-2026-08-22.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "56f27c59ce15781be8f65b6255b78df35f83ad664cd502889be0ff758907cd82"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-evaluation-set-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "4e1723146ce0c60ad79f8367358ddfc8004ccae28f579bc2c6803dc94aad92ca"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-evaluator-consensus-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "d4da37908c3c5ed1fa07a453024f606554eb31f0aa60a7f765b21fe943588266"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-evidence-freshness-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "8460eee06b1ec3d45ae2342d86c89e95945c77b7b4b12e37bd620df2f16db0c6"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-execution-memory-snapshot-index-validation-2026-08-20.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "42a925646c1b52ea7c02db72c1fb61a13b9ec5b4f23635e6ed2730fb73466620"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-handoff-approval-lease-validation-2026-08-21.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "fad5c735378691d9b1b102f6c825478b7f73e6afdf470055605f4bb5c978a123"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-handoff-authorization-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "69ae318f724709cf8f82edb2b9ae42198118d4e3033ee45135c338dac8fb33df"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-handoff-receipt-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "7a15e45a036dbf512d026deb80f13369f78fb7222403dcff434a8f90a5966f2c"
+      },
+      {
+        "boundary_present": true,
+        "category": "physical_hardware",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-hardware-qualification-evidence-quality-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "2df7991d73573cd2b2290601857482ff354ba2c8da7817f476cd5ddc00a71e0f"
+      },
+      {
+        "boundary_present": true,
+        "category": "physical_hardware",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-hardware-qualification-validation-2026-08-24.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "8447b68e653997b1f669b3340516e967a6aa18767fb71e829f9742b830e01129"
+      },
+      {
+        "boundary_present": true,
+        "category": "external_security_review",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-independent-security-review-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "sha256:a387cd478195a3b4b10af10f0dc9e169a278ff6e0fa95a4160f360dce9886b65",
+        "sha256": "7f097d694efb620277c45a5dd10736b09bace117570e414dcb6ae6cd42c642d6"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-intent-repair-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "59429b4e1e0507b558a1d9469efa36b0953ee4f415a8d88cfc8f663ad9f1522f"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-interaction-ledger-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "683d39dbb54b4abb122bbef7afa25df9c07d807da5fe9052ed2c78eac8b43d54"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-interrupt-fence-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "109984b964349d85a44cd02fcca39b88124f8b518b269a86d089d21d37ab85c3"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-intervention-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "19bb8760df31c5ef1be9cb708566f1f3d33f9596ab87a77f9b97f619616d8383"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-kv-cache-admission-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "e8f878f3cd8da3d321aab8d2129cf4403737bcfe3eaf135f0205fa4f7d56e38f"
+      },
+      {
+        "boundary_present": true,
+        "category": "live_multihost",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-live-multihost-qualification-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "sha256:f343936758c328b3a832135038f6627a9e79b92dec2cb5dc9248198f7f224865",
+        "sha256": "fe90ad688f4fbe3d4d8da16463d6a99612b625ab78dd7af0efbe6f1edd51ec38"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-mcp-contract-validation-2026-08-25.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "3e38f868caba8e0725c7650089fa1fce2c1272493def77f520cd15d30b909b40"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-memory-intervention-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "486a634f65a9b4e720e94c693373a1403641318a6ac1ab5a669fec07e34ad7e0"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-memory-promotion-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "edd273e6cd8fe73dcb8359d69e32cdf81dd07ef26e0f328c33cb85ec5d943ad9"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-memory-read-gate-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "c6820419ff34532d1309a6b34f369f91b07c46e55d4e64d1a6b0908a414b7198"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-memory-write-gate-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "8121fdd3346476621477ed52e741d29efe6e8dd2d88a08f5327041422d22c274"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-migration-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "05b5d5a7bc63e33a5a04c0bad53200a6c493ed75c9e1255f113a1bb105072f70"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-model-routing-adaptive-validation-2026-08-28.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "7f30ddb374cad48b57f48ead4a9f094dec8c63fd889d8f39f30f3e284c5cc6e2"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-model-routing-evidence-bound-validation-2026-09-02.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "8f3f95720ba5a77f7b58c86f905857e870e0fa5baa14098a4c1dafbdc006a0d0"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-model-routing-runtime-profile-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "776b3cf87efb29a057c28c73567b1b62203a521a1a1ba71611b740df76b44d12"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-model-routing-validation-2026-08-27.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "92993543f104eee58eedb49795f38eb8bfa77609ab8324d9eff088f2989d5425"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-observation-trust-validation-2026-08-29.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "e9ee22c770e645d31072c931fddff5b34066dc00ccd6819265f8a35d4640b295"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-path-governance-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "8e4348ee2dd9a2c62e0b634462b9b3ec00157212c514f412ca19571b0866301b"
+      },
+      {
+        "boundary_present": true,
+        "category": "physical_hardware",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-physical-hardware-matrix-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "sha256:062e3b855fb13e51aeb596328f02cb52b1a8c4cd62b278a6daee563b4a3d1730",
+        "sha256": "9c1c2b1205a137ba8fb09360604a884a5d3567481a267b7bfd29a6c81b53b443"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-portable-memory-validation-2026-08-26.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "76c6b18fc02fa25ac9585bd96a997a04388326a4fa31a7467d10282910d641d9"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-qualification-intake-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "3214b3c2df719f2052b2ee561dd18c4447327c8b0e52e378b35c79c3c0177d94"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-route-budget-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "1db9952081713d294b2185075e694ae57b409565c19653f6d5afcbbe5be3833f"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-route-receipt-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "0b51dc45655bf91cc39054a4c0c34cec10bbf588984b83b14454463ec2dac902"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-runtime-assurance-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "5daf1c25364ba04a59c70c15ee47aaaa2c2edea4266ad163512c57226433a40b"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-self-improvement-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "9c57b37af9f4e9c8dc78a4bf84ff1bd73b8f09a85657769f60ad193699ef729c"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-session-risk-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "32b0dd096ec1216ff3ace8b3ddf9bc45501739df0b37d8d94613877b21b176fd"
+      },
+      {
+        "boundary_present": true,
+        "category": "operator_signing",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-signing-ceremony-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "5173362c31cd1b5d2f631e225c962cc121055215e0e46e8b8259daf9d252c488"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-task-lifecycle-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "b560f364746906a2a28b71411a365e845d4171c92e83fbd8e82a4fff3f05befc"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-task-routing-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "034ba74d385a97392759a1e3cc501f010e2e5ab081ba6ce7f0f51c12fc25f3e0"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-thread-evaluation-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "c942fc898b41cc8253f4f3eb2c61d5a5cbc294134c3273a7c431c4556f006103"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-tool-attestation-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "f84d0ebd06325af5ebe0075454631f3a1bf2643d41ff63d6516fbab59d71c02f"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-tool-authorization-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "6594a7a050153c89df269e73fe410847655a9f44fbef1c900d45bb70c8c49d46"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-tool-context-admission-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "ea30ab462a7b55824063c9dabd68600bdbbbb841dd02b6d2154a6992cc9446a6"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-trace-certification-validation-2026-08-30.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "989a589314dd72c33d38fe360359a2bb1d273f4e99c9b4186a7ef553ab2bdb6f"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-trace-conformance-validation-2026-08-31.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "02c6eb41cb4f55a40e2bd910e4b52579e78e3734b30764184e0ff87f6b7b3b02"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-trace-segment-validation-2026-08-19.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "7c138f25117d0599efefe96a5e06816bd97b0ecce3b9ad31c08318f4480c7c9f"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/frontier-verified-improvement-evolution-validation-2026-08-23.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "c3493a5c86c9c3f0d54da7942e9d3ddcd08eb0a4834e18e9983f7b3ceb861b04"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m167-lts-6.18.44-forward-port-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "97236f450c02adccb4d0110384034c8ef090cc9cd4ec36eecd48c80a6a8851ed"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m169-cve-response-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "391ce78ab6309019fe3c8ca569fa270c8070da35337afced433a4c65876586de"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m170-physical-accelerator-qualification-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "742939e1866200f4af3d985a6df747a8e883a36a0b3c9a8b4e59b7c3b266ab69"
+      },
+      {
+        "boundary_present": true,
+        "category": "live_multihost",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m171-full-tls-replication-qualification-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "e9f74416b6b2d4d5699e81b83b3516553c9edec5b86fc0a4da50c0687884cbea"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m172-deployment-governance-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "d7709ce0e7aa742e12cc44b37fba22283fe223f76aa7609989ad6eec7e8fd0fd"
+      },
+      {
+        "boundary_present": true,
+        "category": "external_security_review",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m173-external-security-review-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "cdd315e101831a9e7e80969b839994afac0499f299cec4fc3711cb232ad544f5"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m174-independent-builder-handoff-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "b066a370a7c2cf1de7e15f8e9fa8d6f5465c3b2c15d980f0583b9cb981488c21"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m175-physical-accelerator-handoff-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "a78793d3d47950e758e282fda5d8448f56f716f915e064f4cf9a89ad66cdb533"
+      },
+      {
+        "boundary_present": true,
+        "category": "external_security_review",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m176-external-security-review-readiness-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "5554198a5245f05fbc1a334079e0f1e4f7870eb1b4603b4f26580de3894c5dc9"
+      },
+      {
+        "boundary_present": true,
+        "category": "operator_signing",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m177-signing-authority-operational-proof-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "8412e69e9af39eecc4faba4c889a4f4db21535f85f373a102783b7a3d1c45971"
+      },
+      {
+        "boundary_present": true,
+        "category": "live_multihost",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m178-external-replication-qualification-readiness-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "a754108c6b99e0035dd6d135adf7ff95482402046db1499b9a43c30a8f14200a"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m179-live-deployment-qualification-readiness-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "d81c89bcb62070e28f887930970ba6d0b47b45ba05c1d0bc6cc2352953906dcf"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m180-lts-soak-requalification-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "ea4b4804822065aa3ae15f2f9778e89f9b87d5229201d3ed90b08bbba07e3ae2"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m181-cve-operations-readiness-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "59107fdb1fa7e51940fa0b8563d01c46cadd9ab5d3a7872e290c05b4435b9c51"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m183-uapi-checkpatch-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "ec4c725c22228e178232b234d976325fb3433b30d9d1f68d0833b6536af68669"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m184-driver-checkpatch-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "54bf2355b8756736d85d424180f44c7e8d3b7baf26f839fa143a7f5b838378de"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m185-qemu-regression-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "f841c6cf9fe30a283f7efa2a6608892c1200727df23ce87e92e4b2405447ea19"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m186-driver-style-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "e6c7893c42042643e459b719c4b014a905f7b01e413d7f50ae78bc7aebbbe75a"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m187-world-queue-helper-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "706fefa72f1c864e7261f8265d19941ef5c6bca1b3485cbab12c363b9350d214"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m188-queue-overflow-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "5f376f28f94b60895c946bea2e3fc0e6871e59c963a1612ada22be8ade39fea0"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m189-write-side-lifecycle-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "c4669c3ff89568176ec8caf86af14035d5bc25239a4e58a24f52da9b92a31e5d"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m190-write-side-state-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "299346f5ab050c705d47243cadfb05c178ed75a4fb6268c00c4c6ef8f421c014"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m191-graph-telemetry-qemu-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "992e28542a6e2c1d1dd070671244e2b7f2102173e4185177a2c93a5f37c25287"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m192-world-state-hardened-qemu-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "7ab180524aaf146e1f6896a3fa95f8810449d9a3c63d84ee01156f1a56635362"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m193-graph-fault-qemu-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "7e10be303731753f6a6ff0a8ad54d43e1e8fd6ee2e102536e47956ee4d6cc1cd"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m194-durable-execution-recovery-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "1a1f979e6ae19db43b9256ff861ae41a9a76d70c9b10f63cb4f761a459b16b43"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m195-self-healing-hardened-qemu-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "455aaf5c7183d4aea809bf3df698cbea1d39bd9e7cb927505f0007f215f03050"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m196-concurrent-ipc-hardened-qemu-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "2c5ff1c31f3a999d4ea6854bc35562a6494a096fc94e1ecf1d1e8b554bd302ca"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m197-cross-subsystem-hardened-qemu-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "bee99d3d0c1a37de0ed0fa2d974739753dd2fd32f9bb0e8c11bd513561ff7e3d"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m198-world-sync-write-fault-hardened-qemu-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "f8bfb8260d8ddab85fc9a120784bf3813fbeed91e9fcec83ca6804c71480b43a"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m199-graph-world-multiop-hardened-qemu-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "65837498bfe7b1ba22a23caa79307cf7ba9c7621e1a24b5046bb4ea030bffa95"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m200-world-model-router-profile-classification-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "4a95862dd40e1ef6d067e6678e8bf7b1dccae05f853418bd139ede59dc3c2e02"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m201-legacy-qemu-wrapper-hardening-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "8d21d6cb643084a6712810a67b4f649920cd24c92644284e6c64a17b9231b243"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m202-end-to-end-hardened-qemu-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "ceb6b16d72c20bf2ea63fea607e55f8486dcc377f28079a1184476d58aa76c0f"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m203-unqualified-legacy-qemu-fail-closed-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "5b1aee98be2eb966de8e88712f4372f9e7f72a44236480f5509810c71b1ed801"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m204-production-candidate-consistency-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "18ed2fdc374ae73972444a0ff194baceac7f7dcabaa1cf24cb819c575121dfa6"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m205-current-lts-provenance-consistency-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "e875ab673ab8704459b4e6c19e7c88c5b5d363aa0f2bb025ffae5d5f1c385a61"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m206-candidate-provenance-alignment-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "b0193102f5056542d8c51ebacca6d7873b41c6b4d3f196bec62169ae15d92b19"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m207-candidate-evidence-freshness-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "0a42815505aed7f1f6d1b5e45710292d1979b96e055ed432c8d1b73131313a51"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m208-unified-local-candidate-preflight-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "736100b64b33e7e44baf6cacf99c86c0bf818295d87a88c32bfb2df850c93549"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m209-production-gate-local-preflight-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "a82e1220a21311ed9442b9c8990c6ac9e3ad0d0fe2e3669c3836fc954cc037d8"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m210-release-gate-report-integrity-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "b68bb114701e2ff6711dc488c69d9fdd5d0be521d3fc19f1241b86e45aca8135"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m211-local-gate-summary-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "74c379c46a8458a1c2a7af0a98bec74191876b2332882a578cd8e11553d6077d"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m212-local-gate-summary-reproducibility-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "0847e72dac57570298de4ca3158394ad9a508514ff6f8b3bd9615a9d0a81defa"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m213-release-candidate-bundle-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "1a9fef591da5e081bf3ca8682be2d56dcf5a28a6dff0bf04bda2bcf9d37d8955"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m214-release-candidate-archive-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "995d3b36500744d90063e15986f6f316db442c8e2e7af05ca49b9f01a7f82b83"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m215-release-attestation-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "317f5ee0d9f1442e162d38cb8bee8d45a1351ede2417f6711e47dd828d6f3ffb"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m216-release-gate-attestation-integration-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "c86bb8680d656a5bb485de6441b02a499cc6dd3bb9a1c864475259713f5f2264"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m217-external-qualification-intake-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "9fb3620d923daaa2ed376fd459daefef138b4bb71523e5293148e160842ef297"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m218-external-qualification-gate-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "385ccde403426db6e002a7f2c117cb12af15da0e40a8e9a8f42f55b4f0465b3d"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m219-production-readiness-boundary-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "d569ff394d721b01c4573a3e6f05debaf68e342b9bfee8651edf8efb952b4794"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m220-release-gate-boundary-integration-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "957e9c8134ed741f86a446b724871453989e8ceaf741b9f529a738cbdc9ef3e8"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m221-external-blocker-coverage-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "ec14283700192b9872104740e95add905a773b5627e43a02c3c8a6d54af47f1e"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m222-aios-parity-urgency-scheduling-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "a7913a706f53ef593220421ac9a0d39afd2aa0762e2037595d83d9c0f07e7e8c"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m223-inference-objective-contract-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "ef943c4124cf68cdd0571685fa1334d4e71059ced9c9cfb5f9f7d5c3116c5ca6"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m224-preempt-rt-contract-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "f735d0aac0528e9590b348f86d09a793c240be65f99491935158b9a896a33fa5"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m225-kubernetes-fleet-intent-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "27465c3be0e8fc2c9d05987b9359cc3f0f9350b33f6bfbb231ec13554b4d2f78"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m226-accelerator-fabric-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "3c0df054cdcbd1e3a29070f9e3afb1e043eb86775b95cfb2e986ad07a55b5d57"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m227-autonomous-model-action-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "bb2c6430897a406b29737d1bf4b2ee7e188fb7a20b3df6aed4617da15451df06"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m228-sandbox-execution-contract-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "218c37ab9bd9b868f581d6e3a3e2edd6f8e984393047fae439d6c0dddfc26c01"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m229-experience-evidence-contract-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "7fbf842385b671ac0a24885b4e87b83b2e0607e3115e6c82c6e1605cce131b15"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m230-adaptive-model-routing-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "4e74a44feff26dcff9e3dab61fcd7a98654f3b9b640853e20d992206b7f92927"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m231-correlated-recovery-decision-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "586fe5095f272671b56adf5a4cbd10c16e5d0604dc142d740bea32c51f14cc72"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m232-verified-research-consensus-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "5c535b300eb68004b279959185f45f3f2ef62a6778f4e564bd7fa158cad5c406"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m233-world-reconciliation-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "6e2d00c6127040564b613ad2138c6b340f3bd548b28d4921ad2dda81b3de5f3b"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m234-trace-correlation-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "39ef2ad256c9a68bc7cddd75325f257a7e88a3e0be6cee6d5369e6fad459161c"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m235-browser-interaction-verification-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "d95fcd9cff2a1eb88e83b5abda11537846914158cc927839f6810913bfd6a0a7"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m236-multi-agent-coordination-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "392b8543bd43840c81c685cae58c106cc505838beed9430b4bfbf15154b162be"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m237-structured-tool-result-verification-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "d55d6d66547d613709a5dc341697c6d9315d3d241a78a98cb0a73b25dc2b4456"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m238-durable-structured-result-retention-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "cd31845146ec6723b7eb332799e8ddac7bdb6ef53d888f33164d781e792731db"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m239-evidence-bound-kv-tier-telemetry-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "9fd98f656e8d89156d0c025b2f9d6b70b8611d916c9ecbed8ceee8cc42e930d4"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m240-adaptive-resource-budget-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "d6b8e31f08e239dd6b5b773726d2297697a53bbb6fcafa10e8fed046ac80a65d"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m241-agent-runtime-supervisor-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "b1984c22c50feadfde7d584191ca7363804ba79013848a5aad56f9e33b702479"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m242-unified-ai-control-plane-fabric-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "8e25447cd69bcd8ef082b06c14cba573f877356aac57e4c2a2eb2a16e09de2d5"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m243-frontier-adaptive-policy-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "e5d501fcc05c2225184cfdb1907e6f8ad63afff41072df7eec8cf06d9dd9220c"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m244-continuous-optimization-supervisor-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "6c410bf86883f94e2850f9cb0e51fd7f5e83946e36bd841e4fd42279bd3571fa"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m245-platform-coordinator-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "e8d75b2bed60d2175197391606ae58133c8b3f87e9caf2174e1ed8560db4fb10"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m246-ai-safety-control-plane-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "6f354e00e9e18a0930a896872d3d17df793e8d02cb0b744447437b5476104df7"
+      },
+      {
+        "boundary_present": true,
+        "category": "physical_hardware",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m247-portable-hardware-performance-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "5919e26c225276f5e40c94966660e3ff291d720b6c7423e87ca5d9b1f11e57a1"
+      },
+      {
+        "boundary_present": true,
+        "category": "local_control_plane",
+        "external_evidence_verified": false,
+        "path": "tools/faisal-build/evidence/m248-final-integration-validation.json",
+        "production_approval": false,
+        "record_digest": "unbound",
+        "sha256": "23e5c427f9d6a5591ecab00b5e0014d6816180f238b80d7257451bb979743827"
+      }
+    ],
+    "generated_at": 20,
+    "missing_external_categories": [],
+    "policy": {
+      "expires_at": 100,
+      "issued_at": 10,
+      "required_external_categories": [
+        "operator_signing",
+        "physical_hardware",
+        "external_security_review",
+        "live_multihost"
+      ]
+    },
+    "release": {
+      "artifact_digest": "sha256:8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
+      "candidate_manifest_digest": "sha256:ed8a0ae142b21259da8124dc4eca5d16e394761d28bfeefb8de763ecac4ce332",
+      "head": "43aa965e6dfab9c1d4ccf7f343a7f1b17abec282",
+      "tag": "FAISAL-FRONTIER-EVIDENCE-INDEX-2026-08-19"
+    },
+    "release_blockers": [
+      "independent_external_builder_or_attested_farm",
+      "operator_signing_ceremony_trusted_distribution_rotation_revocation",
+      "physical_gpu_npu_vram_iommu_dma_vendor_driver",
+      "independent_external_security_review_signed_disposition",
+      "production_pki_external_multihost_replication_live_kms_attestation",
+      "live_multihost_migration_rollback_irreversible_action_compensation",
+      "operator_owned_cve_workflow_upstream_sync_external_feedback"
+    ],
+    "schema": "org.faisal.release-evidence-index.v1",
+    "snapshot_digest": "sha256:975174669e008e28afd3a0d1db54b5df3d5d155fda97a5f4481cce7b7aeb407b",
+    "state": {
+      "evidence_receipt_is_production_authority": false,
+      "external_evidence_verified": false,
+      "local_index_verified": true,
+      "model_output_is_authority": false,
+      "production_approval": false,
+      "production_ready": false
+    }
+  },
+  "source_candidate_manifest_digest": "sha256:ed8a0ae142b21259da8124dc4eca5d16e394761d28bfeefb8de763ecac4ce332",
+  "upgrade": "release-evidence-index-export-and-verify"
+}
