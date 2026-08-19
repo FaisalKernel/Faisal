@@ -1,0 +1,103 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-intervention-validation-2026-08-19",
+  "recorded_at": "2026-08-19T13:20:00Z",
+  "status": "bounded_execution_intervention_admission_qualified",
+  "objective": "Add provider-neutral fail-closed execution-time intervention admission that binds observed runtime signals to typed bounded controls, target state, recovery checkpoint, policy, generation, expiry, approval, cooldown, post-condition verification, and non-authority boundaries without executing controls.",
+  "research_inputs": [
+    {
+      "source": "https://modelcontextprotocol.io/specification/2026-07-28",
+      "finding": "MCP defines progress, cancellation, and opt-in Tasks for long-running operations with polling, mid-flight input, and durable handles; tool descriptions are untrusted and user consent is required.",
+      "implementation_impact": "FAISAL models intervention admission, approval, bounded lifetime, and post-condition evidence without treating MCP metadata or task handles as authority."
+    },
+    {
+      "source": "https://developers.openai.com/api/docs/guides/agents",
+      "finding": "Production agent runtimes separate loop ownership, sessions, tracing, guardrails, resumable approval flows, state, handoffs, tools/MCP, and evaluation; runs may pause and resume after approval.",
+      "implementation_impact": "FAISAL adds typed intervention decisions, explicit approval gating, attempt limits, generation fences, and completion receipts separate from execution."
+    },
+    {
+      "source": "https://arxiv.org/html/2603.00495v2",
+      "finding": "AI Runtime Infrastructure is an execution-time layer that observes long-horizon state and actively intervenes during execution; passive observability and static orchestration are insufficient for runtime failures and safety risks.",
+      "implementation_impact": "FAISAL adds a bounded intervention contract that complements path governance and task lifecycle without embedding models or autonomous privileged self-modification."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-intervention/faisal_intervention.py",
+    "tests": "tools/faisal-intervention/test_faisal_intervention.py",
+    "benchmark": "tools/faisal-intervention/bench_faisal_intervention.py",
+    "runner": "tools/faisal-build/run_intervention_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "typed pause/checkpoint/downgrade/retry/quarantine/rollback/terminate admission",
+      "observation, target state, proposed state, reason, and recovery checkpoint digest binding",
+      "generation and bounded expiry fences",
+      "one-shot intervention IDs and attempt limits",
+      "target cooldown enforcement",
+      "high-impact blocking approval",
+      "post-condition state and trace completion receipt",
+      "replay/tamper protection and explicit authority boundary"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 6,
+    "unit_tests_passed": 6,
+    "runner": "FAISAL_INTERVENTION_OK",
+    "runner_record_digest": "sha256:e24b34a429cba522c7396b1648a3a477c66d88fa90a6e6eb454557a28d0530f7",
+    "real_task_scenarios": 8,
+    "real_task_scenarios_passed": 8,
+    "intervention_types_exercised": ["pause", "checkpoint", "downgrade", "retry", "quarantine", "rollback", "terminate"],
+    "approval_pause_and_resume": "passed",
+    "cooldown_denial": "passed",
+    "postcondition_completion": "passed",
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 22222.30,
+      "baseline_ungoverned_p95_ns": 32773.00,
+      "admit_mean_ns": 60593.43,
+      "admit_p95_ns": 85310.70,
+      "approval_gate_mean_ns": 62506.75,
+      "approval_gate_p95_ns": 88005.50,
+      "complete_mean_ns": 84129.59,
+      "complete_p95_ns": 121824.45,
+      "scope": "local Python control-plane receipt overhead; excludes actual process control, model, network, memory, accelerator, and kernel scheduling latency"
+    },
+    "kernel_build": "pending_final_run_linux_6.18.44_lts_bzImage",
+    "adjacent_regressions": "pending_final_run"
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "tool_description_is_authority": false,
+    "tool_result_is_authority": false,
+    "observation_is_authority": false,
+    "intervention_receipt_is_execution_authority": false,
+    "intervention_receipt_is_production_authority": false,
+    "execution_performed": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "unrestricted_kernel_self_modification": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-PATH-GOVERNANCE-2026-08-19",
+    "rollback_scope": "remove the intervention module, tests, runner, evidence registration, and metadata; retain prior tagged path-governance release"
+  },
+  "limitations": [
+    "The contract emits admission evidence and does not itself pause, checkpoint, downgrade, retry, quarantine, roll back, or terminate any workload.",
+    "Observed signals, state digests, checkpoint digests, and approvals are caller-supplied and require independently trusted supervisors and enforcement adapters for production trust.",
+    "The benchmark measures local Python receipt overhead and excludes real intervention latency, model serving, network, memory, accelerator, and kernel scheduler performance.",
+    "The real-task scenarios are deterministic control-plane fixtures and do not establish general intelligence, model quality, browser autonomy, robotics, or production agent efficacy.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ]
+}
