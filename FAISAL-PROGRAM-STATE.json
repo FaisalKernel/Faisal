@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "896ed3a9d47a397731280d8ab23220c21ed45f7c",
-  "current_tag": "FAISAL-FRONTIER-AGI-SUPPORT-EVALUATION-2026-08-24",
+  "current_head": "529f83a295993b55f2819c834ce61dddf28a2f6a",
+  "current_tag": "FAISAL-FRONTIER-HARDWARE-QUALIFICATION-2026-08-24",
   "current_abi": 47,
   "operating_loop": [
     "RESEARCH",
@@ -2091,5 +2091,12 @@
   "frontier_agi_support_evaluation_runner": "tools/faisal-build/run_agi_support_evaluation.sh",
   "frontier_agi_support_evaluation_task_pack": "external_sealed_held_out_pack_digest_4b257edf4c282565d3755d2bc3b2dd03427e4ce36c83e566f9f75a33dacdcbfb",
   "frontier_agi_support_evaluation_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-24",
-  "frontier_agi_support_evaluation_authority_boundary": "evaluator_scoring_is_independent_from_adapter_output_model_proposals_cannot_self_promote_privileged_kernel_candidates_are_rejected_and_fixture_authority_is_not_production_approval"
+  "frontier_agi_support_evaluation_authority_boundary": "evaluator_scoring_is_independent_from_adapter_output_model_proposals_cannot_self_promote_privileged_kernel_candidates_are_rejected_and_fixture_authority_is_not_production_approval",
+  "frontier_hardware_qualification": "pass_provider_neutral_procfs_sysfs_pci_iommu_dma_rdma_cxl_nvme_numa_tpm_observation_digest_verification_and_fail_closed_required_capability_checks",
+  "frontier_hardware_qualification_evidence": "tools/faisal-build/evidence/frontier-hardware-qualification-validation-2026-08-24.json",
+  "frontier_hardware_qualification_design": "tools/faisal-hardware-qualify/FAISAL-HARDWARE-QUALIFICATION-DESIGN.md",
+  "frontier_hardware_qualification_runner": "tools/faisal-build/run_hardware_qualification.sh",
+  "frontier_hardware_qualification_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-production-hardware-2026-08-24.md",
+  "frontier_hardware_qualification_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-24-HARDWARE",
+  "frontier_hardware_qualification_authority_boundary": "host_observation_is_not_physical_qualification_vendor_tools_are_not_authority_missing_gpu_npu_iommu_dma_rdma_cxl_nvme_and_tpm_capabilities_remain_explicitly_unqualified_and_production_approval_remains_false"
 }
