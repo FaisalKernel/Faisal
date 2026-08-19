@@ -1,7 +1,7 @@
 {
   "schema": "FAISAL-FRONTIER-EVIDENCE-1",
   "iteration": "frontier-model-routing-runtime-profile-validation-2026-08-19",
-  "recorded_at": "2026-08-19T08:37:12Z",
+  "recorded_at": "2026-08-19T08:44:36Z",
   "status": "pass_runtime_profile_bound_route_evidence_engine_version_cache_parallelism_modality_quantization_accelerator_and_replay_fencing",
   "implementation": {
     "module": "tools/faisal-model-routing/faisal_model_routing.py",
@@ -80,6 +80,12 @@
     }
   ],
   "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
     "model_output_is_authority": false,
     "runtime_profile_is_authority": false,
     "provider_metadata_is_authority": false,
@@ -87,9 +93,9 @@
     "outcome_receipt_is_model_correctness_proof": false,
     "runtime_profile_is_hardware_proof": false,
     "unrestricted_kernel_self_modification": false,
-    "production_approval": false,
     "fake_hardware_evidence": false,
-    "fake_external_review": false
+    "fake_external_review": false,
+    "production_approval": false
   },
   "limitations": [
     "Runtime profiles are caller-supplied descriptions and are not attested observations of an engine, cache, accelerator, quantization mode, or model behavior.",
