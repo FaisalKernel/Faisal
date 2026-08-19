@@ -1,0 +1,91 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-kv-cache-admission-validation-2026-08-19",
+  "recorded_at": "2026-08-19T23:59:00Z",
+  "status": "kv_cache_admission_validated",
+  "objective": "Admit bounded agentic inference cache hints for a session-bound route and qualification surface without pinning memory, executing inference, scheduling hardware, or granting model/provider authority.",
+  "research_inputs": [
+    {
+      "source": "https://arxiv.org/html/2603.21354v2",
+      "finding": "The workload-router-pool architecture separates workload characterization, routing, and inference-pool placement, with agent/session/tool/caller signals and KV-cache topology affecting placement.",
+      "implementation_impact": "FAISAL validates session, route, surface, priority, output-length, prefill, and cache-TTL hints as a separate admission contract."
+    },
+    {
+      "source": "https://developer.nvidia.com/blog/full-stack-optimizations-for-agentic-inference-with-nvidia-dynamo/",
+      "finding": "Agentic inference exhibits repeated KV-cache reuse; structured hints such as priority, estimated output sequence length, speculative prefill, and cache-control TTL can inform an orchestrator.",
+      "implementation_impact": "FAISAL emits a deterministic cache-placement recommendation while explicitly refusing to pin memory, execute inference, or treat provider metadata as authority."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-kv-cache-admission/faisal_kv_cache_admission.py",
+    "tests": "tools/faisal-kv-cache-admission/test_faisal_kv_cache_admission.py",
+    "benchmark": "tools/faisal-kv-cache-admission/bench_faisal_kv_cache_admission.py",
+    "runner": "tools/faisal-build/run_kv_cache_admission_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "session-bound route and qualification-surface cache key",
+      "bounded priority and estimated output-length hints",
+      "bounded speculative-prefill and cache-TTL hints",
+      "session-chain replay and cross-surface reuse rejection",
+      "pinned-session capacity control",
+      "generation, freshness, nonce, tamper, and authority fences",
+      "recommendation-only output with memory_pinned=false and execution_performed=false"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "FAISAL_KV_CACHE_ADMISSION_OK",
+    "runner_record_digest": "sha256:54f58e3ff4860d63cc2be2be81d55ccf97ae67578346e766e36382af859a7f7c",
+    "real_tasks": {
+      "warm_pinned_session": "passed",
+      "followup_session_hint": "passed",
+      "negative_cases_denied": 5,
+      "denials": ["ttl_abuse", "priority_abuse", "output_abuse", "surface_mismatch", "authority"],
+      "memory_pinned": false,
+      "inference_executed": false,
+      "production_approved": false
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 4288.12,
+      "baseline_ungoverned_p95_ns": 6269.00,
+      "admission_mean_ns": 48848.41,
+      "admission_p95_ns": 91895.00,
+      "scope": "local Python control-plane admission overhead; excludes actual KV-cache allocation, model inference, GPU scheduling, network, storage, and production approval latency"
+    },
+    "limitations": [
+      "The contract validates caller-supplied hints and does not observe actual cache residency, hit rate, eviction, GPU memory, or runtime behavior.",
+      "The recommendation does not pin memory or reserve accelerator capacity.",
+      "The benchmark does not demonstrate improved TTFT, throughput, tokens/sec, utilization, or energy efficiency.",
+      "The work is a user-space/control-plane contract and does not establish AGI capability, production approval, physical hardware qualification, or Linux superiority."
+    ]
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "provider_metadata_is_authority": false,
+    "cache_hint_is_execution_authority": false,
+    "cache_hint_is_policy_authority": false,
+    "memory_pinned": false,
+    "inference_executed": false,
+    "production_approved": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-RUNTIME-ASSURANCE-2026-08-19",
+    "rollback_scope": "remove the KV-cache admission module, tests, benchmark, runner, evidence registration, and metadata; retain the runtime-assurance release tag"
+  }
+}

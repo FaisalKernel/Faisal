@@ -2384,5 +2384,13 @@
   "frontier_runtime_assurance_benchmark": "tools/faisal-runtime-assurance/bench_faisal_runtime_assurance.py",
   "frontier_runtime_assurance_runner": "tools/faisal-build/run_runtime_assurance_validation.sh",
   "frontier_runtime_assurance_rollback_checkpoint": "FAISAL-FRONTIER-EVIDENCE-FRESHNESS-2026-08-19",
-  "frontier_runtime_assurance_authority_boundary": "runtime_assurance_receipts_are_decision_evidence_only_observations_model_outputs_and_tool_results_never_become_truth_execution_policy_attestation_or_production_authority_the_contract_does_not_execute_side_effects_or_mutate_privileged_code"
+  "frontier_runtime_assurance_authority_boundary": "runtime_assurance_receipts_are_decision_evidence_only_observations_model_outputs_and_tool_results_never_become_truth_execution_policy_attestation_or_production_authority_the_contract_does_not_execute_side_effects_or_mutate_privileged_code",
+  "frontier_kv_cache_admission": "pass_session_bound_route_surface_priority_output_length_speculative_prefill_ttl_replay_tamper_capacity_and_non_authority_controls",
+  "frontier_kv_cache_admission_evidence": "tools/faisal-build/evidence/frontier-kv-cache-admission-validation-2026-08-19.json",
+  "frontier_kv_cache_admission_module": "tools/faisal-kv-cache-admission/faisal_kv_cache_admission.py",
+  "frontier_kv_cache_admission_tests": "tools/faisal-kv-cache-admission/test_faisal_kv_cache_admission.py",
+  "frontier_kv_cache_admission_benchmark": "tools/faisal-kv-cache-admission/bench_faisal_kv_cache_admission.py",
+  "frontier_kv_cache_admission_runner": "tools/faisal-build/run_kv_cache_admission_validation.sh",
+  "frontier_kv_cache_admission_rollback_checkpoint": "FAISAL-FRONTIER-RUNTIME-ASSURANCE-2026-08-19",
+  "frontier_kv_cache_admission_authority_boundary": "cache_hint_recommendations_are_evidence_only_model_output_provider_metadata_and_cache_hints_never_become_truth_execution_policy_memory_pinning_attestation_or_production_authority_the_contract_does_not_execute_inference_or_pin_memory"
 }
