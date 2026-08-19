@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "0b2563f6a7cdeedbf0d09ca4a2c6b027ddb845f4",
-  "current_tag": "FAISAL-FRONTIER-HARDWARE-QUALIFICATION-2026-08-24",
+  "current_head": "bf88f7cc28bf0f550a5c1631b72f2aa0ebff13d8",
+  "current_tag": "FAISAL-FRONTIER-MCP-CONTRACT-2026-08-25",
   "current_abi": 47,
   "operating_loop": [
     "RESEARCH",
@@ -2098,5 +2098,13 @@
   "frontier_hardware_qualification_runner": "tools/faisal-build/run_hardware_qualification.sh",
   "frontier_hardware_qualification_research_archive": "/home/ubuntu/agi-kernel/build/frontier-research-production-hardware-2026-08-24.md",
   "frontier_hardware_qualification_rollback_checkpoint": "FAISAL-FRONTIER-BASE-2026-08-24-HARDWARE",
-  "frontier_hardware_qualification_authority_boundary": "host_observation_is_not_physical_qualification_vendor_tools_are_not_authority_missing_gpu_npu_iommu_dma_rdma_cxl_nvme_and_tpm_capabilities_remain_explicitly_unqualified_and_production_approval_remains_false"
+  "frontier_hardware_qualification_authority_boundary": "host_observation_is_not_physical_qualification_vendor_tools_are_not_authority_missing_gpu_npu_iommu_dma_rdma_cxl_nvme_and_tpm_capabilities_remain_explicitly_unqualified_and_production_approval_remains_false",
+  "frontier_mcp_contract_validation": "pass_bounded_provider_neutral_tool_schema_scope_collision_call_output_pagination_and_digest_validation_with_untrusted_annotation_boundary",
+  "frontier_mcp_contract_validation_evidence": "tools/faisal-build/evidence/frontier-mcp-contract-validation-2026-08-25.json",
+  "frontier_mcp_contract_validation_module": "tools/faisal-mcp-contract/faisal_mcp_contract.py",
+  "frontier_mcp_contract_validation_tests": "tools/faisal-mcp-contract/test_faisal_mcp_contract.py",
+  "frontier_mcp_contract_validation_runner": "tools/faisal-build/run_mcp_contract_validation.sh",
+  "frontier_mcp_contract_validation_benchmark": "tools/faisal-mcp-contract/bench_faisal_mcp_contract.py",
+  "frontier_mcp_contract_validation_rollback_checkpoint": "FAISAL-FRONTIER-HARDWARE-QUALIFICATION-2026-08-24",
+  "frontier_mcp_contract_validation_authority_boundary": "model_output_tool_annotations_provider_metadata_and_tool_results_remain_untrusted_data_scope_policy_is_caller_supplied_tool_execution_is_out_of_scope_and_production_approval_remains_false"
 }
