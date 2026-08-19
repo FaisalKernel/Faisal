@@ -1,0 +1,105 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-artifact-lineage-validation-2026-08-19",
+  "recorded_at": "2026-08-19T16:20:00Z",
+  "status": "immutable_artifact_lineage_refinement_qualified",
+  "objective": "Add provider-neutral fail-closed artifact lineage and refinement admission that preserves terminal task immutability, parent/child artifact identity, context continuity, scope attenuation, monotonic versions, acceptance evidence, generation and expiry fences, replay/tamper protection, and non-authority boundaries.",
+  "research_inputs": [
+    {
+      "source": "https://a2a-protocol.org/latest/specification/",
+      "finding": "A2A v1.0 defines asynchronous task operations, lifecycle, cancellation, idempotency, capability validation, context/task identifiers, artifact exchange, and authentication/authorization objects for opaque agent collaboration.",
+      "implementation_impact": "FAISAL models task/artifact lineage and admission evidence without creating tasks, invoking agents, or implementing a network protocol binding."
+    },
+    {
+      "source": "https://a2a-protocol.org/latest/topics/life-of-a-task/",
+      "finding": "Terminal tasks are immutable and cannot restart; refinements create new tasks in the same context; artifact references and version history are needed to avoid ambiguity and track mutation.",
+      "implementation_impact": "FAISAL requires terminal parent tasks, accepted or superseded parent artifacts, same-context child refinement, monotonic artifact version, stable artifact name, and explicit acceptance evidence."
+    },
+    {
+      "source": "https://learn.microsoft.com/en-us/azure/durable-task/sdks/durable-task-for-ai-agents",
+      "finding": "Durable agent runtimes checkpoint state transitions and resume after failures while separating deterministic workflow control from agent-directed loops.",
+      "implementation_impact": "FAISAL keeps refinement admission and lineage evidence separate from task execution, checkpointing, artifact mutation, and agent-directed control."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-artifact-lineage/faisal_artifact_lineage.py",
+    "tests": "tools/faisal-artifact-lineage/test_faisal_artifact_lineage.py",
+    "benchmark": "tools/faisal-artifact-lineage/bench_faisal_artifact_lineage.py",
+    "runner": "tools/faisal-build/run_artifact_lineage_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "terminal task immutability gate",
+      "accepted/superseded artifact parent gate",
+      "parent/child task and artifact digest binding",
+      "same-context refinement continuity",
+      "scope attenuation and tenant continuity",
+      "monotonic artifact version and lineage depth",
+      "explicit acceptance evidence requirement",
+      "generation/expiry/ttl/replay/tamper protection",
+      "task/artifact/agent/tool/model non-authority boundary"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 5,
+    "unit_tests_passed": 5,
+    "runner": "FAISAL_ARTIFACT_LINEAGE_OK",
+    "runner_record_digest": "sha256:c52d797de495e3698dcd970a1530da0b50e6ad0203e4949a9ac71cf008b34b85",
+    "real_task": {
+      "valid_refinement": "passed",
+      "parent_version": 1,
+      "child_version": 2,
+      "task_created": false,
+      "artifact_mutated": false,
+      "negative_cases": 6,
+      "negative_cases_denied": 6,
+      "denials": ["nonterminal_parent", "provisional_artifact", "context_mismatch", "version_gap", "missing_acceptance", "expired"]
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 24453.97,
+      "baseline_ungoverned_p95_ns": 37244.65,
+      "lineage_refinement_admit_mean_ns": 93100.85,
+      "lineage_refinement_admit_p95_ns": 133456.65,
+      "scope": "local Python control-plane receipt overhead; excludes task creation, artifact mutation, agents, tools, network, storage, models, and kernel scheduling latency"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_sha256_8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
+    "adjacent_regressions": {"model_routing":"pass","memory_write":"pass","memory_read":"pass","checkpoint":"pass","delegation":"pass","trace_conformance":"pass","trace_certification":"pass","observation_trust":"pass","portable_memory":"pass","mcp_contract":"pass","snapshot_index":"pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"}
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "artifact_content_is_authority": false,
+    "agent_output_is_authority": false,
+    "acceptance_evidence_is_execution_authority": false,
+    "lineage_receipt_is_policy_authority": false,
+    "lineage_receipt_is_production_authority": false,
+    "task_created": false,
+    "artifact_mutated": false,
+    "agents_invoked": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-MEMORY-PROMOTION-2026-08-19",
+    "rollback_scope": "remove the artifact-lineage module, tests, runner, evidence registration, and metadata; retain prior tagged memory-promotion release"
+  },
+  "limitations": [
+    "The contract records refinement admission evidence and does not create the child task or mutate the artifact store.",
+    "Acceptance evidence, task state, artifact state, lineage digests, and scope claims are caller-supplied and require trusted collection and enforcement for production.",
+    "The benchmark measures local Python control-plane receipt overhead and excludes actual durable storage, distributed coordination, artifact transfer, agents, tools, models, network, and kernel scheduler performance.",
+    "The real-task validation is a deterministic local fixture and does not establish artifact quality, general intelligence, browser autonomy, robotics, or production agent efficacy.",
+    "No physical accelerator, TPM, secure enclave, production KMS, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ]
+}
