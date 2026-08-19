@@ -1,0 +1,94 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-handoff-authorization-validation-2026-08-19",
+  "recorded_at": "2026-08-19T23:59:00Z",
+  "status": "handoff_authorization_preservation_admission_validated",
+  "objective": "Preserve original-request authorization across multi-agent handoffs by allowing only policy-bounded or attenuated scopes, selectively disclosing approved memory, and emitting explicit Allow, Require-Confirmation, or Deny verdicts.",
+  "research_inputs": [
+    {
+      "source": "https://arxiv.org/html/2605.11032v1",
+      "finding": "Portable agent memory requires provenance-verified transfer, capability-scoped selective disclosure, and an injection-resistant re-hydration pipeline that verifies, filters, ranks, compresses, formats, frames, and only then injects memory.",
+      "implementation_impact": "FAISAL verifies disclosed memory digests and a disclosure budget at handoff admission; this contract does not transfer, retrieve, frame, or inject memory."
+    },
+    {
+      "source": "https://arxiv.org/html/2608.07556",
+      "finding": "MasDrift makes authorization preservation measurable across multi-agent architectures and formalizes Allow, Require-Confirmation, and Deny verdicts. Delegated policy may be preserved or narrowed but never widened; original-request anchoring reduces unauthorized actions.",
+      "implementation_impact": "FAISAL adds original-request and source-policy anchoring, monotonic scope attenuation, policy-classified verdicts, provenance checks, and replay/freshness fences."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-handoff-authorization/faisal_handoff_authorization.py",
+    "tests": "tools/faisal-handoff-authorization/test_faisal_handoff_authorization.py",
+    "benchmark": "tools/faisal-handoff-authorization/bench_faisal_handoff_authorization.py",
+    "runner": "tools/faisal-build/run_handoff_authorization_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "original-request and source-policy provenance binding",
+      "parent-scope containment and monotonic attenuation",
+      "Allow, Require-Confirmation, and Deny verdicts",
+      "selective memory disclosure digest and budget checks",
+      "task, generation, freshness, trace, replay, and authority fences",
+      "receipt-only verdict output with memory_transferred=false and capabilities_delegated=false"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 4,
+    "unit_tests_passed": 4,
+    "runner": "FAISAL_HANDOFF_AUTHORIZATION_OK",
+    "runner_record_digest": "sha256:6c3bd7180d6b8a70f4f221842cac3ea1baab48aaeaf3c7571f87bc71e91b3cd6",
+    "real_tasks": {
+      "allow": "passed",
+      "require_confirmation": "passed",
+      "deny": "passed",
+      "scope_attenuated": true,
+      "memory_transferred": false,
+      "capabilities_delegated": false,
+      "tools_executed": false,
+      "negative_cases_denied": 7,
+      "denials": ["scope_widening", "provenance", "memory_disclosure", "generation", "stale", "authority", "replay"],
+      "production_approved": false
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 9583.94,
+      "baseline_ungoverned_p95_ns": 19738.00,
+      "handoff_authorization_admission_mean_ns": 64483.60,
+      "handoff_authorization_admission_p95_ns": 112966.00,
+      "scope": "local Python control-plane admission overhead; excludes memory transfer, capability issuance, agent execution, tools, network, storage, and production approval latency"
+    },
+    "limitations": [
+      "The contract verifies caller-supplied provenance and digest references; it does not independently authenticate agents or cryptographically issue capabilities.",
+      "The contract emits a verdict but does not perform an actual handoff, transfer memory, delegate capabilities, or invoke a reference monitor.",
+      "The benchmark does not establish unauthorized-action rates, handoff completion, memory quality, tool success, AGI capability, production efficacy, or Linux superiority.",
+      "No physical hardware, external reviewer, independent builder, live multihost environment, or production approval was exercised."
+    ]
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "agent_claim_is_authority": false,
+    "memory_is_authority": false,
+    "authorization_receipt_is_execution_authority": false,
+    "authorization_receipt_is_policy_authority": false,
+    "memory_transferred": false,
+    "capabilities_delegated": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approved": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-ROUTE-RECEIPT-2026-08-19",
+    "rollback_scope": "remove the handoff-authorization module, tests, benchmark, runner, evidence registration, and metadata; retain the route-receipt release tag"
+  }
+}

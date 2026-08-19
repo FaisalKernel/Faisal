@@ -2424,5 +2424,13 @@
   "frontier_route_receipt_benchmark": "tools/faisal-route-receipt/bench_faisal_route_receipt.py",
   "frontier_route_receipt_runner": "tools/faisal-build/run_route_receipt_validation.sh",
   "frontier_route_receipt_rollback_checkpoint": "FAISAL-FRONTIER-MEMORY-INTERVENTION-2026-08-19",
-  "frontier_route_receipt_authority_boundary": "route_receipts_are_auditable_evidence_only_model_output_provider_metadata_and_confidence_never_become_truth_execution_policy_or_production_authority_the_contract_does_not_select_models_invoke_inference_or_expose_hidden_reasoning"
+  "frontier_route_receipt_authority_boundary": "route_receipts_are_auditable_evidence_only_model_output_provider_metadata_and_confidence_never_become_truth_execution_policy_or_production_authority_the_contract_does_not_select_models_invoke_inference_or_expose_hidden_reasoning",
+  "frontier_handoff_authorization": "pass_original_request_source_policy_parent_scope_attenuation_memory_disclosure_allow_confirmation_deny_freshness_replay_and_non_authority_controls",
+  "frontier_handoff_authorization_evidence": "tools/faisal-build/evidence/frontier-handoff-authorization-validation-2026-08-19.json",
+  "frontier_handoff_authorization_module": "tools/faisal-handoff-authorization/faisal_handoff_authorization.py",
+  "frontier_handoff_authorization_tests": "tools/faisal-handoff-authorization/test_faisal_handoff_authorization.py",
+  "frontier_handoff_authorization_benchmark": "tools/faisal-handoff-authorization/bench_faisal_handoff_authorization.py",
+  "frontier_handoff_authorization_runner": "tools/faisal-build/run_handoff_authorization_validation.sh",
+  "frontier_handoff_authorization_rollback_checkpoint": "FAISAL-FRONTIER-ROUTE-RECEIPT-2026-08-19",
+  "frontier_handoff_authorization_authority_boundary": "handoff_authorization_receipts_are_verdict_evidence_only_original_agent_claims_and_memory_never_become_truth_execution_policy_or_production_authority_the_contract_does_not_transfer_memory_issue_capabilities_execute_tools_or_contact_external_services"
 }
