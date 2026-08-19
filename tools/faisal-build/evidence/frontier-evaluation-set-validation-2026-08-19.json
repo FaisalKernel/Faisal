@@ -1,0 +1,109 @@
+{
+  "project": "FAISAL",
+  "milestone": "frontier-evaluation-set-validation-2026-08-19",
+  "recorded_at": "2026-08-19T21:20:00Z",
+  "status": "evaluation_set_admission_qualified",
+  "objective": "Add a bounded evaluation-set admission ledger binding immutable task/split/grader manifests to policy generation, coverage, independence, overlap, contamination, expiry, and complete candidate results without creating datasets, executing models, grading traces, or approving releases.",
+  "research_inputs": [
+    {
+      "source": "https://developers.openai.com/api/docs/guides/agent-evals",
+      "finding": "Trace debugging should precede repeatable dataset and evaluation runs when benchmarking workflow changes over time.",
+      "implementation_impact": "The contract binds a stable task-set, split, grader, baseline/candidate, task-result, and trace-result digest but does not itself execute or grade them."
+    },
+    {
+      "source": "https://developers.openai.com/api/docs/guides/trace-grading",
+      "finding": "Structured trace grading supports workflow-level regression analysis across tool calls, handoffs, safety policies, and end-to-end behavior.",
+      "implementation_impact": "Result verification requires complete task coverage and zero safety failures while treating grader and trace receipts as untrusted evidence rather than authority."
+    },
+    {
+      "source": "https://arxiv.org/html/2605.27328v1",
+      "finding": "Governed runtime evolution requires lifecycle state, validation, traceability, evaluation, dependencies, and rollback rather than unrestricted self-modification.",
+      "implementation_impact": "The manifest is generation/expiry bound, requires independent split/grader declarations, rejects overlap/contamination, and preserves a rollback checkpoint."
+    }
+  ],
+  "implementation": {
+    "module": "tools/faisal-evaluation-set/faisal_evaluation_set.py",
+    "tests": "tools/faisal-evaluation-set/test_faisal_evaluation_set.py",
+    "benchmark": "tools/faisal-evaluation-set/bench_faisal_evaluation_set.py",
+    "runner": "tools/faisal-build/run_evaluation_set_validation.sh",
+    "platform_abi": 47,
+    "kernel_abi_changed": false,
+    "privileged_kernel_code_changed": false,
+    "features": [
+      "immutable task/split/grader manifest digest binding",
+      "policy generation and platform ABI binding",
+      "minimum task count and coverage gates",
+      "zero overlap and contamination policy gates",
+      "independent split and grader requirements",
+      "bounded manifest TTL and expiry",
+      "complete-result and zero-safety-failure verification",
+      "manifest/result/nonce replay and digest tamper protection",
+      "explicit no-dataset/no-model/no-grader/no-release-authority boundary"
+    ]
+  },
+  "measured_validation": {
+    "syntax_check": "pass",
+    "unit_tests": 5,
+    "unit_tests_passed": 5,
+    "runner": "FAISAL_EVALUATION_SET_OK",
+    "runner_record_digest": "sha256:7358a7bae71ab449e37d4a444ee9c05e83e1670415c841f1aeaf11e442202a9b",
+    "real_tasks": {
+      "valid_manifest": "passed",
+      "complete_result": "passed",
+      "datasets_created": false,
+      "models_invoked": false,
+      "traces_graded": false,
+      "release_approved": false,
+      "negative_cases": 9,
+      "negative_cases_denied": 9,
+      "denials": ["task_count", "coverage", "overlap", "contamination", "independent_split", "independent_grader", "incomplete_result", "safety_failure", "authority"]
+    },
+    "benchmark": {
+      "iterations": 1000,
+      "baseline_ungoverned_mean_ns": 26580.33,
+      "baseline_ungoverned_p95_ns": 41059.15,
+      "manifest_admit_mean_ns": 136545.75,
+      "manifest_admit_p95_ns": 265617.00,
+      "result_verify_mean_ns": 166870.64,
+      "result_verify_p95_ns": 314577.10,
+      "scope": "local Python control-plane manifest/result verification overhead; excludes dataset creation, model invocation, trace grading, network, storage, accelerators, kernel scheduling, and release approval latency"
+    },
+    "kernel_build": "pass_linux_6.18.44_lts_bzImage_sha256_8990b85d777d52b144985eb59b26793d44d799041068fbbf36457a8690bc2d7c",
+    "adjacent_regressions": {"model_routing":"pass","memory_write":"pass","memory_read":"pass","checkpoint":"pass","delegation":"pass","trace_conformance":"pass","trace_certification":"pass","observation_trust":"pass","portable_memory":"pass","mcp_contract":"pass","snapshot_index":"pass_fuzz_selftest_asan_ubsan_tsan_qemu_m82_m83"}
+  },
+  "boundary": {
+    "independent_builder": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "production_approval": false
+  },
+  "security_boundaries": {
+    "model_output_is_authority": false,
+    "grader_output_is_authority": false,
+    "evaluation_receipt_is_deployment_authority": false,
+    "evaluation_receipt_is_policy_authority": false,
+    "evaluation_receipt_is_production_authority": false,
+    "dataset_manifest_is_truth": false,
+    "datasets_created": false,
+    "models_invoked": false,
+    "traces_graded": false,
+    "release_approved": false,
+    "tools_executed": false,
+    "external_services_contacted": false,
+    "production_approval": false
+  },
+  "rollback": {
+    "checkpoint_tag": "FAISAL-FRONTIER-SELF-IMPROVEMENT-2026-08-19",
+    "rollback_scope": "remove the evaluation-set module, tests, runner, evidence registration, and metadata; retain prior tagged self-improvement release"
+  },
+  "limitations": [
+    "The ledger verifies caller-supplied manifests and results; it does not create datasets, sample tasks, execute models, grade traces, or verify that independence and contamination claims are true.",
+    "No external grader, dataset service, model provider, trace backend, cryptographic signer, or remote anchor was contacted.",
+    "The benchmark measures local Python control-plane overhead and excludes evaluation execution, model, tool, network, storage, accelerator, kernel scheduler, and approval latency.",
+    "The real-task validation is a deterministic local fixture and does not establish agent quality, general intelligence, browser autonomy, robotics, or production efficacy.",
+    "No physical accelerator, TPM, secure enclave, independent builder, live multihost deployment, or independent external security review was exercised.",
+    "This evidence does not claim AGI capability, production approval, or superiority to Linux."
+  ]
+}
