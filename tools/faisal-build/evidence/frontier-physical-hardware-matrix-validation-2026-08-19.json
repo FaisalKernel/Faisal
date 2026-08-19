@@ -3,19 +3,29 @@
   "benchmark": {
     "baseline_manifest_digest": {
       "iterations": 1000,
-      "mean_ns": 5885.75,
-      "p95_ns": 12925.0
+      "mean_ns": 5095.54,
+      "p95_ns": 7408.0
     },
     "nine_capability_admission": {
       "iterations": 1000,
-      "mean_ns": 945263.34,
-      "p95_ns": 1191347.0
+      "mean_ns": 923585.31,
+      "p95_ns": 1075193.0
     },
     "nine_capability_status": {
       "iterations": 1000,
-      "mean_ns": 954995.39,
-      "p95_ns": 1145750.0
+      "mean_ns": 988115.81,
+      "p95_ns": 1277310.0
     }
+  },
+  "boundary": {
+    "independent_hardware_review": false,
+    "physical_gpu_qualification": false,
+    "physical_iommu_dma_qualification": false,
+    "physical_npu_qualification": false,
+    "physical_numa_tpm_qualification": false,
+    "physical_power_thermal_qualification": false,
+    "physical_rdma_cxl_nvme_qualification": false,
+    "production_approval": false
   },
   "external_reference_fixture": {
     "blockers": [
@@ -49,7 +59,7 @@
     },
     "path": "/home/ubuntu/agi-kernel/build/frontier/physical-hardware-matrix-2026-08-19/host-observation/live-host-observation.json",
     "physical_qualification": false,
-    "record_digest": "747682aba85efa47c785f4d51ae147ff7c57f5b82cb9b754fd133fb0bc9a4741"
+    "record_digest": "b9c1358fb521ca68d92e3c7ac5163c1f5ef0bf49ca61baac77afcf4cc29ca495"
   },
   "local_observation_fixture": {
     "blockers": [
@@ -72,7 +82,7 @@
   "policy": {
     "artifact_digest": "sha256:403d3e047ea66739b2968686ea0b58c26b0a39f82cc33ddf3b0d7aa777cd8eb1",
     "matrix_id": "physical-matrix-2026-08-19",
-    "release_head": "d9970c5f4ede45dff7d3d82c96063fa53785a7a1",
+    "release_head": "9915de9a71c1150286962003229355f70144bd78",
     "release_tag": "FAISAL-FRONTIER-PHYSICAL-HARDWARE-MATRIX-2026-08-19",
     "required_capabilities": [
       "gpu",
@@ -95,7 +105,7 @@
     ],
     "trusted_observer_id": "independent-hardware-observer-required"
   },
-  "record_digest": "sha256:41b4a0cacb5558f97676a746635c81293f0654d236d9ca0b26b608a7ffcd485d",
+  "record_digest": "sha256:062e3b855fb13e51aeb596328f02cb52b1a8c4cd62b278a6daee563b4a3d1730",
   "recorded_at": "2026-08-19T23:59:00Z",
   "research_provenance": [
     {
