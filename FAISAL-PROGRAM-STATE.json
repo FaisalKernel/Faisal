@@ -1,12 +1,12 @@
 {
   "project": "FAISAL",
   "program": "autonomous AGI-native Linux operating-system implementation",
-  "updated": "2026-08-19",
+  "updated": "2026-08-20",
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "a224ddae316038d18ef06be791096026064306b4",
-  "current_tag": "FAISAL-FRONTIER-EVIDENCE-INDEX-2026-08-19-R2",
+  "current_head": "cd0761e9f5cd355942c23643df6e0b74990208ce",
+  "current_tag": "FAISAL-FRONTIER-AGENT-CAPABILITY-ATTESTATION-2026-08-20-R1",
   "current_abi": 47,
   "operating_loop": [
     "RESEARCH",
@@ -2497,5 +2497,14 @@
   "frontier_signing_ceremony_benchmark": "tools/faisal-signing-ceremony/bench_faisal_signing_ceremony.py",
   "frontier_signing_ceremony_runner": "tools/faisal-build/run_signing_ceremony_validation.sh",
   "frontier_signing_ceremony_rollback_checkpoint": "FAISAL-FRONTIER-QUALIFICATION-INTAKE-2026-08-19",
-  "frontier_signing_ceremony_authority_boundary": "signing_ceremony_receipts_are_preparation_and_evidence_only_the_contract_does_not_access_private_keys_create_signatures_contact_transparency_logs_authenticate_operators_or_issue_production_approval_real_operator_ceremony_remains_required"
+  "frontier_signing_ceremony_authority_boundary": "signing_ceremony_receipts_are_preparation_and_evidence_only_the_contract_does_not_access_private_keys_create_signatures_contact_transparency_logs_authenticate_operators_or_issue_production_approval_real_operator_ceremony_remains_required",
+  "frontier_agent_capability_attestation": "pass_provider_neutral_agent_identity_parentage_selector_purpose_capability_attenuation_lifecycle_generation_replay_and_non_authority_controls",
+  "frontier_agent_capability_attestation_evidence": "tools/faisal-build/evidence/frontier-agent-capability-attestation-validation-2026-08-20.json",
+  "frontier_agent_capability_attestation_research": "tools/faisal-build/evidence/research-agent-capability-attestation-2026-08-20.md",
+  "frontier_agent_capability_attestation_module": "tools/faisal-agent-capability-attestation/faisal_agent_capability_attestation.py",
+  "frontier_agent_capability_attestation_tests": "tools/faisal-agent-capability-attestation/test_faisal_agent_capability_attestation.py",
+  "frontier_agent_capability_attestation_benchmark": "tools/faisal-agent-capability-attestation/bench_faisal_agent_capability_attestation.py",
+  "frontier_agent_capability_attestation_runner": "tools/faisal-build/run_agent_capability_attestation_validation.sh",
+  "frontier_agent_capability_attestation_rollback_checkpoint": "FAISAL-FRONTIER-EVIDENCE-INDEX-2026-08-19-R2",
+  "frontier_agent_capability_attestation_authority_boundary": "agent_attestation_receipts_are_provider_neutral_validation_evidence_only_the_contract_does_not_issue_svids_or_credentials_contact_identity_providers_attest_hardware_execute_agents_authorize_tools_or_convert_model_output_selectors_or_receipts_into_execution_policy_or_production_authority"
 }
