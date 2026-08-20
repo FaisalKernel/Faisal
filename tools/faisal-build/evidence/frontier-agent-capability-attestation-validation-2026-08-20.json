@@ -1,0 +1,73 @@
+{
+  "benchmark": {
+    "baseline": "new provider-neutral contract; no prior directly comparable agent-attestation contract",
+    "iterations": 1000,
+    "log": "/home/ubuntu/agi-kernel/build/frontier/agent-capability-attestation-validation-2026-08-20-release-r2/benchmark.log"
+  },
+  "boundary": {
+    "independent_builder": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "production_approval": false
+  },
+  "generation": 11,
+  "real_tasks": {
+    "all_expected": true,
+    "negative_cases": {
+      "capability_escalation": "denied",
+      "generation_mismatch": "denied",
+      "identity_mismatch": "denied",
+      "parent_mismatch": "denied",
+      "purpose_mismatch": "denied",
+      "replay": "denied",
+      "selector_mismatch": "denied"
+    },
+    "valid_agent_attestation": {
+      "capability_attenuation_verified": true,
+      "credential_issued": false,
+      "execution_performed": false,
+      "identity_verified": true,
+      "lifecycle_verified": true,
+      "parentage_verified": true,
+      "production_approved": false,
+      "purpose_verified": true,
+      "selector_verified": true,
+      "status": "attested"
+    }
+  },
+  "record_digest": "sha256:ca25c408415f6075422d67238f17d7f2a135d5c8b08de5a0b274f4ffc4b94655",
+  "recorded_at": "2026-08-20T12:00:00Z",
+  "research": "tools/faisal-build/evidence/research-agent-capability-attestation-2026-08-20.md",
+  "rollback_checkpoint": "FAISAL-FRONTIER-EVIDENCE-INDEX-2026-08-19-R2",
+  "safety": {
+    "agent_identity_is_execution_authority": false,
+    "attestation_is_execution_authority": false,
+    "attestation_is_policy_authority": false,
+    "credential_issued": false,
+    "execution_performed": false,
+    "external_identity_provider_contacted": false,
+    "hardware_attested": false,
+    "model_output_is_authority": false,
+    "production_approval": false,
+    "workload_selectors_are_hardware_proof": false
+  },
+  "schema": "org.faisal.frontier-validation.v1",
+  "security_boundaries": {
+    "attestation_is_execution_authority": false,
+    "attestation_is_policy_authority": false,
+    "fake_external_review": false,
+    "fake_hardware_evidence": false,
+    "model_output_is_authority": false,
+    "optimizer_output_is_authority": false,
+    "production_approval": false,
+    "provider_metadata_is_authority": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "unit_tests": {
+    "failed": 0,
+    "passed": 4
+  },
+  "upgrade": "agent-capability-attestation"
+}

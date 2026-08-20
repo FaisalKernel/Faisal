@@ -107,6 +107,7 @@ def main() -> None:
         'm247-portable-hardware-performance-validation.json',
         'm248-final-integration-validation.json',
         'frontier-tool-context-admission-validation-2026-08-19.json',
+        'frontier-agent-capability-attestation-validation-2026-08-20.json',
         'frontier-execution-memory-snapshot-index-validation-2026-08-20.json',
         'frontier-handoff-approval-lease-validation-2026-08-21.json',
         'frontier-deterministic-plan-admission-validation-2026-08-22.json',
