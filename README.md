@@ -62,6 +62,67 @@ FAISAL extends the Linux-derived platform around those questions. It favors boun
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
+```mermaid
+flowchart TB
+    MODEL["Model output\nInformational input only"]
+
+    subgraph WORKLOAD["Applications and workload layer"]
+        APP["Agent runtimes · model servers\nMCP clients · robotics stacks · services"]
+    end
+
+    subgraph SUPERVISION["FAISAL userspace supervision"]
+        SUP["Objective, policy, memory,\nrecovery, and deployment supervision"]
+    end
+
+    subgraph CONTRACTS["Evidence-bound control-plane contracts"]
+        AUTH["Intent-bound authority\nleases and capability provenance"]
+        STATE["Memory admission · routing receipts\ncheckpoint fences · trace certificates"]
+        TOOL["Tool-definition and data-flow\nadmission contracts"]
+    end
+
+    subgraph KERNEL["Linux-derived kernel / ABI 47"]
+        PRIMITIVES["Process · memory · scheduling · IPC\ndevice boundaries · lifecycle primitives"]
+    end
+
+    subgraph PLATFORM["Platform resources"]
+        RES["CPU · memory · storage\nnetwork · devices"]
+    end
+
+    subgraph QUALIFICATION["External production qualification"]
+        QUAL["Independent builder · operator signing\nphysical hardware · external security review\nlive multihost qualification"]
+        RELEASE{"Production authority\nFALSE until evidence exists"}
+    end
+
+    MODEL -. "may inform; never authorizes" .-> SUP
+    APP --> SUP
+    SUP --> AUTH
+    SUP --> STATE
+    SUP --> TOOL
+    AUTH --> PRIMITIVES
+    STATE --> PRIMITIVES
+    TOOL --> PRIMITIVES
+    PRIMITIVES --> RES
+    RES -. "measured qualification evidence" .-> QUAL
+    AUTH -. "release and provenance inputs" .-> QUAL
+    STATE -. "validation and recovery inputs" .-> QUAL
+    QUAL --> RELEASE
+
+    classDef workload fill:#e8f1f4,stroke:#35616d,color:#10262d,stroke-width:1.5px;
+    classDef supervision fill:#eaf3e3,stroke:#547c43,color:#1b3214,stroke-width:1.5px;
+    classDef contract fill:#f8f3dd,stroke:#887832,color:#332d0b,stroke-width:1.5px;
+    classDef kernel fill:#e9eaef,stroke:#4d596d,color:#1f2735,stroke-width:1.5px;
+    classDef resource fill:#edf0f0,stroke:#617577,color:#203335,stroke-width:1.5px;
+    classDef boundary fill:#f8e7e3,stroke:#ab4a40,color:#4f1713,stroke-width:2px;
+    class MODEL,APP workload;
+    class SUP supervision;
+    class AUTH,STATE,TOOL contract;
+    class PRIMITIVES kernel;
+    class RES resource;
+    class QUAL,RELEASE boundary;
+```
+
+> **Architecture boundary:** this diagram shows software layers and qualification inputs. It does not assert live provider execution, physical hardware qualification, independent approval, or production authority.
+
 The design keeps complex reasoning, model inference, application policy, and fast-changing provider integrations in **userspace**. The kernel remains focused on secure, deterministic, inspectable primitives and lifecycle boundaries.
 
 ## Core control-plane surfaces
