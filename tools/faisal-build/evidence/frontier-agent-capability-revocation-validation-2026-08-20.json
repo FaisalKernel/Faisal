@@ -1,0 +1,56 @@
+{
+  "benchmark": {
+    "baseline": "new local complete-snapshot revocation contract; no prior directly comparable agent receipt revocation gate",
+    "iterations": 1000,
+    "per_evaluation_us": 42.064662
+  },
+  "boundary": {
+    "independent_builder": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "production_approval": false
+  },
+  "real_tasks": {
+    "all_expected": true,
+    "negative_cases": {
+      "authority": "denied",
+      "capability": "denied",
+      "epoch": "denied",
+      "identity": "denied",
+      "revoked": "denied",
+      "stale": "denied"
+    },
+    "valid_revocation_check": {
+      "complete_snapshot_verified": true,
+      "credentials_revoked": false,
+      "epoch_verified": true,
+      "execution_performed": false,
+      "freshness_verified": true,
+      "production_approved": false,
+      "revocation_checked": true,
+      "revocation_source_authenticated": false,
+      "status": "active"
+    }
+  },
+  "record_digest": "sha256:17338ed6944eddfb86b898c70b49dce266c6252715ae4df411353227086e219e",
+  "recorded_at": "2026-08-20T14:00:00Z",
+  "research": "tools/faisal-build/evidence/research-agent-capability-revocation-2026-08-20.md",
+  "rollback_checkpoint": "FAISAL-FRONTIER-AGENT-CAPABILITY-POSSESSION-2026-08-20-R1",
+  "schema": "org.faisal.frontier-validation.v1",
+  "security_boundaries": {
+    "credentials_revoked": false,
+    "execution_performed": false,
+    "model_output_is_authority": false,
+    "production_approval": false,
+    "provider_metadata_is_authority": false,
+    "receipt_is_policy_authority": false,
+    "revocation_source_authenticated": false
+  },
+  "unit_tests": {
+    "failed": 0,
+    "passed": 3
+  },
+  "upgrade": "agent-capability-revocation-snapshot"
+}

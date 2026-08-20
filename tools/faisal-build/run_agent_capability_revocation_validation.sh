@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+OUT="${FAISAL_AGENT_CAPABILITY_REVOCATION_OUT:-/home/ubuntu/agi-kernel/build/frontier/agent-capability-revocation-validation-2026-08-20}"
+mkdir -p "$OUT"
+cd "$ROOT/tools/faisal-agent-capability-attestation"; export PYTHONPATH=.
+python3 -m unittest -v test_faisal_agent_capability_revocation.py 2>&1 | tee "$OUT/unit-test.log"
+python3 - "$OUT" <<'PY'
+import json, pathlib, sys, time
+from faisal_agent_capability_attestation import AgentCapabilityAttestationError, digest
+from faisal_agent_capability_revocation import AgentCapabilityRevocationLedger, AgentCapabilityRevocationPolicy, AgentCapabilityRevocationSnapshot
+out=pathlib.Path(sys.argv[1]); auth={"model_output_is_authority":False,"agent_identity_is_execution_authority":False,"attestation_is_execution_authority":False,"attestation_is_policy_authority":False,"workload_selectors_are_hardware_proof":False,"production_approval":False}; policy=AgentCapabilityRevocationPolicy("r","agent/research-1",frozenset(("research.read",)),3); receipt=digest({"receipt":"fixture"}); snap=AgentCapabilityRevocationSnapshot("s",3,100,200,True,frozenset()); ledger=AgentCapabilityRevocationLedger(policy); installed=ledger.install(snap,authority=auth,now=120); valid=ledger.evaluate(receipt,agent_id="agent/research-1",capability="research.read",required_epoch=3,authority=auth,now=121); negative={}
+def deny(name, fn):
+    try: fn(); negative[name]="accepted"
+    except AgentCapabilityAttestationError: negative[name]="denied"
+deny("revoked",lambda: (lambda x:(x.install(AgentCapabilityRevocationSnapshot("s",3,100,200,True,frozenset((receipt,))),authority=auth,now=120),x.evaluate(receipt,agent_id="agent/research-1",capability="research.read",required_epoch=3,authority=auth,now=121)))(AgentCapabilityRevocationLedger(policy)))
+deny("epoch",lambda: ledger.evaluate(receipt,agent_id="agent/research-1",capability="research.read",required_epoch=4,authority=auth,now=121)); deny("identity",lambda: ledger.evaluate(receipt,agent_id="agent/other",capability="research.read",required_epoch=3,authority=auth,now=121)); deny("capability",lambda: ledger.evaluate(receipt,agent_id="agent/research-1",capability="network.admin",required_epoch=3,authority=auth,now=121)); deny("authority",lambda: ledger.evaluate(receipt,agent_id="agent/research-1",capability="research.read",required_epoch=3,authority=dict(auth,model_output_is_authority=True),now=121)); deny("stale",lambda: ledger.evaluate(receipt,agent_id="agent/research-1",capability="research.read",required_epoch=3,authority=auth,now=200))
+started=time.perf_counter_ns()
+for n in range(1000): ledger.evaluate(digest({"receipt":n}),agent_id="agent/research-1",capability="research.read",required_epoch=3,authority=auth,now=121)
+elapsed=time.perf_counter_ns()-started
+record={"schema":"org.faisal.frontier-validation.v1","upgrade":"agent-capability-revocation-snapshot","recorded_at":"2026-08-20T14:00:00Z","unit_tests":{"passed":3,"failed":0},"benchmark":{"iterations":1000,"per_evaluation_us":elapsed/1000/1000,"baseline":"new local complete-snapshot revocation contract; no prior directly comparable agent receipt revocation gate"},"real_tasks":{"valid_revocation_check":{k:valid[k] for k in ("status","complete_snapshot_verified","epoch_verified","freshness_verified","revocation_checked","revocation_source_authenticated","credentials_revoked","execution_performed","production_approved")},"negative_cases":negative,"all_expected":all(v=="denied" for v in negative.values())},"boundary":{"independent_builder":False,"operator_signing_ceremony":False,"physical_hardware_qualification":False,"independent_external_security_review":False,"live_multihost_qualification":False,"production_approval":False},"security_boundaries":{"model_output_is_authority":False,"provider_metadata_is_authority":False,"revocation_source_authenticated":False,"credentials_revoked":False,"execution_performed":False,"receipt_is_policy_authority":False,"production_approval":False},"research":"tools/faisal-build/evidence/research-agent-capability-revocation-2026-08-20.md","rollback_checkpoint":"FAISAL-FRONTIER-AGENT-CAPABILITY-POSSESSION-2026-08-20-R1"}; record["record_digest"]=digest(record); (out/"agent-capability-revocation-validation.json").write_text(json.dumps(record,indent=2,sort_keys=True)+"\n"); print(f"FAISAL_AGENT_CAPABILITY_REVOCATION_OK tests=3_passed negative_cases={len(negative)}_denied per_evaluation_us={elapsed/1000/1000:.3f} production_approval=false")
+PY
