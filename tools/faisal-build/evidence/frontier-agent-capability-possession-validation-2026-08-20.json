@@ -1,0 +1,69 @@
+{
+  "benchmark": {
+    "baseline": "new local possession-binding contract; no prior directly comparable agent request-binding control",
+    "iterations": 1000,
+    "log": "/home/ubuntu/agi-kernel/build/frontier/agent-capability-possession-validation-2026-08-20-r1/benchmark.log"
+  },
+  "boundary": {
+    "independent_builder": false,
+    "independent_external_security_review": false,
+    "live_multihost_qualification": false,
+    "operator_signing_ceremony": false,
+    "physical_hardware_qualification": false,
+    "production_approval": false
+  },
+  "real_tasks": {
+    "all_expected": true,
+    "negative_cases": {
+      "attestation_mismatch": "denied",
+      "authority": "denied",
+      "capability_mismatch": "denied",
+      "expiry": "denied",
+      "generation_mismatch": "denied",
+      "key_mismatch": "denied",
+      "method_mismatch": "denied",
+      "missing_nonce": "denied",
+      "nonce_mismatch": "denied",
+      "replay": "denied",
+      "target_mismatch": "denied"
+    },
+    "valid_possession_binding": {
+      "attestation_binding_verified": true,
+      "capability_binding_verified": true,
+      "credential_issued": false,
+      "cryptographic_proof_verified": false,
+      "execution_performed": false,
+      "key_thumbprint_binding_verified": true,
+      "lifecycle_verified": true,
+      "nonce_binding_verified": true,
+      "production_approved": false,
+      "replay_protected": true,
+      "request_binding_verified": true,
+      "status": "bound"
+    }
+  },
+  "record_digest": "sha256:b3419df3915389b515c5a999d7fc4665bbd8c031861387cda7f411a56c2dc818",
+  "recorded_at": "2026-08-20T13:00:00Z",
+  "research": "tools/faisal-build/evidence/research-agent-attestation-possession-2026-08-20.md",
+  "rollback_checkpoint": "FAISAL-FRONTIER-AGENT-CAPABILITY-ATTESTATION-2026-08-20-R1",
+  "schema": "org.faisal.frontier-validation.v1",
+  "security_boundaries": {
+    "credential_issued": false,
+    "execution_performed": false,
+    "fake_external_review": false,
+    "fake_hardware_evidence": false,
+    "model_output_is_authority": false,
+    "optimizer_output_is_authority": false,
+    "production_approval": false,
+    "provider_metadata_is_authority": false,
+    "receipt_is_cryptographic_proof": false,
+    "receipt_is_execution_authority": false,
+    "receipt_is_policy_authority": false,
+    "unrestricted_kernel_self_modification": false
+  },
+  "unit_tests": {
+    "failed": 0,
+    "passed": 4
+  },
+  "upgrade": "agent-capability-possession-binding"
+}
