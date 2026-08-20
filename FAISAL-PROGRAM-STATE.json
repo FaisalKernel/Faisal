@@ -5,8 +5,8 @@
   "end_goal": "A Linux-derived operating system whose kernel and system services are purpose-built to provide native computational primitives for persistent autonomous agents, long-horizon tasks, memory, experience-based learning, world-state observation, verified information acquisition, multi-agent coordination, secure tool use, and adaptive resource allocation.",
   "status": "active_not_complete",
   "current_kernel_base": "Linux 6.18.44 LTS forward-port candidate; FAISAL source lineage retained from Linux v7.2-rc7",
-  "current_head": "0e9827515f3a28a07c2e131c494e9935a5a048cd",
-  "current_tag": "FAISAL-FRONTIER-AGENT-CAPABILITY-POSSESSION-2026-08-20-R1",
+  "current_head": "fcc4732ec444ceb474e598c66ef14abaad8403fe",
+  "current_tag": "FAISAL-FRONTIER-AGENT-CAPABILITY-REVOCATION-2026-08-20-R1",
   "current_abi": 47,
   "operating_loop": [
     "RESEARCH",
@@ -2515,5 +2515,13 @@
   "frontier_agent_capability_possession_benchmark": "tools/faisal-agent-capability-attestation/bench_faisal_agent_capability_possession.py",
   "frontier_agent_capability_possession_runner": "tools/faisal-build/run_agent_capability_possession_validation.sh",
   "frontier_agent_capability_possession_rollback_checkpoint": "FAISAL-FRONTIER-AGENT-CAPABILITY-ATTESTATION-2026-08-20-R1-LOCAL-MASTER-BACKUP",
-  "frontier_agent_capability_possession_authority_boundary": "possession_receipts_bind_local_digests_and_request_metadata_only_the_contract_does_not_verify_signatures_issue_credentials_contact_identity_or_nonce_providers_execute_requests_authorize_tools_or_convert_keys_receipts_model_output_or_provider_metadata_into_policy_hardware_or_production_authority"
+  "frontier_agent_capability_possession_authority_boundary": "possession_receipts_bind_local_digests_and_request_metadata_only_the_contract_does_not_verify_signatures_issue_credentials_contact_identity_or_nonce_providers_execute_requests_authorize_tools_or_convert_keys_receipts_model_output_or_provider_metadata_into_policy_hardware_or_production_authority",
+  "frontier_agent_capability_revocation": "pass_complete_snapshot_epoch_freshness_revoked_receipt_and_non_authority_controls",
+  "frontier_agent_capability_revocation_evidence": "tools/faisal-build/evidence/frontier-agent-capability-revocation-validation-2026-08-20.json",
+  "frontier_agent_capability_revocation_research": "tools/faisal-build/evidence/research-agent-capability-revocation-2026-08-20.md",
+  "frontier_agent_capability_revocation_module": "tools/faisal-agent-capability-attestation/faisal_agent_capability_revocation.py",
+  "frontier_agent_capability_revocation_tests": "tools/faisal-agent-capability-attestation/test_faisal_agent_capability_revocation.py",
+  "frontier_agent_capability_revocation_runner": "tools/faisal-build/run_agent_capability_revocation_validation.sh",
+  "frontier_agent_capability_revocation_rollback_checkpoint": "FAISAL-FRONTIER-AGENT-CAPABILITY-POSSESSION-2026-08-20-R1-LOCAL-MASTER-BACKUP",
+  "frontier_agent_capability_revocation_authority_boundary": "revocation_snapshots_are_caller_supplied_local_evidence_only_the_contract_does_not_authenticate_or_contact_a_revocation_source_prove_stream_delivery_revoke_external_credentials_execute_requests_change_kernel_policy_or_convert_snapshot_receipt_model_or_provider_claims_into_policy_hardware_or_production_authority"
 }
